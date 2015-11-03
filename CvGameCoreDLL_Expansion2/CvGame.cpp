@@ -403,6 +403,12 @@ bool CvGame::init2()
 	initScoreCalculation();
 	setFinalInitialized(true);
 
+#if defined(MOD_EVENTS_TERRAFORMING)
+	if (MOD_EVENTS_TERRAFORMING) {
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_TerraformingMap, TERRAFORMINGEVENT_LOAD, 0);
+	}
+#endif
+
 	return true;
 }
 
@@ -664,7 +670,11 @@ void CvGame::InitPlayers()
 
 			if(iI < MAX_MAJOR_CIVS + iNumMinors)
 			{
+#if defined(MOD_GLOBAL_MAX_MAJOR_CIVS)
+				CvMinorCivInfo* pMinorCivInfo = GC.getMinorCivInfo(CvPreGame::minorCivType((PlayerTypes) (eMinorPlayer + (MAX_PREGAME_MAJOR_CIVS - MAX_MAJOR_CIVS))));
+#else
 				CvMinorCivInfo* pMinorCivInfo = GC.getMinorCivInfo(CvPreGame::minorCivType(eMinorPlayer));
+#endif
 
 				CvPreGame::setSlotStatus(eMinorPlayer, SS_COMPUTER);
 				CvPreGame::setNetID(eMinorPlayer, -1);
@@ -1032,6 +1042,9 @@ void CvGame::uninit()
 	m_eBestGreatPeoplePlayer = NO_PLAYER;
 	m_eReligionTech = NO_TECH;
 	m_eIndustrialRoute = NO_ROUTE;
+#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
+	m_eTeamThatCircumnavigated = NO_TEAM;
+#endif
 
 	m_strScriptData = "";
 	m_iEarliestBarbarianReleaseTurn = 0;
@@ -1287,7 +1300,11 @@ void CvGame::initDiplomacy()
 				const TeamTypes eTeamB = static_cast<TeamTypes>(iJ);
 				if(iI != iJ)
 				{
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+					kTeamA.declareWar(eTeamB, false, kTeamA.getLeaderID());
+#else
 					kTeamA.declareWar(eTeamB);
+#endif
 				}
 			}
 		}
@@ -1934,6 +1951,25 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 		else if(isLocalPlayer){
 			//hold the turn timer at 0 seconds with 0% completion
 			CvPreGame::setEndTurnTimerLength(0.0f);
+
+#if defined(MOD_EVENTS_RED_TURN)
+			if (MOD_EVENTS_RED_TURN)
+			// RED <<<<<
+			{
+				ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
+				if(pkScriptSystem)
+				{	
+					CvLuaArgsHandle args;
+
+					args->Push(getActivePlayer());
+
+					bool bResult;
+					LuaSupport::CallHook(pkScriptSystem, "TurnComplete", args.get(), bResult);
+				}
+			}
+			// RED >>>>>
+#endif
+
 			iface->updateEndTurnTimer(0.0f);
 		}
 	}
@@ -1984,9 +2020,32 @@ void CvGame::updateTestEndTurn()
 				{
 					if(pkIface->canEndTurn() && gDLL->allAICivsProcessedThisTurn() && allUnitAIProcessed() && !gDLL->HasSentTurnComplete())
 					{
+#if !defined(NO_ACHIEVEMENTS)
 						activePlayer.GetPlayerAchievements().EndTurn();
+#endif
+
+#if defined(MOD_EVENTS_RED_TURN)
+						if (MOD_EVENTS_RED_TURN)
+						// RED <<<<<
+						{
+							ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
+							if(pkScriptSystem)
+							{	
+								CvLuaArgsHandle args;
+
+								args->Push(getActivePlayer());
+
+								bool bResult;
+								LuaSupport::CallHook(pkScriptSystem, "TurnComplete", args.get(), bResult);
+							}
+						}
+						// RED >>>>>
+#endif
+
 						gDLL->sendTurnComplete();
+#if !defined(NO_ACHIEVEMENTS)
 						CvAchievementUnlocker::EndTurn();
+#endif
 						m_endTurnTimer.Start();
 					}
 				}
@@ -2066,9 +2125,32 @@ void CvGame::updateTestEndTurn()
 							{
 								if(!gDLL->HasSentTurnComplete() && gDLL->allAICivsProcessedThisTurn() && allUnitAIProcessed() && pkIface && pkIface->IsMPAutoEndTurnEnabled())
 								{
+#if !defined(NO_ACHIEVEMENTS)
 									activePlayer.GetPlayerAchievements().EndTurn();
+#endif
+
+#if defined(MOD_EVENTS_RED_TURN)
+									if (MOD_EVENTS_RED_TURN)
+									// RED <<<<<
+									{
+										ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
+										if(pkScriptSystem)
+										{	
+											CvLuaArgsHandle args;
+
+											args->Push(getActivePlayer());
+
+											bool bResult;
+											LuaSupport::CallHook(pkScriptSystem, "TurnComplete", args.get(), bResult);
+										}
+									}
+									// RED >>>>>
+#endif
+
 									gDLL->sendTurnComplete();
+#if !defined(NO_ACHIEVEMENTS)
 									CvAchievementUnlocker::EndTurn();
+#endif
 								}
 
 								GC.GetEngineUserInterface()->setEndTurnCounter(3); // XXX
@@ -2540,6 +2622,28 @@ void CvGame::selectionListGameNetMessage(int eMessage, int iData2, int iData3, i
 					}
 					else
 					{
+#if defined(MOD_EVENTS_RED_COMBAT_MISSION)
+						if (MOD_EVENTS_RED_COMBAT_MISSION)
+						// RED <<<<<
+						{
+							ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
+							if(pkScriptSystem && pPlot)
+							{						
+								CvLuaArgsHandle args;
+
+								args->Push(pkSelectedUnit->getOwner());
+								args->Push(pkSelectedUnit->GetID());
+								args->Push(pPlot->getX());
+								args->Push(pPlot->getY());
+								args->Push(iData2);
+
+								bool bResult;
+								LuaSupport::CallHook(pkScriptSystem, "PushingMissionTo", args.get(), bResult);
+							}
+						}
+						// RED >>>>>
+#endif
+
 						gDLL->sendPushMission(pkSelectedUnit->GetID(), ((MissionTypes)iData2), iData3, iData4, iFlags, bShift);
 					}
 				}
@@ -3427,9 +3531,31 @@ void CvGame::doControl(ControlTypes eControl)
 			{
 				gDLL->AutoSave(false, true);
 			}
+#if defined(MOD_EVENTS_RED_TURN)
+			if (MOD_EVENTS_RED_TURN)
+			// RED <<<<<
+			{
+				ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
+				if(pkScriptSystem)
+				{	
+					CvLuaArgsHandle args;
+
+					args->Push(getActivePlayer());
+
+					bool bResult;
+					LuaSupport::CallHook(pkScriptSystem, "TurnComplete", args.get(), bResult);
+				}
+			}
+			// RED >>>>>
+#endif
+
+#if !defined(NO_ACHIEVEMENTS)
 			kActivePlayer.GetPlayerAchievements().EndTurn();
+#endif
 			gDLL->sendTurnComplete();
+#if !defined(NO_ACHIEVEMENTS)
 			CvAchievementUnlocker::EndTurn();
+#endif
 			GC.GetEngineUserInterface()->setInterfaceMode(INTERFACEMODE_SELECTION);
 		}
 		break;
@@ -3439,10 +3565,33 @@ void CvGame::doControl(ControlTypes eControl)
 		EndTurnBlockingTypes eBlock = GET_PLAYER(getActivePlayer()).GetEndTurnBlockingType();
 		if(gDLL->allAICivsProcessedThisTurn() && allUnitAIProcessed() && (eBlock == NO_ENDTURN_BLOCKING_TYPE || eBlock == ENDTURN_BLOCKING_UNITS))
 		{
+#if !defined(NO_ACHIEVEMENTS)
 			CvPlayerAI& kActivePlayer = GET_PLAYER(getActivePlayer());
 			kActivePlayer.GetPlayerAchievements().EndTurn();
+#endif
+
+#if defined(MOD_EVENTS_RED_TURN)
+				if (MOD_EVENTS_RED_TURN)
+				// RED <<<<<
+				{
+					ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
+					if(pkScriptSystem)
+					{	
+						CvLuaArgsHandle args;
+
+						args->Push(getActivePlayer());
+
+						bool bResult;
+						LuaSupport::CallHook(pkScriptSystem, "TurnComplete", args.get(), bResult);
+					}
+				}
+				// RED >>>>>
+#endif
+
 			gDLL->sendTurnComplete();
+#if !defined(NO_ACHIEVEMENTS)
 			CvAchievementUnlocker::EndTurn();
+#endif
 			SetForceEndingTurn(true);
 			GC.GetEngineUserInterface()->setInterfaceMode(INTERFACEMODE_SELECTION);
 		}
@@ -4197,6 +4346,14 @@ CivilizationTypes CvGame::getActiveCivilizationType()
 }
 
 
+#if defined(MOD_API_EXTENSIONS)
+//	--------------------------------------------------------------------------------
+bool CvGame::isReallyNetworkMultiPlayer() const
+{
+	return CvPreGame::isReallyNetworkMultiPlayer();
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 bool CvGame::isNetworkMultiPlayer() const
 {
@@ -4867,7 +5024,11 @@ void CvGame::initScoreCalculation()
 		CvEraInfo& kStartEra = getStartEraInfo();
 		int iNumSettlers = kStartEra.getStartingUnitMultiplier();
 		m_iInitPopulation = getPopulationScore(iNumSettlers * (kStartEra.getFreePopulation() + 1));
+#if defined(MOD_GLOBAL_CITY_WORKING)
+		m_iInitLand = getLandPlotsScore(iNumSettlers *  AVG_CITY_PLOTS);
+#else
 		m_iInitLand = getLandPlotsScore(iNumSettlers *  NUM_CITY_PLOTS);
+#endif
 	}
 	else
 	{
@@ -5024,6 +5185,11 @@ bool CvGame::circumnavigationAvailable() const
 /// Message from UI to gameplay about something that should happen with regards to diplomacy
 void CvGame::DoFromUIDiploEvent(FromUIDiploEventTypes eEvent, PlayerTypes eAIPlayer, int iArg1, int iArg2)
 {
+#if defined(MOD_EVENTS_DIPLO_EVENTS)
+	if (MOD_EVENTS_DIPLO_EVENTS) {
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_UiDiploEvent, eEvent, eAIPlayer, iArg1, iArg2);
+	} else {
+#endif
 	ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
 	if(pkScriptSystem)
 	{
@@ -5036,6 +5202,9 @@ void CvGame::DoFromUIDiploEvent(FromUIDiploEventTypes eEvent, PlayerTypes eAIPla
 		bool bResult;
 		LuaSupport::CallHook(pkScriptSystem, "UiDiploEvent", args.get(), bResult);
 	}
+#if defined(MOD_EVENTS_DIPLO_EVENTS)
+	}
+#endif
 
 	gDLL->sendFromUIDiploEvent(eAIPlayer, eEvent, iArg1, iArg2);
 }
@@ -5817,6 +5986,7 @@ void CvGame::setWinner(TeamTypes eNewWinner, VictoryTypes eNewVictory)
 					}
 				}
 
+#if !defined(NO_ACHIEVEMENTS)
 				//--Start Achievements
 				//--Don't allow most in multiplayer so friends can't achieve-whore it up together
 				if(!GC.getGame().isGameMultiPlayer() && kWinningTeamLeader.isHuman() && kWinningTeamLeader.isLocalPlayer())
@@ -6552,6 +6722,7 @@ void CvGame::setWinner(TeamTypes eNewWinner, VictoryTypes eNewVictory)
 				{
 					gDLL->UnlockAchievement(ACHIEVEMENT_WIN_MULTIPLAYER);
 				}
+#endif
 
 			}
 
@@ -6878,6 +7049,7 @@ void CvGame::setGameState(GameStateTypes eNewValue)
 	{
 		m_eGameState = eNewValue;
 
+#if !defined(NO_ACHIEVEMENTS)
 		if(eNewValue == GAMESTATE_OVER || eNewValue == GAMESTATE_EXTENDED)
 		{
 			if (!isGameMultiPlayer())
@@ -6895,10 +7067,12 @@ void CvGame::setGameState(GameStateTypes eNewValue)
 				}
 			}
 		}
+#endif
 
 		if(eNewValue == GAMESTATE_OVER)
 		{
 
+#if !defined(NO_ACHIEVEMENTS)
 			if(!isGameMultiPlayer())
 			{
 				bool bLocalPlayerLost = true;
@@ -6934,6 +7108,7 @@ void CvGame::setGameState(GameStateTypes eNewValue)
 					}
 				}
 			}
+#endif
 
 			//Write out time spent playing.
 			long iHours = getMinutesPlayed() / 60;
@@ -7632,7 +7807,11 @@ void CvGame::doTurn()
 	if(GET_PLAYER(getActivePlayer()).isAlive() && !IsStaticTutorialActive())
 	{
 		// Don't show this stuff in MP
+#if defined(MOD_API_EXTENSIONS)
+		if(!isReallyNetworkMultiPlayer() && !isPbem() && !isHotSeat())
+#else
 		if(!isGameMultiPlayer())
+#endif
 		{
 			int iTurnFrequency = /*25*/ GC.getPROGRESS_POPUP_TURN_FREQUENCY();
 
@@ -7743,6 +7922,18 @@ UnitTypes CvGame::GetRandomSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, 
 			if(pkUnitInfo->GetDomainType() != DOMAIN_LAND)
 				continue;
 
+#if defined(MOD_BUGFIX_NO_HOVERING_REBELS)
+			// Must NOT be a hovering unit
+			for(int iI = 0; iI < GC.getNumPromotionInfos(); iI++)
+			{
+				if(pkUnitInfo->GetFreePromotions(iI))
+				{
+					if(GC.getPromotionInfo((PromotionTypes) iI)->IsHoveringUnit())
+						continue;
+				}
+			}
+#endif
+
 			// Must be able to train this thing
 			if(!GET_PLAYER(ePlayer).canTrain(eLoopUnit, false, false, false, /*bIgnoreUniqueUnitStatus*/ true))
 				continue;
@@ -7764,7 +7955,11 @@ UnitTypes CvGame::GetRandomSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, 
 
 //	--------------------------------------------------------------------------------
 /// Pick a random a Unit type that is ranked by unit power and restricted to units available to ePlayer's technology
+#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
+UnitTypes CvGame::GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, bool bIncludeRanged, bool bIncludeShips)
+#else
 UnitTypes CvGame::GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, bool bIncludeRanged)
+#endif
 {
 	CvAssertMsg(ePlayer >= 0, "ePlayer is expected to be non-negative (invalid Index)");
 	CvAssertMsg(ePlayer < MAX_CIV_PLAYERS, "ePlayer is expected to be within maximum bounds (invalid Index)");
@@ -7857,7 +8052,11 @@ UnitTypes CvGame::GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bInclude
 			continue;
 
 		// Must be land Unit
+#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
+		if(!(pkUnitInfo->GetDomainType() == DOMAIN_LAND || (pkUnitInfo->GetDomainType() == DOMAIN_SEA && bIncludeShips && (GC.getMap().GetAIMapHint() & 5) != 0)))
+#else
 		if(pkUnitInfo->GetDomainType() != DOMAIN_LAND)
+#endif
 			continue;
 
 		// Must be able to train this thing
@@ -7875,6 +8074,65 @@ UnitTypes CvGame::GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bInclude
 
 	return eChosenUnit;
 }
+
+#if defined(MOD_GLOBAL_CS_GIFTS)
+//	--------------------------------------------------------------------------------
+/// Pick a random a Unit type that is ranked by unit power and restricted to recon units available to ePlayer's technology
+#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
+UnitTypes CvGame::GetCsGiftSpawnUnitType(PlayerTypes ePlayer, bool bIncludeShips)
+#else
+UnitTypes CvGame::GetCsGiftSpawnUnitType(PlayerTypes ePlayer)
+#endif
+{
+	CvAssertMsg(ePlayer >= 0, "ePlayer is expected to be non-negative (invalid Index)");
+	CvAssertMsg(ePlayer < MAX_CIV_PLAYERS, "ePlayer is expected to be within maximum bounds (invalid Index)");
+
+	CvWeightedVector<UnitTypes, SAFE_ESTIMATE_NUM_UNITS, true> veUnitRankings;
+
+	// Loop through all Unit Classes
+	for (int iUnitLoop = 0; iUnitLoop < GC.getNumUnitInfos(); iUnitLoop++) {
+		const UnitTypes eLoopUnit = (UnitTypes) iUnitLoop;
+		CvUnitEntry* pkUnitInfo = GC.getUnitInfo(eLoopUnit);
+		if (pkUnitInfo == NULL) continue;
+		
+		bool bValid = (pkUnitInfo->GetUnitCombatType() == (UnitCombatTypes)GC.getInfoTypeForString("UNITCOMBAT_RECON", true));
+		bValid = bValid || (pkUnitInfo->GetUnitCombatType() == (UnitCombatTypes)GC.getInfoTypeForString("UNITCOMBAT_ARCHER", true));
+		bValid = bValid || (pkUnitInfo->GetUnitCombatType() == (UnitCombatTypes)GC.getInfoTypeForString("UNITCOMBAT_MOUNTED", true));
+		bValid = bValid || (pkUnitInfo->GetUnitCombatType() == (UnitCombatTypes)GC.getInfoTypeForString("UNITCOMBAT_HELICOPTER", true));
+
+#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
+		// Exclude carrier units
+		if (pkUnitInfo->GetSpecialCargo() == (SpecialUnitTypes) GC.getInfoTypeForString("SPECIALUNIT_FIGHTER")) continue;
+
+		// Include shipping
+		bValid = bValid || (bIncludeShips && (pkUnitInfo->GetUnitCombatType() == (UnitCombatTypes)GC.getInfoTypeForString("UNITCOMBAT_NAVALMELEE", true)));
+		bValid = bValid || (bIncludeShips && (pkUnitInfo->GetUnitCombatType() == (UnitCombatTypes)GC.getInfoTypeForString("UNITCOMBAT_NAVALRANGED", true)));
+#endif
+
+		if (!bValid) continue;
+
+		CvUnitClassInfo* pkUnitClassInfo = GC.getUnitClassInfo((UnitClassTypes) pkUnitInfo->GetUnitClassType());
+		if (pkUnitClassInfo == NULL) continue;
+
+		// Exclude unique units
+		if (eLoopUnit != pkUnitClassInfo->getDefaultUnitIndex()) continue;
+
+		// Must be able to train this thing
+		if (!GET_PLAYER(ePlayer).canTrain(eLoopUnit, false, false, false, /*bIgnoreUniqueUnitStatus*/ true)) continue;
+
+		// CUSTOMLOG("CS Gift considering unit type %i", eLoopUnit);
+		veUnitRankings.push_back(eLoopUnit, pkUnitInfo->GetPower());
+	}
+
+	// Choose from weighted unit types
+	veUnitRankings.SortItems();
+	int iNumChoices = GC.getUNIT_SPAWN_NUM_CHOICES();
+	RandomNumberDelegate randFn = MakeDelegate(&GC.getGame(), &CvGame::getJonRandNum);
+	UnitTypes eChosenUnit = veUnitRankings.ChooseFromTopChoices(iNumChoices, &randFn, "Choosing competitive unit from top choices");
+
+	return eChosenUnit;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 UnitTypes CvGame::GetRandomUniqueUnitType(bool bIncludeCivsInGame, bool bIncludeStartEra, bool bIncludeOldEras, bool bIncludeRanged)
@@ -7906,6 +8164,14 @@ UnitTypes CvGame::GetRandomUniqueUnitType(bool bIncludeCivsInGame, bool bInclude
 		{
 			continue;
 		}
+
+#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
+		if (MOD_GLOBAL_EXCLUDE_FROM_GIFTS) {
+			if (pkUnitInfo->IsNoMinorGifts()) {
+				continue;
+			}
+		}
+#endif
 
 		bool bValid = (pkUnitInfo->GetCombat() > 0);
 
@@ -8047,7 +8313,11 @@ void CvGame::updateWar()
 									{
 										if(!atWar(((TeamTypes)iI), ((TeamTypes)iJ)))
 										{
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+											teamI.declareWar(((TeamTypes)iJ), false, teamI.getLeaderID());
+#else
 											teamI.declareWar(((TeamTypes)iJ));
+#endif
 										}
 									}
 								}
@@ -8103,10 +8373,14 @@ void CvGame::updateMoves()
 			{//if the active player is an observer, send a turn complete so we don't hold up the game.
 				//We wait until allAICivsProcessedThisTurn to prevent a race condition where an observer could send turn complete,
 				//before all clients have cleared the netbarrier locally.
+#if !defined(NO_ACHIEVEMENTS)
 				CvPlayer& kActivePlayer = GET_PLAYER(eActivePlayer);
 				kActivePlayer.GetPlayerAchievements().EndTurn();
+#endif
 				gDLL->sendTurnComplete();
+#if !defined(NO_ACHIEVEMENTS)
 				CvAchievementUnlocker::EndTurn();
+#endif
 			}
 
 			if(!processPlayerAutoMoves)
@@ -8426,7 +8700,7 @@ bool CvGame::testVictory(VictoryTypes eVictory, TeamTypes eTeam, bool* pbEndScor
 	CvAssert(eVictory >= 0 && eVictory < GC.getNumVictoryInfos());
 	CvAssert(eTeam >=0 && eTeam < MAX_CIV_TEAMS);
 	CvAssert(GET_TEAM(eTeam).isAlive());
-
+	
 	CvVictoryInfo* pkVictoryInfo = GC.getVictoryInfo(eVictory);
 	if(pkVictoryInfo == NULL)
 	{
@@ -8953,6 +9227,7 @@ void CvGame::testVictory()
 	if(bEndGame && !aaiGameWinners.empty())
 	{
 		int iWinner = getJonRandNum(aaiGameWinners.size(), "Victory tie breaker");
+		CUSTOMLOG("Calling setWinner from testVictory: %i, %i", aaiGameWinners[iWinner][0], aaiGameWinners[iWinner][1]);
 		setWinner(((TeamTypes)aaiGameWinners[iWinner][0]), ((VictoryTypes)aaiGameWinners[iWinner][1]));
 	}
 
@@ -9225,6 +9500,7 @@ void CvGame::Read(FDataStream& kStream)
 	// Version number to maintain backwards compatibility
 	uint uiVersion;
 	kStream >> uiVersion;
+	MOD_SERIALIZE_INIT_READ(kStream);
 
 	kStream >> m_iEndTurnMessagesSent;
 	kStream >> m_iElapsedGameTurns;
@@ -9295,6 +9571,10 @@ void CvGame::Read(FDataStream& kStream)
 	kStream >> m_eBestGreatPeoplePlayer;
 	kStream >> m_eReligionTech;
 	kStream >> m_eIndustrialRoute;
+
+#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
+	MOD_SERIALIZE_READ(39, kStream, m_eTeamThatCircumnavigated, NO_TEAM);
+#endif
 
 	kStream >> m_strScriptData;
 
@@ -9457,6 +9737,7 @@ void CvGame::ReadSupportingClassData(FDataStream& kStream)
 	// Version number to maintain backwards compatibility
 	uint uiVersion;
 	kStream >> uiVersion;	
+	MOD_SERIALIZE_INIT_READ(kStream);
 
 	CvBarbarians::Read(kStream, uiVersion);
 	CvGoodyHuts::Read(kStream, uiVersion);
@@ -9467,6 +9748,7 @@ void CvGame::Write(FDataStream& kStream) const
 {
 	// Current version number
 	kStream << g_CurrentCvGameVersion;
+	MOD_SERIALIZE_INIT_WRITE(kStream);
 
 	kStream << m_iEndTurnMessagesSent;
 	kStream << m_iElapsedGameTurns;
@@ -9527,6 +9809,10 @@ void CvGame::Write(FDataStream& kStream) const
 	kStream << m_eBestGreatPeoplePlayer;
 	kStream << m_eReligionTech;
 	kStream << m_eIndustrialRoute;
+
+#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
+	MOD_SERIALIZE_WRITE(kStream, m_eTeamThatCircumnavigated);
+#endif
 
 	kStream << m_strScriptData;
 
@@ -9647,6 +9933,7 @@ void CvGame::WriteSupportingClassData(FDataStream& kStream)
 	// Current version number
 	uint uiVersion = 1;
 	kStream << uiVersion;
+	MOD_SERIALIZE_INIT_WRITE(kStream);
 
 	CvBarbarians::Write(kStream);
 	CvGoodyHuts::Write(kStream);
@@ -9995,6 +10282,20 @@ void CvGame::DoUpdateIndustrialRoute()
 	m_eIndustrialRoute = eIndustrialRoute;
 }
 
+#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
+//	--------------------------------------------------------------------------------
+TeamTypes CvGame::GetTeamThatCircumnavigated() const
+{
+	return (TeamTypes) m_eTeamThatCircumnavigated;
+}
+
+//	--------------------------------------------------------------------------------
+void CvGame::SetTeamThatCircumnavigated(TeamTypes eNewValue)
+{
+	m_eTeamThatCircumnavigated = eNewValue;
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 CvSiteEvaluatorForSettler* CvGame::GetSettlerSiteEvaluator()
 {
@@ -10255,7 +10556,11 @@ void CvGame::DoMinorBullyUnit(PlayerTypes eBully, PlayerTypes eMinor)
 	CvAssertMsg(eMinor >= MAX_MAJOR_CIVS, "eMinor is not in expected range (invalid Index)");
 	CvAssertMsg(eMinor < MAX_CIV_PLAYERS, "eMinor is not in expected range (invalid Index)");
 
+#if defined(MOD_BUGFIX_UNITCLASS_NOT_UNIT)
+	UnitTypes eUnitType = GET_PLAYER(eBully).GetSpecificUnitType("UNITCLASS_WORKER");
+#else
 	UnitTypes eUnitType = (UnitTypes) GC.getInfoTypeForString("UNIT_WORKER"); //antonjs: todo: XML/function
+#endif
 
 	gDLL->sendMinorBullyUnit(eBully, eMinor, eUnitType);
 }
@@ -10406,6 +10711,7 @@ void CvGame::DoTestConquestVictory()
 			{
 				if(pkVictoryInfo->isConquest() && isVictoryValid(eVictory))
 				{
+					CUSTOMLOG("Calling setWinner from DoTestConquestVictory: %i, %i", eTeamWhoWon, eVictory);
 					setWinner(eTeamWhoWon, eVictory);
 				}
 			}
@@ -11663,3 +11969,275 @@ void CvGame::SetLastTurnAICivsProcessed()
 	}
 }
 
+#if defined(MOD_API_EXTENSIONS)
+bool CvGame::AnyoneHasBelief(BeliefTypes iBeliefType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasBelief(iBeliefType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasBuilding(BuildingTypes iBuildingType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasBuilding(iBuildingType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasBuildingClass(BuildingClassTypes iBuildingClassType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasBuildingClass(iBuildingClassType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasAnyWonder() const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasAnyWonder()) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasWonder(BuildingTypes iBuildingType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasWonder(iBuildingType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int CvGame::GetCivilizationPlayer(CivilizationTypes iCivilizationType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.IsCivilization(iCivilizationType)) {
+			return i;
+		}
+	}
+
+	return NO_PLAYER;
+}
+
+bool CvGame::AnyoneIsInEra(EraTypes iEraType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.IsInEra(iEraType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasReachedEra(EraTypes iEraType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasReachedEra(iEraType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasAnyNaturalWonder() const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasAnyNaturalWonder()) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasNaturalWonder(FeatureTypes iFeatureType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasNaturalWonder(iFeatureType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasPolicy(PolicyTypes iPolicyType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasPolicy(iPolicyType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasTenet(PolicyTypes iPolicyType) const
+{
+	return AnyoneHasPolicy(iPolicyType);
+}
+
+bool CvGame::AnyoneHasPolicyBranch(PolicyBranchTypes iPolicyBranchType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasPolicyBranch(iPolicyBranchType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasIdeology(PolicyBranchTypes iPolicyBranchType) const
+{
+	return AnyoneHasPolicyBranch(iPolicyBranchType);
+}
+
+bool CvGame::AnyoneHasProject(ProjectTypes iProjectType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasProject(iProjectType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasPantheon() const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasPantheon()) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasAnyReligion() const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasAnyReligion()) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasReligion(ReligionTypes iReligionType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasReligion(iReligionType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::IsResolutionPassed(ResolutionTypes iResolutionType, int iChoice) const
+{
+	CvGameLeagues* pGameLeagues = GC.getGame().GetGameLeagues();
+
+	if (pGameLeagues->GetNumActiveLeagues() > 0) {
+		CvLeague* pLeague = pGameLeagues->GetActiveLeague();
+		if (pLeague) {
+			return pLeague->IsActiveResolution(iResolutionType, iChoice);
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasTech(TechTypes iTechType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasTech(iTechType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasUnit(UnitTypes iUnitType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasUnit(iUnitType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvGame::AnyoneHasUnitClass(UnitClassTypes iUnitClassType) const
+{
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
+
+		if(player.isAlive() && player.HasUnitClass(iUnitClassType)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+#endif

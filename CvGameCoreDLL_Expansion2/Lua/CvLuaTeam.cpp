@@ -76,6 +76,9 @@ void CvLuaTeam::PushMethods(lua_State* L, int t)
 	Method(IsHuman);
 	Method(IsBarbarian);
 
+#if defined(MOD_API_LUA_EXTENSIONS)
+	Method(IsMajorCiv);
+#endif
 	Method(IsMinorCiv);
 	Method(IsMinorCivWarmonger);
 
@@ -126,6 +129,11 @@ void CvLuaTeam::PushMethods(lua_State* L, int t)
 	Method(GetPermanentAllianceTradingCount);
 	Method(IsPermanentAllianceTrading);
 	Method(ChangePermanentAllianceTradingCount);
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_TECHS_CITY_WORKING)
+	Method(GetCityWorkingChange);
+	Method(IsCityWorkingChange);
+	Method(ChangeCityWorkingChange);
+#endif
 	Method(GetBridgeBuildingCount);
 	Method(IsBridgeBuilding);
 	Method(ChangeBridgeBuildingCount);
@@ -161,6 +169,9 @@ void CvLuaTeam::PushMethods(lua_State* L, int t)
 	Method(GetKilledByTeam);
 
 	Method(HasEmbassyAtTeam);
+#if defined(MOD_API_LUA_EXTENSIONS)
+	Method(HasSpyAtTeam);
+#endif
 	Method(IsAllowsOpenBordersToTeam);
 	Method(IsForcePeace);
 	Method(IsDefensivePact);
@@ -206,6 +217,22 @@ void CvLuaTeam::PushMethods(lua_State* L, int t)
 	Method(SetCurrentEra);
 
 	Method(UpdateEmbarkGraphics);
+
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	Method(IsVassal);
+	Method(CanBecomeVassal);
+	Method(canEndVassal);
+	Method(IsVassalageTradingAllowed);
+	Method(GetNumTurnsIsVassal);
+	Method(GetNumTurnsSinceVassalEnded);
+	Method(IsTooSoonForVassal);
+	Method(IsVassalOfSomeone);
+	Method(IsVassalLockedIntoWar);
+	Method(GetMaster);
+	Method(IsVoluntaryVassal);
+	Method(DoBecomeVassal);
+	Method(DoEndVassal);
+#endif
 }
 //------------------------------------------------------------------------------
 const char* CvLuaTeam::GetTypeName()
@@ -473,6 +500,15 @@ int CvLuaTeam::lIsBarbarian(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvTeam::isBarbarian);
 }
+
+#if defined(MOD_API_LUA_EXTENSIONS)
+//------------------------------------------------------------------------------
+//bool isMajorCiv();
+int CvLuaTeam::lIsMajorCiv(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::isMajorCiv);
+}
+#endif
 
 //------------------------------------------------------------------------------
 //bool isMinorCiv();
@@ -806,6 +842,29 @@ int CvLuaTeam::lChangePermanentAllianceTradingCount(lua_State* L)
 	return BasicLuaMethod(L, &CvTeam::changePermanentAllianceTradingCount);
 }
 
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_TECHS_CITY_WORKING)
+//------------------------------------------------------------------------------
+//int getCityWorkingChange();
+int CvLuaTeam::lGetCityWorkingChange(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::GetCityWorkingChange);
+}
+
+//------------------------------------------------------------------------------
+//bool isCityWorkingChange();
+int CvLuaTeam::lIsCityWorkingChange(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::isCityWorkingChange);
+}
+
+//------------------------------------------------------------------------------
+//void changeCityWorkingChange(int iChange);
+int CvLuaTeam::lChangeCityWorkingChange(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::changeCityWorkingChange);
+}
+#endif
+
 //------------------------------------------------------------------------------
 //int getBridgeBuildingCount();
 int CvLuaTeam::lGetBridgeBuildingCount(lua_State* L)
@@ -984,6 +1043,13 @@ int CvLuaTeam::lHasEmbassyAtTeam(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvTeam::HasEmbassyAtTeam);
 }
+#if defined(MOD_API_LUA_EXTENSIONS)
+//------------------------------------------------------------------------------
+int CvLuaTeam::lHasSpyAtTeam(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::HasSpyAtTeam);
+}
+#endif
 //------------------------------------------------------------------------------
 //bool isAllowsOpenBordersToTeam(TeamTypes eIndex);
 int CvLuaTeam::lIsAllowsOpenBordersToTeam(lua_State* L)
@@ -1251,3 +1317,89 @@ int CvLuaTeam::lUpdateEmbarkGraphics(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvTeam::UpdateEmbarkGraphics);
 }
+
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)
+//------------------------------------------------------------------------------
+//int GetNumTurnsIsVassal(TeamTypes eIndex) const;
+int CvLuaTeam::lGetNumTurnsIsVassal(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::GetNumTurnsIsVassal);
+}
+//------------------------------------------------------------------------------
+//int GetNumTurnsSinceVassalEnded(TeamTypes eIndex) const;
+int CvLuaTeam::lGetNumTurnsSinceVassalEnded(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::GetNumTurnsSinceVassalEnded);
+}
+//------------------------------------------------------------------------------
+//bool IsTooSoonForVassal(TeamTypes eIndex) const;
+int CvLuaTeam::lIsTooSoonForVassal(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::IsTooSoonForVassal);
+}
+//------------------------------------------------------------------------------
+//bool IsVassal(TeamTypes eIndex) const;
+int CvLuaTeam::lIsVassal(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::IsVassal);
+}
+//------------------------------------------------------------------------------
+// bool CanMakeVassal(TeamTypes eIndex) const;
+int CvLuaTeam::lCanBecomeVassal(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::canBecomeVassal);
+}
+//------------------------------------------------------------------------------
+// bool canEndVassal(TeamTypes eIndex) const;
+int CvLuaTeam::lcanEndVassal(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::canEndVassal);
+}
+//------------------------------------------------------------------------------
+// bool IsVassalageTradingAllowed() const;
+int CvLuaTeam::lIsVassalageTradingAllowed(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::IsVassalageTradingAllowed);
+}
+//------------------------------------------------------------------------------
+// bool IsVassalOfSomeone() const;
+int CvLuaTeam::lIsVassalOfSomeone(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::IsVassalOfSomeone);
+}
+//------------------------------------------------------------------------------
+// bool IsVassalLockedIntoWar() const;
+int CvLuaTeam::lIsVassalLockedIntoWar(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::IsVassalLockedIntoWar);
+}
+//------------------------------------------------------------------------------
+// TeamTypes GetMaster() const;
+int CvLuaTeam::lGetMaster(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::GetMaster);
+}
+//------------------------------------------------------------------------------
+// bool IsVoluntaryVassal() const;
+int CvLuaTeam::lIsVoluntaryVassal(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvTeam::IsVoluntaryVassal);
+}
+// ---------------------------------------------------------------------
+// void DoBecomeVassal(TeamTypes eTeam)
+int CvLuaTeam::lDoBecomeVassal(lua_State *L)
+{
+	CvTeam* pkTeam = GetInstance(L);
+	const TeamTypes eTeam = (TeamTypes) lua_tointeger(L, 2);
+	const bool bVoluntary = luaL_optbool(L, 3, false);
+
+	pkTeam->DoBecomeVassal(eTeam, bVoluntary);
+	return 0;
+}
+// ---------------------------------------------------------------------
+// void DoEndVassal(TeamTypes eTeam, bool bPeaceful, bool bSuppressNotification)
+int CvLuaTeam::lDoEndVassal(lua_State *L)
+{
+	return BasicLuaMethod(L, &CvTeam::DoEndVassal);
+}
+#endif

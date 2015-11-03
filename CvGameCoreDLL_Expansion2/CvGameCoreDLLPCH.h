@@ -94,6 +94,8 @@ typedef wchar_t          wchar;
 #include <Fireworks/Win32/FKBInputDevice.h>
 #include <Fireworks/FFastList.h>
 
+#include "CustomMods.h"
+
 #include "CvGameDatabase.h"
 #include "CvGameCoreDLLUtil.h"
 #include "CvPoint.h"
@@ -115,6 +117,12 @@ typedef wchar_t          wchar;
 #include "CvUnit.h"
 #include "CvGlobals.h"
 #include "CvCity.h"
+#if defined(MOD_API_PLOT_YIELDS)
+#include "CvPlotInfo.h"
+#endif
+#if defined(MOD_API_UNIFIED_YIELDS)
+#include "CvGreatPersonInfo.h"
+#endif
 #include "CvInfos.h"
 #include "CvTeam.h"
 #include "CvRandom.h"
@@ -150,9 +158,13 @@ typedef wchar_t          wchar;
 #include "CvAStar.h"
 #include "CvBuilderTaskingAI.h"
 #include "CvNotifications.h"
+#include "CvEventLog.h"
 #include "CvCityConnections.h"
 #include "CvAdvisorCounsel.h"
 #include "CvAdvisorRecommender.h"
+#if defined(MOD_API_ACHIEVEMENTS) || defined(ACHIEVEMENT_HACKS)
+#include "CvAchievementInfo.h"
+#endif
 
 using namespace fastdelegate;
 

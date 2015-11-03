@@ -15,6 +15,9 @@
     <Filter Include="Lua">
       <UniqueIdentifier>{42994bec-0f25-4200-ae4c-b7c751a5a152}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CustomMods">
+      <UniqueIdentifier>{95231ccd-fe20-497d-9b5f-f59c2616d79f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="_precompile.cpp">
@@ -499,6 +502,21 @@
     </ClCompile>
     <ClCompile Include="CvCityManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomMods.cpp">
+      <Filter>CustomMods</Filter>
+    </ClCompile>
+    <ClCompile Include="CvPlotInfo.cpp">
+      <Filter>CustomMods</Filter>
+    </ClCompile>
+    <ClCompile Include="CvAchievementInfo.cpp">
+      <Filter>CustomMods</Filter>
+    </ClCompile>
+    <ClCompile Include="CvGreatPersonInfo.cpp">
+      <Filter>CustomMods</Filter>
+    </ClCompile>
+    <ClCompile Include="CvEventLog.cpp">
+      <Filter>CustomMods</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1020,6 +1038,21 @@
     </ClInclude>
     <ClInclude Include="CvCityManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomMods.h">
+      <Filter>CustomMods</Filter>
+    </ClInclude>
+    <ClInclude Include="CvPlotInfo.h">
+      <Filter>CustomMods</Filter>
+    </ClInclude>
+    <ClInclude Include="CvAchievementInfo.h">
+      <Filter>CustomMods</Filter>
+    </ClInclude>
+    <ClInclude Include="CvGreatPersonInfo.h">
+      <Filter>CustomMods</Filter>
+    </ClInclude>
+    <ClInclude Include="CvEventLog.h">
+      <Filter>CustomMods</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

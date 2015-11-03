@@ -35,6 +35,9 @@ enum CvSpyState
 	SPY_STATE_MAKING_INTRODUCTIONS,
 	SPY_STATE_SCHMOOZE,
     SPY_STATE_DEAD,
+#if defined(MOD_API_ESPIONAGE)
+    SPY_STATE_TERMINATED,
+#endif
     NUM_SPY_STATES
 };
 
@@ -44,6 +47,9 @@ enum CvSpyResult // what was the result of the last spy action
     SPY_RESULT_DETECTED,   // a spy was detected in the city, but the defensive player can't tell which player
     SPY_RESULT_IDENTIFIED, // a spy was detected and identified in the city
     SPY_RESULT_KILLED,     // a spy was detected, identified, and killed in the city
+#if defined(MOD_API_ESPIONAGE)
+    SPY_RESULT_ELIMINATED, // a spy was detected, identified, and killed in the city, in such an embarrassing way that another spy won't be recruited!
+#endif
     NUM_SPY_RESULTS
 };
 
@@ -63,8 +69,19 @@ class CvEspionageSpy
 public:
 	CvEspionageSpy();
 
+#if defined(MOD_BUGFIX_SPY_NAMES)
+	const char* GetSpyName(CvPlayer* pPlayer);
+#endif
+
+#if defined(MOD_API_ESPIONAGE)
+	void SetSpyState(PlayerTypes eSpyOwner, int iSpyIndex, CvSpyState eSpyState);
+#endif
+
 	// Public data
 	int m_iName;
+#if defined(MOD_BUGFIX_SPY_NAMES)
+	CvString m_sName;
+#endif
 	int m_iCityX;
 	int m_iCityY;
 	CvSpyRank m_eRank;
@@ -72,6 +89,9 @@ public:
 	int m_iReviveCounter; // after killed, counter to reincarnate a spy
 	bool m_bIsDiplomat;
 	bool m_bEvaluateReassignment; // used by the AI. Flag to indicate if the spy should be evaluated to be reassigned
+#if defined(MOD_API_ESPIONAGE)
+	bool m_bPassive;
+#endif
 };
 
 FDataStream& operator>>(FDataStream&, CvEspionageSpy&);
@@ -134,7 +154,11 @@ public:
 	void CreateSpy(void);
 	void ProcessSpy(uint uiSpyIndex);
 	void UncoverIntrigue(uint uiSpyIndex);
+#if defined(MOD_BUGFIX_SPY_NAMES)
+	void GetNextSpyName(CvEspionageSpy* pSpy);
+#else
 	int  GetNextSpyName(void);
+#endif
 	bool IsSpyInCity(uint uiSpyIndex);
 	CvCity* GetCityWithSpy(uint uiSpyIndex);
 	int  GetSpyIndexInCity(CvCity* pCity);
@@ -143,6 +167,11 @@ public:
 	bool MoveSpyTo(CvCity* pCity, uint uiSpyIndex, bool bAsDiplomat);
 	bool ExtractSpyFromCity(uint uiSpyIndex);
 	void LevelUpSpy(uint uiSpyIndex);
+
+#if defined(MOD_API_ESPIONAGE)
+	void SetPassive(uint uiSpyIndex, bool bPassive);
+	void SetOutcome(uint uiSpyIndex, uint uiSpyResult, bool bAffectsDiplomacy = true);
+#endif
 
 	void UpdateSpies();
 	void UpdateCity(CvCity* pCity);
@@ -248,7 +277,11 @@ public:
 	void SetLastProgress(PlayerTypes ePlayer, int iProgress);
 	void SetLastPotential(PlayerTypes ePlayer, int iPotential);
 	void SetLastBasePotential(PlayerTypes ePlayer, int iPotential);
-	void SetSpyResult(PlayerTypes ePlayer, int iResult);
+#if defined(MOD_EVENTS_ESPIONAGE)
+	void SetSpyResult(PlayerTypes eSpyOwner, int iSpyIndex, int iResult);
+#else
+	void SetSpyResulttsp(PlayerTypes ePlayer, int iResult);
+#endif
 
 	bool HasCounterSpy();
 

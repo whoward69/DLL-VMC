@@ -993,8 +993,19 @@ public:
 	int getSpyRatePercent() const;
 	int getPeaceDealDuration() const;
 	int getRelationshipDuration() const;
+#if defined(MOD_TRADE_ROUTE_SCALING)
+	int getTradeRouteSpeedMod() const;
+#endif
 	int getLeaguePercent() const;
 	int getNumTurnIncrements() const;
+
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	int getShareOpinionDuration() const;
+	int getTechCostPerTurnMultiplier() const;
+	int getMinimumVoluntaryVassalTurns() const;
+	int getMinimumVassalTurns() const;
+	int getNumTurnsBetweenVassals() const;
+#endif
 
 	GameTurnInfo& getGameTurnInfo(int iIndex) const;
 	void allocateGameTurnInfos(const int iSize);
@@ -1031,7 +1042,18 @@ protected:
 	int m_iSpyRatePercent;
 	int m_iPeaceDealDuration;
 	int m_iRelationshipDuration;
+#if defined(MOD_TRADE_ROUTE_SCALING)
+	int m_iTradeRouteSpeedMod;
+#endif
 	int m_iLeaguePercent;
+
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	int m_iShareOpinionDuration;
+	int m_iTechCostPerTurnMultiplier;
+	int m_iMinimumVoluntaryVassalTurns;
+	int m_iMinimumVassalTurns;
+	int m_iNumTurnsBetweenVassals;
+#endif
 
 	int m_iNumTurnIncrements;
 
@@ -1072,6 +1094,33 @@ protected:
 FDataStream& operator<<(FDataStream&, const CvTurnTimerInfo&);
 FDataStream& operator>>(FDataStream&, CvTurnTimerInfo&);
 
+#if defined(MOD_EVENTS_DIPLO_MODIFIERS)
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// CvDiploModifierInfo
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+class CvDiploModifierInfo :	public CvBaseInfo
+{
+public:
+	CvDiploModifierInfo();
+
+	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
+	virtual bool operator==(const CvDiploModifierInfo&) const;
+	
+	bool isForFromCiv(CivilizationTypes eFromCiv);
+	bool isForToCiv(CivilizationTypes eToCiv);
+
+	virtual void readFrom(FDataStream& readFrom);
+	virtual void writeTo(FDataStream& saveTo) const;
+
+protected:
+	CivilizationTypes m_eFromCiv;
+	CivilizationTypes m_eToCiv;
+};
+
+FDataStream& operator<<(FDataStream&, const CvDiploModifierInfo&);
+FDataStream& operator>>(FDataStream&, CvDiploModifierInfo&);
+#endif
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //  class : CvBuildInfo
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1105,6 +1154,10 @@ public:
 	int getTechTimeChange(int i) const;
 
 	bool isFeatureRemove(int i) const;
+#if defined(MOD_BUGFIX_FEATURE_REMOVAL)
+	int getFeatureObsoleteTech(int i) const;
+	bool isFeatureRemoveOnly(int i) const;
+#endif
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
@@ -1131,6 +1184,10 @@ protected:
 	int* m_paiFeatureCost;
 	int* m_paiTechTimeChange;
 	bool* m_pabFeatureRemove;
+#if defined(MOD_BUGFIX_FEATURE_REMOVAL)
+	int* m_paiFeatureObsoleteTech;
+	bool* m_pabFeatureRemoveOnly;
+#endif
 
 private:
 	CvBuildInfo(const CvBuildInfo&);
@@ -1437,6 +1494,9 @@ public:
 	int getInfluenceCost() const;
 	int getAdvancedStartRemoveCost() const;
 	int getTurnDamage() const;
+#if defined(MOD_API_PLOT_BASED_DAMAGE)
+	int getExtraTurnDamage() const;
+#endif
 	int getFirstFinderGold() const;
 	int getInBorderHappiness() const;
 	int getOccurrenceFrequency() const;
@@ -1470,6 +1530,11 @@ public:
 	int getYieldChange(int i) const;
 	int getRiverYieldChange(int i) const;
 	int getHillsYieldChange(int i) const;
+#if defined(MOD_API_UNIFIED_YIELDS)
+	int getCoastalLandYieldChange(int i) const;
+	int getFreshWaterYieldChange(int i) const;
+	int GetTechYieldChanges(int i, int j) const;
+#endif
 	int get3DAudioScriptFootstepIndex(int i) const;
 
 	bool isTerrain(int i) const;
@@ -1493,6 +1558,9 @@ protected:
 	int m_iInfluenceCost;
 	int m_iAdvancedStartRemoveCost;
 	int m_iTurnDamage;
+#if defined(MOD_API_PLOT_BASED_DAMAGE)
+	int m_iExtraTurnDamage;
+#endif
 	int m_iFirstFinderGold;
 	int m_iInBorderHappiness;
 	int m_iOccurrenceFrequency;
@@ -1526,6 +1594,11 @@ protected:
 	int* m_piYieldChange;
 	int* m_piRiverYieldChange;
 	int* m_piHillsYieldChange;
+#if defined(MOD_API_UNIFIED_YIELDS)
+	int* m_piCoastalLandYieldChange;
+	int* m_piFreshWaterChange;
+	int** m_ppiTechYieldChanges;
+#endif
 	int* m_pi3DAudioScriptFootstepIndex;
 	bool* m_pbTerrain;
 
@@ -1546,6 +1619,10 @@ class CvYieldInfo : public CvBaseInfo
 public:
 	CvYieldInfo();
 
+#if defined(MOD_API_EXTENSIONS)
+	const char* getIconString() const;
+	const char* getColorString() const;
+#endif
 	int getHillsChange() const;
 	int getMountainChange() const;
 	int getLakeChange() const;
@@ -1561,6 +1638,10 @@ public:
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
 protected:
+#if defined(MOD_API_EXTENSIONS)
+	CvString m_strIconString;
+	CvString m_strColorString;
+#endif
 	int m_iHillsChange;
 	int m_iMountainChange;
 	int m_iLakeChange;
@@ -1591,6 +1672,10 @@ public:
 	int getBuildModifier() const;
 	int getDefenseModifier() const;
 	int getInfluenceCost() const;
+#if defined(MOD_API_PLOT_BASED_DAMAGE)
+	int getTurnDamage() const;
+	int getExtraTurnDamage() const;
+#endif
 
 	bool isWater() const;
 	bool isImpassable() const;
@@ -1608,6 +1693,11 @@ public:
 	int getYield(int i) const;
 	int getRiverYieldChange(int i) const;
 	int getHillsYieldChange(int i) const;
+#if defined(MOD_API_UNIFIED_YIELDS)
+	int getCoastalLandYieldChange(int i) const;
+	int getFreshWaterYieldChange(int i) const;
+	int GetTechYieldChanges(int i, int j) const;
+#endif
 	int get3DAudioScriptFootstepIndex(int i) const;
 
 	// Other
@@ -1620,6 +1710,10 @@ protected:
 	int m_iBuildModifier;
 	int m_iDefenseModifier;
 	int m_iInfluenceCost;
+#if defined(MOD_API_PLOT_BASED_DAMAGE)
+	int m_iTurnDamage;
+	int m_iExtraTurnDamage;
+#endif
 
 	bool m_bWater;
 	bool m_bImpassable;
@@ -1633,6 +1727,11 @@ protected:
 	int* m_piYields;
 	int* m_piRiverYieldChange;
 	int* m_piHillsYieldChange;
+#if defined(MOD_API_UNIFIED_YIELDS)
+	int* m_piCoastalLandYieldChange;
+	int* m_piFreshWaterChange;
+	int** m_ppiTechYieldChanges;
+#endif
 	int* m_pi3DAudioScriptFootstepIndex;
 
 	CvString m_strEffectTypeTag;		// Effect type for effect macros
@@ -1769,6 +1868,9 @@ public:
 	int getNumCitiesUnhappinessPercent() const;
 	int GetNumCitiesPolicyCostMod() const;
 	int GetNumCitiesTechCostMod() const;
+#if defined(MOD_TRADE_ROUTE_SCALING)
+	int getTradeRouteDistanceMod() const;
+#endif
 	int GetEstimatedNumCities() const;
 
 	static CvWorldInfo CreateCustomWorldSize(const CvWorldInfo& kTemplate, int iWidth, int iHeight);
@@ -1807,6 +1909,9 @@ protected:
 	int m_iNumCitiesUnhappinessPercent;
 	int m_iNumCitiesPolicyCostMod;
 	int m_iNumCitiesTechCostMod;
+#if defined(MOD_TRADE_ROUTE_SCALING)
+	int m_iTradeRouteDistanceMod;
+#endif
 	int m_iEstimatedNumCities;
 };
 
@@ -2065,6 +2170,10 @@ public:
 	int getLeaguePercent() const;
 	int getWarmongerPercent() const;
 
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	bool getVassalageEnabled() const;
+#endif
+
 	const char* GetCityBombardEffectTag() const;
 	uint GetCityBombardEffectTagHash() const;
 
@@ -2119,6 +2228,10 @@ protected:
 	int m_iTradeRouteProductionBonusTimes100;
 	int m_iLeaguePercent;
 	int m_iWarmongerPercent;
+
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	bool m_bVassalageEnabled;
+#endif
 
 	CvString m_strCityBombardEffectTag;
 	CvString m_strAudioUnitVictoryScript;
@@ -2262,4 +2375,28 @@ private:
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef CvBaseInfo CvDomainInfo;
 
+
+#if defined(MOD_API_UNIFIED_YIELDS)
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Helper Functions to serialize arrays of variable length (based on number of features defined in game)
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+namespace FeatureArrayHelpers
+{
+void Read(FDataStream& kStream, int* paiFeatureArray);
+void Write(FDataStream& kStream, int* paiFeatureArray, int iArraySize);
+void ReadYieldArray(FDataStream& kStream, int** ppaaiFeatureYieldArray, int iNumYields);
+void WriteYieldArray(FDataStream& kStream, int** ppaaiFeatureYieldArray, int iArraySize);
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Helper Functions to serialize arrays of variable length (based on number of terrains defined in game)
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+namespace TerrainArrayHelpers
+{
+void Read(FDataStream& kStream, int* paiTerrainArray);
+void Write(FDataStream& kStream, int* paiTerrainArray, int iArraySize);
+void ReadYieldArray(FDataStream& kStream, int** ppaaiTerrainYieldArray, int iNumYields);
+void WriteYieldArray(FDataStream& kStream, int** ppaaiTerrainYieldArray, int iArraySize);
+}
+#endif
 #endif

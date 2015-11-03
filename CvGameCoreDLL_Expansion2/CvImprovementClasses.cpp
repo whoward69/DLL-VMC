@@ -67,6 +67,12 @@ CvImprovementEntry::CvImprovementEntry(void):
 	m_iGoldMaintenance(0),
 	m_iCultureBombRadius(0),
 	m_iRequiresXAdjacentLand(-1),
+#if defined(MOD_API_EXTENSIONS)
+	m_iRequiresXAdjacentWater(-1),
+#endif
+#if defined(MOD_GLOBAL_STACKING_RULES)
+	m_iAdditionalUnits(0),
+#endif
 	m_iCultureAdjacentSameType(0),
 	m_iTilesPerGoody(0),
 	m_iGoodyUniqueRange(0),
@@ -81,12 +87,24 @@ CvImprovementEntry::CvImprovementEntry(void):
 	m_iPillageGold(0),
 	m_iResourceExtractionMod(0),
 	m_iLuxuryCopiesSiphonedFromMinor(0),
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	m_iImprovementLeagueVotes(0),
+#endif
 	m_iImprovementPillage(NO_IMPROVEMENT),
 	m_iImprovementUpgrade(NO_IMPROVEMENT),
 	m_bHillsMakesValid(false),
+#if defined(MOD_GLOBAL_ALPINE_PASSES)
+	m_bMountainsMakesValid(false),
+#endif
+#if defined(MOD_GLOBAL_PASSABLE_FORTS)
+	m_bMakesPassable(false),
+#endif
 	m_bFreshWaterMakesValid(false),
 	m_bRiverSideMakesValid(false),
 	m_bNoFreshWater(false),
+#if defined(MOD_API_EXTENSIONS)
+	m_bAddsFreshWater(false),
+#endif
 	m_bRequiresFlatlands(false),
 	m_bRequiresFlatlandsOrFreshWater(false),
 	m_bRequiresFeature(false),
@@ -127,6 +145,9 @@ CvImprovementEntry::CvImprovementEntry(void):
 	m_pbTerrainMakesValid(NULL),
 	m_pbFeatureMakesValid(NULL),
 	m_pbImprovementMakesValid(NULL),
+#if defined(MOD_API_UNIFIED_YIELDS)
+	m_piAdjacentSameTypeYield(NULL),
+#endif
 	m_ppiTechYieldChanges(NULL),
 	m_ppiTechNoFreshWaterYieldChanges(NULL),
 	m_ppiTechFreshWaterYieldChanges(NULL),
@@ -152,6 +173,9 @@ CvImprovementEntry::~CvImprovementEntry(void)
 	SAFE_DELETE_ARRAY(m_pbTerrainMakesValid);
 	SAFE_DELETE_ARRAY(m_pbFeatureMakesValid);
 	SAFE_DELETE_ARRAY(m_pbImprovementMakesValid);
+#if defined(MOD_API_UNIFIED_YIELDS)
+	SAFE_DELETE_ARRAY(m_piAdjacentSameTypeYield);
+#endif
 
 	if(m_paImprovementResource != NULL)
 	{
@@ -192,11 +216,28 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 	m_iGoldMaintenance = kResults.GetInt("GoldMaintenance");
 	m_iCultureBombRadius = kResults.GetInt("CultureBombRadius");
 	m_iRequiresXAdjacentLand = kResults.GetInt("RequiresXAdjacentLand");
+#if defined(MOD_API_EXTENSIONS)
+	m_iRequiresXAdjacentWater = kResults.GetInt("RequiresXAdjacentWater");
+#endif
+#if defined(MOD_GLOBAL_STACKING_RULES)
+	m_iAdditionalUnits = kResults.GetInt("AdditionalUnits");
+#endif
 	m_iCultureAdjacentSameType = kResults.GetInt("CultureAdjacentSameType");
 	m_bHillsMakesValid = kResults.GetBool("HillsMakesValid");
+#if defined(MOD_GLOBAL_ALPINE_PASSES)
+	m_bMountainsMakesValid = kResults.GetBool("MountainsMakesValid");
+#endif
+#if defined(MOD_GLOBAL_PASSABLE_FORTS)
+	m_bMakesPassable = kResults.GetBool("MakesPassable");
+#endif
 	m_bFreshWaterMakesValid = kResults.GetBool("FreshWaterMakesValid");
 	m_bRiverSideMakesValid = kResults.GetBool("RiverSideMakesValid");
 	m_bNoFreshWater = kResults.GetBool("NoFreshWater");
+#if defined(MOD_API_EXTENSIONS)
+	if (MOD_API_EXTENSIONS) {
+		m_bAddsFreshWater = kResults.GetBool("AddsFreshWater");
+	}
+#endif
 	m_bRequiresFlatlands = kResults.GetBool("RequiresFlatlands");
 	m_bRequiresFlatlandsOrFreshWater = kResults.GetBool("RequiresFlatlandsOrFreshWater");
 	m_bRequiresFeature = kResults.GetBool("RequiresFeature");
@@ -234,6 +275,11 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 	m_bSpecificCivRequired = kResults.GetBool("SpecificCivRequired");
 	m_iResourceExtractionMod = kResults.GetInt("ResourceExtractionMod");
 	m_iLuxuryCopiesSiphonedFromMinor = kResults.GetInt("LuxuryCopiesSiphonedFromMinor");
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if (MOD_DIPLOMACY_CITYSTATES) {
+		m_iImprovementLeagueVotes = kResults.GetInt("ImprovementLeagueVotes");
+	}
+#endif
 
 	const char* szCivilizationType = kResults.GetText("CivilizationType");
 	m_eRequiredCivilization = (CivilizationTypes)GC.getInfoTypeForString(szCivilizationType, true);
@@ -280,6 +326,10 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 									  "PrereqImprovement",
 									  "ImprovementType",
 							          szImprovementType);
+
+#if defined(MOD_API_UNIFIED_YIELDS)
+	kUtility.PopulateArrayByValue(m_piAdjacentSameTypeYield, "Yields", "Improvement_YieldAdjacentSameType", "YieldType", "ImprovementType", szImprovementType, "Yield");
+#endif
 
 	kUtility.SetYields(m_piYieldChange, "Improvement_Yields", "ImprovementType", szImprovementType);
 	kUtility.SetYields(m_piYieldPerEra, "Improvement_YieldPerEra", "ImprovementType", szImprovementType);
@@ -491,11 +541,42 @@ int CvImprovementEntry::GetRequiresXAdjacentLand() const
 	return m_iRequiresXAdjacentLand;
 }
 
+#if defined(MOD_API_EXTENSIONS)
+/// How many adjacent tiles must be water?
+int CvImprovementEntry::GetRequiresXAdjacentWater() const
+{
+	return m_iRequiresXAdjacentWater;
+}
+#endif
+
+#if defined(MOD_GLOBAL_STACKING_RULES)
+/// Additional units that can stack in this improvement
+int CvImprovementEntry::GetAdditionalUnits() const
+{
+	return m_iAdditionalUnits;
+}
+#endif
+
+#if defined(MOD_API_UNIFIED_YIELDS)
+/// Bonus yield if another Improvement of same type is adjacent
+int CvImprovementEntry::GetYieldAdjacentSameType(YieldTypes eYield) const
+{
+	int iYield = GetAdjacentSameTypeYield(eYield);
+	
+	// Special case for culture
+	if (eYield == YIELD_CULTURE) {
+		iYield += m_iCultureAdjacentSameType;
+	}
+	
+	return iYield;
+}
+#else
 /// Bonus culture if another Improvement of same type is adjacent
 int CvImprovementEntry::GetCultureAdjacentSameType() const
 {
 	return m_iCultureAdjacentSameType;
 }
+#endif
 
 /// The number of tiles in an area needed for a goody hut to be placed by the map generator
 int CvImprovementEntry::GetTilesPerGoody() const
@@ -575,6 +656,14 @@ int CvImprovementEntry::GetLuxuryCopiesSiphonedFromMinor() const
 	return m_iLuxuryCopiesSiphonedFromMinor;
 }
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+/// Does this improvement grant an extra World Congress vote?
+int CvImprovementEntry::GetCityStateExtraVote() const
+{
+	return m_iImprovementLeagueVotes;
+}
+#endif
+
 /// Returns the type of improvement that results from this improvement being pillaged
 int CvImprovementEntry::GetImprovementPillage() const
 {
@@ -605,6 +694,22 @@ bool CvImprovementEntry::IsHillsMakesValid() const
 	return m_bHillsMakesValid;
 }
 
+#if defined(MOD_GLOBAL_ALPINE_PASSES)
+/// Requires mountains to be constructed
+bool CvImprovementEntry::IsMountainsMakesValid() const
+{
+	return m_bMountainsMakesValid;
+}
+#endif
+
+#if defined(MOD_GLOBAL_PASSABLE_FORTS)
+/// Permits the tile to be passed by ships
+bool CvImprovementEntry::IsMakesPassable() const
+{
+	return m_bMakesPassable;
+}
+#endif
+
 /// Requires fresh water to build
 bool CvImprovementEntry::IsFreshWaterMakesValid() const
 {
@@ -622,6 +727,14 @@ bool CvImprovementEntry::IsNoFreshWater() const
 {
 	return m_bNoFreshWater;
 }
+
+#if defined(MOD_API_EXTENSIONS)
+/// Adds fresh water to the plot
+bool CvImprovementEntry::IsAddsFreshWater() const
+{
+	return m_bAddsFreshWater;
+}
+#endif
 
 /// Requires that it must be built on something other than a hill
 bool CvImprovementEntry::IsRequiresFlatlands() const
@@ -936,6 +1049,16 @@ bool CvImprovementEntry::GetImprovementMakesValid(int i) const
 	CvAssertMsg(i > -1, "Index out of bounds");
 	return m_pbImprovementMakesValid ? m_pbImprovementMakesValid[i] : false;
 }
+
+#if defined(MOD_API_UNIFIED_YIELDS)
+/// If this improvement requires a terrain type to be valid
+int CvImprovementEntry::GetAdjacentSameTypeYield(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piAdjacentSameTypeYield ? m_piAdjacentSameTypeYield[i] : false;
+}
+#endif
 
 /// How much a tech improves the yield of this improvement
 int CvImprovementEntry::GetTechYieldChanges(int i, int j) const

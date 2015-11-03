@@ -61,7 +61,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>CvWorldBuilderMapWin32.lib;CvGameCoreDLLUtilWin32.lib;CvLocalizationWin32.lib;CvGameDatabaseWin32.lib;FireWorksWin32.lib;FLuaWin32.lib;lua51_Win32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(ProjectName)$(Platform)$(Configuration).dll</OutputFile>
+      <OutputFile>$(OutDir)CvGameCore_Expansion2.dll</OutputFile>
       <SuppressStartupBanner>false</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\CvWorldBuilderMap\lib\;$(SolutionDir)\CvGameCoreDLLUtil\lib\;$(SolutionDir)\CvLocalization\lib\;$(SolutionDir)\CvGameDatabase\lib\;$(SolutionDir)FirePlace\lib\;$(SolutionDir)ThirdPartyLibs\Lua51\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -80,7 +80,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CustomMods.cpp" />
+    <ClCompile Include="CvAchievementInfo.cpp" />
     <ClCompile Include="CvCityManager.cpp" />
+    <ClCompile Include="CvEventLog.cpp" />
+    <ClCompile Include="CvGreatPersonInfo.cpp" />
+    <ClCompile Include="CvPlotInfo.cpp" />
     <ClCompile Include="CvTargeting.cpp" />
     <ClCompile Include="_precompile.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">Create</PrecompiledHeader>
@@ -246,6 +251,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="banned.h" />
+    <ClInclude Include="CustomMods.h" />
+    <ClInclude Include="CvAchievementInfo.h" />
     <ClInclude Include="CvAchievementUnlocker.h" />
     <ClInclude Include="CvAdvisorCounsel.h" />
     <ClInclude Include="CvAdvisorRecommender.h" />
@@ -279,6 +286,7 @@
     <ClInclude Include="CvEconomicAI.h" />
     <ClInclude Include="CvEmphasisClasses.h" />
     <ClInclude Include="CvEspionageClasses.h" />
+    <ClInclude Include="CvEventLog.h" />
     <ClInclude Include="CvFlavorManager.h" />
     <ClInclude Include="CvFractal.h" />
     <ClInclude Include="CvGame.h" />
@@ -292,6 +300,7 @@
     <ClInclude Include="CvGlobals.h" />
     <ClInclude Include="CvGoodyHuts.h" />
     <ClInclude Include="CvGrandStrategyAI.h" />
+    <ClInclude Include="CvGreatPersonInfo.h" />
     <ClInclude Include="CvHomelandAI.h" />
     <ClInclude Include="CvImprovementClasses.h" />
     <ClInclude Include="CvInfos.h" />
@@ -307,6 +316,7 @@
     <ClInclude Include="CvPlayerAI.h" />
     <ClInclude Include="CvPlayerManager.h" />
     <ClInclude Include="CvPlot.h" />
+    <ClInclude Include="CvPlotInfo.h" />
     <ClInclude Include="CvPlotManager.h" />
     <ClInclude Include="CvPoint.h" />
     <ClInclude Include="CvPolicyAI.h" />

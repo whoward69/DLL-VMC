@@ -356,6 +356,7 @@ void CvMilitaryAI::Read(FDataStream& kStream)
 	// Version number to maintain backwards compatibility
 	uint uiVersion;
 	kStream >> uiVersion;
+	MOD_SERIALIZE_INIT_READ(kStream);
 
 	FAssertMsg(m_pAIStrategies != NULL && m_pAIStrategies->GetNumMilitaryAIStrategies() > 0, "Number of AIStrategies to serialize is expected to greater than 0");
 	kStream >> m_iTotalThreatWeight;
@@ -400,6 +401,7 @@ void CvMilitaryAI::Write(FDataStream& kStream)
 	// Current version number
 	uint uiVersion = 1;
 	kStream << uiVersion;
+	MOD_SERIALIZE_INIT_WRITE(kStream);
 
 	FAssertMsg(GC.getNumMilitaryAIStrategyInfos() > 0, "Number of AIStrategies to serialize is expected to greater than 0");
 	kStream << m_iTotalThreatWeight;
@@ -879,7 +881,14 @@ CvUnit* CvMilitaryAI::BuyEmergencyUnit(UnitAITypes eUnitType, CvCity* pCity)
 						m_pPlayer->GetTreasury()->LogExpenditure((CvString)pUnit->getUnitInfo().GetText(), iGoldCost, 7);
 						m_pPlayer->GetTreasury()->ChangeGold(-iGoldCost);
 
-						pUnit->setMoves(0);
+#if defined(MOD_BUGFIX_MOVE_AFTER_PURCHASE)
+						if (!pUnit->getUnitInfo().CanMoveAfterPurchase())
+						{
+#endif
+							pUnit->setMoves(0);
+#if defined(MOD_BUGFIX_MOVE_AFTER_PURCHASE)
+						}
+#endif
 
 						CvString szMsg;
 						szMsg.Format("Emergency Unit Purchased: %s, ", pUnit->getUnitInfo().GetDescription());
@@ -910,7 +919,14 @@ CvUnit* CvMilitaryAI::BuyEmergencyUnit(UnitAITypes eUnitType, CvCity* pCity)
 
 				CvAssertMsg(iResult != FFreeList::INVALID_INDEX, "Unable to create unit");
 				CvUnit* pUnit = m_pPlayer->getUnit(iResult);
-				pUnit->setMoves(0);
+#if defined(MOD_BUGFIX_MOVE_AFTER_PURCHASE)
+				if (!pUnit->getUnitInfo().CanMoveAfterPurchase())
+				{
+#endif
+					pUnit->setMoves(0);
+#if defined(MOD_BUGFIX_MOVE_AFTER_PURCHASE)
+				}
+#endif
 
 				CvString szMsg;
 				szMsg.Format("Emergency Faith Unit Purchase: %s, ", pUnit->getUnitInfo().GetDescription());
@@ -1350,6 +1366,24 @@ int CvMilitaryAI::ScoreTarget(CvMilitaryTarget& target, AIOperationTypes eAIOper
 		uliRtnValue *= GC.getAI_MILITARY_RECAPTURING_OWN_CITY();
 		uliRtnValue /= 100;
 	}
+	
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if (MOD_DIPLOMACY_CITYSTATES) {
+		for(int iMinorLoop = MAX_MAJOR_CIVS; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
+		{
+			PlayerTypes eMinor = (PlayerTypes) iMinorLoop;
+			if (target.m_pTargetCity->getOriginalOwner() == eMinor)
+			{
+				CvPlayer* pMinor = &GET_PLAYER(eMinor);
+				if(pMinor->GetMinorCivAI()->GetQuestData1(m_pPlayer->GetID(), MINOR_CIV_QUEST_LIBERATION) == eMinor)
+				{
+					uliRtnValue *= GC.getAI_MILITARY_RECAPTURING_CITY_STATE();
+					uliRtnValue /= 100;
+				}
+			}
+		}
+	}
+#endif
 
 	// Don't want it to already be targeted by an operation that's not well on its way
 	if(m_pPlayer->IsCityAlreadyTargeted(target.m_pTargetCity, NO_DOMAIN, 50))
@@ -1369,6 +1403,12 @@ int CvMilitaryAI::ScoreTarget(CvMilitaryTarget& target, AIOperationTypes eAIOper
 	iEconomicValue += target.m_pTargetCity->getYieldRateTimes100(YIELD_GOLD, false) / 10;
 	iEconomicValue += target.m_pTargetCity->getYieldRateTimes100(YIELD_CULTURE, false) / 10;
 	iEconomicValue += target.m_pTargetCity->getYieldRateTimes100(YIELD_FAITH, false) / 10;
+#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
+	iEconomicValue += target.m_pTargetCity->getYieldRateTimes100(YIELD_TOURISM, false) / 10;
+#endif
+#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
+	iEconomicValue += target.m_pTargetCity->getYieldRateTimes100(YIELD_GOLDEN_AGE_POINTS, false) / 10;
+#endif
 	uliRtnValue *= iEconomicValue;
 
 	uliRtnValue /= 10;
@@ -3754,8 +3794,66 @@ bool CvMilitaryAI::WillAirUnitRebase(CvUnit* pUnit) const
 	return false;
 }
 
+#if defined(MOD_AI_SMART_AIR_TACTICS)
+// Get all possible interceptions on that plot, doesn't use visibility to offset AI inability to remember air attacks.
+int CvMilitaryAI::GetMaxPossibleInterceptions(CvPlot* pTargetPlot) const
+{
+	int iRtnValue = 0;
+
+	// Loop through all the players
+	for(int iI = 0; iI < MAX_PLAYERS; iI++)
+	{
+		CvPlayer& kPlayer = GET_PLAYER((PlayerTypes)iI);
+
+		if(kPlayer.isAlive() && kPlayer.GetID() != m_pPlayer->GetID())
+		{
+			if (atWar(kPlayer.getTeam(), m_pPlayer->getTeam()))
+			{
+				// Loop through their units looking for intercept capable units
+				int iLoopUnit = 0;
+
+				for(CvUnit* pLoopUnit = kPlayer.firstUnit(&iLoopUnit); pLoopUnit != NULL; pLoopUnit = kPlayer.nextUnit(&iLoopUnit))
+				{
+					// Must be able to intercept
+					if(!pLoopUnit->isDelayedDeath() && pLoopUnit->canAirDefend() && !pLoopUnit->isInCombat())
+					{
+						// Must still be able to intercept this turn.
+						if(!pLoopUnit->isOutOfInterceptions())
+						{
+							// Must either be a non-air Unit, or an air Unit that hasn't moved this turn
+							if((pLoopUnit->getDomainType() != DOMAIN_AIR) || !(pLoopUnit->hasMoved()))
+							{
+								// Must either be a non-air Unit or an air Unit on intercept
+								if((pLoopUnit->getDomainType() != DOMAIN_AIR) || (pLoopUnit->GetActivityType() == ACTIVITY_INTERCEPT))
+								{
+									// Test range
+									if(plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pTargetPlot->getX(), pTargetPlot->getY()) <= pLoopUnit->getUnitInfo().GetAirInterceptRange())
+									{
+										if (pLoopUnit->currInterceptionProbability() > 0)
+										{
+											iRtnValue++;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return iRtnValue;
+}
+#endif
+
 /// Assess nearby enemy air assets
+#if defined(MOD_AI_SMART_AIR_TACTICS)
+// Add half of unit range to the calculations.
+int CvMilitaryAI::GetNumEnemyAirUnitsInRange(CvPlot* pCenterPlot, int iRange, bool bCountFighters, bool bCountBombers) const
+#else
 int CvMilitaryAI::GetNumEnemyAirUnitsInRange(CvPlot* pCenterPlot, int /*iRange*/, bool bCountFighters, bool bCountBombers) const
+#endif
 {
 	int iRtnValue = 0;
 
@@ -3773,7 +3871,14 @@ int CvMilitaryAI::GetNumEnemyAirUnitsInRange(CvPlot* pCenterPlot, int /*iRange*/
 				{
 					if (pLoopUnit->getDomainType() == DOMAIN_AIR)
 					{
+#if defined(MOD_AI_SMART_AIR_TACTICS)
+						// Just to keep fighters closer to high range bombers (stealth bombers)
+						int iAcceptableDistance = MOD_AI_SMART_AIR_TACTICS ? min(pLoopUnit->GetRange(), 12) + (iRange / 2) : 10;
+						// distance was checked to a fixed 10 value
+						if ( plotDistance(pCenterPlot->getX(), pCenterPlot->getY(), pLoopUnit->getX(), pLoopUnit->getY()) <= iAcceptableDistance )
+#else
 						if ( plotDistance(pCenterPlot->getX(), pCenterPlot->getY(), pLoopUnit->getX(), pLoopUnit->getY()) <= 10 )
+#endif
 						{
 							// Let's not factor in revealed or visible - As a human I can remember past attacks and intuit whether a bomber could be in range of the city, AIs don't have great intuition...
 							if (pLoopUnit->IsAirSweepCapable() || pLoopUnit->canAirDefend())
@@ -4663,8 +4768,13 @@ bool MilitaryAIHelpers::IsTestStrategy_EnoughAntiAirUnits(CvPlayer* pPlayer, int
 
 	if(bAnyAirforce)
 	{
+#if defined(MOD_CONFIG_AI_IN_XML)
+		// The original code simplifies to 4*iNumAA > iNumMelee
+		return (GD_INT_GET(AI_CONFIG_MILITARY_MELEE_PER_AA)*iNumAA > iNumMelee);
+#else
 		int iRatio = (iNumAA * 10) / max(1,iNumMelee+iNumAA);
 		return (iRatio > 2);
+#endif
 	}
 	else
 	{
@@ -4692,8 +4802,13 @@ bool MilitaryAIHelpers::IsTestStrategy_NeedAntiAirUnits(CvPlayer* pPlayer, int i
 
 	if(bAnyAirforce)
 	{
+#if defined(MOD_CONFIG_AI_IN_XML)
+		// This original code simplifies to 4*iNumAA <= iNumMelee
+		return (GD_INT_GET(AI_CONFIG_MILITARY_MELEE_PER_AA)*iNumAA <= iNumMelee);
+#else
 		int iRatio = (iNumAA * 10) / max(1,iNumMelee+iNumAA);
 		return (iRatio <= 2);
+#endif
 	}
 	else
 	{
@@ -4706,6 +4821,7 @@ bool MilitaryAIHelpers::IsTestStrategy_NeedAirCarriers(CvPlayer* pPlayer)
 {
 	int iNumLoadableAirUnits = 0;
 	int iNumTotalCargoSpace = 0;
+
 	CvUnit* pLoopUnit;
 	int iLoop;
 	SpecialUnitTypes eSpecialUnitPlane = (SpecialUnitTypes) GC.getInfoTypeForString("SPECIALUNIT_FIGHTER");
@@ -4740,7 +4856,13 @@ bool MilitaryAIHelpers::IsTestStrategy_NeedAirCarriers(CvPlayer* pPlayer)
 		}
 	}
 
+#if defined(MOD_CONFIG_AI_IN_XML)
+	// Why would we ever want to load EVERY plane onto a carrier?
+	int iFactor = GC.getAI_CONFIG_MILITARY_AIRCRAFT_PER_CARRIER_SPACE();
+	if (iNumLoadableAirUnits > iFactor*iNumTotalCargoSpace)
+#else
 	if (iNumLoadableAirUnits > iNumTotalCargoSpace)
+#endif
 	{
 		return true;
 	}
