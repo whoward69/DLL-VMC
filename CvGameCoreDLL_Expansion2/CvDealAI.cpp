@@ -101,6 +101,9 @@ DealOfferResponseTypes CvDealAI::DoHumanOfferDealToThisAI(CvDeal* pDeal)
 
 	const char* szText = "";
 	LeaderheadAnimationTypes eAnimation = NO_LEADERHEAD_ANIM;
+#if defined(MOD_DIPLOMACY_STFU)
+	DiploMessageTypes eDiploMessage = NO_DIPLO_MESSAGE_TYPE;
+#endif
 
 	PlayerTypes eFromPlayer = GC.getGame().getActivePlayer();
 
@@ -145,6 +148,9 @@ DealOfferResponseTypes CvDealAI::DoHumanOfferDealToThisAI(CvDeal* pDeal)
 
 		if(bFromIsActivePlayer)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			eDiploMessage = DIPLO_MESSAGE_TRADE_REJECT_UNACCEPTABLE;
+#endif
 			szText = GetPlayer()->GetDiplomacyAI()->GetDiploStringForMessage(DIPLO_MESSAGE_TRADE_REJECT_UNACCEPTABLE);
 			eAnimation = LEADERHEAD_ANIM_NO;
 		}
@@ -157,6 +163,9 @@ DealOfferResponseTypes CvDealAI::DoHumanOfferDealToThisAI(CvDeal* pDeal)
 
 		if(bFromIsActivePlayer)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			eDiploMessage = DIPLO_MESSAGE_TRADE_REJECT_INSULTING;
+#endif
 			szText = GetPlayer()->GetDiplomacyAI()->GetDiploStringForMessage(DIPLO_MESSAGE_TRADE_REJECT_INSULTING);
 			eAnimation = LEADERHEAD_ANIM_NO;
 		}
@@ -169,27 +178,25 @@ DealOfferResponseTypes CvDealAI::DoHumanOfferDealToThisAI(CvDeal* pDeal)
 		{
 			int iTimesDealOffered = GC.GetEngineUserInterface()->GetOfferTradeRepeatCount();
 
-#if defined(MOD_DIPLOMACY_STFU)
-			if (iTimesDealOffered > 4)
-			{
-				GET_PLAYER(eFromPlayer).GetDiplomacyAI()->DisplayAILeaderMessage(GetPlayer()->GetID(), eUIState, DIPLO_MESSAGE_REPEAT_TRADE_TOO_MUCH, eAnimation);
-			}
-			else if (iTimesDealOffered > 1)
-			{
-				GET_PLAYER(eFromPlayer).GetDiplomacyAI()->DisplayAILeaderMessage(GetPlayer()->GetID(), eUIState, DIPLO_MESSAGE_REPEAT_TRADE, eAnimation);
-			}
-			GC.GetEngineUserInterface()->ChangeOfferTradeRepeatCount(1);
-#else
 			if(iTimesDealOffered > 4)
 			{
+#if defined(MOD_DIPLOMACY_STFU)
+				eDiploMessage = DIPLO_MESSAGE_REPEAT_TRADE_TOO_MUCH;
+#endif
 				szText = GetPlayer()->GetDiplomacyAI()->GetDiploStringForMessage(DIPLO_MESSAGE_REPEAT_TRADE_TOO_MUCH);
 			}
 			else if(iTimesDealOffered > 1)
 			{
+#if defined(MOD_DIPLOMACY_STFU)
+				eDiploMessage = DIPLO_MESSAGE_REPEAT_TRADE;
+#endif
 				szText = GetPlayer()->GetDiplomacyAI()->GetDiploStringForMessage(DIPLO_MESSAGE_REPEAT_TRADE);
 			}
 
 			GC.GetEngineUserInterface()->ChangeOfferTradeRepeatCount(1);
+#if defined(MOD_DIPLOMACY_STFU)
+			GET_PLAYER(eFromPlayer).GetDiplomacyAI()->DisplayAILeaderMessage(GetPlayer()->GetID(), eUIState, eDiploMessage, eAnimation);
+#else
 			gDLL->GameplayDiplomacyAILeaderMessage(GetPlayer()->GetID(), eUIState, szText, eAnimation);
 #endif
 		}

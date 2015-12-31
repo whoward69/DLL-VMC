@@ -1475,7 +1475,7 @@ void CvHomelandAI::PlotWorkerSeaMoves()
 void CvHomelandAI::PlotPatrolMoves()
 {
 #if defined(MOD_AI_SECONDARY_SETTLERS)
-	if (MOD_AI_SECONDARY_SETTLERS && !m_pPlayer->isMinorCiv()) {
+	if (MOD_AI_SECONDARY_SETTLERS && !m_pPlayer->isMinorCiv() && m_pPlayer->getCapitalCity()) {
 		// Find any units with a secondary role of settler and check for opportunistic city founding
 		PlotOpportunisticSettlementMoves();
 	}

@@ -10,6 +10,8 @@
 #ifndef CIV5_BELIEF_CLASSES_H
 #define CIV5_BELIEF_CLASSES_H
 
+#include "CustomMods.h"
+
 class CvReligion;
 
 #define SAFE_ESTIMATE_NUM_BELIEFS 100
@@ -501,7 +503,11 @@ private:
 
 namespace CvBeliefHelpers
 {
+#if defined(MOD_EVENTS_UNIT_CAPTURE)
+	bool ConvertBarbarianUnit(const CvUnit *pByUnit, UnitHandle pUnit);
+#else
 	bool ConvertBarbarianUnit(CvPlayer *pPlayer, UnitHandle pUnit);
+#endif
 }
 
 #endif //CIV5_BELIEF_CLASSES_H
