@@ -1396,7 +1396,11 @@ void CvCity::PreKill()
 
 	CvPlot* pPlot = plot();
 
+#if defined(MOD_BUGFIX_MINOR)
+	GC.getGame().GetGameTrade()->ClearAllCityTradeRoutes(pPlot, true);
+#else
 	GC.getGame().GetGameTrade()->ClearAllCityTradeRoutes(pPlot);
+#endif
 
 	// Update resources linked to this city
 #if defined(MOD_GLOBAL_CITY_WORKING)
@@ -1639,7 +1643,11 @@ void CvCity::kill()
 	CvGameTrade* pkGameTrade = GC.getGame().GetGameTrade();
 	if(pkGameTrade)
 	{
+#if defined(MOD_BUGFIX_MINOR)
+		pkGameTrade->ClearAllCityTradeRoutes(plot(), true);
+#else
 		pkGameTrade->ClearAllCityTradeRoutes(plot());
+#endif
 	}
 	GET_PLAYER(getOwner()).deleteCity(m_iID);
 	GET_PLAYER(eOwner).GetCityConnections()->Update();
@@ -3283,12 +3291,35 @@ bool CvCity::IsHasResourceLocal(ResourceTypes eResource, bool bTestVisible) cons
 }
 
 #if defined(MOD_API_EXTENSIONS) || defined(MOD_TRADE_WONDER_RESOURCE_ROUTES)
-int CvCity::GetNumResourceLocal(ResourceTypes eResource)
+int CvCity::GetNumResourceLocal(ResourceTypes eResource, bool bImproved)
 {
 	VALIDATE_OBJECT
 	CvAssertMsg(eResource > -1 && eResource < GC.getNumResourceInfos(), "Invalid resource index.");
 
-	return m_paiNumResourcesLocal[eResource];
+	if (!bImproved) {
+		return m_paiNumResourcesLocal[eResource];
+	} else {
+		int iCount = 0;
+		CvImprovementEntry* pImprovement = GC.GetGameImprovements()->GetImprovementForResource(eResource);
+		CvCityCitizens* pCityCitizens = GetCityCitizens();
+
+#if defined(MOD_GLOBAL_CITY_WORKING)
+		for(int iI = 0; iI < GetNumWorkablePlots(); iI++)
+#else
+		for(int iI = 0; iI < NUM_CITY_PLOTS; iI++)
+#endif
+		{
+			CvPlot* pLoopPlot = pCityCitizens->GetCityPlotFromIndex(iI);
+
+			if (pLoopPlot != NULL && pLoopPlot->getWorkingCity() == this) {
+				if (pLoopPlot->getResourceType() == eResource && pLoopPlot->getImprovementType() == ((ImprovementTypes) pImprovement->GetID()) && !pLoopPlot->IsImprovementPillaged()) {
+					++iCount;
+				}
+			}
+		}
+		
+		return iCount;
+	}
 }
 #endif
 

@@ -1303,8 +1303,10 @@ void CvTeam::DoDeclareWar(TeamTypes eTeam, bool bDefensivePact, bool bMinorAllyP
 		GET_TEAM(eTeam).EvacuateDiplomatsAtTeam(m_eID);
 	}
 
+#if !defined(MOD_GLOBAL_STACKING_RULES)
 	// Bump Units out of places they shouldn't be
 	GC.getMap().verifyUnitValidPlot();
+#endif
 
 #if defined(MOD_EVENTS_WAR_AND_PEACE)
 	setAtWar(eTeam, true, bAggressor);
@@ -1313,6 +1315,12 @@ void CvTeam::DoDeclareWar(TeamTypes eTeam, bool bDefensivePact, bool bMinorAllyP
 	setAtWar(eTeam, true);
 	GET_TEAM(eTeam).setAtWar(GetID(), true);
 #endif
+
+#if defined(MOD_GLOBAL_STACKING_RULES)
+	// Bump Units out of places they shouldn't be
+	GC.getMap().verifyUnitValidPlot();
+#endif
+
 #if defined(MOD_EVENTS_WAR_AND_PEACE)
 	if (MOD_EVENTS_WAR_AND_PEACE) {
 		GAMEEVENTINVOKE_HOOK(GAMEEVENT_DeclareWar, eOriginatingPlayer, eTeam, bAggressor);

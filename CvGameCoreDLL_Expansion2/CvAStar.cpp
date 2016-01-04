@@ -2576,8 +2576,12 @@ int WaterRouteValid(CvAStarNode* parent, CvAStarNode* node, int data, const void
 		return FALSE;
 	}
 
+#if defined(MOD_GLOBAL_PASSABLE_FORTS)
+	if (pNewPlot->isFriendlyCityOrPassableImprovement(ePlayer, true))
+#else
 	CvCity* pCity = pNewPlot->getPlotCity();
-	if(pCity && pCity->getTeam() == eTeam)
+	if (pCity && pCity->getTeam() == eTeam)
+#endif
 	{
 		return TRUE;
 	}
@@ -3997,7 +4001,17 @@ int TradeRouteLandPathCost(CvAStarNode* parent, CvAStarNode* node, int data, con
 	}
 	
 	// Penalty for ending a turn on a mountain
-	if(pToPlot->isImpassable() || pToPlot->isMountain())
+#if defined(MOD_GLOBAL_ALPINE_PASSES)
+	bool bMountain = pToPlot->isMountain();
+	if (bMountain && MOD_GLOBAL_ALPINE_PASSES && pToPlot->getRouteType() != NO_ROUTE) {
+		// Any land unit may travel over a mountain with a pass
+		bMountain = false;
+	}
+
+	if (pToPlot->isImpassable() || bMountain)
+#else
+	if (pToPlot->isImpassable() || pToPlot->isMountain())
+#endif
 	{
 		iCost += 1000;
 	}
@@ -4019,17 +4033,47 @@ int TradeRouteLandValid(CvAStarNode* parent, CvAStarNode* node, int data, const 
 	CvMap& kMap = GC.getMap();
 	CvPlot* pNewPlot = kMap.plotUnchecked(node->m_iX, node->m_iY);
 
+#if !defined(MOD_BUGFIX_MINOR)
 	if(kMap.plotUnchecked(parent->m_iX, parent->m_iY)->getArea() != pNewPlot->getArea())
 	{
 		return FALSE;
 	}
+#endif
 
 	if (pNewPlot->isWater())
 	{
+#if defined(MOD_BUGFIX_MINOR)
+		if (pNewPlot->IsAllowsWalkWater()) {
+			return TRUE;
+		}
+#endif
+
 		return FALSE;
 	}
 
-	if(pNewPlot->isMountain() || pNewPlot->isImpassable())
+#if defined(MOD_BUGFIX_MINOR)
+	CvPlot* pOldPlot = kMap.plotUnchecked(parent->m_iX, parent->m_iY);
+	if (pOldPlot->getArea() != pNewPlot->getArea())
+	{
+		if (pOldPlot->IsAllowsWalkWater()) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+#endif
+
+#if defined(MOD_GLOBAL_ALPINE_PASSES)
+	bool bMountain = pNewPlot->isMountain();
+	if (bMountain && MOD_GLOBAL_ALPINE_PASSES && pNewPlot->getRouteType() != NO_ROUTE) {
+		// Any land unit may travel over a mountain with a pass
+		bMountain = false;
+	}
+
+	if (bMountain || pNewPlot->isImpassable())
+#else
+	if (pNewPlot->isMountain() || pNewPlot->isImpassable())
+#endif
 	{
 		return FALSE;
 	}
@@ -4055,7 +4099,11 @@ int TradeRouteWaterPathCost(CvAStarNode* parent, CvAStarNode* node, int data, co
 	int iBaseCost = 100;
 	int iCost = iBaseCost;
 
+#if defined(MOD_GLOBAL_PASSABLE_FORTS)
+	if (!(pToPlot->isCity() || pToPlot->isPassableImprovement()))
+#else
 	if (!pToPlot->isCity())
+#endif
 	{
 		bool bIsAdjacentToLand = pFromPlot->isAdjacentToLand_Cached() && pToPlot->isAdjacentToLand_Cached();
 		if (!bIsAdjacentToLand)
@@ -4072,7 +4120,13 @@ int TradeRouteWaterPathCost(CvAStarNode* parent, CvAStarNode* node, int data, co
 
 		if (!pToPlot->isWater())
 		{
+#if defined(MOD_BUGFIX_MINOR)
+			// Due to the "times 100", this is only equivalent to 10 tiles, which for a water trade route is too few
+			// iCost += 1000;
+			iCost += 50 * 100;
+#else
 			iCost += 1000;
+#endif
 		}
 		else
 		{
@@ -4110,7 +4164,11 @@ int TradeRouteWaterValid(CvAStarNode* parent, CvAStarNode* node, int data, const
 	CvMap& kMap = GC.getMap();
 	CvPlot* pNewPlot = kMap.plotUnchecked(node->m_iX, node->m_iY);
 
+#if defined(MOD_GLOBAL_PASSABLE_FORTS)
+	if (!(pNewPlot->isCity() || pNewPlot->isPassableImprovement()))
+#else
 	if (!pNewPlot->isCity())
+#endif
 	{
 		if (!pNewPlot->isWater())
 		{
@@ -4126,7 +4184,11 @@ int TradeRouteWaterValid(CvAStarNode* parent, CvAStarNode* node, int data, const
 		}
 
 		CvPlot* pParentPlot = kMap.plotUnchecked(parent->m_iX, parent->m_iY);
+#if defined(MOD_GLOBAL_PASSABLE_FORTS)
+		if (!(pParentPlot->isCity() || pParentPlot->isPassableImprovement()))
+#else
 		if (!pParentPlot->isCity())
+#endif
 		{
 			if(pParentPlot->getArea() != pNewPlot->getArea())
 			{

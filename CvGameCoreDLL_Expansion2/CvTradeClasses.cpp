@@ -186,7 +186,7 @@ bool CvGameTrade::CanCreateTradeRoute(CvCity* pOriginCity, CvCity* pDestCity, Do
 
 			// We need the wonder resource at pOriginCity AND not at pDestCity
 			if (eWonderResource != NO_RESOURCE) {
-				bAllowsWonderResourceConnection	= (pOriginCity->IsHasResourceLocal(eWonderResource, true) && !pDestCity->IsHasResourceLocal(eWonderResource, true));
+				bAllowsWonderResourceConnection	= (pOriginCity->GetNumResourceLocal(eWonderResource, true) > 0 && !pDestCity->IsHasResourceLocal(eWonderResource, true));
 			}
 
 			if (bAllowsWonderResourceConnection) {
@@ -487,7 +487,7 @@ bool CvGameTrade::IsValidTradeRoutePath (CvCity* pOriginCity, CvCity* pDestCity,
 	int iOriginY = pOriginCity->getY();
 	int iDestX = pDestCity->getX();
 	int iDestY = pDestCity->getY();
-
+	
 	bool bSuccess = false;
 	CvAStarNode* pPathfinderNode = NULL;
 	if (eDomain == DOMAIN_SEA)
@@ -496,6 +496,7 @@ bool CvGameTrade::IsValidTradeRoutePath (CvCity* pOriginCity, CvCity* pDestCity,
 		{
 			bSuccess = GC.GetInternationalTradeRouteWaterFinder().GeneratePath(iOriginX, iOriginY, iDestX, iDestY, eOriginPlayer, false);
 			pPathfinderNode = GC.GetInternationalTradeRouteWaterFinder().GetLastNode();
+			if (pPathfinderNode) ("  ... to (%i, %i)", pPathfinderNode->m_iX, pPathfinderNode->m_iY);
 		}
 	}
 	else if (eDomain == DOMAIN_LAND)
@@ -941,7 +942,11 @@ bool CvGameTrade::EmptyTradeRoute(int iIndex)
 
 //	--------------------------------------------------------------------------------
 /// Called when a city changes hands
+#if defined(MOD_BUGFIX_MINOR)
+void CvGameTrade::ClearAllCityTradeRoutes (CvPlot* pPlot, bool bIncludeTransits)
+#else
 void CvGameTrade::ClearAllCityTradeRoutes (CvPlot* pPlot)
+#endif
 {
 	CvAssert(pPlot != NULL);
 
@@ -979,6 +984,21 @@ void CvGameTrade::ClearAllCityTradeRoutes (CvPlot* pPlot)
 
 				EmptyTradeRoute(ui);
 			}		
+			
+#if defined(MOD_BUGFIX_MINOR)
+			// If we have any water routes transiting via this city, we need to cancel them
+			if (bIncludeTransits && m_aTradeConnections[ui].m_eDomain == DOMAIN_SEA) {
+				TradeConnectionPlotList aPlotList = m_aTradeConnections[ui].m_aPlotList;
+
+				for (uint uiPlotIndex = 0; uiPlotIndex < aPlotList.size(); uiPlotIndex++) {
+					if (aPlotList[uiPlotIndex].m_iX == iX && aPlotList[uiPlotIndex].m_iY == iY) {
+						CUSTOMLOG("Cancelling water trade route in plot (%i, %i) as city destroyed", iX, iY);
+						m_aTradeConnections[ui].m_iCircuitsCompleted = m_aTradeConnections[ui].m_iCircuitsToComplete;
+						break;
+					}
+				}
+			}
+#endif
 		}
 	}
 }

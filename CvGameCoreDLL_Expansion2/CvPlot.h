@@ -273,7 +273,9 @@ public:
 
 	bool isFriendlyCity(const CvUnit& kUnit, bool bCheckImprovement) const;
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
+	bool isPassableImprovement() const;
 	bool isFriendlyCityOrPassableImprovement(const CvUnit& kUnit, bool bCheckImprovement) const;
+	bool isFriendlyCityOrPassableImprovement(const PlayerTypes ePlayer, bool bCheckImprovement) const;
 #endif
 	bool IsFriendlyTerritory(PlayerTypes ePlayer) const;
 
