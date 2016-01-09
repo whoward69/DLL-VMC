@@ -389,6 +389,14 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 	FeatureTypes eFeature = pPlot->getFeatureType();
 #endif
 
+#if defined(MOD_GLOBAL_CITY_JUNGLE_BONUS)
+	static BuildTypes eBuildRemoveJungle = (BuildTypes)GC.getInfoTypeForString("BUILD_REMOVE_JUNGLE");
+	bool bClearedJungle = false;
+#if !defined(MOD_GLOBAL_CITY_FOREST_BONUS)
+	FeatureTypes eFeature = pPlot->getFeatureType();
+#endif
+#endif
+
 	//SCRIPT call ' bool citiesDestroyFeatures(iX, iY);'
 	if(pPlot->getFeatureType() != NO_FEATURE)
 	{
@@ -400,6 +408,18 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 			if (owningPlayer.isHuman() || owningPlayer.getCapitalCity() != NULL) {
 				TechTypes iRequiredTech = (TechTypes) gCustomMods.getOption("GLOBAL_CITY_FOREST_BONUS_TECH", -1);
 				bClearedForest = (iRequiredTech == -1 || GET_TEAM(owningPlayer.getTeam()).GetTeamTechs()->HasTech(iRequiredTech));
+			}
+		}
+#endif
+
+#if defined(MOD_GLOBAL_CITY_JUNGLE_BONUS)
+		// Only for major civs building on a jungle
+		if(MOD_GLOBAL_CITY_JUNGLE_BONUS && eBuildRemoveJungle != -1 && !owningPlayer.isMinorCiv() && eFeature == FEATURE_JUNGLE)
+		{
+			// Don't do this for the AI capitals - it's just too much of an initial boost!
+			if (owningPlayer.isHuman() || owningPlayer.getCapitalCity() != NULL) {
+				TechTypes iRequiredTech = (TechTypes) gCustomMods.getOption("GLOBAL_CITY_JUNGLE_BONUS_TECH", -1);
+				bClearedJungle = (iRequiredTech == -1 || GET_TEAM(owningPlayer.getTeam()).GetTeamTechs()->HasTech(iRequiredTech));
 			}
 		}
 #endif
@@ -713,6 +733,39 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 
 			changeFeatureProduction(iProduction);
 			CUSTOMLOG("Founding of %s on a forest created %d initial production", getName().GetCString(), iProduction);
+
+			if (getOwner() == GC.getGame().getActivePlayer()) {
+				CvString strBuffer = GetLocalizedText("TXT_KEY_MISC_CLEARING_FEATURE_RESOURCE", GC.getFeatureInfo(eFeature)->GetTextKey(), iProduction, getNameKey());
+				GC.GetEngineUserInterface()->AddCityMessage(0, GetIDInfo(), getOwner(), false, GC.getEVENT_MESSAGE_TIME(), strBuffer);
+			}
+		}
+	}
+#endif
+
+#if defined(MOD_GLOBAL_CITY_JUNGLE_BONUS)
+	if (bClearedJungle) {
+		int iProduction;
+
+		// Base value
+		if (GET_PLAYER(getOwner()).GetAllFeatureProduction() > 0) {
+			iProduction = GET_PLAYER(getOwner()).GetAllFeatureProduction();
+		} else {
+			iProduction = GC.getBuildInfo(eBuildRemoveJungle)->getFeatureProduction(FEATURE_JUNGLE);
+		}
+
+		iProduction *= std::max(0, (GET_PLAYER(getOwner()).getFeatureProductionModifier() + 100));
+		iProduction /= 100;
+
+		iProduction *= GC.getGame().getGameSpeedInfo().getFeatureProductionPercent();
+		iProduction /= 100;
+
+		if (iProduction > 0) {
+			// Make the production higher than a "ring-1 chop"
+			iProduction *= gCustomMods.getOption("GLOBAL_CITY_JUNGLE_BONUS_PERCENT", 125);
+			iProduction /= 100;
+
+			changeFeatureProduction(iProduction);
+			CUSTOMLOG("Founding of %s on a jungle created %d initial production", getName().GetCString(), iProduction);
 
 			if (getOwner() == GC.getGame().getActivePlayer()) {
 				CvString strBuffer = GetLocalizedText("TXT_KEY_MISC_CLEARING_FEATURE_RESOURCE", GC.getFeatureInfo(eFeature)->GetTextKey(), iProduction, getNameKey());

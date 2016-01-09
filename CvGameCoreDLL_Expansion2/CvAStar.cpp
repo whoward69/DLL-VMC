@@ -2580,7 +2580,7 @@ int WaterRouteValid(CvAStarNode* parent, CvAStarNode* node, int data, const void
 	if (pNewPlot->isFriendlyCityOrPassableImprovement(ePlayer, true))
 #else
 	CvCity* pCity = pNewPlot->getPlotCity();
-	if (pCity && pCity->getTeam() == eTeam)
+	if(pCity && pCity->getTeam() == eTeam)
 #endif
 	{
 		return TRUE;
@@ -4010,7 +4010,7 @@ int TradeRouteLandPathCost(CvAStarNode* parent, CvAStarNode* node, int data, con
 
 	if (pToPlot->isImpassable() || bMountain)
 #else
-	if (pToPlot->isImpassable() || pToPlot->isMountain())
+	if(pToPlot->isImpassable() || pToPlot->isMountain())
 #endif
 	{
 		iCost += 1000;

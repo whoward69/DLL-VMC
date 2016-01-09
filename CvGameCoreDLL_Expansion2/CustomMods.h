@@ -23,7 +23,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 71)
+#define MOD_DLL_VERSION_NUMBER ((uint) 72)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -107,6 +107,8 @@
 #define MOD_GLOBAL_ANYTIME_GOODY_GOLD               gCustomMods.isGLOBAL_ANYTIME_GOODY_GOLD()
 // Give initial production boost for cities founded on forests, as if the forest had been chopped down by a worker
 #define MOD_GLOBAL_CITY_FOREST_BONUS                gCustomMods.isGLOBAL_CITY_FOREST_BONUS()
+// Give initial production boost for cities founded on jungle, as if the jungle had been chopped down by a worker (v72)
+#define MOD_GLOBAL_CITY_JUNGLE_BONUS                gCustomMods.isGLOBAL_CITY_JUNGLE_BONUS()
 // Permit cities to work tiles up to MAXIMUM_ACQUIRE_PLOT_DISTANCE - WARNING! Cities take 2.5 times as much memory/file space
 #define MOD_GLOBAL_CITY_WORKING                     gCustomMods.isGLOBAL_CITY_WORKING()
 // Mountain plots return their terrain as TERRAIN_MOUNTAIN and any land unit may enter a mountain that has a road/rail route
@@ -1028,6 +1030,7 @@ public:
 	MOD_OPT_DECL(GLOBAL_PASSABLE_FORTS_ANY);
 	MOD_OPT_DECL(GLOBAL_ANYTIME_GOODY_GOLD);
 	MOD_OPT_DECL(GLOBAL_CITY_FOREST_BONUS);
+	MOD_OPT_DECL(GLOBAL_CITY_JUNGLE_BONUS);
 	MOD_OPT_DECL(GLOBAL_CITY_WORKING);
 	MOD_OPT_DECL(GLOBAL_ALPINE_PASSES);
 	MOD_OPT_DECL(GLOBAL_CS_GIFT_SHIPS);

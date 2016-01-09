@@ -487,7 +487,7 @@ bool CvGameTrade::IsValidTradeRoutePath (CvCity* pOriginCity, CvCity* pDestCity,
 	int iOriginY = pOriginCity->getY();
 	int iDestX = pDestCity->getX();
 	int iDestY = pDestCity->getY();
-	
+
 	bool bSuccess = false;
 	CvAStarNode* pPathfinderNode = NULL;
 	if (eDomain == DOMAIN_SEA)
@@ -496,7 +496,6 @@ bool CvGameTrade::IsValidTradeRoutePath (CvCity* pOriginCity, CvCity* pDestCity,
 		{
 			bSuccess = GC.GetInternationalTradeRouteWaterFinder().GeneratePath(iOriginX, iOriginY, iDestX, iDestY, eOriginPlayer, false);
 			pPathfinderNode = GC.GetInternationalTradeRouteWaterFinder().GetLastNode();
-			if (pPathfinderNode) ("  ... to (%i, %i)", pPathfinderNode->m_iX, pPathfinderNode->m_iY);
 		}
 	}
 	else if (eDomain == DOMAIN_LAND)
