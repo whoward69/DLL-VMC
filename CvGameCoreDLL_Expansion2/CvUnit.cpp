@@ -62,6 +62,12 @@
 // Come back to this
 #include "LintFree.h"
 
+
+#if defined(MOD_BUGFIX_USE_GETTERS)
+#define GET_MY_PLAYER() GET_PLAYER(getOwner())
+#endif
+
+
 namespace FSerialization
 {
 std::set<CvUnit*> unitsToCheck;
@@ -127,6 +133,10 @@ CvUnit::CvUnit() :
 	, m_iY("CvUnit::m_iY", m_syncArchive, true)
 	, m_iLastMoveTurn(0)
 	, m_iCycleOrder(-1)
+#if defined(MOD_API_UNIT_STATS)
+	, m_iStatsTravelled(0)
+	, m_iStatsKilled(0)
+#endif
 	, m_iDeployFromOperationTurn("CvUnit::DeployFromOperationTurn", m_syncArchive)
 	, m_iReconX("CvUnit::m_iReconX", m_syncArchive)
 	, m_iReconY("CvUnit::m_iReconY", m_syncArchive)
@@ -828,6 +838,10 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iY = INVALID_PLOT_COORD;
 	m_iLastMoveTurn = 0;
 	m_iCycleOrder = -1;
+#if defined(MOD_API_UNIT_STATS)
+	m_iStatsTravelled = 0;
+	m_iStatsKilled = 0;
+#endif
 	m_iDeployFromOperationTurn = -100;
 	m_iReconX = INVALID_PLOT_COORD;
 	m_iReconY = INVALID_PLOT_COORD;
@@ -1316,6 +1330,10 @@ void CvUnit::convert(CvUnit* pUnit, bool bIsUpgrade)
 	}
 #else
 	setEmbarked(pUnit->isEmbarked());
+#endif
+#if defined(MOD_API_UNIT_STATS)
+	setStatsTravelled(pUnit->getStatsTravelled());
+	setStatsKilled(pUnit->getStatsKilled());
 #endif
 	setFacingDirection(pUnit->getFacingDirection(false));
 	SetBeenPromotedFromGoody(pUnit->IsHasBeenPromotedFromGoody());
@@ -1929,7 +1947,11 @@ void CvUnit::doTurn()
 		{
 			if(0 != GC.getFeatureInfo(eFeature)->getTurnDamage())
 			{
+#if defined(MOD_API_UNIT_STATS)
+				changeDamage(GC.getFeatureInfo(eFeature)->getTurnDamage());
+#else
 				changeDamage(GC.getFeatureInfo(eFeature)->getTurnDamage(), NO_PLAYER);
+#endif
 			}
 		}
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
@@ -3501,12 +3523,20 @@ bool CvUnit::jumpToNearestValidPlot()
 		{
 			strLogString.Format("Jump to nearest valid plot by %s , X: %d, Y: %d, From X: %d, From Y: %d", getName().GetCString(),
 			                    pBestPlot->getX(), pBestPlot->getY(), getX(), getY());
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			GET_MY_PLAYER().GetHomelandAI()->LogHomelandMessage(strLogString);
+#else
 			GET_PLAYER(m_eOwner).GetHomelandAI()->LogHomelandMessage(strLogString);
+#endif
 		}
 		else
 		{
 			strLogString.Format("Can't find a valid plot within range. %s deleted, X: %d, Y: %d", getName().GetCString(), getX(), getY());
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			GET_MY_PLAYER().GetHomelandAI()->LogHomelandMessage(strLogString);
+#else
 			GET_PLAYER(m_eOwner).GetHomelandAI()->LogHomelandMessage(strLogString);
+#endif
 		}
 	}
 
@@ -3597,7 +3627,11 @@ bool CvUnit::jumpToNearestValidPlotWithinRange(int iRange)
 			CvString strLogString;
 			strLogString.Format("Jump to nearest valid plot within range by %s , X: %d, Y: %d, From X: %d, From Y: %d", getName().GetCString(),
 			                    pBestPlot->getX(), pBestPlot->getY(), getX(), getY());
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			GET_MY_PLAYER().GetHomelandAI()->LogHomelandMessage(strLogString);
+#else
 			GET_PLAYER(m_eOwner).GetHomelandAI()->LogHomelandMessage(strLogString);
+#endif
 		}
 		setXY(pBestPlot->getX(), pBestPlot->getY(), false, true, pBestPlot->isVisibleToWatchingHuman(), false);
 	}
@@ -3607,7 +3641,11 @@ bool CvUnit::jumpToNearestValidPlotWithinRange(int iRange)
 		{
 			CvString strLogString;
 			strLogString.Format("Can't find a valid plot within range for %s, X: %d, Y: %d", getName().GetCString(), getX(), getY());
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			GET_MY_PLAYER().GetHomelandAI()->LogHomelandMessage(strLogString);
+#else
 			GET_PLAYER(m_eOwner).GetHomelandAI()->LogHomelandMessage(strLogString);
+#endif
 		}
 		CUSTOMLOG("jumpToNearestValidPlotWithinRange(%i) failed for unit %s at plot (%i, %i)", iRange, getName().GetCString(), getX(), getY());
 		return false;
@@ -3652,7 +3690,11 @@ bool CvUnit::CanAutomate(AutomateTypes eAutomate, bool bTestVisibility) const
 
 		if(!bTestVisibility)
 		{
-			if(!GET_PLAYER(m_eOwner).GetHomelandAI()->IsAnyValidExploreMoves(this))
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			if (!GET_MY_PLAYER().GetHomelandAI()->IsAnyValidExploreMoves(this))
+#else
+			if (!GET_PLAYER(m_eOwner).GetHomelandAI()->IsAnyValidExploreMoves(this))
+#endif
 			{
 				return false;
 			}
@@ -3835,7 +3877,11 @@ bool CvUnit::canGift(bool bTestVisible, bool bTestTransport) const
 		// No non-combat units
 		if(!IsCombatUnit())
 		{
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			CvPlayer& kPlayer = GET_MY_PLAYER();
+#else
 			CvPlayer& kPlayer = GET_PLAYER(m_eOwner);
+#endif
 
 			// Unless okay by trait
 			if(kPlayer.GetPlayerTraits()->GetGreatPersonGiftInfluence() == 0 || !IsGreatPerson())
@@ -3968,7 +4014,11 @@ bool CvUnit::CanDistanceGift(PlayerTypes eToPlayer) const
 		// No non-combat units
 		if(!IsCombatUnit() && !canAirAttack())
 		{
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			CvPlayer& kPlayer = GET_MY_PLAYER();
+#else
 			CvPlayer& kPlayer = GET_PLAYER(m_eOwner);
+#endif
 
 			// Unless okay by trait
 			if(kPlayer.GetPlayerTraits()->GetGreatPersonGiftInfluence() == 0 || !IsGreatPerson())
@@ -5654,7 +5704,11 @@ void CvUnit::DoAttrition()
 			if(GC.getGame().getJonRandNum(100, "Enemy Territory Damage Chance") < getEnemyDamageChance())
 			{
 				strAppendText =  GetLocalizedText("TXT_KEY_MISC_YOU_UNIT_WAS_DAMAGED_ATTRITION");
+#if defined(MOD_API_UNIT_STATS)
+				changeDamage(getEnemyDamage(), NO_PLAYER, -1, 0.0, &strAppendText);
+#else
 				changeDamage(getEnemyDamage(), NO_PLAYER, 0.0, &strAppendText);
+#endif
 			}
 		}
 		else if(getNeutralDamageChance() > 0 && getNeutralDamage() > 0)
@@ -5662,7 +5716,11 @@ void CvUnit::DoAttrition()
 			if(GC.getGame().getJonRandNum(100, "Neutral Territory Damage Chance") < getNeutralDamageChance())
 			{
 				strAppendText =  GetLocalizedText("TXT_KEY_MISC_YOU_UNIT_WAS_DAMAGED_ATTRITION");
+#if defined(MOD_API_UNIT_STATS)
+				changeDamage(getNeutralDamage(), NO_PLAYER, -1, 0.0, &strAppendText);
+#else
 				changeDamage(getNeutralDamage(), NO_PLAYER, 0.0, &strAppendText);
+#endif
 			}
 		}
 	}
@@ -5674,10 +5732,18 @@ void CvUnit::DoAttrition()
 			if (iDamage > 0) {
 				// CUSTOMLOG("Applying terrain/feature damage (of %i) for player/unit %i/%i at (%i, %i)", iDamage, getOwner(), GetID(), plot()->getX(), plot()->getY());
 				CvString strAppendText =  GetLocalizedText("TXT_KEY_MISC_YOU_UNIT_WAS_DAMAGED_ATTRITION");
+#if defined(MOD_API_UNIT_STATS)
+				changeDamage(iDamage, NO_PLAYER, -1, 0.0, &strAppendText);
+#else
 				changeDamage(iDamage, NO_PLAYER, 0.0, &strAppendText);
+#endif
 			} else {
 				// CUSTOMLOG("Applying terrain/feature healing (of %i) for player/unit %i/%i at (%i, %i)", iDamage, getOwner(), GetID(), plot()->getX(), plot()->getY());
+#if defined(MOD_API_UNIT_STATS)
+				changeDamage(iDamage, NO_PLAYER, -1);
+#else
 				changeDamage(iDamage, NO_PLAYER);
+#endif
 			}
 		}
 	} else {
@@ -5686,7 +5752,11 @@ void CvUnit::DoAttrition()
 		if(getDomainType() == DOMAIN_LAND && pPlot->isMountain() && !canMoveAllTerrain())
 		{
 			strAppendText =  GetLocalizedText("TXT_KEY_MISC_YOU_UNIT_WAS_DAMAGED_ATTRITION");
+#if defined(MOD_API_UNIT_STATS)
+			changeDamage(50, NO_PLAYER, -1, 0.0, &strAppendText);
+#else
 			changeDamage(50, NO_PLAYER, 0.0, &strAppendText);
+#endif
 		}
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 	}
@@ -6598,12 +6668,16 @@ bool CvUnit::canPlunderTradeRoute(const CvPlot* pPlot, bool bOnlyTestVisibility)
 	}
 #endif
 
+#if defined(MOD_BUGFIX_USE_GETTERS)
+	if (GET_MY_PLAYER().GetTrade()->ContainsOpposingPlayerTradeUnit(pPlot))
+#else
 	if (GET_PLAYER(m_eOwner).GetTrade()->ContainsOpposingPlayerTradeUnit(pPlot))
+#endif
 	{
 		if (!bOnlyTestVisibility)
 		{
 			std::vector<int> aiTradeUnitsAtPlot;
-			aiTradeUnitsAtPlot = GET_PLAYER(m_eOwner).GetTrade()->GetOpposingTradeUnitsAtPlot(pPlot, true);
+			aiTradeUnitsAtPlot = GET_MY_PLAYER().GetTrade()->GetOpposingTradeUnitsAtPlot(pPlot, true);
 			if (aiTradeUnitsAtPlot.size() <= 0)
 			{
 				return false;
@@ -6617,7 +6691,11 @@ bool CvUnit::canPlunderTradeRoute(const CvPlot* pPlot, bool bOnlyTestVisibility)
 			}
 
 			TeamTypes eTeam = GET_PLAYER(eTradeUnitOwner).getTeam();
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			if (!GET_TEAM(GET_MY_PLAYER().getTeam()).isAtWar(eTeam))
+#else
 			if (!GET_TEAM(GET_PLAYER(m_eOwner).getTeam()).isAtWar(eTeam))
+#endif
 			{
 				return false;
 			}
@@ -6641,7 +6719,11 @@ bool CvUnit::plunderTradeRoute()
 	}
 
 	std::vector<int> aiTradeUnitsAtPlot;
+#if defined(MOD_BUGFIX_USE_GETTERS)
+	CvPlayerTrade* pTrade = GET_MY_PLAYER().GetTrade();
+#else
 	CvPlayerTrade* pTrade = GET_PLAYER(m_eOwner).GetTrade();
+#endif
 	aiTradeUnitsAtPlot = pTrade->GetOpposingTradeUnitsAtPlot(pPlot, false);
 	CvAssertMsg(aiTradeUnitsAtPlot.size() > 0, "aiTradeUnitsAtPlot is empty. Earlier check should have verified that this can't be the case");
 	if (aiTradeUnitsAtPlot.size() <= 0)
@@ -6735,7 +6817,11 @@ bool CvUnit::createGreatWork()
 		return false;
 	}
 	
+#if defined(MOD_BUGFIX_USE_GETTERS)
+	CvPlayer &kPlayer = GET_MY_PLAYER();
+#else
 	CvPlayer &kPlayer = GET_PLAYER(m_eOwner);
+#endif
 	BuildingClassTypes eBuildingClass = NO_BUILDINGCLASS; // Passed by reference below
 	int iSlot = -1; // Passed by reference below
 	GreatWorkType eGreatWorkType = GetGreatWork();
@@ -6745,7 +6831,11 @@ bool CvUnit::createGreatWork()
 	CvCity *pCity = kPlayer.GetCulture()->GetClosestAvailableGreatWorkSlot(getX(), getY(), eGreatWorkSlot, &eBuildingClass, &iSlot);
 	if (pCity)
 	{
+#if defined(MOD_BUGFIX_USE_GETTERS)
+		int iGWindex = pCulture->CreateGreatWork(eGreatWorkType, eClass, getOwner(), kPlayer.GetCurrentEra(), getName());
+#else
 		int iGWindex = pCulture->CreateGreatWork(eGreatWorkType, eClass, m_eOwner, kPlayer.GetCurrentEra(), getName());
+#endif
 		pCity->GetCityBuildings()->SetBuildingGreatWork(eBuildingClass, iSlot, iGWindex);
 
 		if(pPlot->isActiveVisible(false))
@@ -7455,7 +7545,11 @@ bool CvUnit::canFound(const CvPlot* pPlot, bool bTestVisible) const
 		}
 		else
 		{
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			CvCity* pCapital = GET_MY_PLAYER().getCapitalCity();
+#else
 			CvCity* pCapital = GET_PLAYER(m_eOwner).getCapitalCity();
+#endif
 			if(!pCapital || pCapital->getArea() == pPlot->getArea())
 			{
 				return false;
@@ -8050,7 +8144,11 @@ bool CvUnit::DoSpreadReligion()
 					int iOtherFollowers = pCity->GetCityReligions()->GetFollowersOtherReligions(eReligion);
 					if (eCurrentReligion != NO_RELIGION && eCurrentReligion != eReligion && iOtherFollowers > 0)
 					{
+#if defined(MOD_BUGFIX_USE_GETTERS)
+						CvPlayer &kPlayer = GET_MY_PLAYER();
+#else
 						CvPlayer &kPlayer = GET_PLAYER(m_eOwner);
+#endif
 #if !defined(SHOW_PLOT_POPUP)
 						int iDelay = 0;
 #endif
@@ -8152,7 +8250,11 @@ bool CvUnit::DoSpreadReligion()
 
 			if (pCity->plot() && pCity->plot()->GetActiveFogOfWarMode() == FOGOFWARMODE_OFF)
 			{
+#if defined(MOD_BUGFIX_USE_GETTERS)
+				const CvReligion* pReligion = GC.getGame().GetGameReligions()->GetReligion(GetReligionData()->GetReligion(), getOwner());
+#else
 				const CvReligion* pReligion = GC.getGame().GetGameReligions()->GetReligion(GetReligionData()->GetReligion(), m_eOwner);
+#endif
 				Localization::String strReligionName = Localization::Lookup(pReligion->GetName());
 
 				char text[256] = {0};
@@ -8170,7 +8272,11 @@ bool CvUnit::DoSpreadReligion()
 #if !defined(MOD_API_UNIFIED_YIELDS)
 			if (iScienceBonus > 0)
 			{
+#if defined(MOD_BUGFIX_USE_GETTERS)
+				CvPlayer &kPlayer = GET_MY_PLAYER();
+#else
 				CvPlayer &kPlayer = GET_PLAYER(m_eOwner);
+#endif
 
 				TechTypes eCurrentTech = kPlayer.GetPlayerTechs()->GetCurrentResearch();
 				if(eCurrentTech == NO_TECH)
@@ -8973,7 +9079,11 @@ bool CvUnit::canBuyCityState(const CvPlot* pPlot, bool bTestVisible) const
 			return false;
 
 		// if we don't have a starting city, we can't purchase a city-state.
+#if defined(MOD_BUGFIX_USE_GETTERS)
+		if (GET_MY_PLAYER().getNumCities() <= 0)
+#else
 		if (GET_PLAYER(m_eOwner).getNumCities() <= 0)
+#endif
 		{
 			return false;
 		}
@@ -9749,10 +9859,18 @@ bool CvUnit::blastTourism()
 
 #if !defined(NO_ACHIEVEMENTS)
 	// Achievements
+#if defined(MOD_BUGFIX_USE_GETTERS)
+	if (GET_MY_PLAYER().isHuman() && !GC.getGame().isGameMultiPlayer())
+#else
 	if (GET_PLAYER(m_eOwner).isHuman() && !GC.getGame().isGameMultiPlayer())
+#endif
 	{
 		if (strcmp(GET_PLAYER(eOwner).getCivilizationTypeKey(),   "CIVILIZATION_AMERICA") == 0 &&
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			strcmp(GET_MY_PLAYER().getCivilizationTypeKey(), "CIVILIZATION_ENGLAND") == 0)
+#else
 			strcmp(GET_PLAYER(m_eOwner).getCivilizationTypeKey(), "CIVILIZATION_ENGLAND") == 0)
+#endif
 		{
 			gDLL->UnlockAchievement(ACHIEVEMENT_XP2_36);
 		}
@@ -11205,7 +11323,11 @@ BuildTypes CvUnit::getBuildType() const
 	{
 		if(pkMissionNode->eMissionType == CvTypes::getMISSION_ROUTE_TO())
 		{
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			RouteTypes eBestRoute = GET_MY_PLAYER().getBestRoute(plot());
+#else
 			RouteTypes eBestRoute = GET_PLAYER(m_eOwner).getBestRoute(plot());
+#endif
 			if(eBestRoute != NO_ROUTE)
 			{
 				for(int iI = 0; iI < GC.getNumBuildInfos(); iI++)
@@ -12152,7 +12274,11 @@ int CvUnit::GetEmbarkedUnitDefense() const
 {
 	int iRtnValue;
 	int iModifier;
+#if defined(MOD_BUGFIX_USE_GETTERS)
+	CvPlayer& kPlayer = GET_MY_PLAYER();
+#else
 	CvPlayer& kPlayer = GET_PLAYER(m_eOwner);
+#endif
 	EraTypes eEra = kPlayer.GetCurrentEra();
 
 	iRtnValue = GC.getEraInfo(eEra)->getEmbarkedUnitDefense() * 100;
@@ -15090,6 +15216,9 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 		//update facing direction
 		if(pOldPlot != NULL)
 		{
+#if defined(MOD_API_UNIT_STATS)
+			changeStatsTravelled(plotDistance(pOldPlot->getX(), pOldPlot->getY(), pNewPlot->getX(), pNewPlot->getY()));
+#endif
 			DirectionTypes newDirection = directionXY(pOldPlot, pNewPlot);
 			if(newDirection != NO_DIRECTION)
 				m_eFacingDirection = newDirection;
@@ -15189,7 +15318,11 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 						{
 							if(strcmp(getCivilizationInfo().GetType(), "CIVILIZATION_VENICE") == 0)
 							{
+#if defined(MOD_BUGFIX_USE_GETTERS)
+								CvCity* pCity = GET_MY_PLAYER().getCapitalCity();
+#else
 								CvCity* pCity = GET_PLAYER(m_eOwner).getCapitalCity();
+#endif
 								ReligionTypes eReligion = pCity->GetCityReligions()->GetReligiousMajority();
 								if (eReligion != NO_RELIGION)
 								{
@@ -15916,7 +16049,11 @@ void CvUnit::ShowDamageDeltaText(int iDelta, CvPlot* pkPlot, float fAdditionalTe
 
     @return	The difference in the damage.
  */
+#if defined(MOD_API_UNIT_STATS)
+int CvUnit::setDamage(int iNewValue, PlayerTypes ePlayer, int iUnit, float fAdditionalTextDelay, const CvString* pAppendText)
+#else
 int CvUnit::setDamage(int iNewValue, PlayerTypes ePlayer, float fAdditionalTextDelay, const CvString* pAppendText)
+#endif
 {
 	VALIDATE_OBJECT
 	int iOldValue;
@@ -16048,11 +16185,19 @@ int CvUnit::setDamage(int iNewValue, PlayerTypes ePlayer, float fAdditionalTextD
 		getUnitAIString(szUnitAIString, AI_getUnitAIType());
 		szMsg.Format("Killed in combat: %s, AI was: ", getName().GetCString());
 		szMsg += szUnitAIString;
+#if defined(MOD_BUGFIX_USE_GETTERS)
+		GET_MY_PLAYER().GetTacticalAI()->LogTacticalMessage(szMsg, true /*bSkipLogDominanceZone*/);
+#else
 		GET_PLAYER(m_eOwner).GetTacticalAI()->LogTacticalMessage(szMsg, true /*bSkipLogDominanceZone*/);
+#endif
 
 		if(ePlayer != NO_PLAYER)
 		{
-			if(m_eOwner == BARBARIAN_PLAYER && plot()->getImprovementType() == GC.getBARBARIAN_CAMP_IMPROVEMENT())
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			if (getOwner() == BARBARIAN_PLAYER && plot()->getImprovementType() == GC.getBARBARIAN_CAMP_IMPROVEMENT())
+#else
+			if (m_eOwner == BARBARIAN_PLAYER && plot()->getImprovementType() == GC.getBARBARIAN_CAMP_IMPROVEMENT())
+#endif
 			{
 				GET_PLAYER(ePlayer).GetPlayerTraits()->SetDefeatedBarbarianCampGuardType(getUnitType());
 			}
@@ -16061,6 +16206,16 @@ int CvUnit::setDamage(int iNewValue, PlayerTypes ePlayer, float fAdditionalTextD
 			GET_PLAYER(ePlayer).DoUnitKilledCombat(NULL, getOwner(), getUnitType());
 #else
 			GET_PLAYER(ePlayer).DoUnitKilledCombat(getOwner(), getUnitType());
+#endif
+
+#if defined(MOD_API_UNIT_STATS)
+			if (iUnit != -1) {
+				CvUnit* killingUnit = GET_PLAYER(ePlayer).getUnit(iUnit);
+
+				if (killingUnit) {
+					killingUnit->changeStatsKilled(1);
+				}
+			}
 #endif
 		}
 	}
@@ -16080,10 +16235,18 @@ int CvUnit::setDamage(int iNewValue, PlayerTypes ePlayer, float fAdditionalTextD
 
     @return	the final delta change to the units damage.
  */
+#if defined(MOD_API_UNIT_STATS)
+int CvUnit::changeDamage(int iChange, PlayerTypes ePlayer, int iUnit, float fAdditionalTextDelay, const CvString* pAppendText)
+#else
 int CvUnit::changeDamage(int iChange, PlayerTypes ePlayer, float fAdditionalTextDelay, const CvString* pAppendText)
+#endif
 {
 	VALIDATE_OBJECT;
+#if defined(MOD_API_UNIT_STATS)
+	return setDamage((getDamage() + iChange), ePlayer, iUnit, fAdditionalTextDelay, pAppendText);
+#else
 	return setDamage((getDamage() + iChange), ePlayer, fAdditionalTextDelay, pAppendText);
+#endif
 }
 
 
@@ -17879,7 +18042,11 @@ int CvUnit::GetNearbyImprovementModifier()const
 
 int CvUnit::GetNearbyImprovementModifierFromTraits()const
 {
+#if defined(MOD_BUGFIX_USE_GETTERS)
+	CvPlayer& kPlayer = GET_MY_PLAYER();
+#else
 	CvPlayer& kPlayer = GET_PLAYER(m_eOwner);
+#endif
 	CvPlayerTraits* playerTraits = kPlayer.GetPlayerTraits();
 
 	return GetNearbyImprovementModifier(playerTraits->GetCombatBonusImprovementType(), playerTraits->GetNearbyImprovementBonusRange(), playerTraits->GetNearbyImprovementCombatBonus());
@@ -17897,7 +18064,11 @@ int CvUnit::GetNearbyImprovementModifier()const
 {
 	VALIDATE_OBJECT
 #if !defined(MOD_PROMOTIONS_IMPROVEMENT_BONUS)
-	CvPlayer& kPlayer = GET_PLAYER(m_eOwner);
+#if defined(MOD_BUGFIX_USE_GETTERS)
+		CvPlayer& kPlayer = GET_MY_PLAYER();
+#else
+		CvPlayer& kPlayer = GET_PLAYER(m_eOwner);
+#endif
 	int iImprovementRange = kPlayer.GetPlayerTraits()->GetNearbyImprovementBonusRange();
 	int iImprovementModifier = kPlayer.GetPlayerTraits()->GetNearbyImprovementCombatBonus();
 #endif
@@ -20140,6 +20311,10 @@ void CvUnit::read(FDataStream& kStream)
 	}
 
 	kStream >> m_iLastMoveTurn;
+#if defined(MOD_API_UNIT_STATS)
+	MOD_SERIALIZE_READ(73, kStream, m_iStatsTravelled, 0);
+	MOD_SERIALIZE_READ(73, kStream, m_iStatsKilled, 0);
+#endif
 	m_Promotions.Read(kStream);
 	m_pUnitInfo = (NO_UNIT != m_eUnitType) ? GC.getUnitInfo(m_eUnitType) : NULL;
 	kStream >> m_combatUnit.eOwner;
@@ -20326,6 +20501,10 @@ void CvUnit::write(FDataStream& kStream) const
 		kStream << (uint)0;
 
 	kStream << m_iLastMoveTurn;
+#if defined(MOD_API_UNIT_STATS)
+	MOD_SERIALIZE_WRITE(kStream, m_iStatsTravelled);
+	MOD_SERIALIZE_WRITE(kStream, m_iStatsKilled);
+#endif
 	m_Promotions.Write(kStream);
 	kStream << m_combatUnit.eOwner;
 	kStream << m_combatUnit.iID;
@@ -21547,7 +21726,11 @@ bool CvUnit::UnitAttack(int iX, int iY, int iFlags, int iSteps)
 				kPopup.iFlags = DOW_MOVE_ONTO_CITY;
 			}
 			// If a unit was present, put up the standard DOW message
-			else if(pDestPlot->isVisibleOtherUnit(m_eOwner))
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			else if (pDestPlot->isVisibleOtherUnit(getOwner()))
+#else
+			else if (pDestPlot->isVisibleOtherUnit(m_eOwner))
+#endif
 			{
 				kPopup.iFlags = DOW_MOVE_ONTO_UNIT;
 			}
@@ -23084,7 +23267,11 @@ void CvUnit::AI_promote()
 				CvString szMsg;
 				szMsg.Format("Promotion, %s, For %s, Value: %d, Damage: %d",
 				             szPromotionDesc, getName().GetCString(), iValue, getDamage());
+#if defined(MOD_BUGFIX_USE_GETTERS)
+				GET_MY_PLAYER().GetTacticalAI()->LogTacticalMessage(szMsg, true /*bSkipLogDominanceZone*/);
+#else
 				GET_PLAYER(m_eOwner).GetTacticalAI()->LogTacticalMessage(szMsg, true /*bSkipLogDominanceZone*/);
+#endif
 			}
 
 			if(iValue > iBestValue)
@@ -23105,7 +23292,11 @@ void CvUnit::AI_promote()
 			CvString szMsg;
 			szMsg.Format("Promotion, %s, Received by %s, X: %d, Y: %d, Damage: %d",
 			             GC.getPromotionInfo(eBestPromotion)->GetDescription(), getName().GetCString(), getX(), getY(), getDamage());
+#if defined(MOD_BUGFIX_USE_GETTERS)
+			GET_MY_PLAYER().GetTacticalAI()->LogTacticalMessage(szMsg, true /*bSkipLogDominanceZone*/);
+#else
 			GET_PLAYER(m_eOwner).GetTacticalAI()->LogTacticalMessage(szMsg, true /*bSkipLogDominanceZone*/);
+#endif
 		}
 	}
 }
@@ -23131,7 +23322,11 @@ int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
 	int iI;
 
 	// Get flavor info we can use
+#if defined(MOD_BUGFIX_USE_GETTERS)
+	CvFlavorManager* pFlavorMgr = GET_MY_PLAYER().GetFlavorManager();
+#else
 	CvFlavorManager* pFlavorMgr = GET_PLAYER(m_eOwner).GetFlavorManager();
+#endif
 	int iFlavorOffense = pFlavorMgr->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_OFFENSE"));
 	int iFlavorDefense = pFlavorMgr->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_DEFENSE"));
 	int iFlavorRanged = pFlavorMgr->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_RANGED"));

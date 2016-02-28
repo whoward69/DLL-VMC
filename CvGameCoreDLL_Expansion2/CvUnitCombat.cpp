@@ -320,8 +320,13 @@ void CvUnitCombat::ResolveMeleeCombat(const CvCombatInfo& kCombatInfo, uint uiPa
 		}
 #endif
 
+#if defined(MOD_API_UNIT_STATS)
+		pkDefender->changeDamage(iAttackerDamageInflicted, pkAttacker->getOwner(), pkAttacker->GetID());
+		iAttackerDamageDelta = pkAttacker->changeDamage(iDefenderDamageInflicted, pkDefender->getOwner(), pkDefender->GetID(), -1.f);		// Signal that we don't want the popup text.  It will be added later when the unit is at its final location
+#else
 		pkDefender->changeDamage(iAttackerDamageInflicted, pkAttacker->getOwner());
 		iAttackerDamageDelta = pkAttacker->changeDamage(iDefenderDamageInflicted, pkDefender->getOwner(), -1.f);		// Signal that we don't want the popup text.  It will be added later when the unit is at its final location
+#endif
 
 		// Update experience for both sides.
 		pkDefender->changeExperience(
@@ -831,7 +836,11 @@ void CvUnitCombat::ResolveRangedUnitVsCombat(const CvCombatInfo& kCombatInfo, ui
 					//pkDLLInterface->AddMessage(uiParentEventID, pkDefender->getOwner(), false, 0, ""/*, "AS2D_COMBAT", MESSAGE_TYPE_DISPLAY_ONLY, pkDefender->getUnitInfo().GetButton(), (ColorTypes)GC.getInfoTypeForString("COLOR_WHITE"), pkDefender->getX(), pkDefender->getY(), true, true*/);
 
 					//set damage but don't update entity damage visibility
+#if defined(MOD_API_UNIT_STATS)
+					pkDefender->changeDamage(iDamage, pkAttacker->getOwner(), pkAttacker->GetID());
+#else
 					pkDefender->changeDamage(iDamage, pkAttacker->getOwner());
+#endif
 
 					// Update experience
 					pkDefender->changeExperience(
@@ -978,7 +987,11 @@ void CvUnitCombat::ResolveRangedCityVsUnitCombat(const CvCombatInfo& kCombatInfo
 					}
 
 					//set damage but don't update entity damage visibility
+#if defined(MOD_API_UNIT_STATS)
+					pkDefender->changeDamage(iDamage, pkAttacker->getOwner(), pkAttacker->GetID());
+#else
 					pkDefender->changeDamage(iDamage, pkAttacker->getOwner());
+#endif
 
 					// Update experience
 					pkDefender->changeExperience(
@@ -1037,7 +1050,11 @@ void CvUnitCombat::ResolveCityMeleeCombat(const CvCombatInfo& kCombatInfo, uint 
 
 	if(pkAttacker && pkDefender)
 	{
+#if defined(MOD_API_UNIT_STATS)
+		pkAttacker->changeDamage(iDefenderDamageInflicted, pkDefender->getOwner(), pkDefender->GetID());
+#else
 		pkAttacker->changeDamage(iDefenderDamageInflicted, pkDefender->getOwner());
+#endif
 		pkDefender->changeDamage(iAttackerDamageInflicted);
 
 		pkAttacker->changeExperience(kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
@@ -1439,8 +1456,13 @@ void CvUnitCombat::ResolveAirUnitVsCombat(const CvCombatInfo& kCombatInfo, uint 
 					}
 #endif
 
+#if defined(MOD_API_UNIT_STATS)
+					pkAttacker->changeDamage(iDefenderDamageInflicted, pkDefender->getOwner(), pkDefender->GetID());
+					pkDefender->changeDamage(iAttackerDamageInflicted, pkAttacker->getOwner(), pkAttacker->GetID());
+#else
 					pkAttacker->changeDamage(iDefenderDamageInflicted, pkDefender->getOwner());
 					pkDefender->changeDamage(iAttackerDamageInflicted, pkAttacker->getOwner());
+#endif
 
 					// Update experience
 					pkDefender->changeExperience(
@@ -1574,7 +1596,11 @@ void CvUnitCombat::ResolveAirUnitVsCombat(const CvCombatInfo& kCombatInfo, uint 
 				if(pkAttacker)
 				{
 					pCity->changeDamage(iAttackerDamageInflicted);
+#if defined(MOD_API_UNIT_STATS)
+					pkAttacker->changeDamage(iDefenderDamageInflicted, pCity->getOwner(), -1);
+#else
 					pkAttacker->changeDamage(iDefenderDamageInflicted, pCity->getOwner());
+#endif
 
 					//		iUnitDamage = std::max(pCity->getDamage(), pCity->getDamage() + iDamage);
 
@@ -1789,8 +1815,13 @@ void CvUnitCombat::ResolveAirSweep(const CvCombatInfo& kCombatInfo, uint uiParen
 			}
 #endif
 
+#if defined(MOD_API_UNIT_STATS)
+			pkDefender->changeDamage(iAttackerDamageInflicted, pkAttacker->getOwner(), pkAttacker->GetID());
+			pkAttacker->changeDamage(iDefenderDamageInflicted, pkDefender->getOwner(), pkDefender->GetID());
+#else
 			pkDefender->changeDamage(iAttackerDamageInflicted, pkAttacker->getOwner());
 			pkAttacker->changeDamage(iDefenderDamageInflicted, pkDefender->getOwner());
+#endif
 
 			// Update experience for both sides.
 			pkDefender->changeExperience(
@@ -2120,7 +2151,11 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDama
 
 				if(pkUnit->IsCombatUnit() || pkUnit->IsCanAttackRanged())
 				{
+#if defined(MOD_API_UNIT_STATS)
+					pkUnit->changeDamage(kEntry.GetDamage(), eAttackerOwner, pkAttacker ? pkAttacker->GetID() : -1);
+#else
 					pkUnit->changeDamage(kEntry.GetDamage(), eAttackerOwner);
+#endif
 				}
 				else if(kEntry.GetDamage() >= /*6*/ GC.getNUKE_NON_COMBAT_DEATH_THRESHOLD())
 				{
@@ -2565,7 +2600,11 @@ bool CvUnitCombat::ParadropIntercept(CvUnit& pParaUnit, CvPlot& pDropPlot) {
 
 			// Killing the unit during the drop is a really bad idea, the game crashes at random after the drop
 			int iHealth = pParaUnit.GetMaxHitPoints() - pParaUnit.GetCurrHitPoints();
-			pParaUnit.changeDamage(std::min(iHealth-1, iInterceptionDamage), pInterceptor->getOwner());
+#if defined(MOD_API_UNIT_STATS)
+			pParaUnit.changeDamage(std::min(iHealth - 1, iInterceptionDamage), pInterceptor->getOwner(), pInterceptor->GetID());
+#else
+			pParaUnit.changeDamage(std::min(iHealth - 1, iInterceptionDamage), pInterceptor->getOwner());
+#endif
 
 			if (GC.getGame().getActivePlayer() == pParaUnit.getOwner()) {
 				CvString strBuffer;

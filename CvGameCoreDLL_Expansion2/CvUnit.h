@@ -421,6 +421,15 @@ public:
 	CvUnit* DoUpgradeTo(UnitTypes eUpgradeUnitType, bool bFree = false);
 #endif
 
+#if defined(MOD_API_UNIT_STATS)
+	int getStatsTravelled() { return m_iStatsTravelled; };
+	void setStatsTravelled(int iDistance) { m_iStatsTravelled = iDistance; };
+	int changeStatsTravelled(int iDistance) { m_iStatsTravelled += iDistance; return m_iStatsTravelled; };
+	int getStatsKilled() { return m_iStatsKilled; };
+	void setStatsKilled(int iCount) { m_iStatsKilled = iCount; };
+	int changeStatsKilled(int iCount) { m_iStatsKilled += iCount; return m_iStatsKilled; };
+#endif
+
 	HandicapTypes getHandicapType() const;
 	CvCivilizationInfo& getCivilizationInfo() const;
 	CivilizationTypes getCivilizationType() const;
@@ -767,8 +776,13 @@ public:
 	void setGameTurnCreated(int iNewValue);
 
 	int getDamage() const;
+#if defined(MOD_API_UNIT_STATS)
+	int setDamage(int iNewValue, PlayerTypes ePlayer = NO_PLAYER, int iUnit = -1, float fAdditionalTextDelay = 0.0f, const CvString* pAppendText = NULL);
+	int changeDamage(int iChange, PlayerTypes ePlayer = NO_PLAYER, int iUnit = -1, float fAdditionalTextDelay = 0.0f, const CvString* pAppendText = NULL);
+#else
 	int setDamage(int iNewValue, PlayerTypes ePlayer = NO_PLAYER, float fAdditionalTextDelay = 0.0f, const CvString* pAppendText = NULL);
 	int changeDamage(int iChange, PlayerTypes ePlayer = NO_PLAYER, float fAdditionalTextDelay = 0.0f, const CvString* pAppendText = NULL);
+#endif
 #if defined(SHOW_PLOT_POPUP)
 	void ShowDamageDeltaText(int iDelta, CvPlot* pkPlot, float fAdditionalTextDelay = 0.0f, const CvString* pAppendText = NULL);
 #else
@@ -1443,6 +1457,10 @@ protected:
 	FAutoVariable<int, CvUnit> m_iDeployFromOperationTurn;
 	int m_iLastMoveTurn;
 	short m_iCycleOrder;
+#if defined(MOD_API_UNIT_STATS)
+	int m_iStatsTravelled;
+	int m_iStatsKilled;
+#endif
 	FAutoVariable<int, CvUnit> m_iReconX;
 	FAutoVariable<int, CvUnit> m_iReconY;
 	FAutoVariable<int, CvUnit> m_iReconCount;
@@ -1679,7 +1697,7 @@ protected:
 	int m_iMapLayer;		// Which layer does the unit reside on for pathing/stacking/etc.
 	int m_iNumGoodyHutsPopped;
 	int m_iLastGameTurnAtFullHealth;
-		
+	
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
 	CvString m_strUnitName;
 #endif

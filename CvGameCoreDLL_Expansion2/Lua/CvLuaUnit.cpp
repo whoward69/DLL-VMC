@@ -149,6 +149,15 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(CanPromote);
 	Method(Promote);
 
+#if defined(MOD_API_UNIT_STATS)
+	Method(GetStatsTravelled);
+	Method(SetStatsTravelled);
+	Method(ChangeStatsTravelled);
+	Method(GetStatsKilled);
+	Method(SetStatsKilled);
+	Method(ChangeStatsKilled);
+#endif
+
 	Method(GetUpgradeUnitType);
 	Method(UpgradePrice);
 	Method(CanUpgradeRightNow);
@@ -1719,6 +1728,64 @@ int CvLuaUnit::lPromote(lua_State* L)
 	pkUnit->promote(ePromotion, iLeaderUnitId);
 	return 0;
 }
+#if defined(MOD_API_UNIT_STATS)
+//------------------------------------------------------------------------------
+int CvLuaUnit::lGetStatsTravelled(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getStatsTravelled();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+//------------------------------------------------------------------------------
+int CvLuaUnit::lSetStatsTravelled(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iDistance = lua_tointeger(L, 2);
+
+	pkUnit->setStatsTravelled(iDistance);
+	return 0;
+}
+//------------------------------------------------------------------------------
+int CvLuaUnit::lChangeStatsTravelled(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iDistance = lua_tointeger(L, 2);
+
+	const int iResult = pkUnit->changeStatsTravelled(iDistance);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+//------------------------------------------------------------------------------
+int CvLuaUnit::lGetStatsKilled(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getStatsKilled();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+//------------------------------------------------------------------------------
+int CvLuaUnit::lSetStatsKilled(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iCount = lua_tointeger(L, 2);
+
+	pkUnit->setStatsKilled(iCount);
+	return 0;
+}
+//------------------------------------------------------------------------------
+int CvLuaUnit::lChangeStatsKilled(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iDistance = lua_tointeger(L, 2);
+
+	const int iResult = pkUnit->changeStatsKilled(iDistance);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+#endif
 //------------------------------------------------------------------------------
 //int GetUpgradeUnitType();
 int CvLuaUnit::lGetUpgradeUnitType(lua_State* L)
@@ -3628,7 +3695,11 @@ int CvLuaUnit::lSetDamage(lua_State* L)
 	const PlayerTypes ePlayer = (lua_isnil(L, 3))? NO_PLAYER : (PlayerTypes)lua_tointeger(L, 3);
 	const bool bNotifyEntity = luaL_optint(L, 4, 1);
 
+#if defined(MOD_API_UNIT_STATS)
+	pkUnit->setDamage(iNewValue, ePlayer, -1, bNotifyEntity);
+#else
 	pkUnit->setDamage(iNewValue, ePlayer, bNotifyEntity);
+#endif
 	return 0;
 }
 //------------------------------------------------------------------------------
@@ -3638,8 +3709,13 @@ int CvLuaUnit::lChangeDamage(lua_State* L)
 	CvUnit* pkUnit = GetInstance(L);
 	const int iChange = lua_tointeger(L, 2);
 	const PlayerTypes ePlayer = (lua_isnil(L, 3))? NO_PLAYER : (PlayerTypes)lua_tointeger(L, 3);
-
+#if defined(MOD_API_UNIT_STATS)
+	const int iUnit = (lua_isnil(L, 4))? -1 : lua_tointeger(L, 4);
+	
+	pkUnit->changeDamage(iChange, ePlayer, iUnit);
+#else
 	pkUnit->changeDamage(iChange, ePlayer);
+#endif
 	return 0;
 }
 //------------------------------------------------------------------------------

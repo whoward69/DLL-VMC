@@ -156,6 +156,15 @@ protected:
 	static int lCanPromote(lua_State* L);
 	static int lPromote(lua_State* L);
 
+#if defined(MOD_API_UNIT_STATS)
+	LUAAPIEXTN(GetStatsTravelled, int);
+	LUAAPIEXTN(SetStatsTravelled, void, int);
+	LUAAPIEXTN(ChangeStatsTravelled, int, int);
+	LUAAPIEXTN(GetStatsKilled, int);
+	LUAAPIEXTN(SetStatsKilled, void, int);
+	LUAAPIEXTN(ChangeStatsKilled, int, int);
+#endif
+
 	static int lGetUpgradeUnitType(lua_State* L);
 	static int lUpgradePrice(lua_State* L);
 	static int lCanUpgradeRightNow(lua_State* L);

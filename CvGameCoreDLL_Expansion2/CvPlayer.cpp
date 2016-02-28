@@ -43,6 +43,9 @@
 #include "CvDiplomacyRequests.h"
 #include "cvStopWatch.h"
 #include "CvTypes.h"
+#if defined(MOD_BUGFIX_NO_PUPPET_CAPITALS)
+#include "CvEnums.h"
+#endif
 
 #include "ICvDLLUserInterface.h"
 #include "CvEnumSerialization.h"
@@ -2879,12 +2882,23 @@ void CvPlayer::acquireCity(CvCity* pOldCity, bool bConquest, bool bGift)
 		const BuildingTypes eCapitalBuilding = (BuildingTypes)(getCivilizationInfo().getCivilizationBuildings(GC.getCAPITAL_BUILDINGCLASS()));
 		if(eCapitalBuilding != NO_BUILDING)
 		{
-			if(getCapitalCity() != NULL)
+#if defined(MOD_EVENTS_CITY_CAPITAL)
+			CvCity* pOldCapital = getCapitalCity();
+			if (pOldCapital != NULL)
+#else
+			if (getCapitalCity() != NULL)
+#endif
 			{
 				getCapitalCity()->GetCityBuildings()->SetNumRealBuilding(eCapitalBuilding, 0);
 			}
 			CvAssertMsg(!(pNewCity->GetCityBuildings()->GetNumRealBuilding(eCapitalBuilding)), "(pBestCity->getNumRealBuilding(eCapitalBuilding)) did not return false as expected");
 			pNewCity->GetCityBuildings()->SetNumRealBuilding(eCapitalBuilding, 1);
+
+#if defined(MOD_EVENTS_CITY_CAPITAL)
+			if (MOD_EVENTS_CITY_CAPITAL) {
+				GAMEEVENTINVOKE_HOOK(GAMEEVENT_CapitalChanged, GetID(), pNewCity->GetID(), (pOldCapital ? pOldCapital->GetID() : -1));
+			}
+#endif
 		}
 	}
 
@@ -5082,7 +5096,11 @@ void CvPlayer::DoUnitReset()
 		int iCitadelDamage;
 		if(pLoopUnit->IsNearEnemyCitadel(iCitadelDamage))
 		{
+#if defined(MOD_API_UNIT_STATS)
+			pLoopUnit->changeDamage(iCitadelDamage, NO_PLAYER, -1, /*fAdditionalTextDelay*/ 0.5f);
+#else
 			pLoopUnit->changeDamage(iCitadelDamage, NO_PLAYER, /*fAdditionalTextDelay*/ 0.5f);
+#endif
 		}
 
 		// Finally (now that healing is done), restore movement points
@@ -5928,32 +5946,99 @@ void CvPlayer::findNewCapital()
 		{
 			if(0 == pLoopCity->GetCityBuildings()->GetNumRealBuilding(eCapitalBuilding))
 			{
-				iValue = (pLoopCity->getPopulation() * 4);
-
-				int iYieldValueTimes100 = pLoopCity->getYieldRateTimes100(YIELD_FOOD, false);
-				iYieldValueTimes100 += (pLoopCity->getYieldRateTimes100(YIELD_PRODUCTION, false) * 3);
-				iYieldValueTimes100 += (pLoopCity->getYieldRateTimes100(YIELD_GOLD, false) * 2);
-				iValue += (iYieldValueTimes100 / 100);
-
-				iValue += (pLoopCity->getNumGreatPeople() * 2);
-
-				if(iValue > iBestValue)
+#if defined(MOD_BUGFIX_NO_PUPPET_CAPITALS)
+				// First pass, exclude cities in resistance, puppets, and those burning to the ground
+				if (!(pLoopCity->IsResistance() || pLoopCity->IsPuppet() || pLoopCity->IsRazing()))
 				{
-					iBestValue = iValue;
-					pBestCity = pLoopCity;
+#endif
+					iValue = (pLoopCity->getPopulation() * 4);
+
+					int iYieldValueTimes100 = pLoopCity->getYieldRateTimes100(YIELD_FOOD, false);
+					iYieldValueTimes100 += (pLoopCity->getYieldRateTimes100(YIELD_PRODUCTION, false) * 3);
+					iYieldValueTimes100 += (pLoopCity->getYieldRateTimes100(YIELD_GOLD, false) * 2);
+					iValue += (iYieldValueTimes100 / 100);
+
+					iValue += (pLoopCity->getNumGreatPeople() * 2);
+
+					if (iValue > iBestValue)
+					{
+						iBestValue = iValue;
+						pBestCity = pLoopCity;
+					}
+#if defined(MOD_BUGFIX_NO_PUPPET_CAPITALS)
 				}
+#endif
 			}
 		}
 	}
 
-	if(pBestCity != NULL)
+#if defined(MOD_BUGFIX_NO_PUPPET_CAPITALS)
+	if (pBestCity != NULL)
 	{
-		if(pOldCapital != NULL)
+		for (pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
+		{
+			if (pLoopCity != pOldCapital)
+			{
+				if (0 == pLoopCity->GetCityBuildings()->GetNumRealBuilding(eCapitalBuilding))
+				{
+					// Second pass, consider only those we ignored first time
+					if (pLoopCity->IsResistance())
+					{
+						// We'll take a city in resistance (ie one we have decided to assimilate) over all others
+						iValue = pLoopCity->getPopulation() + 500;
+					}
+					else if (pLoopCity->IsPuppet())
+					{
+						// We'll take a puppet city next, at least we're not burning it to the ground!
+						iValue = pLoopCity->getPopulation() + 250;
+					}
+					else if (pLoopCity->IsRazing())
+					{
+						// Might be an idea to stop the burning!
+						iValue = pLoopCity->getPopulation();
+					}
+					else
+					{
+						iValue = iBestValue;
+					}
+
+					if (iValue > iBestValue)
+					{
+						iBestValue = iValue;
+						pBestCity = pLoopCity;
+					}
+				}
+			}
+		}
+	}
+#endif
+
+	if (pBestCity != NULL)
+	{
+		if (pOldCapital != NULL)
 		{
 			pOldCapital->GetCityBuildings()->SetNumRealBuilding(eCapitalBuilding, 0);
 		}
 		CvAssertMsg(!(pBestCity->GetCityBuildings()->GetNumRealBuilding(eCapitalBuilding)), "(pBestCity->getNumRealBuilding(eCapitalBuilding)) did not return false as expected");
 		pBestCity->GetCityBuildings()->SetNumRealBuilding(eCapitalBuilding, 1);
+
+#if defined(MOD_EVENTS_CITY_CAPITAL)
+		if (MOD_EVENTS_CITY_CAPITAL) {
+			GAMEEVENTINVOKE_HOOK(GAMEEVENT_CapitalChanged, GetID(), pBestCity->GetID(), (pOldCapital ? pOldCapital->GetID() : -1));
+		}
+#endif
+
+#if defined(MOD_BUGFIX_NO_PUPPET_CAPITALS)
+		if (pBestCity->IsPuppet())
+		{
+			gDLL->sendDoTask(pBestCity->GetID(), TASK_ANNEX_PUPPET, -1, -1, false, false, false, false);
+		}
+		else if (pBestCity->IsRazing() && !isHuman())
+		{
+			// For the AI, we'll stop burining our new capital!
+			gDLL->sendDoTask(pBestCity->GetID(), TASK_UNRAZE, -1, -1, false, false, false, false);
+		}
+#endif
 
 #if defined(MOD_GLOBAL_NO_CONQUERED_SPACESHIPS)
 		if (MOD_GLOBAL_NO_CONQUERED_SPACESHIPS && !isMinorCiv() && !isBarbarian()) {

@@ -3333,7 +3333,7 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 							// We are adding a popup that the player must make a choice in, make sure they are not in the end-turn phase.
 							CancelActivePlayerEndTurn();
 						}
-
+						
 						// update the mouseover text for the city-state's city banners
 						int iLoop = 0;
 						CvCity* pLoopCity = NULL;
@@ -3346,6 +3346,14 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 							}
 						}
 					}
+
+#if defined(MOD_GLOBAL_CS_GIFTS)
+					if (MOD_GLOBAL_CS_GIFTS && MOD_EVENTS_MINORS_GIFTS)
+					{
+						// Send an event with the details
+						GAMEEVENTINVOKE_HOOK(GAMEEVENT_MinorGift, GetPlayer()->GetID(), ePlayer, iGift, iFriendshipBoost, 0, bFirstMajorCiv, false, szTxtKeySuffix);
+					}
+#endif
 				}
 			}
 #if defined(MOD_GLOBAL_CS_GIFTS)

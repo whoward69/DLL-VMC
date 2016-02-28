@@ -633,6 +633,10 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 	{
 		if(owningPlayer.getNumCities() == 1)
 		{
+#if defined(MOD_EVENTS_CITY_CAPITAL)
+			int eCapitalBuilding = thisCiv.getCivilizationBuildings(GC.getCAPITAL_BUILDINGCLASS());
+#endif
+			
 			for(iI = 0; iI < GC.getNumBuildingClassInfos(); iI++)
 			{
 				CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo((BuildingClassTypes)iI);
@@ -648,6 +652,12 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 					if(eLoopBuilding != NO_BUILDING)
 					{
 						m_pCityBuildings->SetNumRealBuilding(eLoopBuilding, true);
+
+#if defined(MOD_EVENTS_CITY_CAPITAL)
+						if (iI == eCapitalBuilding && MOD_EVENTS_CITY_CAPITAL) {
+							GAMEEVENTINVOKE_HOOK(GAMEEVENT_CapitalChanged, getOwner(), GetID(), -1);
+						}
+#endif
 					}
 				}
 			}
