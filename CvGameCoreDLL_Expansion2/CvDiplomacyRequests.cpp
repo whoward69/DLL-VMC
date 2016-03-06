@@ -297,7 +297,7 @@ void CvDiplomacyRequests::SendDealRequest(PlayerTypes eFromPlayer, PlayerTypes e
 	// Deals must currently happen on the active player's turn...
 	if(GC.getGame().getActivePlayer() == eToPlayer)
 	{
-CUSTOMLOG("STFU@%i: Deal request from player %i", GC.getGame().getGameTurn(), eFromPlayer);
+// CUSTOMLOG("STFU@%i: Deal request from player %i", GC.getGame().getGameTurn(), eFromPlayer);
 		auto_ptr<ICvDeal1> pDeal = GC.WrapDealPointer(pkDeal);
 		GC.GetEngineUserInterface()->SetScratchDeal(pDeal.get());
 #if defined(MOD_API_PLAYER_LOGS)

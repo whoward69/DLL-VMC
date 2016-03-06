@@ -329,14 +329,22 @@ void CvUnitCombat::ResolveMeleeCombat(const CvCombatInfo& kCombatInfo, uint uiPa
 #endif
 
 		// Update experience for both sides.
+#if defined(MOD_API_XP_TIMES_100)
+		pkDefender->changeExperienceTimes100(100 *
+#else
 		pkDefender->changeExperience(
+#endif
 		    kCombatInfo.getExperience(BATTLE_UNIT_DEFENDER),
 		    kCombatInfo.getMaxExperienceAllowed(BATTLE_UNIT_DEFENDER),
 		    true,
 		    kCombatInfo.getInBorders(BATTLE_UNIT_DEFENDER),
 		    kCombatInfo.getUpdateGlobal(BATTLE_UNIT_DEFENDER));
 
+#if defined(MOD_API_XP_TIMES_100)
+		pkAttacker->changeExperienceTimes100(100 * 
+#else
 		pkAttacker->changeExperience(
+#endif
 		    kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
 		    kCombatInfo.getMaxExperienceAllowed(BATTLE_UNIT_ATTACKER),
 		    true,
@@ -843,7 +851,11 @@ void CvUnitCombat::ResolveRangedUnitVsCombat(const CvCombatInfo& kCombatInfo, ui
 #endif
 
 					// Update experience
+#if defined(MOD_API_XP_TIMES_100)
+					pkDefender->changeExperienceTimes100(100 * 
+#else
 					pkDefender->changeExperience(
+#endif
 					    kCombatInfo.getExperience(BATTLE_UNIT_DEFENDER),
 					    kCombatInfo.getMaxExperienceAllowed(BATTLE_UNIT_DEFENDER),
 					    true,
@@ -893,7 +905,11 @@ void CvUnitCombat::ResolveRangedUnitVsCombat(const CvCombatInfo& kCombatInfo, ui
 		// Unit gains XP for executing a Range Strike
 		if(iDamage > 0) // && iDefenderStrength > 0)
 		{
+#if defined(MOD_API_XP_TIMES_100)
+			pkAttacker->changeExperienceTimes100(100 * 
+#else
 			pkAttacker->changeExperience(
+#endif
 			    kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
 			    kCombatInfo.getMaxExperienceAllowed(BATTLE_UNIT_ATTACKER),
 			    true,
@@ -994,7 +1010,11 @@ void CvUnitCombat::ResolveRangedCityVsUnitCombat(const CvCombatInfo& kCombatInfo
 #endif
 
 					// Update experience
+#if defined(MOD_API_XP_TIMES_100)
+					pkDefender->changeExperienceTimes100(100 * 
+#else
 					pkDefender->changeExperience(
+#endif
 					    kCombatInfo.getExperience(BATTLE_UNIT_DEFENDER),
 					    kCombatInfo.getMaxExperienceAllowed(BATTLE_UNIT_DEFENDER),
 					    true,
@@ -1057,7 +1077,11 @@ void CvUnitCombat::ResolveCityMeleeCombat(const CvCombatInfo& kCombatInfo, uint 
 #endif
 		pkDefender->changeDamage(iAttackerDamageInflicted);
 
+#if defined(MOD_API_XP_TIMES_100)
+		pkAttacker->changeExperienceTimes100(100 * kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
+#else
 		pkAttacker->changeExperience(kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
+#endif
 		                             kCombatInfo.getMaxExperienceAllowed(BATTLE_UNIT_ATTACKER),
 		                             true,
 		                             false,
@@ -1421,7 +1445,11 @@ void CvUnitCombat::ResolveAirUnitVsCombat(const CvCombatInfo& kCombatInfo, uint 
 	{
 		pInterceptor->setMadeInterception(true);
 		pInterceptor->setCombatUnit(NULL);
+#if defined(MOD_API_XP_TIMES_100)
+		pInterceptor->changeExperienceTimes100(100 * 
+#else
 		pInterceptor->changeExperience(
+#endif
 			kCombatInfo.getExperience(BATTLE_UNIT_INTERCEPTOR),
 			kCombatInfo.getMaxExperienceAllowed(BATTLE_UNIT_INTERCEPTOR),
 			true,
@@ -1465,7 +1493,11 @@ void CvUnitCombat::ResolveAirUnitVsCombat(const CvCombatInfo& kCombatInfo, uint 
 #endif
 
 					// Update experience
+#if defined(MOD_API_XP_TIMES_100)
+					pkDefender->changeExperienceTimes100(100 * 
+#else
 					pkDefender->changeExperience(
+#endif
 					    kCombatInfo.getExperience(BATTLE_UNIT_DEFENDER),
 					    kCombatInfo.getMaxExperienceAllowed(BATTLE_UNIT_DEFENDER),
 					    true,
@@ -1643,7 +1675,11 @@ void CvUnitCombat::ResolveAirUnitVsCombat(const CvCombatInfo& kCombatInfo, uint 
 			// Experience
 			if(iAttackerDamageInflicted > 0)
 			{
+#if defined(MOD_API_XP_TIMES_100)
+				pkAttacker->changeExperienceTimes100(100 * kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
+#else
 				pkAttacker->changeExperience(kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
+#endif
 				                             kCombatInfo.getMaxExperienceAllowed(BATTLE_UNIT_ATTACKER),
 				                             true,
 				                             kCombatInfo.getInBorders(BATTLE_UNIT_ATTACKER),
@@ -1824,14 +1860,22 @@ void CvUnitCombat::ResolveAirSweep(const CvCombatInfo& kCombatInfo, uint uiParen
 #endif
 
 			// Update experience for both sides.
+#if defined(MOD_API_XP_TIMES_100)
+			pkDefender->changeExperienceTimes100(100 *
+#else
 			pkDefender->changeExperience(
+#endif
 			    kCombatInfo.getExperience(BATTLE_UNIT_DEFENDER),
 			    kCombatInfo.getMaxExperienceAllowed(BATTLE_UNIT_DEFENDER),
 			    true,
 			    kCombatInfo.getInBorders(BATTLE_UNIT_DEFENDER),
 			    kCombatInfo.getUpdateGlobal(BATTLE_UNIT_DEFENDER));
 
+#if defined(MOD_API_XP_TIMES_100)
+			pkAttacker->changeExperienceTimes100(100 * 
+#else
 			pkAttacker->changeExperience(
+#endif
 			    kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
 			    kCombatInfo.getMaxExperienceAllowed(BATTLE_UNIT_ATTACKER),
 			    true,

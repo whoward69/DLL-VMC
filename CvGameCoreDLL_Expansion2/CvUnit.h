@@ -268,6 +268,10 @@ public:
 	void doHeal();
 	void DoAttrition();
 
+#if defined(MOD_GLOBAL_RELOCATION)
+	const CvPlot* getAirliftFromPlot(const CvPlot* pPlot) const;
+	const CvPlot* getAirliftToPlot(const CvPlot* pPlot, bool bIncludeCities) const;
+#endif
 	bool canAirlift(const CvPlot* pPlot) const;
 	bool canAirliftAt(const CvPlot* pPlot, int iX, int iY) const;
 	bool airlift(int iX, int iY);
@@ -800,9 +804,15 @@ public:
 	bool IsInFriendlyTerritory() const;
 	bool IsUnderEnemyRangedAttack() const;
 
+#if defined(MOD_API_XP_TIMES_100)
+	int getExperienceTimes100() const;
+	void setExperienceTimes100(int iNewValueTimes100, int iMax = -1);
+	void changeExperienceTimes100(int iChangeTimes100, int iMax = -1, bool bFromCombat = false, bool bInBorders = false, bool bUpdateGlobal = false);
+#else
 	int getExperience() const;
 	void setExperience(int iNewValue, int iMax = -1);
 	void changeExperience(int iChange, int iMax = -1, bool bFromCombat = false, bool bInBorders = false, bool bUpdateGlobal = false);
+#endif
 
 	int getLevel() const;
 	void setLevel(int iNewValue);
@@ -1469,6 +1479,9 @@ protected:
 	FAutoVariable<int, CvUnit> m_iMoves;
 	FAutoVariable<bool, CvUnit> m_bImmobile;
 	FAutoVariable<int, CvUnit> m_iExperience;
+#if defined(MOD_API_XP_TIMES_100)
+	int m_iExperienceTimes100;
+#endif
 	FAutoVariable<int, CvUnit> m_iLevel;
 	FAutoVariable<int, CvUnit> m_iCargo;
 	FAutoVariable<int, CvUnit> m_iCargoCapacity;

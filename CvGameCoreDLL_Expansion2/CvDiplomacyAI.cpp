@@ -16645,7 +16645,7 @@ void CvDiplomacyAI::DoBeginDiploWithHuman()
 		}
 #endif
 				
-CUSTOMLOG("STFU@%i: DoBeginDiploWithHuman for player %i", GC.getGame().getGameTurn(), GetPlayer()->GetID());
+// CUSTOMLOG("STFU@%i: DoBeginDiploWithHuman for player %i", GC.getGame().getGameTurn(), GetPlayer()->GetID());
 		gDLL->GameplayDiplomacyAILeaderMessage(GetPlayer()->GetID(), DIPLO_UI_STATE_DEFAULT_ROOT, szText, eAnimation);
 		DIPLOMACYLOG(m_pPlayer->GetID(), szText, GetPlayer()->GetID(), DIPLO_UI_STATE_DEFAULT_ROOT, DIPLO_MESSAGE_GREETING_NEUTRAL_HELLO);
 	}
@@ -16686,7 +16686,7 @@ void CvDiplomacyAI::DoBeginDiploWithHumanInDiscuss()
 		}
 #endif
 				
-CUSTOMLOG("STFU@%i: DoBeginDiploWithHumanInDiscuss for player %i", GC.getGame().getGameTurn(), GetPlayer()->GetID());
+// CUSTOMLOG("STFU@%i: DoBeginDiploWithHumanInDiscuss for player %i", GC.getGame().getGameTurn(), GetPlayer()->GetID());
 		gDLL->GameplayDiplomacyAILeaderMessage(GetPlayer()->GetID(), DIPLO_UI_STATE_DISCUSS_HUMAN_INVOKED, szText, eAnimation);
 		DIPLOMACYLOG(m_pPlayer->GetID(), szText, GetPlayer()->GetID(), DIPLO_UI_STATE_DISCUSS_HUMAN_INVOKED, DIPLO_MESSAGE_GREETING_NEUTRAL_HELLO);
 	}
@@ -32377,7 +32377,7 @@ bool CvDiplomacyAI::WantAILeaderMessage(DiploMessageTypes eDiploMessage, PlayerT
 	const char* szResponseKey = GetResponseKeyForMessage(eDiploMessage);
 	
 	if (szResponseKey) {
-		CUSTOMLOG("STFU@%i: Diplo message %s (%i) from player %i", GC.getGame().getGameTurn(), szResponseKey, eDiploMessage, eFromPlayer);
+		// CUSTOMLOG("STFU@%i: Diplo message %s (%i) from player %i", GC.getGame().getGameTurn(), szResponseKey, eDiploMessage, eFromPlayer);
 
 		if (m_pStfuResponseQuery == NULL)
 		{
@@ -32385,7 +32385,7 @@ bool CvDiplomacyAI::WantAILeaderMessage(DiploMessageTypes eDiploMessage, PlayerT
 			m_pStfuResponseQuery = new Database::Results();
 			if (!GC.GetGameDatabase()->Execute(*m_pStfuResponseQuery, szSQL, strlen(szSQL)))
 			{
-				CUSTOMLOG("STFU: Failed to generate response query.");
+				// CUSTOMLOG("STFU: Failed to generate response query.");
 			}
 		}
 
@@ -32417,18 +32417,18 @@ bool CvDiplomacyAI::WantAILeaderMessage(DiploMessageTypes eDiploMessage, PlayerT
 		m_pStfuResponseQuery->Reset();
 
 		if (bSendEvent) {
-			CUSTOMLOG("STFU: GameEvents.DiplomacyStfu(%i, %i, %i, %i, %i, %i)", eFromPlayer, iResponseType, eDiploMessage, eDiploUIState, eAction, iExtraData);
+			// CUSTOMLOG("STFU: GameEvents.DiplomacyStfu(%i, %i, %i, %i, %i, %i)", eFromPlayer, iResponseType, eDiploMessage, eDiploUIState, eAction, iExtraData);
 
 			int iValue = 0;
 			if (GAMEEVENTINVOKE_VALUE(iValue, GAMEEVENT_DiplomacyStfu, eFromPlayer, iResponseType, eDiploMessage, eDiploUIState, eAction, iExtraData) == GAMEEVENTRETURN_VALUE) {
-				CUSTOMLOG("STFU: Received %i", iValue);
+				// CUSTOMLOG("STFU: Received %i", iValue);
 				if (iValue != 0) {
 					// Process the return code as the ID of the STFU_ action to execute
 					if (m_pStfuQuery == NULL) {
 						const char* szSQL = "SELECT ID, SendEvent, Ignore, Respond, ResponseEvent, ResponseAI, ResponseData1, ResponseData2 FROM Diplomacy_Stfu WHERE ID=?";
 						m_pStfuQuery = new Database::Results();
 						if (!GC.GetGameDatabase()->Execute(*m_pStfuQuery, szSQL, strlen(szSQL))) {
-							CUSTOMLOG("STFU: Failed to generate stfu query.");
+							// CUSTOMLOG("STFU: Failed to generate stfu query.");
 						}
 					}
 
@@ -32455,10 +32455,10 @@ bool CvDiplomacyAI::WantAILeaderMessage(DiploMessageTypes eDiploMessage, PlayerT
 		}
 
 		if (bIgnore) {
-			CUSTOMLOG("STFU: Ignore");
+			// CUSTOMLOG("STFU: Ignore");
 			bWant = false;
 		} else if (bRespond) {
-			CUSTOMLOG("STFU: Game.DoFromUIDiploEvent(%i, %i, %i, %i)", eResponseEvent, eResponseFrom, iResponseData1, iResponseData2);
+			// CUSTOMLOG("STFU: Game.DoFromUIDiploEvent(%i, %i, %i, %i)", eResponseEvent, eResponseFrom, iResponseData1, iResponseData2);
 			GC.getGame().DoFromUIDiploEvent(eResponseEvent, eResponseFrom, iResponseData1, iResponseData2);
 			bWant = false;
 		}
@@ -32469,7 +32469,7 @@ bool CvDiplomacyAI::WantAILeaderMessage(DiploMessageTypes eDiploMessage, PlayerT
 	}
 
 	if (bWant) {
-		CUSTOMLOG("STFU: Want");
+		// CUSTOMLOG("STFU: Want");
 	} else {
 		// Need to close the leader screen if it's open
 		// In Lua this is UI.RequestLeaveLeader(), but it's not in the API, so we'll have to send a GameEvent and do it in Lua ... YUCK!!!

@@ -395,6 +395,11 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(GetExperience);
 	Method(SetExperience);
 	Method(ChangeExperience);
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_API_XP_TIMES_100)
+	Method(GetExperienceTimes100);
+	Method(SetExperienceTimes100);
+	Method(ChangeExperienceTimes100);
+#endif
 	Method(GetLevel);
 	Method(SetLevel);
 	Method(ChangeLevel);
@@ -3773,7 +3778,11 @@ int CvLuaUnit::lGetExperience(lua_State* L)
 {
 	CvUnit* pkUnit = GetInstance(L);
 
+#if defined(MOD_API_XP_TIMES_100)
+	const int iResult = pkUnit->getExperienceTimes100() / 100;
+#else
 	const int iResult = pkUnit->getExperience();
+#endif
 	lua_pushinteger(L, iResult);
 	return 1;
 }
@@ -3785,7 +3794,11 @@ int CvLuaUnit::lSetExperience(lua_State* L)
 	const int iNewValue = lua_tointeger(L, 2);
 	const int iMax = luaL_optint(L, 3, -1);
 
+#if defined(MOD_API_XP_TIMES_100)
+	pkUnit->setExperienceTimes100(iNewValue * 100, iMax);
+#else
 	pkUnit->setExperience(iNewValue, iMax);
+#endif
 	return 0;
 }
 //------------------------------------------------------------------------------
@@ -3799,9 +3812,50 @@ int CvLuaUnit::lChangeExperience(lua_State* L)
 	const bool bInBorders = luaL_optint(L, 5, 0);
 	const bool bUpdateGlobal = luaL_optint(L, 6, 0);
 
+#if defined(MOD_API_XP_TIMES_100)
+	pkUnit->changeExperienceTimes100(iChange * 100, iMax, bFromCombat, bInBorders, bUpdateGlobal);
+#else
 	pkUnit->changeExperience(iChange, iMax, bFromCombat, bInBorders, bUpdateGlobal);
+#endif
 	return 0;
 }
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_API_XP_TIMES_100)
+//------------------------------------------------------------------------------
+//int getExperience();
+int CvLuaUnit::lGetExperienceTimes100(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getExperienceTimes100();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+//------------------------------------------------------------------------------
+//void setExperience(int iNewValue, int iMax = -1);
+int CvLuaUnit::lSetExperienceTimes100(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iNewValueTimes100 = lua_tointeger(L, 2);
+	const int iMax = luaL_optint(L, 3, -1);
+
+	pkUnit->setExperienceTimes100(iNewValueTimes100, iMax);
+	return 0;
+}
+//------------------------------------------------------------------------------
+//void changeExperience(int iChange, int iMax = -1, bool bFromCombat = false, bool bInBorders = false, bool bUpdateGlobal = false);
+int CvLuaUnit::lChangeExperienceTimes100(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iChangeTimes100 = lua_tointeger(L, 2);
+	const int iMax = luaL_optint(L, 3, -1);
+	const bool bFromCombat = luaL_optint(L, 4, 0);
+	const bool bInBorders = luaL_optint(L, 5, 0);
+	const bool bUpdateGlobal = luaL_optint(L, 6, 0);
+
+	pkUnit->changeExperienceTimes100(iChangeTimes100, iMax, bFromCombat, bInBorders, bUpdateGlobal);
+	return 0;
+}
+#endif
 //------------------------------------------------------------------------------
 //int getLevel();
 int CvLuaUnit::lGetLevel(lua_State* L)

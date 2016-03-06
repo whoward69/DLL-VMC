@@ -23,7 +23,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 73)
+#define MOD_DLL_VERSION_NUMBER ((uint) 74)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -72,6 +72,8 @@
 #define MOD_API_ACHIEVEMENTS                        gCustomMods.isAPI_ACHIEVEMENTS()
 // Enables the Unit Stats API (v73)
 #define MOD_API_UNIT_STATS                          (true)
+// Enables the XP times 100 API (v74)
+#define MOD_API_XP_TIMES_100                        (true)
 // Enables the Extensions API
 #define MOD_API_EXTENSIONS                          gCustomMods.isAPI_EXTENSIONS()
 // Enables the LUA Extensions API
@@ -113,6 +115,8 @@
 #define MOD_GLOBAL_CITY_JUNGLE_BONUS                gCustomMods.isGLOBAL_CITY_JUNGLE_BONUS()
 // Permit cities to work tiles up to MAXIMUM_ACQUIRE_PLOT_DISTANCE - WARNING! Cities take 2.5 times as much memory/file space
 #define MOD_GLOBAL_CITY_WORKING                     gCustomMods.isGLOBAL_CITY_WORKING()
+// Enables rebasing to and airlifting to/from improvements (v74)
+#define MOD_GLOBAL_RELOCATION                       gCustomMods.isGLOBAL_RELOCATION()
 // Mountain plots return their terrain as TERRAIN_MOUNTAIN and any land unit may enter a mountain that has a road/rail route
 #define MOD_GLOBAL_ALPINE_PASSES                    gCustomMods.isGLOBAL_ALPINE_PASSES()
 // Permits City States to gift ships
@@ -373,6 +377,8 @@
 //   GameEvents.PlayerCanGiftUnit.Add(function(iPlayer, iCS, iUnit) return true end)
 //   GameEvents.PlayerCanGiftImprovement.Add(function(iPlayer, iCS) return true end)
 //   GameEvents.PlayerGifted.Add(function(iPlayer, iCS, iGold, iUnitType, iPlotX, iPlotY) end)
+//   GameEvents.PlayerCanTransitMinorCity.Add(function(iPlayer, iCS, iCity, iPlotX, iPlotY) return true end) (v74)
+//   GameEvents.UnitCanTransitMinorCity.Add(function(iPlayer, iUnit, iCS, iCity, iPlotX, iPlotY) return true end) (v74)
 #define MOD_EVENTS_MINORS_INTERACTION               gCustomMods.isEVENTS_MINORS_INTERACTION()
 
 // Events sent by Barbarians (v68)
@@ -561,6 +567,11 @@
 //   GameEvents.PlaceResource.Add(function(iPlayer, iResource, iCount, iPlotX, iPlotY) end)
 #define MOD_EVENTS_AREA_RESOURCES                   gCustomMods.isEVENTS_AREA_RESOURCES()
 
+// Events sent to ascertain if a unit can airlift from/to a specific plot (v74)
+//   GameEvents.CanAirliftFrom.Add(function(iPlayer, iUnit, iPlotX, iPlotY) return false end)
+//   GameEvents.CanAirliftTo.Add(function(iPlayer, iUnit, iPlotX, iPlotY) return false end)
+#define MOD_EVENTS_AIRLIFT                           gCustomMods.isEVENTS_AIRLIFT()
+
 // Events sent to ascertain if a unit can rebase to a specific plot (either a city or a carrier)
 //   GameEvents.CanLoadAt.Add(function(iPlayer, iUnit, iPlotX, iPlotY) return false end)
 //   GameEvents.CanRebaseInCity.Add(function(iPlayer, iUnit, iPlotX, iPlotY) return false end)
@@ -611,6 +622,8 @@
 #define MOD_BUGFIX_USE_GETTERS                      (true)
 // Fixes the spy name crash (v53)
 #define MOD_BUGFIX_SPY_NAMES                        (true)
+// Fixes the 'radaring' bug/exploit - see https://www.reddit.com/r/nqmod/comments/34reu9/how_to_remove_radaring/ (v74)
+#define MOD_BUGFIX_RADARING                         gCustomMods.isBUGFIX_RADARING()
 // Fixes the research overflow bug/exploit (v52)
 #define MOD_BUGFIX_RESEARCH_OVERFLOW                gCustomMods.isBUGFIX_RESEARCH_OVERFLOW()
 // Fixes the bug where a city doesn't work its centre tile (v45)
@@ -839,6 +852,8 @@ enum BattleTypeTypes
 #define GAMEEVENT_BattleFinished				"BattleFinished",				""
 #define GAMEEVENT_BattleJoined					"BattleJoined",					"iiib"
 #define GAMEEVENT_BattleStarted					"BattleStarted",				"iii"
+#define GAMEEVENT_CanAirliftFrom				"CanAirliftFrom",				"iiii"
+#define GAMEEVENT_CanAirliftTo					"CanAirliftTo",					"iiii"
 #define GAMEEVENT_CanDoCommand					"CanDoCommand",					"iiiiiiib"
 #define GAMEEVENT_CanHaveAnyUpgrade				"CanHaveAnyUpgrade",			"ii"
 #define GAMEEVENT_CanHavePromotion				"CanHavePromotion",				"iii"
@@ -922,6 +937,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_PlayerCanRemoveHeresy			"PlayerCanRemoveHeresy",		"iiii"
 #define GAMEEVENT_PlayerCanRevoke				"PlayerCanRevoke",				"ii"
 #define GAMEEVENT_PlayerCanSpreadReligion		"PlayerCanSpreadReligion",		"iiii"
+#define GAMEEVENT_PlayerCanTransitMinorCity		"PlayerCanTransitMinorCity",	"iiiii"
 #define GAMEEVENT_PlayerGifted					"PlayerGifted",					"iiiiii"
 #define GAMEEVENT_PlayerGoldenAge				"PlayerGoldenAge",				"ibi"
 #define GAMEEVENT_PlayerLiberated				"PlayerLiberated",				"iii"
@@ -949,6 +965,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_UnitCanHaveName				"UnitCanHaveName",				"iii"
 #define GAMEEVENT_UnitCanHavePromotion			"UnitCanHavePromotion",			"iii"
 #define GAMEEVENT_UnitCanHaveUpgrade			"UnitCanHaveUpgrade",			"iiii"
+#define GAMEEVENT_UnitCanTransitMinorCity		"UnitCanTransitMinorCity",		"iiiiii"
 #define GAMEEVENT_UnitCaptured					"UnitCaptured",					"iiiibi"
 #define GAMEEVENT_UnitCaptureType				"UnitCaptureType",				"iiii"
 #define GAMEEVENT_UnitCityFounded				"UnitCityFounded",				"iiiii"
@@ -1052,6 +1069,7 @@ public:
 	MOD_OPT_DECL(GLOBAL_CITY_FOREST_BONUS);
 	MOD_OPT_DECL(GLOBAL_CITY_JUNGLE_BONUS);
 	MOD_OPT_DECL(GLOBAL_CITY_WORKING);
+	MOD_OPT_DECL(GLOBAL_RELOCATION);
 	MOD_OPT_DECL(GLOBAL_ALPINE_PASSES);
 	MOD_OPT_DECL(GLOBAL_CS_GIFT_SHIPS);
 	MOD_OPT_DECL(GLOBAL_CS_UPGRADES);
@@ -1201,6 +1219,7 @@ public:
 	MOD_OPT_DECL(EVENTS_RESOLUTIONS);
 	MOD_OPT_DECL(EVENTS_IDEOLOGIES);
 	MOD_OPT_DECL(EVENTS_NUCLEAR_DETONATION);
+	MOD_OPT_DECL(EVENTS_AIRLIFT);
 	MOD_OPT_DECL(EVENTS_REBASE);
 	MOD_OPT_DECL(EVENTS_COMMAND);
 	MOD_OPT_DECL(EVENTS_CUSTOM_MISSIONS);
@@ -1227,6 +1246,7 @@ public:
 	MOD_OPT_DECL(CONFIG_GAME_IN_XML);
 	MOD_OPT_DECL(CONFIG_AI_IN_XML);
 
+	MOD_OPT_DECL(BUGFIX_RADARING);
 	MOD_OPT_DECL(BUGFIX_RESEARCH_OVERFLOW);
 	MOD_OPT_DECL(BUGFIX_LUA_CHANGE_VISIBILITY_COUNT);
 	MOD_OPT_DECL(BUGFIX_RELIGIOUS_SPY_PRESSURE);

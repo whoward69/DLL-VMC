@@ -1268,6 +1268,7 @@ int CvMilitaryAI::ScoreTarget(CvMilitaryTarget& target, AIOperationTypes eAIOper
 			uliRtnValue *= 2;
 		}
 
+		// TODO - WH - relocation - should also check for an AllowsAirliftTo improvement in the vacinity
 		// Double if we can assemble troops in muster city with airlifts
 		if (target.m_pMusterCity->CanAirlift())
 		{

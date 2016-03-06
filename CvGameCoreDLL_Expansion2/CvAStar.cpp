@@ -1426,6 +1426,10 @@ int PathValid(CvAStarNode* parent, CvAStarNode* node, int data, const void* poin
 #if defined(MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS)
 	if (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS) {
 #endif
+#if defined(MOD_BUGFIX_RADARING)
+	if (!MOD_BUGFIX_RADARING) {
+		// See https://www.reddit.com/r/nqmod/comments/34reu9/how_to_remove_radaring/
+#endif
 	if(!bUnitIsCombat && unit_domain_type != DOMAIN_AIR)
 	{
 		const PlayerTypes eUnitPlayer = unit_owner;
@@ -1439,6 +1443,9 @@ int PathValid(CvAStarNode* parent, CvAStarNode* node, int data, const void* poin
 			}
 		}
 	}
+#if defined(MOD_BUGFIX_RADARING)
+	}
+#endif
 #if defined(MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS)
 	}
 #endif

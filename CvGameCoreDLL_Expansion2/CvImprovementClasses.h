@@ -89,6 +89,12 @@ public:
 	int GetRequiresXAdjacentWater() const;
 #endif
 
+#if defined(MOD_GLOBAL_RELOCATION)
+	bool IsAllowsRebaseTo() const;
+	bool IsAllowsAirliftFrom() const;
+	bool IsAllowsAirliftTo() const;
+#endif
+
 	bool IsHillsMakesValid() const;
 #if defined(MOD_GLOBAL_ALPINE_PASSES)
 	bool IsMountainsMakesValid() const;
@@ -217,6 +223,12 @@ protected:
 	int m_iRequiresXAdjacentLand;
 #if defined(MOD_API_EXTENSIONS)
 	int m_iRequiresXAdjacentWater;
+#endif
+
+#if defined(MOD_GLOBAL_RELOCATION)
+	bool m_bAllowsRebaseTo;
+	bool m_bAllowsAirliftFrom;
+	bool m_bAllowsAirliftTo;
 #endif
 
 	bool m_bHillsMakesValid;

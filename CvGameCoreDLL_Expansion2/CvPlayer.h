@@ -1101,22 +1101,51 @@ public:
 	int calculateEconomicMight() const;
 	int calculateProductionMight() const;
 
+#if defined(MOD_API_XP_TIMES_100)
+	int getCombatExperienceTimes100() const;
+#else
 	int getCombatExperience() const;
+#endif
 #if defined(MOD_GLOBAL_LOCAL_GENERALS)
+#if defined(MOD_API_XP_TIMES_100)
+	void setCombatExperienceTimes100(int iExperienceTimes100, CvUnit* pFromUnit = NULL);
+	void changeCombatExperienceTimes100(int iChangeTimes100, CvUnit* pFromUnit = NULL);
+#else
 	void setCombatExperience(int iExperience, CvUnit* pFromUnit = NULL);
 	void changeCombatExperience(int iChange, CvUnit* pFromUnit = NULL);
+#endif
+#else
+#if defined(MOD_API_XP_TIMES_100)
+	void setCombatExperienceTimes100(int iExperienceTimes100);
+	void changeCombatExperienceTimes100(int iChangeTimes100);
 #else
 	void setCombatExperience(int iExperience);
 	void changeCombatExperience(int iChange);
 #endif
+#endif
+#if defined(MOD_API_XP_TIMES_100)
+	int getLifetimeCombatExperienceTimes100() const;
+	int getNavalCombatExperienceTimes100() const;
+#else
 	int getLifetimeCombatExperience() const;
 	int getNavalCombatExperience() const;
+#endif
 #if defined(MOD_GLOBAL_LOCAL_GENERALS)
+#if defined(MOD_API_XP_TIMES_100)
+	void setNavalCombatExperienceTimes100(int iExperienceTimes100, CvUnit* pFromUnit = NULL);
+	void changeNavalCombatExperienceTimes100(int iChangeTimes100, CvUnit* pFromUnit = NULL);
+#else
 	void setNavalCombatExperience(int iExperience, CvUnit* pFromUnit = NULL);
 	void changeNavalCombatExperience(int iChange, CvUnit* pFromUnit = NULL);
+#endif
+#else
+#if defined(MOD_API_XP_TIMES_100)
+	void setNavalCombatExperienceTimes100(int iExperienceTimes100);
+	void changeNavalCombatExperienceTimes100(int iChangeTimes100);
 #else
 	void setNavalCombatExperience(int iExperience);
 	void changeNavalCombatExperience(int iChange);
+#endif
 #endif
 
 	int getBorderObstacleCount() const;
@@ -2125,6 +2154,11 @@ protected:
 	FAutoVariable<int, CvPlayer> m_iCombatExperience;
 	int m_iLifetimeCombatExperience;
 	int m_iNavalCombatExperience;
+#if defined(MOD_API_XP_TIMES_100)
+	int m_iCombatExperienceTimes100;
+	int m_iLifetimeCombatExperienceTimes100;
+	int m_iNavalCombatExperienceTimes100;
+#endif
 	int m_iBorderObstacleCount;
 	FAutoVariable<int, CvPlayer> m_iPopRushHurryCount;
 	FAutoVariable<int, CvPlayer> m_iTotalImprovementsBuilt;

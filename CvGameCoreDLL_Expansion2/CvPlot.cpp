@@ -2860,6 +2860,16 @@ const UnitHandle CvPlot::getBestDefender(PlayerTypes eOwner, PlayerTypes eAttack
 	const UnitHandle pLoopUnit;
 	const UnitHandle pBestUnit;
 
+#if defined(MOD_BUGFIX_RADARING)
+	if (!MOD_BUGFIX_RADARING) {
+		// See https://www.reddit.com/r/nqmod/comments/34reu9/how_to_remove_radaring/
+		// Early out if we can't see what's on the plot
+		if (eAttackingPlayer != NO_PLAYER && !isVisible(GET_PLAYER(eAttackingPlayer).getTeam()))
+		{
+			return pBestUnit;
+		}
+	}
+#endif
 	pUnitNode = headUnitNode();
 
 	while(pUnitNode != NULL)
@@ -3660,23 +3670,37 @@ bool CvPlot::isPassableImprovement() const
 	return (MOD_GLOBAL_PASSABLE_FORTS && pkImprovementInfo != NULL && pkImprovementInfo->IsMakesPassable());
 }
 
-
 bool CvPlot::isFriendlyCityOrPassableImprovement(const CvUnit& kUnit, bool bCheckImprovement) const
 {
-	return isFriendlyCityOrPassableImprovement(kUnit.getOwner(), bCheckImprovement);
+	return isFriendlyCityOrPassableImprovement(kUnit.getOwner(), bCheckImprovement, &kUnit);
 }
 
-bool CvPlot::isFriendlyCityOrPassableImprovement(const PlayerTypes ePlayer, bool) const
+bool CvPlot::isFriendlyCityOrPassableImprovement(PlayerTypes ePlayer, bool, const CvUnit* pUnit) const
 {
-	bool bIsCityOrPassable = getPlotCity() || isPassableImprovement();
+	CvCity* pPlotCity = getPlotCity();
 
-	if (!bIsCityOrPassable) {
+	if (!(pPlotCity || isPassableImprovement())) {
 		// Not a city or a fort
 		return false;
 	}
-
+	
 	if (IsFriendlyTerritory(ePlayer)) {
 		// In friendly lands (ours, an allied CS or a major with open borders)
+
+#if defined(MOD_EVENTS_MINORS_INTERACTION)
+		if (MOD_EVENTS_MINORS_INTERACTION && GET_PLAYER(pPlotCity->getOwner()).isMinorCiv()) {
+			if (pUnit) {
+				if (GAMEEVENTINVOKE_TESTALL(GAMEEVENT_UnitCanTransitMinorCity, ePlayer, pUnit->GetID(), pPlotCity->getOwner(), pPlotCity->GetID(), getX(), getY()) == GAMEEVENTRETURN_FALSE) {
+					return false;
+				}
+			} else {
+				if (GAMEEVENTINVOKE_TESTALL(GAMEEVENT_PlayerCanTransitMinorCity, ePlayer, pPlotCity->getOwner(), pPlotCity->GetID(), getX(), getY()) == GAMEEVENTRETURN_FALSE) {
+					return false;
+				}
+			}
+		}
+#endif
+
 		return true;
 	}
 

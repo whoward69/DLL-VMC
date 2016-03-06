@@ -2297,6 +2297,7 @@ void CvHomelandAI::PlotAirliftMoves()
 	}
 
 	// Need at least 2 cities with airports
+	// TODO - WH - relocation - need to allow for AllowsAirliftTo improvements as well as cities
 	vector<CvCity *> aAirliftCities;
 	CvCity *pLoopCity;
 	int iCityLoop;

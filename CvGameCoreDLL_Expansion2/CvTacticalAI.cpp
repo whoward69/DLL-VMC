@@ -3346,6 +3346,7 @@ void CvTacticalAI::PlotDefensiveAirlifts()
 
 	// Is this a dominance zone where we're defending a city and that city has an airport?
 	CvTacticalDominanceZone* pZone = GC.getGame().GetTacticalAnalysisMap()->GetZone(m_iCurrentZoneIndex);
+	// TODO - WH - relocation - should also check for an AllowsAirliftTo improvement
 	pCity = pZone->GetClosestCity();
 	if(pCity && pCity->getOwner() == m_pPlayer->GetID() && pZone->GetTerritoryType() == TACTICAL_TERRITORY_FRIENDLY && pCity->CanAirlift()&& pZone->GetEnemyUnitCount() > 0)
 	{
