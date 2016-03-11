@@ -16650,9 +16650,13 @@ void CvUnit::setExperience(int iNewValue, int iMax)
 {
 	VALIDATE_OBJECT
 #if defined(MOD_API_XP_TIMES_100)
-		if ((getExperienceTimes100() != iNewValueTimes100) && (getExperienceTimes100() < ((iMax == -1) ? INT_MAX : (iMax * 100))))
+	// Checking limits.h for the values of MAX_INT and MAX_LONG they are the same, so we need to use "long long" and hence MAX_LLONG
+	long long lMaxTimes100 = (iMax == -1) ? INT_MAX : (iMax * 100LL);
+	int iMaxTimes100 = (lMaxTimes100 > ((long long) INT_MAX)) ? INT_MAX : (int) lMaxTimes100;
+	
+	if ((getExperienceTimes100() != iNewValueTimes100) && (getExperienceTimes100() < iMaxTimes100))
 #else
-		if ((getExperience() != iNewValue) && (getExperience() < ((iMax == -1) ? INT_MAX : iMax)))
+	if ((getExperience() != iNewValue) && (getExperience() < ((iMax == -1) ? INT_MAX : iMax)))
 #endif
 	{
 #if defined(MOD_API_XP_TIMES_100)
@@ -16662,7 +16666,7 @@ void CvUnit::setExperience(int iNewValue, int iMax)
 #endif
 
 #if defined(MOD_API_XP_TIMES_100)
-		m_iExperienceTimes100 = std::min(((iMax == -1) ? INT_MAX : (iMax * 100)), iNewValueTimes100);
+		m_iExperienceTimes100 = std::min(iMaxTimes100, iNewValueTimes100);
 		CvAssert(getExperienceTimes100() >= 0);
 #else
 		m_iExperience = std::min(((iMax == -1) ? INT_MAX : iMax), iNewValue);
@@ -16739,6 +16743,10 @@ void CvUnit::changeExperience(int iChange, int iMax, bool bFromCombat, bool bInB
 	}
 
 #if defined(MOD_API_XP_TIMES_100)
+	// Checking limits.h for the values of MAX_INT and MAX_LONG they are the same, so we need to use "long long" and hence MAX_LLONG
+	long long lMaxTimes100 = (iMax == -1) ? INT_MAX : (iMax * 100LL);
+	int iMaxTimes100 = (lMaxTimes100 > ((long long)INT_MAX)) ? INT_MAX : (int)lMaxTimes100;
+	
 	int iUnitExperienceTimes100 = iChangeTimes100;
 #else
 	int iUnitExperience = iChange;
@@ -16860,7 +16868,7 @@ void CvUnit::changeExperience(int iChange, int iMax, bool bFromCombat, bool bInB
 			else
 			{
 #if defined(MOD_API_XP_TIMES_100)
-				int iModdedChangeTimes100 = min((iMax * 100) - m_iExperienceTimes100, iChangeTimes100);
+				int iModdedChangeTimes100 = min(iMaxTimes100 - m_iExperienceTimes100, iChangeTimes100);
 				if (iModdedChangeTimes100 > 0)
 #else
 				int iModdedChange = min(iMax - m_iExperience, iChange);
