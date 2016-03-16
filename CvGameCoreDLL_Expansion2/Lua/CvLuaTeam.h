@@ -225,19 +225,30 @@ protected:
 	static int lUpdateEmbarkGraphics(lua_State* L);
 
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	LUAAPIEXTN(IsVassal, bool, iteam);
-	LUAAPIEXTN(CanBecomeVassal, bool, iTeam);
-	LUAAPIEXTN(canEndVassal, bool, iTeam);
-	LUAAPIEXTN(IsVassalageTradingAllowed, bool);
-	LUAAPIEXTN(GetNumTurnsIsVassal, int, iTeam);
-	LUAAPIEXTN(GetNumTurnsSinceVassalEnded, int, iTeam);
-	LUAAPIEXTN(IsTooSoonForVassal, bool, iTeam);
-	LUAAPIEXTN(IsVassalOfSomeone, bool);
-	LUAAPIEXTN(IsVassalLockedIntoWar, bool, iTeam);
-	LUAAPIEXTN(GetMaster, int);
-	LUAAPIEXTN(IsVoluntaryVassal, bool, iTeam);
-	LUAAPIEXTN(DoBecomeVassal, void, iTeam, bVoluntary);
-	LUAAPIEXTN(DoEndVassal, void, iTeam, bPeaceful, bSuppressNotification);
+	static int lIsVassal(lua_State* L);
+	static int lCanBecomeVassal(lua_State* L);
+	static int lCanMakeVassal(lua_State* L);
+	static int lCanEndVassal(lua_State* L);
+	static int lCanEndAllVassal(lua_State* L);
+	static int lIsVassalageTradingAllowed(lua_State* L);
+	static int lGetNumTurnsIsVassal(lua_State* L);
+	static int lGetNumTurnsSinceVassalEnded(lua_State* L);
+	static int lIsTooSoonForVassal(lua_State* L);
+	static int lIsVassalOfSomeone(lua_State* L);
+	static int lIsVassalLockedIntoWar(lua_State* L);
+	static int lGetMaster(lua_State* L);
+	static int lIsVoluntaryVassal(lua_State* L);
+	static int lDoBecomeVassal(lua_State* L);
+	static int lDoEndVassal(lua_State* L);
+	static int lGetNumCitiesWhenVassalMade(lua_State* L);
+	static int lGetTotalPopulationWhenVassalMade(lua_State* L);
+	static int lCanLiberateVassal(lua_State* L);
+	static int lDoLiberateVassal(lua_State* L);
+	static int lDoApplyVassalTax(lua_State* L);
+	static int lCanSetVassalTax(lua_State* L);
+	static int lGetVassalTax(lua_State* L);
+	static int lGetNumTurnsSinceVassalTaxSet(lua_State* L);
+	static int lGetNumVassals(lua_State* L);
 #endif
 };
 

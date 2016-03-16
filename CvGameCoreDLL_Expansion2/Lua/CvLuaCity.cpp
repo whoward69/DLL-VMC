@@ -580,6 +580,16 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(IsOnTerrain);
 	Method(IsAdjacentToTerrain);
 	Method(IsWithinDistanceOfTerrain);
+	Method(CountFeature);
+	Method(CountWorkedFeature);
+	Method(CountImprovement);
+	Method(CountWorkedImprovement);
+	Method(CountPlotType);
+	Method(CountWorkedPlotType);
+	Method(CountResource);
+	Method(CountWorkedResource);
+	Method(CountTerrain);
+	Method(CountWorkedTerrain);
 #endif
 }
 //------------------------------------------------------------------------------
@@ -4386,4 +4396,14 @@ LUAAPIIMPL(City, IsWithinDistanceOfResource)
 LUAAPIIMPL(City, IsOnTerrain)
 LUAAPIIMPL(City, IsAdjacentToTerrain)
 LUAAPIIMPL(City, IsWithinDistanceOfTerrain)
+LUAAPIIMPL(City, CountFeature)
+LUAAPIIMPL(City, CountWorkedFeature)
+LUAAPIIMPL(City, CountImprovement)
+LUAAPIIMPL(City, CountWorkedImprovement)
+LUAAPIIMPL(City, CountPlotType)
+LUAAPIIMPL(City, CountWorkedPlotType)
+LUAAPIIMPL(City, CountResource)
+LUAAPIIMPL(City, CountWorkedResource)
+LUAAPIIMPL(City, CountTerrain)
+LUAAPIIMPL(City, CountWorkedTerrain)
 #endif

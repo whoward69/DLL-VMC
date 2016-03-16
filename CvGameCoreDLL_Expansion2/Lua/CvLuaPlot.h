@@ -167,6 +167,10 @@ protected:
 	static int lIsValidDomainForAction(lua_State* L);
 	static int lIsImpassable(lua_State* L);
 
+#if defined(MOD_API_LUA_EXTENSIONS)
+	LUAAPIEXTN(GetNumTradeRoutes, int);
+#endif
+
 	static int lGetX(lua_State* L);
 	static int lGetY(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS)

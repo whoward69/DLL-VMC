@@ -250,6 +250,9 @@ public:
 	int GetTourismModifierSharedReligion() const;
 	int GetTourismModifierTradeRoute() const;
 	int GetTourismModifierOpenBorders() const;
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	int GetTourismModifierVassal() const;
+#endif
 	PublicOpinionTypes GetPublicOpinionType() const;
 	PolicyBranchTypes GetPublicOpinionPreferredIdeology() const;
 	CvString GetPublicOpinionTooltip() const;

@@ -589,6 +589,16 @@ protected:
 	LUAAPIEXTN(IsOnTerrain, bool, iTerrainType);
 	LUAAPIEXTN(IsAdjacentToTerrain, bool, iTerrainType);
 	LUAAPIEXTN(IsWithinDistanceOfTerrain, bool, iTerrainType, iDistance);
+	LUAAPIEXTN(CountFeature, int, iFeature);
+	LUAAPIEXTN(CountWorkedFeature, int, iFeature);
+	LUAAPIEXTN(CountImprovement, int, iImprovement);
+	LUAAPIEXTN(CountWorkedImprovement, int, iImprovement);
+	LUAAPIEXTN(CountPlotType, int, iPlotType);
+	LUAAPIEXTN(CountWorkedPlotType, int, iPlotType);
+	LUAAPIEXTN(CountResource, int, iResource);
+	LUAAPIEXTN(CountWorkedResource, int, iResource);
+	LUAAPIEXTN(CountTerrain, int, iTerrain);
+	LUAAPIEXTN(CountWorkedTerrain, int, iTerrain);
 #endif
 };
 

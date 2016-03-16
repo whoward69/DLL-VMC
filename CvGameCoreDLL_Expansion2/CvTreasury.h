@@ -111,6 +111,16 @@ public:
 
 #if defined(MOD_DIPLOMACY_CIV4_FEATURES)
 	int GetVassalGoldMaintenance() const;
+
+	int GetMyShareOfVassalTaxes() const;
+	int GetVassalTaxContributionTimes100(PlayerTypes ePlayer) const;
+	int GetVassalTaxContribution(PlayerTypes ePlayer) const;
+
+	void CalculateExpensePerTurnFromVassalTaxes();
+	
+	int GetExpensePerTurnFromVassalTaxesTimes100() const;
+	int GetExpensePerTurnFromVassalTaxes() const;
+	void SetExpensePerTurnFromVassalTaxesTimes100(int iValue);
 #endif
 
 protected:
@@ -120,6 +130,9 @@ protected:
 	int m_iExpensePerTurnUnitMaintenance;
 	int m_iExpensePerTurnUnitSupply;
 	int m_iCityConnectionGoldTimes100;
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	int m_iExpensePerTurnFromVassalTax;
+#endif
 	int m_iCityConnectionTradeRouteGoldModifier;
 	int m_iCityConnectionTradeRouteGoldChange;
 

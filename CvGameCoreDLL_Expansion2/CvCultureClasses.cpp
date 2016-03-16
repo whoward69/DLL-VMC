@@ -3191,6 +3191,14 @@ int CvPlayerCulture::GetTourismModifierWith(PlayerTypes ePlayer) const
 		iMultiplier += GetTourismModifierTradeRoute();
 	}
 
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	// My vassal
+	if (MOD_DIPLOMACY_CIV4_FEATURES && GET_TEAM(GET_PLAYER(ePlayer).getTeam()).GetMaster() == m_pPlayer->getTeam())
+	{
+		iMultiplier += GetTourismModifierVassal();
+	}
+#endif
+
 	if (eMyIdeology != NO_POLICY_BRANCH_TYPE && eTheirIdeology != NO_POLICY_BRANCH_TYPE && eMyIdeology != eTheirIdeology)
 	{
 		iMultiplier += GC.getTOURISM_MODIFIER_DIFFERENT_IDEOLOGIES();
@@ -3278,7 +3286,12 @@ CvString CvPlayerCulture::GetTourismModifierWithTooltip(PlayerTypes ePlayer) con
 	{
 		szRtnValue += "[COLOR_POSITIVE_TEXT]" + GetLocalizedText("TXT_KEY_CO_PLAYER_TOURISM_RELIGION_NOTE", GetTourismModifierSharedReligion()) + "[ENDCOLOR]";
 	}
-
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	if(MOD_DIPLOMACY_CIV4_FEATURES && GET_TEAM(GET_PLAYER(ePlayer).getTeam()).GetMaster() == m_pPlayer->getTeam())
+	{
+		szRtnValue += "[COLOR_POSITIVE_TEXT]" + GetLocalizedText("TXT_KEY_CO_PLAYER_TOURISM_VASSAL", GetTourismModifierVassal()) + "[ENDCOLOR]";
+	}
+#endif
 	if (eMyIdeology != NO_POLICY_BRANCH_TYPE && eTheirIdeology != NO_POLICY_BRANCH_TYPE && eMyIdeology != eTheirIdeology)
 	{
 		if (m_pPlayer->GetEspionage()->IsMyDiplomatVisitingThem(ePlayer))
@@ -3376,6 +3389,14 @@ int CvPlayerCulture::GetTourismModifierOpenBorders() const
 {
 	return GC.getTOURISM_MODIFIER_SHARED_RELIGION() + m_pPlayer->GetPlayerPolicies()->GetNumericModifier(POLICYMOD_OPEN_BORDERS_TOURISM_MODIFIER);
 }
+
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+/// Tourism modifier - vassal
+int CvPlayerCulture::GetTourismModifierVassal() const
+{
+	return GC.getVASSAL_TOURISM_MODIFIER();
+}
+#endif
 
 /// Is the populace satisfied?
 PublicOpinionTypes CvPlayerCulture::GetPublicOpinionType() const

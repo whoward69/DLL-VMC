@@ -1826,6 +1826,17 @@ public:
 	bool HasCapturedHolyCity(ReligionTypes eReligion);
 	bool HasEmbassyWith(PlayerTypes eOtherPlayer) const;
 	void DoForceDefPact(PlayerTypes eOtherPlayer);
+
+	int CountAllFeature(FeatureTypes iFeatureType);
+	int CountAllWorkedFeature(FeatureTypes iFeatureType);
+	int CountAllImprovement(ImprovementTypes iImprovementType);
+	int CountAllWorkedImprovement(ImprovementTypes iImprovementType);
+	int CountAllPlotType(PlotTypes iPlotType);
+	int CountAllWorkedPlotType(PlotTypes iPlotType);
+	int CountAllResource(ResourceTypes iResourceType);
+	int CountAllWorkedResource(ResourceTypes iResourceType);
+	int CountAllTerrain(TerrainTypes iTerrainType);
+	int CountAllWorkedTerrain(TerrainTypes iTerrainType);
 #endif
 
 	// for serialization
@@ -1870,23 +1881,24 @@ public:
 	CvPlayerAchievements& GetPlayerAchievements(){return m_kPlayerAchievements;}
 #endif
 
-	bool hasTurnTimerExpired();
-
 #if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	CvString GetVassalIndependenceTooltipAsMaster(PlayerTypes ePlayer) const;
+	CvString GetVassalIndependenceTooltipAsVassal() const;
+
 	int GetScoreFromVassals() const;
 	int GetScoreFromVassal(PlayerTypes ePlayer) const;
 
-	int GetJONSCulturePerTurnFromVassals() const;
+	int GetYieldPerTurnFromVassals(YieldTypes eYield) const;
 
 	int GetHappinessFromVassals() const;
 	int GetHappinessFromVassal(PlayerTypes ePlayer) const;
-
-	int GetScienceFromVassalTimes100() const;
 
 	int GetVassalGoldMaintenanceMod() const;
 	void SetVassalGoldMaintenanceMod(int iValue);
 	void ChangeVassalGoldMaintenanceMod(int iChange);
 #endif
+
+	bool hasTurnTimerExpired();
 
 protected:
 	class ConqueredByBoolField

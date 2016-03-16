@@ -149,6 +149,10 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(IsValidDomainForAction);
 	Method(IsImpassable);
 
+#if defined(MOD_API_LUA_EXTENSIONS)
+	Method(GetNumTradeRoutes);
+#endif
+
 	Method(GetX);
 	Method(GetY);
 #if defined(MOD_API_LUA_EXTENSIONS)
@@ -1085,6 +1089,18 @@ int CvLuaPlot::lIsImpassable(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::isImpassable);
 }
+
+#if defined(MOD_API_LUA_EXTENSIONS)
+//------------------------------------------------------------------------------
+int CvLuaPlot::lGetNumTradeRoutes(lua_State* L)
+{
+	CvPlot* pkPlot = GetInstance(L);
+
+	const int iValue = GC.getGame().GetGameTrade()->GetNumTradeRoutesInPlot(pkPlot);
+	lua_pushinteger(L, iValue);
+	return 1;
+}
+#endif
 
 //------------------------------------------------------------------------------
 //int getX();

@@ -2401,14 +2401,20 @@ int CvGameReligions::GetAdjacentCityReligiousPressure (ReligionTypes eReligion, 
 		int iModifier = pFromCity->GetCityReligions()->GetReligiousPressureModifier();
 #if defined(MOD_API_EXTENSIONS)
 		// Trust the modder if they set a negative mod
-		if (iLeaguesMod != 0)
+		if (iModifier != 0)
 #else
-		if (iLeaguesMod > 0)
+		if (iModifier > 0)
 #endif
 		{
 			iPressure *= (100 + iModifier);
 			iPressure /= 100;
 		}
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+		if(MOD_DIPLOMACY_CIV4_FEATURES && GET_TEAM(GET_PLAYER(pToCity->getOwner()).getTeam()).IsVassal(GET_PLAYER(pFromCity->getOwner()).getTeam()))
+		{
+			iPressure *= 2;
+		}
+#endif
 	}
 
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)

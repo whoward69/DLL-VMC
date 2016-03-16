@@ -332,10 +332,6 @@ void CvPlot::reset(int iX, int iY, bool bConstructorCall)
 		for(int iI = 0; iI < MAX_MAJOR_CIVS; ++iI)
 		{
 			m_abNoSettling[iI] = false;
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-			m_abAvoidMovement[iI] = false;
-#endif
 		}
 	}
 	for(int iI = 0; iI < REALLY_MAX_TEAMS; ++iI)
@@ -10600,13 +10596,6 @@ void CvPlot::read(FDataStream& kStream)
 	for(uint i = 0; i < MAX_MAJOR_CIVS; i++)
 		kStream >> m_abNoSettling[i];
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	for(uint i = 0; i < MAX_MAJOR_CIVS; i++)
-	{
-		MOD_SERIALIZE_READ(36, kStream, m_abAvoidMovement[i], false);
-	}
-#endif
-
 	bool hasScriptData = false;
 	kStream >> hasScriptData;
 	if(hasScriptData)
@@ -10771,13 +10760,6 @@ void CvPlot::write(FDataStream& kStream) const
 
 	for(uint i = 0; i < MAX_MAJOR_CIVS; i++)
 		kStream << m_abNoSettling[i];
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	for(uint i = 0; i < MAX_MAJOR_CIVS; i++)
-	{
-		MOD_SERIALIZE_WRITE(kStream, m_abAvoidMovement[i]);
-	}
-#endif
 
 	// char * should have died in 1989...
 	bool hasScriptData = (m_szScriptData != NULL);
@@ -11771,24 +11753,6 @@ void CvPlot::updateImpassable()
 		}
 	}
 }
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-bool CvPlot::IsAvoidMovement(PlayerTypes ePlayer) const
-{
-	CvAssertMsg(ePlayer >= 0, "ePlayer is expected to be greater than or equal to 0");
-	CvAssertMsg(ePlayer < MAX_MAJOR_CIVS, "ePlayer is expected to be less than MAX_MAJOR_CIVS");
-
-	return m_abAvoidMovement[ePlayer];
-}
-
-void CvPlot::SetAvoidMovement(PlayerTypes ePlayer, bool bNewValue)
-{
-	CvAssertMsg(ePlayer >= 0, "ePlayer is expected to be greater than or equal to 0");
-	CvAssertMsg(ePlayer < MAX_MAJOR_CIVS, "ePlayer is expected to be less than MAX_MAJOR_CIVS");
-
-	m_abAvoidMovement[ePlayer] = bNewValue;
-}
-#endif
 
 #if defined(MOD_API_EXTENSIONS)
 bool CvPlot::IsCivilization(CivilizationTypes iCivilizationType) const

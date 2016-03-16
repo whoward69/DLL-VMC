@@ -144,9 +144,6 @@ CvDeal::CvDeal()
 	m_bConsideringForRenewal = false;
 	m_bCheckedForRenewal = false;
 	m_bDealCancelled = false;
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_eOfferingPlayer = NO_PLAYER;
-#endif
 }
 
 /// Constructor with typical parameters
@@ -181,9 +178,6 @@ CvDeal::CvDeal(const CvDeal& source)
 	{
 		m_TradedItems.push_back(*it);
 	}
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_eOfferingPlayer = source.m_eOfferingPlayer;
-#endif
 }
 
 /// Destructor
@@ -212,9 +206,6 @@ CvDeal& CvDeal::operator=(const CvDeal& source)
 	{
 		m_TradedItems.push_back(*it);
 	}
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_eOfferingPlayer = source.m_eOfferingPlayer;
-#endif
 
 	return (*this);
 }
@@ -235,9 +226,6 @@ void CvDeal::ClearItems()
 	SetSurrenderingPlayer(NO_PLAYER);
 	SetDemandingPlayer(NO_PLAYER);
 	SetRequestingPlayer(NO_PLAYER);
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	SetOfferingPlayer(NO_PLAYER);
-#endif
 }
 
 /// How many trade items are in this deal?
@@ -560,6 +548,12 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 		if(eFromTeam == eToTeam)
 			return false;
 
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+		// If we're a vassal, can't
+		if(MOD_DIPLOMACY_CIV4_FEATURES && pFromTeam->IsVassalOfSomeone())
+			return false;
+#endif
+
 		// Check to see if the other player can trade this item to us as well.  If we can't, we can't trade it either
 		if(bCheckOtherPlayerValidity)
 		{
@@ -855,6 +849,10 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 		// Same team
 		if(eFromTeam == eToTeam)
 			return false;
+
+		//Can't already be offering this
+		if (!bFinalizing && IsMapTrade( ePlayer))
+			return false;
 	}
 	// Techs
 	else if(MOD_DIPLOMACY_CIV4_FEATURES && eItem == TRADE_ITEM_TECHS)
@@ -876,11 +874,15 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 			return false;
 
 		// We don't have an embassy established
-		if(!pFromTeam->HasEmbassyAtTeam(eToTeam))
+		if (!GET_TEAM(eToTeam).HasEmbassyAtTeam(eFromTeam) || !GET_TEAM(eFromTeam).HasEmbassyAtTeam(eToTeam))
 			return false;
 
 		// We don't own this tech
 		if(!pFromTeam->GetTeamTechs()->HasTech((TechTypes) iData1))
+			return false;
+
+		// We are researching this tech
+		if(GET_PLAYER(ePlayer).GetPlayerTechs()->GetCurrentResearch() == ((TechTypes) iData1))
 			return false;
 
 		// They can't research this tech yet
@@ -894,6 +896,10 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 
 		// Tech Brokering is enabled, and we didn't research that tech
 		if(GC.getGame().isOption(GAMEOPTION_NO_TECH_BROKERING) && !pFromTeam->IsTradeTech((TechTypes) iData1))
+			return false;
+		
+		//Can't already be offering this
+		if (!bFinalizing && IsTechTrade( ePlayer, (TechTypes) iData1))
 			return false;
 	}
 	else if(MOD_DIPLOMACY_CIV4_FEATURES && eItem == TRADE_ITEM_VASSALAGE)
@@ -911,7 +917,69 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 			return false;
 
 		// Can we become the vassal of eToTeam?
-		if(!pToTeam->canBecomeVassal(eFromTeam))
+		if(!pFromTeam->canBecomeVassal(eToTeam))
+			return false;
+
+		//Does the offering team have a vassal?
+		if(pFromTeam->GetNumVassals() > 0)
+			return false;
+
+		//If the other player is our master, or vice versa...
+		if(GET_TEAM(pToPlayer->getTeam()).IsVassal(pFromPlayer->getTeam()))
+		{
+			return false;
+		}
+
+		if(GET_TEAM(pFromPlayer->getTeam()).IsVassal(pToPlayer->getTeam()))
+		{
+			return false;
+		}
+
+		//Can't already be offering this
+		if (!bFinalizing && IsVassalageTrade( ePlayer))
+			return false;
+
+		//Can't already be offering this
+		if (!bFinalizing && IsRevokeVassalageTrade( ePlayer))
+			return false;
+	}
+	else if(MOD_DIPLOMACY_CIV4_FEATURES && eItem == TRADE_ITEM_VASSALAGE_REVOKE)
+	{
+		// Vassalage is disabled...
+		if(GC.getGame().isOption(GAMEOPTION_NO_VASSALAGE))
+			return false;
+
+		// Same Team
+		if(eFromTeam == eToTeam)
+			return false;
+
+		// This prevents AI teammates selling capitulation in peace deals
+		if(!pFromPlayer->isHuman() && pFromPlayer->IsAITeammateOfHuman())
+			return false;
+
+		//If the other player has no vassals...
+		if(GET_TEAM(pFromPlayer->getTeam()).GetNumVassals() <= 0)
+		{
+			return false;
+		}
+
+		//If the other player is our master, or vice versa...
+		if(GET_TEAM(pToPlayer->getTeam()).IsVassal(pFromPlayer->getTeam()))
+		{
+			return false;
+		}
+
+		if(GET_TEAM(pFromPlayer->getTeam()).IsVassal(pToPlayer->getTeam()))
+		{
+			return false;
+		}
+
+		//Can't already be offering this
+		if (!bFinalizing && IsVassalageTrade( ePlayer))
+			return false;
+
+		//Can't already be offering this
+		if (!bFinalizing && IsRevokeVassalageTrade( ePlayer))
 			return false;
 	}
 #endif
@@ -1727,6 +1795,7 @@ CvDeal::DealRenewStatus CvDeal::GetItemTradeableState(TradeableItems eTradeItem)
 	case TRADE_ITEM_VOTE_COMMITMENT:
 #if defined(MOD_DIPLOMACY_CIV4_FEATURES)
 	case TRADE_ITEM_VASSALAGE:
+	case TRADE_ITEM_MAPS:
 #endif
 		return DEAL_NONRENEWABLE;
 		break;
@@ -1743,9 +1812,10 @@ CvDeal::DealRenewStatus CvDeal::GetItemTradeableState(TradeableItems eTradeItem)
 		// doesn't matter
 	case TRADE_ITEM_TRADE_AGREEMENT:
 	case TRADE_ITEM_GOLD:
-	case TRADE_ITEM_MAPS:
 #if defined(MOD_DIPLOMACY_CIV4_FEATURES)
 	case TRADE_ITEM_TECHS:
+#else
+	case TRADE_ITEM_MAPS:
 #endif
 	case TRADE_ITEM_RESEARCH_AGREEMENT:
 		return DEAL_SUPPLEMENTAL;
@@ -1758,11 +1828,6 @@ CvDeal::DealRenewStatus CvDeal::GetItemTradeableState(TradeableItems eTradeItem)
 
 bool CvDeal::IsPotentiallyRenewable()
 {
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if(MOD_DIPLOMACY_CIV4_FEATURES && m_eOfferingPlayer != NO_PLAYER)
-		return false;
-#endif
-
 	TradedItemList::iterator it;
 	bool bHasValidTradeItem = false;
 	for(it = m_TradedItems.begin(); it != m_TradedItems.end(); ++it)
@@ -2035,9 +2100,6 @@ FDataStream& operator>>(FDataStream& loadFrom, CvDeal& writeTo)
 	loadFrom >> writeTo.m_eSurrenderingPlayer;
 	loadFrom >> writeTo.m_eDemandingPlayer;
 	loadFrom >> writeTo.m_eRequestingPlayer;
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	MOD_SERIALIZE_READ(36, loadFrom, writeTo.m_eOfferingPlayer, NO_PLAYER);
-#endif
 	loadFrom >> iEntriesToRead;
 
 	writeTo.m_TradedItems.clear();
@@ -2075,9 +2137,6 @@ FDataStream& operator<<(FDataStream& saveTo, const CvDeal& readFrom)
 	saveTo << readFrom.m_eSurrenderingPlayer;
 	saveTo << readFrom.m_eDemandingPlayer;
 	saveTo << readFrom.m_eRequestingPlayer;
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	MOD_SERIALIZE_WRITE(saveTo, readFrom.m_eOfferingPlayer);
-#endif
 	saveTo << readFrom.m_TradedItems.size();
 	TradedItemList::const_iterator it;
 	for(it = readFrom.m_TradedItems.begin(); it != readFrom.m_TradedItems.end(); ++it)
@@ -2119,6 +2178,24 @@ void CvDeal::AddVassalageTrade(PlayerTypes eFrom)
 	{
 		CvTradedItem item;
 		item.m_eItemType = TRADE_ITEM_VASSALAGE;
+		item.m_eFromPlayer = eFrom;
+		m_TradedItems.push_back(item);
+	}
+	else
+	{
+		CvAssertMsg(false, "DEAL: Trying to add an invalid Vassalage item to a deal");
+	}
+}
+
+/// Insert Vassalage Trade
+void CvDeal::AddRevokeVassalageTrade(PlayerTypes eFrom)
+{
+	CvAssertMsg(eFrom == m_eFromPlayer || eFrom == m_eToPlayer, "DEAL: Adding deal item for a player that's not actually in this deal!  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
+
+	if(IsPossibleToTradeItem(eFrom, GetOtherPlayer(eFrom), TRADE_ITEM_VASSALAGE_REVOKE))
+	{
+		CvTradedItem item;
+		item.m_eItemType = TRADE_ITEM_VASSALAGE_REVOKE;
 		item.m_eFromPlayer = eFrom;
 		m_TradedItems.push_back(item);
 	}
@@ -2172,6 +2249,19 @@ bool CvDeal::IsVassalageTrade(PlayerTypes eFrom)
 	return 0;
 }
 
+bool CvDeal::IsRevokeVassalageTrade(PlayerTypes eFrom)
+{
+	TradedItemList::iterator it;
+	for(it = m_TradedItems.begin(); it != m_TradedItems.end(); ++it)
+	{
+		if(it->m_eItemType == TRADE_ITEM_VASSALAGE_REVOKE && it->m_eFromPlayer == eFrom)
+		{
+			return true;
+		}
+	}
+	return 0;
+}
+
 /// Delete a tech trade
 void CvDeal::RemoveTechTrade(TechTypes eTech)
 {
@@ -2185,19 +2275,6 @@ void CvDeal::RemoveTechTrade(TechTypes eTech)
 			break;
 		}
 	}
-}
-
-PlayerTypes CvDeal::GetOfferingPlayer() const
-{
-	return m_eOfferingPlayer;
-}
-
-void CvDeal::SetOfferingPlayer(PlayerTypes ePlayer)
-{
-	CvAssertMsg(ePlayer >= NO_PLAYER, "DEAL: Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");	// NO_PLAYER is valid because we could be clearing the deal out for other uses
-	CvAssertMsg(ePlayer < MAX_CIV_PLAYERS, "DEAL: Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
-
-	m_eOfferingPlayer = ePlayer;
 }
 #endif
 
@@ -2536,15 +2613,27 @@ bool CvGameDeals::FinalizeDeal(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, b
 				// Vassalage
 				else if(MOD_DIPLOMACY_CIV4_FEATURES && it->m_eItemType == TRADE_ITEM_VASSALAGE)
 				{
-					bool bCapitulation = false;
-
-					// If this isn't a peace treaty deal
-					if(kDeal.GetPeaceTreatyType() != NO_PEACE_TREATY_TYPE)
-					{
-						bCapitulation = true;
-					}
-
+					bool bCapitulation = kDeal.IsPeaceTreatyTrade(eFromPlayer) || kDeal.IsPeaceTreatyTrade(eToPlayer);
 					GET_TEAM(eFromTeam).DoBecomeVassal(eToTeam, !bCapitulation);
+				}
+				// Revoke Vassalage
+				else if(MOD_DIPLOMACY_CIV4_FEATURES && it->m_eItemType == TRADE_ITEM_VASSALAGE_REVOKE)
+				{
+					PlayerTypes eLoopPlayer;
+					TeamTypes eLoopTeam;
+					for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
+					{
+						eLoopPlayer = (PlayerTypes) iPlayerLoop;
+
+						if(eLoopPlayer != NO_PLAYER && GET_PLAYER(eLoopPlayer).isAlive())
+						{
+							eLoopTeam = GET_PLAYER(eLoopPlayer).getTeam();
+							if(eLoopTeam != NO_TEAM)
+							{
+								GET_TEAM(eFromTeam).DoEndVassal(eLoopTeam, true, true);
+							}
+						}
+					}
 				}
 #endif
 				// **** Peace Treaty **** this should always be the last item processed!!!
@@ -3502,10 +3591,13 @@ void CvGameDeals::LogDealComplete(CvDeal* pDeal)
 				strTemp.Format("***** Map Trade *****");
 				break;
 			case TRADE_ITEM_TECHS:
-				strTemp.Format("***** Tech Trade *****", itemIter->m_iData1);
+				strTemp.Format("***** Tech Trade ***** ID %s",  GC.getTechInfo((TechTypes)itemIter->m_iData1)->GetDescriptionKey());
 				break;
 			case TRADE_ITEM_VASSALAGE:
 				strTemp.Format("***** Vassalage Trade *****");
+				break;
+			case TRADE_ITEM_VASSALAGE_REVOKE:
+				strTemp.Format("***** Revoke Vassalage Trade *****");
 				break;
 #endif
 			default:

@@ -145,6 +145,7 @@ struct CvResolutionEffects
 #endif
 #if defined(MOD_DIPLOMACY_CIV4_FEATURES)
 	int iVassalMaintenanceGoldPercent;
+	bool bEndAllCurrentVassals;
 #endif
 };
 
@@ -1291,8 +1292,10 @@ public:
 	int GetWorldWar() const;
 	bool IsEmbargoIdeology() const;
 #endif
+
 #if defined(MOD_DIPLOMACY_CIV4_FEATURES)
 	int GetVassalMaintenanceGoldPercent() const;
+	bool IsEndAllCurrentVassals() const;
 #endif
 
 protected:
@@ -1337,8 +1340,10 @@ protected:
 	int m_iIsWorldWar;
 	bool m_bEmbargoIdeology;
 #endif
+
 #if defined(MOD_DIPLOMACY_CIV4_FEATURES)
 	int m_iVassalMaintenanceGoldPercent;
+	bool m_bEndAllCurrentVassals;
 #endif
 
 private:

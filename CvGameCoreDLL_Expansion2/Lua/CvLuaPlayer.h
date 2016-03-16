@@ -387,7 +387,7 @@ protected:
 	LUAAPIEXTN(CanAdoptIdeology, bool, iIdeologyBranch);
 	LUAAPIEXTN(CanAdoptTenet, bool, iTenetPolicy, bIgnoreCost);
 #endif
-	
+
 	static int lGetPolicyCatchSpiesModifier(lua_State* L);
 
 	static int lGetNumPolicyBranchesFinished(lua_State* L);
@@ -1075,18 +1075,6 @@ protected:
 	LUAAPIEXTN(AddMessage, void, sMessage);
 #endif
 
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	LUAAPIEXTN(GetVassalGoldMaintenance, int);
-	LUAAPIEXTN(IsVassalageAcceptable, bool, iOtherPlayer);
-	LUAAPIEXTN(GetJONSCulturePerTurnFromVassals, int);
-	LUAAPIEXTN(GetHappinessFromVassals, int);
-	LUAAPIEXTN(GetScoreFromVassals, int);
-	LUAAPIEXTN(GetScienceFromVassalTimes100, int);
-	LUAAPIEXTN(GetMilitaryAggressivePosture, int, iOtherPlayer);
-	LUAAPIEXTN(MoveRequestTooSoon, bool, iOtherPlayer);
-	LUAAPIEXTN(GetPlayerMoveTroopsRequestCounter, int, iOtherPlayer);
-#endif
-
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(HasBelief, bool, iBeliefType);
 	LUAAPIEXTN(HasBuilding, bool, iBuildingType);
@@ -1132,6 +1120,42 @@ protected:
 	LUAAPIEXTN(HasCapturedHolyCity, bool, eReligion);
 	LUAAPIEXTN(HasEmbassyWith, bool, iOtherPlayer);
 	LUAAPIEXTN(DoForceDefPact, void, iOtherPlayer);
+
+	LUAAPIEXTN(CountAllFeature, int, iFeatureType);
+	LUAAPIEXTN(CountAllWorkedFeature, int, iFeatureType);
+	LUAAPIEXTN(CountAllImprovement, int, iImprovementType);
+	LUAAPIEXTN(CountAllWorkedImprovement, int, iImprovementType);
+	LUAAPIEXTN(CountAllPlotType, int, iPlotType);
+	LUAAPIEXTN(CountAllWorkedPlotType, int, iPlotType);
+	LUAAPIEXTN(CountAllResource, int, iResourceType);
+	LUAAPIEXTN(CountAllWorkedResource, int, iResourceType);
+	LUAAPIEXTN(CountAllTerrain, int, iTerrainType);
+	LUAAPIEXTN(CountAllWorkedTerrain, int, iTerrainType);
+#endif
+
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	static int lGetVassalGoldMaintenance(lua_State* L);
+	static int lIsVassalageAcceptable(lua_State* L);
+	static int lGetYieldPerTurnFromVassals(lua_State* L);
+	static int lGetHappinessFromVassals(lua_State* L);
+	static int lGetScoreFromVassals(lua_State* L);
+	static int lGetMilitaryAggressivePosture(lua_State* L);
+	static int lMoveRequestTooSoon(lua_State* L);
+	static int lGetPlayerMoveTroopsRequestCounter(lua_State* L);
+	static int lGetExpensePerTurnFromVassalTaxes(lua_State* L);
+	static int lGetMyShareOfVassalTaxes(lua_State* L);
+	static int lGetVassalTaxContribution(lua_State* L);
+	static int lGetVassalScore(lua_State* L);
+	static int lGetVassalTreatedScore(lua_State* L);
+	static int lGetVassalDemandScore(lua_State* L);
+	static int lGetVassalTaxScore(lua_State* L);
+	static int lGetVassalProtectScore(lua_State* L);
+	static int lGetVassalFailedProtectScore(lua_State* L);
+	static int lGetVassalTreatmentLevel(lua_State* L);
+	static int lGetVassalTreatmentToolTip(lua_State* L);
+	static int lGetVassalIndependenceTooltipAsMaster(lua_State* L);
+	static int lGetVassalIndependenceTooltipAsVassal(lua_State* L);
+	static int lGetMajorityReligion(lua_State* L);	// from CPP
 #endif
 };
 

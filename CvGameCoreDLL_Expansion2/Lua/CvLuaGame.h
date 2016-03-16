@@ -411,12 +411,6 @@ protected:
 	LUAAPIEXTN(SpewTestEvents, int, iLimit); // returns iSeconds, iMilliSeconds, iValue
 #endif
 
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	LUAAPIEXTN(GetMinimumVoluntaryVassalTurns, int);
-	LUAAPIEXTN(GetMinimumVassalTurns, int);
-	LUAAPIEXTN(GetNumTurnsBetweenVassals, int);
-#endif
-
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(AnyoneHasBelief, bool, iBeliefType);
 	LUAAPIEXTN(AnyoneHasBuilding, bool, iBuildingType);
@@ -440,6 +434,17 @@ protected:
 	LUAAPIEXTN(AnyoneHasTech, bool, iTechType);
 	LUAAPIEXTN(AnyoneHasUnit, bool, iUnitType);
 	LUAAPIEXTN(AnyoneHasUnitClass, bool, iUnitClassType);
+#endif
+
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	static int lGetMinimumVoluntaryVassalTurns(lua_State* L);
+	static int lGetMinimumVassalTurns(lua_State* L);
+	static int lGetNumTurnsBetweenVassals(lua_State* L);
+	static int lGetMinimumVassalTax(lua_State* L);
+	static int lGetMaximumVassalTax(lua_State* L);
+	static int lGetMinimumVassalLiberateTurns(lua_State* L);
+	static int lGetMinimumVassalTaxTurns(lua_State* L);
+	static int lGetVassalageEnabledEra(lua_State* L);
 #endif
 };
 

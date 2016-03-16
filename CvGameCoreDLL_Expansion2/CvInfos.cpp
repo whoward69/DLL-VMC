@@ -3305,6 +3305,15 @@ CvGameSpeedInfo::CvGameSpeedInfo() :
 #if defined(MOD_TRADE_ROUTE_SCALING)
 	m_iTradeRouteSpeedMod(100),
 #endif
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	m_iShareOpinionDuration(0),
+	m_iTechCostPerTurnMultiplier(0),
+	m_iMinimumVoluntaryVassalTurns(0),
+	m_iMinimumVassalTurns(0),
+	m_iMinimumVassalTaxTurns(0),
+	m_iNumTurnsBetweenVassals(0),
+	m_iMinimumVassalLiberateTurns(0),
+#endif
 	m_iLeaguePercent(0),
 	m_iNumTurnIncrements(0),
 	m_pGameTurnInfo(NULL)
@@ -3535,10 +3544,12 @@ bool CvGameSpeedInfo::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 		m_iTechCostPerTurnMultiplier	= kResults.GetInt("TechCostPerTurnMultiplier");
 		m_iMinimumVoluntaryVassalTurns	= kResults.GetInt("MinimumVoluntaryVassalTurns");
 		m_iMinimumVassalTurns			= kResults.GetInt("MinimumVassalTurns");
+		m_iMinimumVassalTaxTurns		= kResults.GetInt("MinimumVassalTaxTurns");
 		m_iNumTurnsBetweenVassals		= kResults.GetInt("NumTurnsBetweenVassals");
+		m_iMinimumVassalLiberateTurns	= kResults.GetInt("MinimumVassalLiberateTurns");
 	}
 #endif
-
+	
 	//GameTurnInfos
 	{
 		const char* szGameSpeedInfoType = GetType();
@@ -7183,39 +7194,6 @@ bool CvVoteSourceInfo::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	return true;
 }
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-//------------------------------------------------------------------------------
-bool CvEraInfo::getVassalageEnabled() const
-{
-	return m_bVassalageEnabled;
-}
-//------------------------------------------------------------------------------
-int CvGameSpeedInfo::getShareOpinionDuration() const
-{
-	return m_iShareOpinionDuration;
-}
-//------------------------------------------------------------------------------
-int CvGameSpeedInfo::getTechCostPerTurnMultiplier() const
-{
-	return m_iTechCostPerTurnMultiplier;
-}
-//------------------------------------------------------------------------------
-int CvGameSpeedInfo::getMinimumVoluntaryVassalTurns() const
-{
-	return m_iMinimumVoluntaryVassalTurns;
-}
-//------------------------------------------------------------------------------
-int CvGameSpeedInfo::getMinimumVassalTurns() const
-{
-	return m_iMinimumVassalTurns;
-}
-//------------------------------------------------------------------------------
-int CvGameSpeedInfo::getNumTurnsBetweenVassals() const
-{
-	return m_iNumTurnsBetweenVassals;
-}
-#endif
-
 #if defined(MOD_API_UNIFIED_YIELDS)
 /// Helper function to read in an integer array of data sized according to number of building types
 void FeatureArrayHelpers::Read(FDataStream& kStream, int* paiFeatureArray)
@@ -7448,5 +7426,48 @@ void TerrainArrayHelpers::WriteYieldArray(FDataStream& kStream, int** ppaaiTerra
 			kStream << (int)0;
 		}
 	}
+}
+#endif
+
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+//------------------------------------------------------------------------------
+bool CvEraInfo::getVassalageEnabled() const
+{
+	return m_bVassalageEnabled;
+}
+//------------------------------------------------------------------------------
+int CvGameSpeedInfo::getShareOpinionDuration() const
+{
+	return m_iShareOpinionDuration;
+}
+//------------------------------------------------------------------------------
+int CvGameSpeedInfo::getTechCostPerTurnMultiplier() const
+{
+	return m_iTechCostPerTurnMultiplier;
+}
+//------------------------------------------------------------------------------
+int CvGameSpeedInfo::getMinimumVoluntaryVassalTurns() const
+{
+	return m_iMinimumVoluntaryVassalTurns;
+}
+//------------------------------------------------------------------------------
+int CvGameSpeedInfo::getMinimumVassalTurns() const
+{
+	return m_iMinimumVassalTurns;
+}
+//------------------------------------------------------------------------------
+int CvGameSpeedInfo::getMinimumVassalTaxTurns() const
+{
+	return m_iMinimumVassalTaxTurns;
+}
+//------------------------------------------------------------------------------
+int CvGameSpeedInfo::getMinimumVassalLiberateTurns() const
+{
+	return m_iMinimumVassalLiberateTurns;
+}
+//------------------------------------------------------------------------------
+int CvGameSpeedInfo::getNumTurnsBetweenVassals() const
+{
+	return m_iNumTurnsBetweenVassals;
 }
 #endif

@@ -461,6 +461,10 @@ public:
 	void changeCityWorkingChange(int iChange);
 #endif
 
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	bool IsVassalLevyEra() const;
+#endif
+
 	int getHealRate() const;
 	void changeHealRate(int iChange);
 
@@ -957,6 +961,16 @@ public:
 	bool IsOnTerrain(TerrainTypes iTerrainType) const;
 	bool IsAdjacentToTerrain(TerrainTypes iTerrainType) const;
 	bool IsWithinDistanceOfTerrain(TerrainTypes iTerrainType, int iDistance) const;
+	int CountFeature(FeatureTypes iFeatureType) const;
+	int CountWorkedFeature(FeatureTypes iFeatureType) const;
+	int CountImprovement(ImprovementTypes iImprovementType) const;
+	int CountWorkedImprovement(ImprovementTypes iImprovementType) const;
+	int CountPlotType(PlotTypes iPlotType) const;
+	int CountWorkedPlotType(PlotTypes iPlotType) const;
+	int CountResource(ResourceTypes iResourceType) const;
+	int CountWorkedResource(ResourceTypes iResourceType) const;
+	int CountTerrain(TerrainTypes iTerrainType) const;
+	int CountWorkedTerrain(TerrainTypes iTerrainType) const;
 #endif
 
 	int iScratch; // know the scope of your validity

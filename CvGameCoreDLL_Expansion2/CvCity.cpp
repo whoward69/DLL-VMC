@@ -17850,4 +17850,314 @@ bool CvCity::IsWithinDistanceOfTerrain(TerrainTypes iTerrainType, int iDistance)
 {
 	return plot()->IsWithinDistanceOfTerrain(iTerrainType, iDistance);
 }
+
+int CvCity::CountFeature(FeatureTypes iFeatureType) const
+{
+	int iCount = 0;
+	int iX = getX(); int iY = getY(); int iOwner = getOwner();
+
+#if defined(MOD_GLOBAL_CITY_WORKING)
+	for (int iCityPlotLoop = 0; iCityPlotLoop < GetNumWorkablePlots(); iCityPlotLoop++)
+#else
+	for (int iCityPlotLoop = 0; iCityPlotLoop < NUM_CITY_PLOTS; iCityPlotLoop++)
+#endif
+	{
+		CvPlot* pLoopPlot = plotCity(iX, iY, iCityPlotLoop);
+
+		// Invalid plot or not owned by this player
+		if (pLoopPlot == NULL || pLoopPlot->getOwner() != iOwner) {
+			continue;
+		}
+
+		// Not owned by this city
+		if (pLoopPlot->getWorkingCity() != this) {
+			continue;
+		}
+
+		if (pLoopPlot->HasFeature(iFeatureType)) {
+			++iCount;
+		}
+	}
+	
+	return iCount;
+}
+
+int CvCity::CountWorkedFeature(FeatureTypes iFeatureType) const
+{
+	int iCount = 0;
+	int iX = getX(); int iY = getY(); int iOwner = getOwner();
+
+#if defined(MOD_GLOBAL_CITY_WORKING)
+	for (int iCityPlotLoop = 0; iCityPlotLoop < GetNumWorkablePlots(); iCityPlotLoop++)
+#else
+	for (int iCityPlotLoop = 0; iCityPlotLoop < NUM_CITY_PLOTS; iCityPlotLoop++)
+#endif
+	{
+		CvPlot* pLoopPlot = plotCity(iX, iY, iCityPlotLoop);
+
+		// Invalid plot or not owned by this player
+		if (pLoopPlot == NULL || pLoopPlot->getOwner() != iOwner) {
+			continue;
+		}
+
+		// Not being worked by this city
+		if (pLoopPlot->getWorkingCity() != this || !pLoopPlot->isBeingWorked()) {
+			continue;
+		}
+
+		if (pLoopPlot->HasFeature(iFeatureType)) {
+			++iCount;
+		}
+	}
+	
+	return iCount;
+}
+
+int CvCity::CountImprovement(ImprovementTypes iImprovementType) const
+{
+	int iCount = 0;
+	int iX = getX(); int iY = getY(); int iOwner = getOwner();
+
+#if defined(MOD_GLOBAL_CITY_WORKING)
+	for (int iCityPlotLoop = 0; iCityPlotLoop < GetNumWorkablePlots(); iCityPlotLoop++)
+#else
+	for (int iCityPlotLoop = 0; iCityPlotLoop < NUM_CITY_PLOTS; iCityPlotLoop++)
+#endif
+	{
+		CvPlot* pLoopPlot = plotCity(iX, iY, iCityPlotLoop);
+
+		// Invalid plot or not owned by this player
+		if (pLoopPlot == NULL || pLoopPlot->getOwner() != iOwner) {
+			continue;
+		}
+
+		// Not owned by this city
+		if (pLoopPlot->getWorkingCity() != this) {
+			continue;
+		}
+
+		if (pLoopPlot->HasImprovement(iImprovementType)) {
+			++iCount;
+		}
+	}
+	
+	return iCount;
+}
+
+int CvCity::CountWorkedImprovement(ImprovementTypes iImprovementType) const
+{
+	int iCount = 0;
+	int iX = getX(); int iY = getY(); int iOwner = getOwner();
+
+#if defined(MOD_GLOBAL_CITY_WORKING)
+	for (int iCityPlotLoop = 0; iCityPlotLoop < GetNumWorkablePlots(); iCityPlotLoop++)
+#else
+	for (int iCityPlotLoop = 0; iCityPlotLoop < NUM_CITY_PLOTS; iCityPlotLoop++)
+#endif
+	{
+		CvPlot* pLoopPlot = plotCity(iX, iY, iCityPlotLoop);
+
+		// Invalid plot or not owned by this player
+		if (pLoopPlot == NULL || pLoopPlot->getOwner() != iOwner) {
+			continue;
+		}
+
+		// Not being worked by this city
+		if (pLoopPlot->getWorkingCity() != this || !pLoopPlot->isBeingWorked()) {
+			continue;
+		}
+
+		if (pLoopPlot->HasImprovement(iImprovementType)) {
+			++iCount;
+		}
+	}
+	
+	return iCount;
+}
+
+int CvCity::CountPlotType(PlotTypes iPlotType) const
+{
+	int iCount = 0;
+	int iX = getX(); int iY = getY(); int iOwner = getOwner();
+
+#if defined(MOD_GLOBAL_CITY_WORKING)
+	for (int iCityPlotLoop = 0; iCityPlotLoop < GetNumWorkablePlots(); iCityPlotLoop++)
+#else
+	for (int iCityPlotLoop = 0; iCityPlotLoop < NUM_CITY_PLOTS; iCityPlotLoop++)
+#endif
+	{
+		CvPlot* pLoopPlot = plotCity(iX, iY, iCityPlotLoop);
+
+		// Invalid plot or not owned by this player
+		if (pLoopPlot == NULL || pLoopPlot->getOwner() != iOwner) {
+			continue;
+		}
+
+		// Not owned by this city
+		if (pLoopPlot->getWorkingCity() != this) {
+			continue;
+		}
+
+		if (pLoopPlot->HasPlotType(iPlotType)) {
+			++iCount;
+		}
+	}
+	
+	return iCount;
+}
+
+int CvCity::CountWorkedPlotType(PlotTypes iPlotType) const
+{
+	int iCount = 0;
+	int iX = getX(); int iY = getY(); int iOwner = getOwner();
+
+#if defined(MOD_GLOBAL_CITY_WORKING)
+	for (int iCityPlotLoop = 0; iCityPlotLoop < GetNumWorkablePlots(); iCityPlotLoop++)
+#else
+	for (int iCityPlotLoop = 0; iCityPlotLoop < NUM_CITY_PLOTS; iCityPlotLoop++)
+#endif
+	{
+		CvPlot* pLoopPlot = plotCity(iX, iY, iCityPlotLoop);
+
+		// Invalid plot or not owned by this player
+		if (pLoopPlot == NULL || pLoopPlot->getOwner() != iOwner) {
+			continue;
+		}
+
+		// Not being worked by this city
+		if (pLoopPlot->getWorkingCity() != this || !pLoopPlot->isBeingWorked()) {
+			continue;
+		}
+
+		if (pLoopPlot->HasPlotType(iPlotType)) {
+			++iCount;
+		}
+	}
+	
+	return iCount;
+}
+
+int CvCity::CountResource(ResourceTypes iResourceType) const
+{
+	int iCount = 0;
+	int iX = getX(); int iY = getY(); int iOwner = getOwner();
+
+#if defined(MOD_GLOBAL_CITY_WORKING)
+	for (int iCityPlotLoop = 0; iCityPlotLoop < GetNumWorkablePlots(); iCityPlotLoop++)
+#else
+	for (int iCityPlotLoop = 0; iCityPlotLoop < NUM_CITY_PLOTS; iCityPlotLoop++)
+#endif
+	{
+		CvPlot* pLoopPlot = plotCity(iX, iY, iCityPlotLoop);
+
+		// Invalid plot or not owned by this player
+		if (pLoopPlot == NULL || pLoopPlot->getOwner() != iOwner) {
+			continue;
+		}
+
+		// Not owned by this city
+		if (pLoopPlot->getWorkingCity() != this) {
+			continue;
+		}
+
+		if (pLoopPlot->HasResource(iResourceType)) {
+			++iCount;
+		}
+	}
+	
+	return iCount;
+}
+
+int CvCity::CountWorkedResource(ResourceTypes iResourceType) const
+{
+	int iCount = 0;
+	int iX = getX(); int iY = getY(); int iOwner = getOwner();
+
+#if defined(MOD_GLOBAL_CITY_WORKING)
+	for (int iCityPlotLoop = 0; iCityPlotLoop < GetNumWorkablePlots(); iCityPlotLoop++)
+#else
+	for (int iCityPlotLoop = 0; iCityPlotLoop < NUM_CITY_PLOTS; iCityPlotLoop++)
+#endif
+	{
+		CvPlot* pLoopPlot = plotCity(iX, iY, iCityPlotLoop);
+
+		// Invalid plot or not owned by this player
+		if (pLoopPlot == NULL || pLoopPlot->getOwner() != iOwner) {
+			continue;
+		}
+
+		// Not being worked by this city
+		if (pLoopPlot->getWorkingCity() != this || !pLoopPlot->isBeingWorked()) {
+			continue;
+		}
+
+		if (pLoopPlot->HasResource(iResourceType)) {
+			++iCount;
+		}
+	}
+	
+	return iCount;
+}
+
+int CvCity::CountTerrain(TerrainTypes iTerrainType) const
+{
+	int iCount = 0;
+	int iX = getX(); int iY = getY(); int iOwner = getOwner();
+
+#if defined(MOD_GLOBAL_CITY_WORKING)
+	for (int iCityPlotLoop = 0; iCityPlotLoop < GetNumWorkablePlots(); iCityPlotLoop++)
+#else
+	for (int iCityPlotLoop = 0; iCityPlotLoop < NUM_CITY_PLOTS; iCityPlotLoop++)
+#endif
+	{
+		CvPlot* pLoopPlot = plotCity(iX, iY, iCityPlotLoop);
+
+		// Invalid plot or not owned by this player
+		if (pLoopPlot == NULL || pLoopPlot->getOwner() != iOwner) {
+			continue;
+		}
+
+		// Not owned by this city
+		if (pLoopPlot->getWorkingCity() != this) {
+			continue;
+		}
+
+		if (pLoopPlot->HasTerrain(iTerrainType)) {
+			++iCount;
+		}
+	}
+	
+	return iCount;
+}
+
+int CvCity::CountWorkedTerrain(TerrainTypes iTerrainType) const
+{
+	int iCount = 0;
+	int iX = getX(); int iY = getY(); int iOwner = getOwner();
+
+#if defined(MOD_GLOBAL_CITY_WORKING)
+	for (int iCityPlotLoop = 0; iCityPlotLoop < GetNumWorkablePlots(); iCityPlotLoop++)
+#else
+	for (int iCityPlotLoop = 0; iCityPlotLoop < NUM_CITY_PLOTS; iCityPlotLoop++)
+#endif
+	{
+		CvPlot* pLoopPlot = plotCity(iX, iY, iCityPlotLoop);
+
+		// Invalid plot or not owned by this player
+		if (pLoopPlot == NULL || pLoopPlot->getOwner() != iOwner) {
+			continue;
+		}
+
+		// Not being worked by this city
+		if (pLoopPlot->getWorkingCity() != this || !pLoopPlot->isBeingWorked()) {
+			continue;
+		}
+
+		if (pLoopPlot->HasTerrain(iTerrainType)) {
+			++iCount;
+		}
+	}
+
+	return iCount;
+}
 #endif

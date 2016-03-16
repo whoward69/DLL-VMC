@@ -334,10 +334,6 @@ protected:
 	bool*  m_pNoSettling;
 	bool* m_pResourceForceReveal;
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	bool* m_pAvoidMovement;
-#endif
-
 	FFreeListTrashArray<CvArea> m_areas;
 	FFreeListTrashArray<CvLandmass> m_landmasses;
 
