@@ -1053,6 +1053,9 @@ int PathCost(CvAStarNode* parent, CvAStarNode* node, int data, const void* point
 		{
 			if(pToPlot->getFeatureType() != NO_FEATURE)
 			{
+#if defined(MOD_UNITS_MAX_HP)
+			// We don't have the specific unit, so we'll just use the generic MAX_HIT_POINTS value
+#endif
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 				if (MOD_API_PLOT_BASED_DAMAGE) {
 					iCost += (GC.getPATH_DAMAGE_WEIGHT() * std::max(0, pToPlot->getTurnDamage(pUnit->ignoreTerrainDamage(), pUnit->ignoreFeatureDamage(), pUnit->extraTerrainDamage(), pUnit->extraFeatureDamage()))) / GC.getMAX_HIT_POINTS();
@@ -1776,6 +1779,9 @@ int IgnoreUnitsCost(CvAStarNode* parent, CvAStarNode* node, int data, const void
 		{
 			if(pToPlot->getFeatureType() != NO_FEATURE)
 			{
+#if defined(MOD_UNITS_MAX_HP)
+			// We don't have the specific unit, so we'll just use the generic MAX_HIT_POINTS value
+#endif
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 				if (MOD_API_PLOT_BASED_DAMAGE) {
 					iCost += (GC.getPATH_DAMAGE_WEIGHT() * std::max(0, pToPlot->getTurnDamage(pUnit->ignoreTerrainDamage(), pUnit->ignoreFeatureDamage(), pUnit->extraTerrainDamage(), pUnit->extraFeatureDamage()))) / GC.getMAX_HIT_POINTS();

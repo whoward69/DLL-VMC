@@ -647,7 +647,14 @@ public:
 	void SetAlwaysSeeBarbCampsCount(int iValue);
 	void ChangeAlwaysSeeBarbCampsCount(int iChange);
 
+#if defined(MOD_API_EXTENSIONS)
+	bool grantPolicy(PolicyTypes iPolicy, bool bFree=false);
+	bool revokePolicy(PolicyTypes iPolicy);
+	bool swapPolicy(PolicyTypes iNewPolicy, PolicyTypes iOldPolicy);
+	void setHasPolicy(PolicyTypes eIndex, bool bNewValue, bool bFree=false);
+#else
 	void setHasPolicy(PolicyTypes eIndex, bool bNewValue);
+#endif
 	int getNextPolicyCost() const;
 	void DoUpdateNextPolicyCost();
 	bool canAdoptPolicy(PolicyTypes ePolicy) const;
@@ -1101,13 +1108,13 @@ public:
 	int calculateEconomicMight() const;
 	int calculateProductionMight() const;
 
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	int getCombatExperienceTimes100() const;
 #else
 	int getCombatExperience() const;
 #endif
 #if defined(MOD_GLOBAL_LOCAL_GENERALS)
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	void setCombatExperienceTimes100(int iExperienceTimes100, CvUnit* pFromUnit = NULL);
 	void changeCombatExperienceTimes100(int iChangeTimes100, CvUnit* pFromUnit = NULL);
 #else
@@ -1115,7 +1122,7 @@ public:
 	void changeCombatExperience(int iChange, CvUnit* pFromUnit = NULL);
 #endif
 #else
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	void setCombatExperienceTimes100(int iExperienceTimes100);
 	void changeCombatExperienceTimes100(int iChangeTimes100);
 #else
@@ -1123,7 +1130,7 @@ public:
 	void changeCombatExperience(int iChange);
 #endif
 #endif
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	int getLifetimeCombatExperienceTimes100() const;
 	int getNavalCombatExperienceTimes100() const;
 #else
@@ -1131,7 +1138,7 @@ public:
 	int getNavalCombatExperience() const;
 #endif
 #if defined(MOD_GLOBAL_LOCAL_GENERALS)
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	void setNavalCombatExperienceTimes100(int iExperienceTimes100, CvUnit* pFromUnit = NULL);
 	void changeNavalCombatExperienceTimes100(int iChangeTimes100, CvUnit* pFromUnit = NULL);
 #else
@@ -1139,7 +1146,7 @@ public:
 	void changeNavalCombatExperience(int iChange, CvUnit* pFromUnit = NULL);
 #endif
 #else
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	void setNavalCombatExperienceTimes100(int iExperienceTimes100);
 	void changeNavalCombatExperienceTimes100(int iChangeTimes100);
 #else
@@ -2166,7 +2173,7 @@ protected:
 	FAutoVariable<int, CvPlayer> m_iCombatExperience;
 	int m_iLifetimeCombatExperience;
 	int m_iNavalCombatExperience;
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	int m_iCombatExperienceTimes100;
 	int m_iLifetimeCombatExperienceTimes100;
 	int m_iNavalCombatExperienceTimes100;

@@ -384,6 +384,9 @@ protected:
 	static int lGetBranchPicked2(lua_State* L);
 	static int lGetBranchPicked3(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS)
+	LUAAPIEXTN(GrantPolicy, bool, iPolicy, bFree);
+	LUAAPIEXTN(RevokePolicy, bool, iPolicy);
+	LUAAPIEXTN(SwapPolicy, bool, iPolicyNew, iPolicyOld);
 	LUAAPIEXTN(CanAdoptIdeology, bool, iIdeologyBranch);
 	LUAAPIEXTN(CanAdoptTenet, bool, iTenetPolicy, bIgnoreCost);
 #endif

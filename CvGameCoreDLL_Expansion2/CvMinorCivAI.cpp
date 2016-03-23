@@ -3226,7 +3226,7 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 									if (GC.getGame().getJonRandNum(100, "Minor Civ AI: Decide if we give a unit to the meeting player") < iUnitGift) {
 										CvUnit* pUnit = DoSpawnUnit(ePlayer, true, true);
 										if (pUnit != NULL) {
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 											pUnit->changeExperienceTimes100(100 * (pPlayer->GetCurrentEra() * GC.getMINOR_CIV_FIRST_CONTACT_XP_PER_ERA() + GC.getGame().getJonRandNum(GC.getMINOR_CIV_FIRST_CONTACT_XP_RANDOM(), "Minor Civ AI: Random XP for unit")));
 #else
 											pUnit->changeExperience(pPlayer->GetCurrentEra() * GC.getMINOR_CIV_FIRST_CONTACT_XP_PER_ERA() + GC.getGame().getJonRandNum(GC.getMINOR_CIV_FIRST_CONTACT_XP_RANDOM(), "Minor Civ AI: Random XP for unit"));
@@ -10296,7 +10296,7 @@ void CvMinorCivAI::DoSpawnUnit(PlayerTypes eMajor)
 			// If player trait is to enhance minor bonuses, give this unit some free experience
 			if(GET_PLAYER(eMajor).GetPlayerTraits()->GetCityStateBonusModifier() > 0)
 			{
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 				pNewUnit->changeExperienceTimes100(100 * GC.getMAX_EXPERIENCE_PER_COMBAT());
 #else
 				pNewUnit->changeExperience(GC.getMAX_EXPERIENCE_PER_COMBAT());

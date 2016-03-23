@@ -101,7 +101,11 @@ static CvCombatMemberEntry* AddCombatMember(CvCombatMemberEntry* pkArray, int* p
 void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, CvPlot& plot, CvCombatInfo* pkCombatInfo)
 {
 	BATTLE_STARTED(BATTLE_TYPE_MELEE, plot);
+#if defined(MOD_UNITS_MAX_HP)
+	int iAttackerMaxHP = kAttacker.GetMaxHitPoints();
+#else
 	int iMaxHP = GC.getMAX_HIT_POINTS();
+#endif
 
 	pkCombatInfo->setUnit(BATTLE_UNIT_ATTACKER, &kAttacker);
 	pkCombatInfo->setUnit(BATTLE_UNIT_DEFENDER, pkDefender);
@@ -125,11 +129,19 @@ void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender
 		int iDefenderTotalDamageInflicted = iDefenderDamageInflicted + kAttacker.getDamage();
 
 		// Will both the attacker die, and the city fall? If so, the unit wins
-		if(iAttackerTotalDamageInflicted >= iMaxCityHP && iDefenderTotalDamageInflicted >= iMaxHP)
+#if defined(MOD_UNITS_MAX_HP)
+		if (iAttackerTotalDamageInflicted >= iMaxCityHP && iDefenderTotalDamageInflicted >= iAttackerMaxHP)
+		{
+			iDefenderDamageInflicted = iAttackerMaxHP - kAttacker.getDamage() - 1;
+			iDefenderTotalDamageInflicted = iAttackerMaxHP - 1;
+		}
+#else
+		if (iAttackerTotalDamageInflicted >= iMaxCityHP && iDefenderTotalDamageInflicted >= iMaxHP)
 		{
 			iDefenderDamageInflicted = iMaxHP - kAttacker.getDamage() - 1;
 			iDefenderTotalDamageInflicted = iMaxHP - 1;
 		}
+#endif
 
 		pkCombatInfo->setFinalDamage(BATTLE_UNIT_ATTACKER, iDefenderTotalDamageInflicted);
 		pkCombatInfo->setDamageInflicted(BATTLE_UNIT_ATTACKER, iAttackerDamageInflicted);
@@ -155,6 +167,10 @@ void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender
 	{
 		// Unit vs. Unit
 		CvAssert(pkDefender != NULL);
+
+#if defined(MOD_UNITS_MAX_HP)
+		int iDefenderMaxHP = pkDefender->GetMaxHitPoints();
+#endif
 
 		int iDefenderStrength = pkDefender->GetMaxDefenseStrength(&plot, &kAttacker);
 		int iAttackerStrength = 0;
@@ -189,20 +205,36 @@ void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender
 		int iDefenderTotalDamageInflicted = iDefenderDamageInflicted + kAttacker.getDamage();
 
 		// Will both units be killed by this? :o If so, take drastic corrective measures
-		if(iAttackerTotalDamageInflicted >= iMaxHP && iDefenderTotalDamageInflicted >= iMaxHP)
+#if defined(MOD_UNITS_MAX_HP)
+		if (iAttackerTotalDamageInflicted >= iDefenderMaxHP && iDefenderTotalDamageInflicted >= iAttackerMaxHP)
+#else
+		if (iAttackerTotalDamageInflicted >= iMaxHP && iDefenderTotalDamageInflicted >= iMaxHP)
+#endif
 		{
 			// He who hath the least amount of damage survives with 1 HP left
 			if(iAttackerTotalDamageInflicted > iDefenderTotalDamageInflicted)
 			{
+#if defined(MOD_UNITS_MAX_HP)
+				iDefenderDamageInflicted = iAttackerMaxHP - kAttacker.getDamage() - 1;
+				iDefenderTotalDamageInflicted = iAttackerMaxHP - 1;
+				iAttackerTotalDamageInflicted = iDefenderMaxHP;
+#else
 				iDefenderDamageInflicted = iMaxHP - kAttacker.getDamage() - 1;
 				iDefenderTotalDamageInflicted = iMaxHP - 1;
 				iAttackerTotalDamageInflicted = iMaxHP;
+#endif
 			}
 			else
 			{
+#if defined(MOD_UNITS_MAX_HP)
+				iAttackerDamageInflicted = iDefenderMaxHP - pkDefender->getDamage() - 1;
+				iAttackerTotalDamageInflicted = iDefenderMaxHP - 1;
+				iDefenderTotalDamageInflicted = iAttackerMaxHP;
+#else
 				iAttackerDamageInflicted = iMaxHP - pkDefender->getDamage() - 1;
 				iAttackerTotalDamageInflicted = iMaxHP - 1;
 				iDefenderTotalDamageInflicted = iMaxHP;
+#endif
 			}
 		}
 
@@ -215,9 +247,17 @@ void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender
 		pkCombatInfo->setFearDamageInflicted(BATTLE_UNIT_ATTACKER, kAttacker.getCombatDamage(iAttackerStrength, iDefenderStrength, kAttacker.getDamage(), true, false, true));
 		//	pkCombatInfo->setFearDamageInflicted( BATTLE_UNIT_DEFENDER, getCombatDamage(iDefenderStrength, iAttackerStrength, pDefender->getDamage(), true, false, true) );
 
-		int iAttackerEffectiveStrength = iAttackerStrength * (iMaxHP - range(kAttacker.getDamage(), 0, iMaxHP-1)) / iMaxHP;
+#if defined(MOD_UNITS_MAX_HP)
+		int iAttackerEffectiveStrength = iAttackerStrength * (iAttackerMaxHP - range(kAttacker.getDamage(), 0, iAttackerMaxHP - 1)) / iAttackerMaxHP;
+#else
+		int iAttackerEffectiveStrength = iAttackerStrength * (iMaxHP - range(kAttacker.getDamage(), 0, iMaxHP - 1)) / iMaxHP;
+#endif
 		iAttackerEffectiveStrength = iAttackerEffectiveStrength > 0 ? iAttackerEffectiveStrength : 1;
-		int iDefenderEffectiveStrength = iDefenderStrength * (iMaxHP - range(pkDefender->getDamage(), 0, iMaxHP-1)) / iMaxHP;
+#if defined(MOD_UNITS_MAX_HP)
+		int iDefenderEffectiveStrength = iDefenderStrength * (iDefenderMaxHP - range(pkDefender->getDamage(), 0, iDefenderMaxHP - 1)) / iDefenderMaxHP;
+#else
+		int iDefenderEffectiveStrength = iDefenderStrength * (iMaxHP - range(pkDefender->getDamage(), 0, iMaxHP - 1)) / iMaxHP;
+#endif
 		iDefenderEffectiveStrength = iDefenderEffectiveStrength > 0 ? iDefenderEffectiveStrength : 1;
 
 		//int iExperience = kAttacker.defenseXPValue();
@@ -244,7 +284,11 @@ void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender
 		{
 			bAdvance = false;
 		}
-		else if(iAttackerTotalDamageInflicted >= iMaxHP && kAttacker.IsCaptureDefeatedEnemy() && kAttacker.AreUnitsOfSameType(*pkDefender))
+#if defined(MOD_UNITS_MAX_HP)
+		else if (iAttackerTotalDamageInflicted >= iDefenderMaxHP && kAttacker.IsCaptureDefeatedEnemy() && kAttacker.AreUnitsOfSameType(*pkDefender))
+#else
+		else if (iAttackerTotalDamageInflicted >= iMaxHP && kAttacker.IsCaptureDefeatedEnemy() && kAttacker.AreUnitsOfSameType(*pkDefender))
+#endif
 		{
 			int iCaptureRoll = GC.getGame().getJonRandNum(100, "Capture Enemy Roll");
 
@@ -313,7 +357,11 @@ void CvUnitCombat::ResolveMeleeCombat(const CvCombatInfo& kCombatInfo, uint uiPa
 
 #if !defined(NO_ACHIEVEMENTS)
 		//One Hit
+#if defined(MOD_UNITS_MAX_HP)
+		if(pkDefender->GetCurrHitPoints() == pkDefender->GetMaxHitPoints() && iAttackerDamageInflicted >= pkDefender->GetCurrHitPoints()  // Defender at full hit points and will the damage be more than the full hit points?
+#else
 		if(pkDefender->GetCurrHitPoints() == GC.getMAX_HIT_POINTS() && iAttackerDamageInflicted >= pkDefender->GetCurrHitPoints()  // Defender at full hit points and will the damage be more than the full hit points?
+#endif
 		        && pkAttacker->isHuman() && !GC.getGame().isGameMultiPlayer())
 		{
 			gDLL->UnlockAchievement(ACHIEVEMENT_ONEHITKILL);
@@ -329,7 +377,7 @@ void CvUnitCombat::ResolveMeleeCombat(const CvCombatInfo& kCombatInfo, uint uiPa
 #endif
 
 		// Update experience for both sides.
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 		pkDefender->changeExperienceTimes100(100 *
 #else
 		pkDefender->changeExperience(
@@ -340,7 +388,7 @@ void CvUnitCombat::ResolveMeleeCombat(const CvCombatInfo& kCombatInfo, uint uiPa
 		    kCombatInfo.getInBorders(BATTLE_UNIT_DEFENDER),
 		    kCombatInfo.getUpdateGlobal(BATTLE_UNIT_DEFENDER));
 
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 		pkAttacker->changeExperienceTimes100(100 * 
 #else
 		pkAttacker->changeExperience(
@@ -352,8 +400,13 @@ void CvUnitCombat::ResolveMeleeCombat(const CvCombatInfo& kCombatInfo, uint uiPa
 		    kCombatInfo.getUpdateGlobal(BATTLE_UNIT_ATTACKER));
 
 		// Anyone eat it?
+#if defined(MOD_UNITS_MAX_HP)
+		bAttackerDead = (pkAttacker->getDamage() >= pkAttacker->GetMaxHitPoints());
+		bDefenderDead = (pkDefender->getDamage() >= pkDefender->GetMaxHitPoints());
+#else
 		bAttackerDead = (pkAttacker->getDamage() >= GC.getMAX_HIT_POINTS());
 		bDefenderDead = (pkDefender->getDamage() >= GC.getMAX_HIT_POINTS());
+#endif
 
 #if !defined(NO_ACHIEVEMENTS)
 		CvPlayerAI& kAttackerOwner = GET_PLAYER(pkAttacker->getOwner());
@@ -591,10 +644,17 @@ void CvUnitCombat::GenerateRangedCombatInfo(CvUnit& kAttacker, CvUnit* pkDefende
 
 		iDamage = kAttacker.GetRangeCombatDamage(pkDefender, /*pCity*/ NULL, /*bIncludeRand*/ true);
 
+#if defined(MOD_UNITS_MAX_HP)
+		if(iDamage + pkDefender->getDamage() > kAttacker.GetMaxHitPoints())
+		{
+			iDamage = kAttacker.GetMaxHitPoints() - pkDefender->getDamage();
+		}
+#else
 		if(iDamage + pkDefender->getDamage() > GC.getMAX_HIT_POINTS())
 		{
 			iDamage = GC.getMAX_HIT_POINTS() - pkDefender->getDamage();
 		}
+#endif
 
 		iTotalDamage = std::max(pkDefender->getDamage(), pkDefender->getDamage() + iDamage);
 	}
@@ -705,10 +765,17 @@ void CvUnitCombat::GenerateRangedCombatInfo(CvCity& kAttacker, CvUnit* pkDefende
 
 		iDamage = kAttacker.rangeCombatDamage(pkDefender);
 
+#if defined(MOD_UNITS_MAX_HP)
+		if(iDamage + pkDefender->getDamage() > pkDefender->GetMaxHitPoints())
+		{
+			iDamage = pkDefender->GetMaxHitPoints() - pkDefender->getDamage();
+		}
+#else
 		if(iDamage + pkDefender->getDamage() > GC.getMAX_HIT_POINTS())
 		{
 			iDamage = GC.getMAX_HIT_POINTS() - pkDefender->getDamage();
 		}
+#endif
 
 		iTotalDamage = std::max(pkDefender->getDamage(), pkDefender->getDamage() + iDamage);
 	}
@@ -783,7 +850,11 @@ void CvUnitCombat::ResolveRangedUnitVsCombat(const CvCombatInfo& kCombatInfo, ui
 				if(pkAttacker)
 				{
 					// Defender died
+#if defined(MOD_UNITS_MAX_HP)
+					if(iDamage + pkDefender->getDamage() >= pkDefender->GetMaxHitPoints())
+#else
 					if(iDamage + pkDefender->getDamage() >= GC.getMAX_HIT_POINTS())
+#endif
 					{
 						if(pkAttacker->getOwner() == GC.getGame().getActivePlayer())
 						{
@@ -816,7 +887,11 @@ void CvUnitCombat::ResolveRangedUnitVsCombat(const CvCombatInfo& kCombatInfo, ui
 
 #if !defined(NO_ACHIEVEMENTS)
 						//One Hit
+#if defined(MOD_UNITS_MAX_HP)
+						if(pkDefender->GetCurrHitPoints() == pkDefender->GetMaxHitPoints() && pkAttacker->isHuman() && !GC.getGame().isGameMultiPlayer())
+#else
 						if(pkDefender->GetCurrHitPoints() == GC.getMAX_HIT_POINTS() && pkAttacker->isHuman() && !GC.getGame().isGameMultiPlayer())
+#endif
 						{
 							gDLL->UnlockAchievement(ACHIEVEMENT_ONEHITKILL);
 						}
@@ -851,7 +926,7 @@ void CvUnitCombat::ResolveRangedUnitVsCombat(const CvCombatInfo& kCombatInfo, ui
 #endif
 
 					// Update experience
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 					pkDefender->changeExperienceTimes100(100 * 
 #else
 					pkDefender->changeExperience(
@@ -905,7 +980,7 @@ void CvUnitCombat::ResolveRangedUnitVsCombat(const CvCombatInfo& kCombatInfo, ui
 		// Unit gains XP for executing a Range Strike
 		if(iDamage > 0) // && iDefenderStrength > 0)
 		{
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 			pkAttacker->changeExperienceTimes100(100 * 
 #else
 			pkAttacker->changeExperience(
@@ -981,7 +1056,11 @@ void CvUnitCombat::ResolveRangedCityVsUnitCombat(const CvCombatInfo& kCombatInfo
 						MILITARYLOG(pkDefender->getOwner(), localizedText.toUTF8(), pkDefender->plot(), pkAttacker->getOwner());
 					}
 
+#if defined(MOD_UNITS_MAX_HP)
+					if(iDamage + pkDefender->getDamage() >= pkDefender->GetMaxHitPoints())
+#else
 					if(iDamage + pkDefender->getDamage() >= GC.getMAX_HIT_POINTS())
+#endif
 					{
 						CvNotifications* pNotifications = GET_PLAYER(pkDefender->getOwner()).GetNotifications();
 						if(pNotifications)
@@ -1010,7 +1089,7 @@ void CvUnitCombat::ResolveRangedCityVsUnitCombat(const CvCombatInfo& kCombatInfo
 #endif
 
 					// Update experience
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 					pkDefender->changeExperienceTimes100(100 * 
 #else
 					pkDefender->changeExperience(
@@ -1077,7 +1156,7 @@ void CvUnitCombat::ResolveCityMeleeCombat(const CvCombatInfo& kCombatInfo, uint 
 #endif
 		pkDefender->changeDamage(iAttackerDamageInflicted);
 
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 		pkAttacker->changeExperienceTimes100(100 * kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
 #else
 		pkAttacker->changeExperience(kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
@@ -1297,20 +1376,34 @@ void CvUnitCombat::GenerateAirCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, 
 		// Calculate attacker damage
 		iAttackerDamageInflicted = kAttacker.GetAirCombatDamage(pkDefender, /*pCity*/ NULL, /*bIncludeRand*/ true, iInterceptionDamage);
 
+#if defined(MOD_UNITS_MAX_HP)
+		if(iAttackerDamageInflicted + pkDefender->getDamage() > pkDefender->GetMaxHitPoints())
+		{
+			iAttackerDamageInflicted = pkDefender->GetMaxHitPoints() - pkDefender->getDamage();
+		}
+#else
 		if(iAttackerDamageInflicted + pkDefender->getDamage() > GC.getMAX_HIT_POINTS())
 		{
 			iAttackerDamageInflicted = GC.getMAX_HIT_POINTS() - pkDefender->getDamage();
 		}
+#endif
 
 		iAttackerTotalDamageInflicted = std::max(pkDefender->getDamage(), pkDefender->getDamage() + iAttackerDamageInflicted);
 
 		// Calculate defense damage
 		iDefenderDamageInflicted = pkDefender->GetAirStrikeDefenseDamage(&kAttacker);
 
+#if defined(MOD_UNITS_MAX_HP)
+		if(iDefenderDamageInflicted + kAttacker.getDamage() > kAttacker.GetMaxHitPoints())
+		{
+			iDefenderDamageInflicted = kAttacker.GetMaxHitPoints() - kAttacker.getDamage();
+		}
+#else
 		if(iDefenderDamageInflicted + kAttacker.getDamage() > GC.getMAX_HIT_POINTS())
 		{
 			iDefenderDamageInflicted = GC.getMAX_HIT_POINTS() - kAttacker.getDamage();
 		}
+#endif
 
 		iDefenderTotalDamageInflicted = std::max(kAttacker.getDamage(), kAttacker.getDamage() + (iDefenderDamageInflicted + iInterceptionDamage));
 	}
@@ -1352,7 +1445,12 @@ void CvUnitCombat::GenerateAirCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, 
 
 		if(iDefenderDamageInflicted + kAttacker.getDamage() > pCity->GetMaxHitPoints())
 		{
+#if defined(MOD_BUGFIX_MINOR)
+			// Surely!!!
+			iDefenderDamageInflicted = pCity->GetMaxHitPoints() - kAttacker.getDamage();
+#else
 			iDefenderDamageInflicted = GC.getMAX_HIT_POINTS() - kAttacker.getDamage();
+#endif
 		}
 
 		iDefenderTotalDamageInflicted = std::max(kAttacker.getDamage(), kAttacker.getDamage() + (iDefenderDamageInflicted + iInterceptionDamage));
@@ -1445,7 +1543,7 @@ void CvUnitCombat::ResolveAirUnitVsCombat(const CvCombatInfo& kCombatInfo, uint 
 	{
 		pInterceptor->setMadeInterception(true);
 		pInterceptor->setCombatUnit(NULL);
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 		pInterceptor->changeExperienceTimes100(100 * 
 #else
 		pInterceptor->changeExperience(
@@ -1478,7 +1576,11 @@ void CvUnitCombat::ResolveAirUnitVsCombat(const CvCombatInfo& kCombatInfo, uint 
 				{
 #if !defined(NO_ACHIEVEMENTS)
 					//One Hit
+#if defined(MOD_UNITS_MAX_HP)
+					if(pkDefender->GetCurrHitPoints() == pkDefender->GetMaxHitPoints() && pkAttacker->isHuman() && !GC.getGame().isGameMultiPlayer())
+#else
 					if(pkDefender->GetCurrHitPoints() == GC.getMAX_HIT_POINTS() && pkAttacker->isHuman() && !GC.getGame().isGameMultiPlayer())
+#endif
 					{
 						gDLL->UnlockAchievement(ACHIEVEMENT_ONEHITKILL);
 					}
@@ -1493,7 +1595,7 @@ void CvUnitCombat::ResolveAirUnitVsCombat(const CvCombatInfo& kCombatInfo, uint 
 #endif
 
 					// Update experience
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 					pkDefender->changeExperienceTimes100(100 * 
 #else
 					pkDefender->changeExperience(
@@ -1675,7 +1777,7 @@ void CvUnitCombat::ResolveAirUnitVsCombat(const CvCombatInfo& kCombatInfo, uint 
 			// Experience
 			if(iAttackerDamageInflicted > 0)
 			{
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 				pkAttacker->changeExperienceTimes100(100 * kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
 #else
 				pkAttacker->changeExperience(kCombatInfo.getExperience(BATTLE_UNIT_ATTACKER),
@@ -1715,7 +1817,11 @@ void CvUnitCombat::ResolveAirUnitVsCombat(const CvCombatInfo& kCombatInfo, uint 
 void CvUnitCombat::GenerateAirSweepCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, CvPlot& plot, CvCombatInfo* pkCombatInfo)
 {
 	BATTLE_STARTED(BATTLE_TYPE_SWEEP, plot);
+#if defined(MOD_UNITS_MAX_HP)
+	int iAttackerMaxHP = kAttacker.GetMaxHitPoints();
+#else
 	int iMaxHP = GC.getMAX_HIT_POINTS();
+#endif
 
 	pkCombatInfo->setUnit(BATTLE_UNIT_ATTACKER, &kAttacker);
 	pkCombatInfo->setUnit(BATTLE_UNIT_DEFENDER, pkDefender);
@@ -1751,6 +1857,9 @@ void CvUnitCombat::GenerateAirSweepCombatInfo(CvUnit& kAttacker, CvUnit* pkDefen
 	else
 	{
 		iDefenderStrength = pkDefender->GetMaxRangedCombatStrength(&kAttacker, /*pCity*/ NULL, false, false);
+#if defined(MOD_UNITS_MAX_HP)
+		int iDefenderMaxHP = pkDefender->GetMaxHitPoints();
+#endif
 
 		int iAttackerDamageInflicted = kAttacker.getCombatDamage(iAttackerStrength, iDefenderStrength, kAttacker.getDamage(), /*bIncludeRand*/ true, /*bAttackerIsCity*/ false, /*bDefenderIsCity*/ false);
 		int iDefenderDamageInflicted = pkDefender->getCombatDamage(iDefenderStrength, iAttackerStrength, pkDefender->getDamage(), /*bIncludeRand*/ true, /*bAttackerIsCity*/ false, /*bDefenderIsCity*/ false);
@@ -1759,20 +1868,36 @@ void CvUnitCombat::GenerateAirSweepCombatInfo(CvUnit& kAttacker, CvUnit* pkDefen
 		int iDefenderTotalDamageInflicted = iDefenderDamageInflicted + kAttacker.getDamage();
 
 		// Will both units be killed by this? :o If so, take drastic corrective measures
-		if(iAttackerTotalDamageInflicted >= iMaxHP && iDefenderTotalDamageInflicted >= iMaxHP)
+#if defined(MOD_UNITS_MAX_HP)
+		if (iAttackerTotalDamageInflicted >= iDefenderMaxHP && iDefenderTotalDamageInflicted >= iAttackerMaxHP)
+#else
+		if (iAttackerTotalDamageInflicted >= iMaxHP && iDefenderTotalDamageInflicted >= iMaxHP)
+#endif
 		{
 			// He who hath the least amount of damage survives with 1 HP left
 			if(iAttackerTotalDamageInflicted > iDefenderTotalDamageInflicted)
 			{
+#if defined(MOD_UNITS_MAX_HP)
+				iDefenderDamageInflicted = iAttackerMaxHP - kAttacker.getDamage() - 1;
+				iDefenderTotalDamageInflicted = iAttackerMaxHP - 1;
+				iAttackerTotalDamageInflicted = iDefenderMaxHP;
+#else
 				iDefenderDamageInflicted = iMaxHP - kAttacker.getDamage() - 1;
 				iDefenderTotalDamageInflicted = iMaxHP - 1;
 				iAttackerTotalDamageInflicted = iMaxHP;
+#endif
 			}
 			else
 			{
+#if defined(MOD_UNITS_MAX_HP)
+				iAttackerDamageInflicted = iDefenderMaxHP - pkDefender->getDamage() - 1;
+				iAttackerTotalDamageInflicted = iDefenderMaxHP - 1;
+				iDefenderTotalDamageInflicted = iAttackerMaxHP;
+#else
 				iAttackerDamageInflicted = iMaxHP - pkDefender->getDamage() - 1;
 				iAttackerTotalDamageInflicted = iMaxHP - 1;
 				iDefenderTotalDamageInflicted = iMaxHP;
+#endif
 			}
 		}
 
@@ -1787,9 +1912,17 @@ void CvUnitCombat::GenerateAirSweepCombatInfo(CvUnit& kAttacker, CvUnit* pkDefen
 		//pkCombatInfo->setFearDamageInflicted( BATTLE_UNIT_ATTACKER, kAttacker.getCombatDamage(iAttackerStrength, iDefenderStrength, kAttacker.getDamage(), true, false, true) );
 		//	pkCombatInfo->setFearDamageInflicted( BATTLE_UNIT_DEFENDER, getCombatDamage(iDefenderStrength, iAttackerStrength, pDefender->getDamage(), true, false, true) );
 
-		int iAttackerEffectiveStrength = iAttackerStrength * (iMaxHP - range(kAttacker.getDamage(), 0, iMaxHP-1)) / iMaxHP;
+#if defined(MOD_UNITS_MAX_HP)
+		int iAttackerEffectiveStrength = iAttackerStrength * (iAttackerMaxHP - range(kAttacker.getDamage(), 0, iAttackerMaxHP - 1)) / iAttackerMaxHP;
+#else
+		int iAttackerEffectiveStrength = iAttackerStrength * (iMaxHP - range(kAttacker.getDamage(), 0, iMaxHP - 1)) / iMaxHP;
+#endif
 		iAttackerEffectiveStrength = iAttackerEffectiveStrength > 0 ? iAttackerEffectiveStrength : 1;
-		int iDefenderEffectiveStrength = iDefenderStrength * (iMaxHP - range(pkDefender->getDamage(), 0, iMaxHP-1)) / iMaxHP;
+#if defined(MOD_UNITS_MAX_HP)
+		int iDefenderEffectiveStrength = iDefenderStrength * (iDefenderMaxHP - range(pkDefender->getDamage(), 0, iDefenderMaxHP - 1)) / iDefenderMaxHP;
+#else
+		int iDefenderEffectiveStrength = iDefenderStrength * (iMaxHP - range(pkDefender->getDamage(), 0, iMaxHP - 1)) / iMaxHP;
+#endif
 		iDefenderEffectiveStrength = iDefenderEffectiveStrength > 0 ? iDefenderEffectiveStrength : 1;
 
 		//int iExperience = kAttacker.defenseXPValue();
@@ -1845,7 +1978,11 @@ void CvUnitCombat::ResolveAirSweep(const CvCombatInfo& kCombatInfo, uint uiParen
 		{
 #if !defined(NO_ACHIEVEMENTS)
 			//One Hit
+#if defined(MOD_UNITS_MAX_HP)
+			if(pkDefender->GetCurrHitPoints() == pkDefender->GetMaxHitPoints() && pkAttacker->isHuman() && !GC.getGame().isGameMultiPlayer())
+#else
 			if(pkDefender->GetCurrHitPoints() == GC.getMAX_HIT_POINTS() && pkAttacker->isHuman() && !GC.getGame().isGameMultiPlayer())
+#endif
 			{
 				gDLL->UnlockAchievement(ACHIEVEMENT_ONEHITKILL);
 			}
@@ -1860,7 +1997,7 @@ void CvUnitCombat::ResolveAirSweep(const CvCombatInfo& kCombatInfo, uint uiParen
 #endif
 
 			// Update experience for both sides.
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 			pkDefender->changeExperienceTimes100(100 *
 #else
 			pkDefender->changeExperience(
@@ -1871,7 +2008,7 @@ void CvUnitCombat::ResolveAirSweep(const CvCombatInfo& kCombatInfo, uint uiParen
 			    kCombatInfo.getInBorders(BATTLE_UNIT_DEFENDER),
 			    kCombatInfo.getUpdateGlobal(BATTLE_UNIT_DEFENDER));
 
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 			pkAttacker->changeExperienceTimes100(100 * 
 #else
 			pkAttacker->changeExperience(
@@ -1883,8 +2020,13 @@ void CvUnitCombat::ResolveAirSweep(const CvCombatInfo& kCombatInfo, uint uiParen
 			    kCombatInfo.getUpdateGlobal(BATTLE_UNIT_ATTACKER));
 
 			// Anyone eat it?
+#if defined(MOD_UNITS_MAX_HP)
+			bAttackerDead = (pkAttacker->getDamage() >= pkAttacker->GetMaxHitPoints());
+			bDefenderDead = (pkDefender->getDamage() >= pkDefender->GetMaxHitPoints());
+#else
 			bAttackerDead = (pkAttacker->getDamage() >= GC.getMAX_HIT_POINTS());
 			bDefenderDead = (pkDefender->getDamage() >= GC.getMAX_HIT_POINTS());
+#endif
 
 			int iActivePlayerID = GC.getGame().getActivePlayer();
 
@@ -2395,7 +2537,11 @@ void CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDam
 								// Wipe everything out
 								else
 								{
+#if defined(MOD_UNITS_MAX_HP)
+									iNukeDamage = pLoopUnit->GetMaxHitPoints();
+#else
 									iNukeDamage = GC.getMAX_HIT_POINTS();
+#endif
 								}
 
 								if(pLoopCity != NULL)
@@ -2414,8 +2560,13 @@ void CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDam
 									}
 #endif
 									pkDamageEntry->SetDamage(iNukeDamage);
+#if defined(MOD_UNITS_MAX_HP)
+									pkDamageEntry->SetFinalDamage(std::min(iNukeDamage + pLoopUnit->getDamage(), pLoopUnit->GetMaxHitPoints()));
+									pkDamageEntry->SetMaxHitPoints(pLoopUnit->GetMaxHitPoints());
+#else
 									pkDamageEntry->SetFinalDamage(std::min(iNukeDamage + pLoopUnit->getDamage(), GC.getMAX_HIT_POINTS()));
 									pkDamageEntry->SetMaxHitPoints(GC.getMAX_HIT_POINTS());
+#endif
 									if(pkAttacker)
 										pLoopUnit->setCombatUnit(pkAttacker);
 								}
@@ -2724,6 +2875,9 @@ void CvUnitCombat::ResolveCombat(const CvCombatInfo& kInfo, uint uiParentEventID
 			int iDefendingUnit = -1;
 			int iInterceptingUnit = -1;
 
+#if defined(MOD_UNITS_MAX_HP)
+			// Generic values for max hit points, changed below when we have the specific units available
+#endif
 			int attackerMaxHP = GC.getMAX_HIT_POINTS();
 			int defenderMaxHP = GC.getMAX_HIT_POINTS();
 		
@@ -2754,11 +2908,19 @@ void CvUnitCombat::ResolveCombat(const CvCombatInfo& kInfo, uint uiParentEventID
 			{
 				iAttackingPlayer = pAttacker->getOwner();
 				iAttackingUnit = pAttacker->GetID();
+#if defined(MOD_UNITS_MAX_HP)
+				attackerMaxHP = pAttacker->GetMaxHitPoints();
+				// Generic values for max hit points, changed below when we have the specific units available
+#endif
 			}
 			if (pkDefender)
 			{
 				iDefendingPlayer = pkDefender->getOwner();
 				iDefendingUnit = pkDefender->GetID();
+#if defined(MOD_UNITS_MAX_HP)
+				defenderMaxHP = pkDefender->GetMaxHitPoints();
+				// Generic values for max hit points, changed below when we have the specific units available
+#endif
 			}
 			if (pInterceptor)
 			{
@@ -2890,6 +3052,9 @@ void CvUnitCombat::ResolveCombat(const CvCombatInfo& kInfo, uint uiParentEventID
 				int iDefendingUnit = -1;
 				int iInterceptingUnit = -1;
 
+#if defined(MOD_UNITS_MAX_HP)
+				// Generic values for max hit points, changed below when we have the specific units available
+#endif
 				int attackerMaxHP = GC.getMAX_HIT_POINTS();
 				int defenderMaxHP = GC.getMAX_HIT_POINTS();
 		
@@ -2920,11 +3085,17 @@ void CvUnitCombat::ResolveCombat(const CvCombatInfo& kInfo, uint uiParentEventID
 				{
 					iAttackingPlayer = pAttacker->getOwner();
 					iAttackingUnit = pAttacker->GetID();
+#if defined(MOD_UNITS_MAX_HP)
+					attackerMaxHP = pAttacker->GetMaxHitPoints();
+#endif
 				}
 				if (pkDefender)
 				{
 					iDefendingPlayer = pkDefender->getOwner();
 					iDefendingUnit = pkDefender->GetID();
+#if defined(MOD_UNITS_MAX_HP)
+					defenderMaxHP = pkDefender->GetMaxHitPoints();
+#endif
 				}
 				if (pInterceptor)
 				{
@@ -3106,7 +3277,11 @@ CvUnitCombat::ATTACK_RESULT CvUnitCombat::Attack(CvUnit& kAttacker, CvPlot& targ
 		}
 
 		// Kill them!
+#if defined(MOD_UNITS_MAX_HP)
+		pDefender->setDamage(pDefender->GetMaxHitPoints());
+#else
 		pDefender->setDamage(GC.getMAX_HIT_POINTS());
+#endif
 
 		Localization::String strMessage;
 		Localization::String strSummary;

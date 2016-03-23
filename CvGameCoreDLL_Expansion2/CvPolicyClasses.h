@@ -253,6 +253,9 @@ public:
 	int GetBuildingClassYieldChanges(int i, int j) const;
 	int GetFlavorValue(int i) const;
 
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+	bool IsDummy() const;
+#endif
 	bool IsOneShot() const;
 	bool IncludesOneShotFreeUnits() const;
 
@@ -409,6 +412,9 @@ private:
 	bool m_bEnablesSSPartPurchase;
 	bool m_bAbleToAnnexCityStates;
 
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+	bool m_bDummy;
+#endif
 	bool m_bOneShot;
 	bool m_bIncludesOneShotFreeUnits;
 
@@ -640,8 +646,25 @@ public:
 
 	// Accessor functions
 	bool HasPolicy(PolicyTypes eIndex) const;
+#if defined(MOD_API_EXTENSIONS)
+	bool IsFreePolicy(PolicyTypes eIndex) const;
+	void SetPolicy(PolicyTypes eIndex, bool bNewValue, bool bFree);
+#else
 	void SetPolicy(PolicyTypes eIndex, bool bNewValue);
+#endif
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+#if defined(MOD_API_EXTENSIONS)
+	int GetNumPoliciesOwned(bool bExcludeOrphans, bool bExcludeFree = false) const;
+#else
+	int GetNumPoliciesOwned(bool bExcludeOrphans) const;
+#endif
+#else
+#if defined(MOD_API_EXTENSIONS)
+	int GetNumPoliciesOwned(bool bExcludeFree = false) const;
+#else
 	int GetNumPoliciesOwned() const;
+#endif
+#endif
 	int GetNumPoliciesOwnedInBranch(PolicyBranchTypes eBranch) const;
 	CvPolicyXMLEntries* GetPolicies() const;
 
@@ -738,6 +761,9 @@ private:
 	// Logging functions
 	void LogFlavors(FlavorTypes eFlavor = NO_FLAVOR);
 
+#if defined(MOD_API_EXTENSIONS)
+	bool* m_pabFreePolicy;
+#endif
 	bool* m_pabHasPolicy;
 	bool* m_pabHasOneShotPolicyFired;
 	bool* m_pabHaveOneShotFreeUnitsFired;

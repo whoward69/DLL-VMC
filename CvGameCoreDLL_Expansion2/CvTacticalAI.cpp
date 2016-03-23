@@ -3202,7 +3202,11 @@ void CvTacticalAI::PlotAirSweepMoves()
 	for(it = m_CurrentTurnUnits.begin(); it != m_CurrentTurnUnits.end(); it++)
 	{
 		UnitHandle pUnit = m_pPlayer->getUnit(*it);
+#if defined(MOD_UNITS_MAX_HP)
+		if(pUnit && (pUnit->getDamage() * 2) < pUnit->GetMaxHitPoints())
+#else
 		if(pUnit && (pUnit->getDamage() * 2) < GC.getMAX_HIT_POINTS())
+#endif
 		{
 			// Am I eligible to air sweep and have a target?
 			if(pUnit->canAirSweep() && !m_pPlayer->GetMilitaryAI()->WillAirUnitRebase(pUnit.pointer()) && m_pPlayer->GetMilitaryAI()->GetBestAirSweepTarget(pUnit.pointer()) != NULL)
@@ -8798,7 +8802,11 @@ bool CvTacticalAI::FindUnitsWithinStrikingDistance(CvPlot* pTarget, int iNumTurn
 #endif
 				{
 					// Don't use air units for air strikes if at or below half health
+#if defined(MOD_UNITS_MAX_HP)
+					if (pLoopUnit->getDomainType() != DOMAIN_AIR || (pLoopUnit->getDamage() * 2) < pLoopUnit->GetMaxHitPoints())
+#else
 					if (pLoopUnit->getDomainType() != DOMAIN_AIR || (pLoopUnit->getDamage() * 2) < GC.getMAX_HIT_POINTS())
+#endif
 					{
 #if defined(MOD_AI_SMART_RANGED_UNITS)
 						if (MOD_AI_SMART_RANGED_UNITS)
@@ -9003,7 +9011,11 @@ bool CvTacticalAI::FindClosestUnit(CvPlot* pTarget, int iNumTurnsAway, bool bMus
 				bValidUnit = false;
 			}
 
+#if defined(MOD_UNITS_MAX_HP)
+			else if (bMustHaveHalfHP && (pLoopUnit->getDamage() * 2 > pLoopUnit->GetMaxHitPoints()))
+#else
 			else if (bMustHaveHalfHP && (pLoopUnit->getDamage() * 2 > GC.getMAX_HIT_POINTS()))
+#endif
 			{
 				bValidUnit = false;
 			}

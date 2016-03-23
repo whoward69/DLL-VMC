@@ -398,6 +398,9 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetBranchPicked2);
 	Method(GetBranchPicked3);
 #if defined(MOD_API_LUA_EXTENSIONS)
+	Method(GrantPolicy);
+	Method(RevokePolicy);
+	Method(SwapPolicy);
 	Method(CanAdoptIdeology);
 	Method(CanAdoptTenet);
 #endif
@@ -5126,7 +5129,13 @@ int CvLuaPlayer::lGetNumPolicies(lua_State* L)
 {
 	CvPlayerAI* pkPlayer = GetInstance(L);
 
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+	bool bExcludeOrphans = luaL_optbool(L, 2, MOD_BUGFIX_DUMMY_POLICIES);
+	
+	const int iResult = pkPlayer->GetPlayerPolicies()->GetNumPoliciesOwned(bExcludeOrphans);
+#else
 	const int iResult = pkPlayer->GetPlayerPolicies()->GetNumPoliciesOwned();
+#endif
 	lua_pushinteger(L, iResult);
 	return 1;
 }
@@ -5159,7 +5168,17 @@ int CvLuaPlayer::lHasPolicy(lua_State* L)
 //void setHasPolicy(PolicyTypes  eIndex, bool bNewValue);
 int CvLuaPlayer::lSetHasPolicy(lua_State* L)
 {
+#if defined(MOD_API_EXTENSIONS)
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const PolicyTypes iIndex = (PolicyTypes)lua_tointeger(L, 2);
+	bool bValue = lua_toboolean(L, 3);
+	bool bFree = luaL_optbool(L, 4, false);
+
+	pkPlayer->setHasPolicy(iIndex, bValue, bFree);
+	return 0;
+#else
 	return BasicLuaMethod(L, &CvPlayerAI::setHasPolicy);
+#endif
 }
 //------------------------------------------------------------------------------
 //int getNextPolicyCost();
@@ -5262,6 +5281,44 @@ int CvLuaPlayer::lGetBranchPicked3(lua_State* L)
 }
 
 #if defined(MOD_API_LUA_EXTENSIONS)
+//------------------------------------------------------------------------------
+//void GrantPolicy(PolicyTypes iPolicy, bool bFree=false);
+int CvLuaPlayer::lGrantPolicy(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const PolicyTypes iPolicy = (PolicyTypes)lua_tointeger(L, 2);
+	bool bFree = luaL_optbool(L, 3, false);
+
+	const bool bResult = pkPlayer->grantPolicy(iPolicy, bFree);
+	lua_pushboolean(L, bResult);
+	return 1;
+}
+
+//------------------------------------------------------------------------------
+//void RevokePolicy(PolicyTypes iPolicy);
+int CvLuaPlayer::lRevokePolicy(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const PolicyTypes iPolicy = (PolicyTypes)lua_tointeger(L, 2);
+
+	const bool bResult = pkPlayer->revokePolicy(iPolicy);
+	lua_pushboolean(L, bResult);
+	return 1;
+}
+
+//------------------------------------------------------------------------------
+//void SwapPolicy(PolicyTypes iNewPolicy, PolicyTypes iOldPolicy);
+int CvLuaPlayer::lSwapPolicy(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const PolicyTypes iPolicyNew = (PolicyTypes)lua_tointeger(L, 2);
+	const PolicyTypes iPolicyOld = (PolicyTypes)lua_tointeger(L, 3);
+
+	const bool bResult = pkPlayer->swapPolicy(iPolicyNew, iPolicyOld);
+	lua_pushboolean(L, bResult);
+	return 1;
+}
+
 //------------------------------------------------------------------------------
 //bool CanAdoptIdeology(PolicyBranchTypes  iIndex);
 int CvLuaPlayer::lCanAdoptIdeology(lua_State* L)
@@ -7493,7 +7550,7 @@ int CvLuaPlayer::lSetResearchingTech(lua_State* L)
 //int getCombatExperience();
 int CvLuaPlayer::lGetCombatExperience(lua_State* L)
 {
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	CvPlayerAI* pkPlayer = GetInstance(L);
 
 	lua_pushinteger(L, pkPlayer->getCombatExperienceTimes100() / 100);
@@ -7506,7 +7563,7 @@ int CvLuaPlayer::lGetCombatExperience(lua_State* L)
 //void changeCombatExperience(int iChange);
 int CvLuaPlayer::lChangeCombatExperience(lua_State* L)
 {
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	const int iExperience = lua_tointeger(L, 2);
 
@@ -7520,7 +7577,7 @@ int CvLuaPlayer::lChangeCombatExperience(lua_State* L)
 //void setCombatExperience(int iExperience);
 int CvLuaPlayer::lSetCombatExperience(lua_State* L)
 {
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	const int iExperience = lua_tointeger(L, 2);
 
@@ -7534,7 +7591,7 @@ int CvLuaPlayer::lSetCombatExperience(lua_State* L)
 //int getLifetimeCombatExperience();
 int CvLuaPlayer::lGetLifetimeCombatExperience(lua_State* L)
 {
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	CvPlayerAI* pkPlayer = GetInstance(L);
 
 	lua_pushinteger(L, pkPlayer->getLifetimeCombatExperienceTimes100() / 100);
@@ -7547,7 +7604,7 @@ int CvLuaPlayer::lGetLifetimeCombatExperience(lua_State* L)
 //int getNavalCombatExperience();
 int CvLuaPlayer::lGetNavalCombatExperience(lua_State* L)
 {
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	CvPlayerAI* pkPlayer = GetInstance(L);
 
 	lua_pushinteger(L, pkPlayer->getNavalCombatExperienceTimes100() / 100);
@@ -7560,7 +7617,7 @@ int CvLuaPlayer::lGetNavalCombatExperience(lua_State* L)
 //void changeNavalCombatExperience(int iChange);
 int CvLuaPlayer::lChangeNavalCombatExperience(lua_State* L)
 {
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	const int iExperience = lua_tointeger(L, 2);
 
@@ -7574,7 +7631,7 @@ int CvLuaPlayer::lChangeNavalCombatExperience(lua_State* L)
 //void setCombatExperience(int iExperience);
 int CvLuaPlayer::lSetNavalCombatExperience(lua_State* L)
 {
-#if defined(MOD_API_XP_TIMES_100)
+#if defined(MOD_UNITS_XP_TIMES_100)
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	const int iExperience = lua_tointeger(L, 2);
 

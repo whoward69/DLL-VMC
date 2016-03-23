@@ -168,6 +168,9 @@ CvPolicyEntry::CvPolicyEntry(void):
 	m_bRevealAllCapitals(false),
 	m_bGarrisonFreeMaintenance(false),
 	m_bAbleToAnnexCityStates(false),
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+	m_bDummy(false),
+#endif
 	m_bOneShot(false),
 	m_bIncludesOneShotFreeUnits(false),
 	m_piPrereqOrPolicies(NULL),
@@ -426,6 +429,11 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	m_bEnablesSSPartHurry = kResults.GetBool("EnablesSSPartHurry");
 	m_bEnablesSSPartPurchase = kResults.GetBool("EnablesSSPartPurchase");
 	m_bAbleToAnnexCityStates = kResults.GetBool("AbleToAnnexCityStates");
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+	if (MOD_BUGFIX_DUMMY_POLICIES) {
+		m_bDummy = kResults.GetBool("Dummy");
+	}
+#endif
 	m_bOneShot = kResults.GetBool("OneShot");
 	m_bIncludesOneShotFreeUnits = kResults.GetBool("IncludesOneShotFreeUnits");
 
@@ -1776,6 +1784,14 @@ bool CvPolicyEntry::IsAbleToAnnexCityStates() const
 	return m_bAbleToAnnexCityStates;
 }
 
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+/// Is this a dummy policy
+bool CvPolicyEntry::IsDummy() const
+{
+	return m_bDummy;
+}
+#endif
+
 /// Is this a one shot policy effect
 bool CvPolicyEntry::IsOneShot() const
 {
@@ -2514,6 +2530,9 @@ CvPolicyBranchEntry* CvPolicyXMLEntries::GetPolicyBranchEntry(int index)
 //=====================================
 /// Constructor
 CvPlayerPolicies::CvPlayerPolicies():
+#if defined(MOD_API_EXTENSIONS)
+	m_pabFreePolicy(NULL),
+#endif
 	m_pabHasPolicy(NULL),
 	m_pabHasOneShotPolicyFired(NULL),
 	m_pabHaveOneShotFreeUnitsFired(NULL),
@@ -2545,6 +2564,10 @@ void CvPlayerPolicies::Init(CvPolicyXMLEntries* pPolicies, CvPlayer* pPlayer, bo
 	m_pPlayer = pPlayer;
 
 	// Initialize policy status array
+#if defined(MOD_API_EXTENSIONS)
+	CvAssertMsg(m_pabFreePolicy==NULL, "about to leak memory, CvPlayerPolicies::m_pabFreePolicy");
+	m_pabFreePolicy = FNEW(bool[m_pPolicies->GetNumPolicies()], c_eCiv5GameplayDLL, 0);
+#endif
 	CvAssertMsg(m_pabHasPolicy==NULL, "about to leak memory, CvPlayerPolicies::m_pabHasPolicy");
 	m_pabHasPolicy = FNEW(bool[m_pPolicies->GetNumPolicies()], c_eCiv5GameplayDLL, 0);
 	CvAssertMsg(m_pabHasOneShotPolicyFired==NULL, "about to leak memory, CvPlayerPolicies::m_pabHasOneShotPolicyFired");
@@ -2582,6 +2605,9 @@ void CvPlayerPolicies::Uninit()
 	// Uninit base class
 	CvFlavorRecipient::Uninit();
 
+#if defined(MOD_API_EXTENSIONS)
+	SAFE_DELETE_ARRAY(m_pabFreePolicy);
+#endif
 	SAFE_DELETE_ARRAY(m_pabHasPolicy);
 	SAFE_DELETE_ARRAY(m_pabHasOneShotPolicyFired);
 	SAFE_DELETE_ARRAY(m_pabHaveOneShotFreeUnitsFired);
@@ -2600,6 +2626,9 @@ void CvPlayerPolicies::Reset()
 
 	for(iI = 0; iI < m_pPolicies->GetNumPolicies(); iI++)
 	{
+#if defined(MOD_API_EXTENSIONS)
+		m_pabFreePolicy[iI] = false;
+#endif
 		m_pabHasPolicy[iI] = false;
 		m_pabHasOneShotPolicyFired[iI] = false;
 		m_pabHaveOneShotFreeUnitsFired[iI] = false;
@@ -2682,6 +2711,9 @@ void CvPlayerPolicies::Read(FDataStream& kStream)
 		uiPolicyBranchCount = m_pPolicies->GetNumPolicyBranches();
 	}
 
+#if defined(MOD_API_EXTENSIONS)
+	CvInfosSerializationHelper::ReadHashedDataArray(kStream, m_pabFreePolicy, uiPolicyCount);
+#endif
 	CvInfosSerializationHelper::ReadHashedDataArray(kStream, m_pabHasPolicy, uiPolicyCount);
 	CvInfosSerializationHelper::ReadHashedDataArray(kStream, m_pabHasOneShotPolicyFired, uiPolicyCount);
 	CvInfosSerializationHelper::ReadHashedDataArray(kStream, m_pabHaveOneShotFreeUnitsFired, uiPolicyCount);
@@ -2733,9 +2765,13 @@ void CvPlayerPolicies::Write(FDataStream& kStream) const
 		uiPolicyBranchCount = m_pPolicies->GetNumPolicyBranches();
 	}
 
+#if defined(MOD_API_EXTENSIONS)
+	CvInfosSerializationHelper::WriteHashedDataArray<PolicyTypes>(kStream, m_pabFreePolicy, uiPolicyCount);
+#endif
 	CvInfosSerializationHelper::WriteHashedDataArray<PolicyTypes>(kStream, m_pabHasPolicy, uiPolicyCount);
 	CvInfosSerializationHelper::WriteHashedDataArray<PolicyTypes>(kStream, m_pabHasOneShotPolicyFired, uiPolicyCount);
 	CvInfosSerializationHelper::WriteHashedDataArray<PolicyTypes>(kStream, m_pabHaveOneShotFreeUnitsFired, uiPolicyCount);
+
 	CvInfosSerializationHelper::WriteHashedDataArray<PolicyBranchTypes>(kStream, m_pabPolicyBranchUnlocked, uiPolicyBranchCount);
 	CvInfosSerializationHelper::WriteHashedDataArray<PolicyBranchTypes>(kStream, m_pabPolicyBranchBlocked, uiPolicyBranchCount);
 	CvInfosSerializationHelper::WriteHashedDataArray<PolicyBranchTypes>(kStream, m_pabPolicyBranchFinished, uiPolicyBranchCount);
@@ -2775,8 +2811,22 @@ bool CvPlayerPolicies::HasPolicy(PolicyTypes eIndex) const
 	return m_pabHasPolicy[eIndex];
 }
 
+#if defined(MOD_API_EXTENSIONS)
+/// Accessor: was this policy given for free
+bool CvPlayerPolicies::IsFreePolicy(PolicyTypes eIndex) const
+{
+	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eIndex < GC.getNumPolicyInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
+	return m_pabFreePolicy[eIndex];
+}
+#endif
+
 /// Accessor: set whether player has a policy
+#if defined(MOD_API_EXTENSIONS)
+void CvPlayerPolicies::SetPolicy(PolicyTypes eIndex, bool bNewValue, bool bFree)
+#else
 void CvPlayerPolicies::SetPolicy(PolicyTypes eIndex, bool bNewValue)
+#endif
 {
 	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
 	CvAssertMsg(eIndex < m_pPolicies->GetNumPolicies(), "eIndex is expected to be within maximum bounds (invalid Index)");
@@ -2790,6 +2840,10 @@ void CvPlayerPolicies::SetPolicy(PolicyTypes eIndex, bool bNewValue)
 		m_pabHasPolicy[eIndex] = bNewValue;
 
 		int iChange = bNewValue ? 1 : -1;
+#if defined(MOD_API_EXTENSIONS)
+		m_pabFreePolicy[eIndex] = bFree;
+		if (bFree) iChange = 0;
+#endif
 		GetPlayer()->ChangeNumPolicies(iChange);
 
 		if(bNewValue)
@@ -2891,7 +2945,37 @@ void CvPlayerPolicies::SetOneShotFreeUnitsFired(PolicyTypes eIndex, bool bFired)
 }
 
 /// Returns number of policies purchased by this player
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+//
+// Firaxis assume that EVERY policy is attached to a branch, either directly (Policies.PolicyBranchType is not NULL),
+// or indirectly (by reference from PolicyBranchTypes.FreePolicy or PolicyBranchTypes.FreeFinishingPolicy)
+//
+// However, modders (being sneaky little buggers) have discovered that policies don't need to be attached to branches
+// (that is they are orphans) and can use them as dummy policies as a way of getting access to the bonuses in the
+// Policies table for civilization unique attributes (UAs) etc.  They (mainly me!) have also discovered an exploit
+// to grant policies without affecting the cost of the next policy (SetNumFreePolicies 1 - 0 magic)
+//
+// This however leads to a number of issues - buildings (eg Prora) give happiness boost for the dummy policies,
+// overall score gets a boost from the dummy policies, etc
+//
+// We could write a method that calculates if a policy is an orphan (doesn't reference the PolicyBranchType
+// table either directly or indirectly) but that would then break every existing mod that uses dummy policies and
+// the free policy exploit.  So we'll add a column to the Policies table to explicitly flag a policy as a dummy.
+// That way, existing mods are unaffected, new mods can use the new database column, the new Grant/Revoke/Swap API
+// and not have to bother with the free policy exploit.  Happiness all round :)
+//
+#if defined(MOD_API_EXTENSIONS)
+int CvPlayerPolicies::GetNumPoliciesOwned(bool bExcludeOrphans, bool bExcludeFree) const
+#else
+int CvPlayerPolicies::GetNumPoliciesOwned(bool bExcludeOrphans) const
+#endif
+#else
+#if defined(MOD_API_EXTENSIONS)
+int CvPlayerPolicies::GetNumPoliciesOwned(bool bExcludeFree) const
+#else
 int CvPlayerPolicies::GetNumPoliciesOwned() const
+#endif
+#endif
 {
 	int rtnValue = 0;
 
@@ -2900,6 +2984,13 @@ int CvPlayerPolicies::GetNumPoliciesOwned() const
 		// Do we have this policy?
 		if(m_pabHasPolicy[i])
 		{
+#if defined(MOD_API_EXTENSIONS)
+			if (bExcludeFree && m_pabFreePolicy[i]) continue;
+#endif
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+			// Exclude orphans
+			if ((MOD_BUGFIX_DUMMY_POLICIES && bExcludeOrphans && m_pPolicies->GetPolicyEntry(i)->IsDummy())) continue;
+#endif
 			rtnValue++;
 		}
 	}
@@ -3323,7 +3414,19 @@ int CvPlayerPolicies::GetTourismFromUnitCreation(UnitClassTypes eUnitClass) cons
 /// How much will the next policy cost?
 int CvPlayerPolicies::GetNextPolicyCost()
 {
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+#if defined(MOD_API_EXTENSIONS)
+	int iNumPolicies = GetNumPoliciesOwned(MOD_BUGFIX_DUMMY_POLICIES, true);
+#else
+	int iNumPolicies = GetNumPoliciesOwned(MOD_BUGFIX_DUMMY_POLICIES);
+#endif
+#else
+#if defined(MOD_API_EXTENSIONS)
+	int iNumPolicies = GetNumPoliciesOwned(true);
+#else
 	int iNumPolicies = GetNumPoliciesOwned();
+#endif
+#endif
 
 	// Reduce count by however many free Policies we've had in this game
 	iNumPolicies -= (m_pPlayer->GetNumFreePoliciesEver() - m_pPlayer->GetNumFreePolicies() - m_pPlayer->GetNumFreeTenets());
@@ -4254,7 +4357,11 @@ int CvPlayerPolicies::GetNumPoliciesCanBeAdopted()
 		}
 	}
 
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+	return iNumPoliciesToAcquire - GetNumPoliciesOwned(MOD_BUGFIX_DUMMY_POLICIES);
+#else
 	return iNumPoliciesToAcquire - GetNumPoliciesOwned();
+#endif
 }
 
 /// New Policy picked... figure how what that means for history. This isn't the greatest example of programming ever, but oh well, it'll do

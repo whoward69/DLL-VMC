@@ -23,7 +23,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 76)
+#define MOD_DLL_VERSION_NUMBER ((uint) 77)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -72,8 +72,6 @@
 #define MOD_API_ACHIEVEMENTS                        gCustomMods.isAPI_ACHIEVEMENTS()
 // Enables the Unit Stats API (v73)
 #define MOD_API_UNIT_STATS                          (true)
-// Enables the XP times 100 API (v74)
-#define MOD_API_XP_TIMES_100                        (true)
 // Enables the Extensions API
 #define MOD_API_EXTENSIONS                          gCustomMods.isAPI_EXTENSIONS()
 // Enables the LUA Extensions API
@@ -205,6 +203,8 @@
 #define MOD_TRAITS_CROSSES_ICE                      gCustomMods.isTRAITS_CROSSES_ICE()
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
 #define MOD_TRAITS_CITY_WORKING                     gCustomMods.isTRAITS_CITY_WORKING()
+// Enables traits to be enabled/obsoleted via beliefs and policies (v77)
+#define MOD_TRAITS_OTHER_PREREQS                    gCustomMods.isTRAITS_OTHER_PREREQS()
 // Enables any belief to be selected, even if already taken (v46)
 #define MOD_TRAITS_ANY_BELIEF                       gCustomMods.isTRAITS_ANY_BELIEF()
 // Enables additional trade route related traits (v52)
@@ -253,6 +253,12 @@
 // Permits wonder resource (ie Marble) trade routes to be established (v43)
 #define MOD_TRADE_WONDER_RESOURCE_ROUTES            gCustomMods.isTRADE_WONDER_RESOURCE_ROUTES()
 
+// Permits units to have no supply cost (v77)
+#define MOD_UNITS_NO_SUPPLY                         gCustomMods.isUNITS_NO_SUPPLY()
+// Permits units to have other than GameDefines.MAX_HIT_POINTS maximum hit points (v77)
+#define MOD_UNITS_MAX_HP                            gCustomMods.isUNITS_MAX_HP()
+// Enables the XP times 100 API (v77)
+#define MOD_UNITS_XP_TIMES_100                      gCustomMods.isUNITS_XP_TIMES_100()
 // Restricts worker suggestions to local tiles
 #define MOD_UNITS_LOCAL_WORKERS                     gCustomMods.isUNITS_LOCAL_WORKERS()
 // Hovering unit can only heal over land
@@ -622,6 +628,8 @@
 #define MOD_BUGFIX_USE_GETTERS                      (true)
 // Fixes the spy name crash (v53)
 #define MOD_BUGFIX_SPY_NAMES                        (true)
+// Fixes the issues with using dummy policies, thanks to LeeS for assistance with this (v77)
+#define MOD_BUGFIX_DUMMY_POLICIES                   gCustomMods.isBUGFIX_DUMMY_POLICIES()
 // Fixes the 'radaring' bug/exploit - see https://www.reddit.com/r/nqmod/comments/34reu9/how_to_remove_radaring/ (v74)
 #define MOD_BUGFIX_RADARING                         gCustomMods.isBUGFIX_RADARING()
 // Fixes the research overflow bug/exploit (v52)
@@ -1113,6 +1121,7 @@ public:
 
 	MOD_OPT_DECL(TRAITS_CROSSES_ICE);
 	MOD_OPT_DECL(TRAITS_CITY_WORKING);
+	MOD_OPT_DECL(TRAITS_OTHER_PREREQS);
 	MOD_OPT_DECL(TRAITS_ANY_BELIEF);
 	MOD_OPT_DECL(TRAITS_TRADE_ROUTE_BONUSES);
 
@@ -1140,6 +1149,9 @@ public:
 	MOD_OPT_DECL(TRADE_ROUTE_SCALING);
 	MOD_OPT_DECL(TRADE_WONDER_RESOURCE_ROUTES);
 
+	MOD_OPT_DECL(UNITS_NO_SUPPLY);
+	MOD_OPT_DECL(UNITS_MAX_HP);
+	MOD_OPT_DECL(UNITS_XP_TIMES_100);
 	MOD_OPT_DECL(UNITS_LOCAL_WORKERS);
 	MOD_OPT_DECL(UNITS_HOVERING_LAND_ONLY_HEAL);
 	MOD_OPT_DECL(UNITS_HOVERING_COASTAL_ATTACKS);
@@ -1246,6 +1258,7 @@ public:
 	MOD_OPT_DECL(CONFIG_GAME_IN_XML);
 	MOD_OPT_DECL(CONFIG_AI_IN_XML);
 
+	MOD_OPT_DECL(BUGFIX_DUMMY_POLICIES);
 	MOD_OPT_DECL(BUGFIX_RADARING);
 	MOD_OPT_DECL(BUGFIX_RESEARCH_OVERFLOW);
 	MOD_OPT_DECL(BUGFIX_LUA_CHANGE_VISIBILITY_COUNT);

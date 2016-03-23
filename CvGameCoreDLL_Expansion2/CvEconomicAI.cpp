@@ -1370,7 +1370,11 @@ void CvEconomicAI::LogMonitor(void)
 	AppendToLog(strHeader, strLog, "Num Techs", GET_TEAM(GetPlayer()->getTeam()).GetTeamTechs()->GetNumTechsKnown());
 
 	// Culture
+#if defined(MOD_BUGFIX_DUMMY_POLICIES)
+	AppendToLog(strHeader, strLog, "Policies", GetPlayer()->GetPlayerPolicies()->GetNumPoliciesOwned(false));
+#else
 	AppendToLog(strHeader, strLog, "Policies", GetPlayer()->GetPlayerPolicies()->GetNumPoliciesOwned());
+#endif
 	AppendToLog(strHeader, strLog, "Culture (lifetime)", GetPlayer()->GetJONSCultureEverGenerated());
 
 	// Faith

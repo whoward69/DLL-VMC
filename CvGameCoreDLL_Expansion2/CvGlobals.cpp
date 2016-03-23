@@ -1647,7 +1647,12 @@ CvGlobals::CvGlobals() :
 #endif
 	m_iZONE_OF_CONTROL_ENABLED(1),
 	m_iFIRE_SUPPORT_DISABLED(1),
+#if defined(MOD_BUGFIX_MINOR)
+	// BNW matey boy!
+	m_iMAX_HIT_POINTS(100),
+#else
 	m_iMAX_HIT_POINTS(10),
+#endif
 	m_iMAX_CITY_HIT_POINTS(200),
 	m_iCITY_HIT_POINTS_HEALED_PER_TURN(1),
 	m_iFLAT_LAND_EXTRA_DEFENSE(-33),

@@ -908,6 +908,12 @@ void CvGameReligions::FoundPantheon(PlayerTypes ePlayer, BeliefTypes eBelief)
 	// Found it
 	m_CurrentReligions.push_back(newReligion);
 
+#if defined(MOD_TRAITS_OTHER_PREREQS)
+	if (MOD_TRAITS_OTHER_PREREQS) {
+		kPlayer.GetPlayerTraits()->InitPlayerTraits();
+	}
+#endif
+
 	// Update game systems
 	kPlayer.UpdateReligion();
 	kPlayer.ChangeFaith(-GetMinimumFaithNextPantheon());
@@ -1069,6 +1075,12 @@ void CvGameReligions::FoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion
 
 	// Inform the holy city
 	pkHolyCity->GetCityReligions()->DoReligionFounded(kReligion.m_eReligion);
+
+#if defined(MOD_TRAITS_OTHER_PREREQS)
+	if (MOD_TRAITS_OTHER_PREREQS) {
+		kPlayer.GetPlayerTraits()->InitPlayerTraits();
+	}
+#endif
 
 	// Update game systems
 	kPlayer.UpdateReligion();
@@ -1323,6 +1335,12 @@ void CvGameReligions::EnhanceReligion(PlayerTypes ePlayer, ReligionTypes eReligi
 #endif
 		it->m_bEnhanced = true;
 
+#if defined(MOD_TRAITS_OTHER_PREREQS)
+	if (MOD_TRAITS_OTHER_PREREQS) {
+		kPlayer.GetPlayerTraits()->InitPlayerTraits();
+	}
+#endif
+
 	// Update game systems
 	UpdateAllCitiesThisReligion(eReligion);
 	kPlayer.UpdateReligion();
@@ -1503,6 +1521,12 @@ void CvGameReligions::AddReformationBelief(PlayerTypes ePlayer, ReligionTypes eR
 	}
 
 	it->m_Beliefs.AddBelief(eBelief1);
+
+#if defined(MOD_TRAITS_OTHER_PREREQS)
+	if (MOD_TRAITS_OTHER_PREREQS) {
+		kPlayer.GetPlayerTraits()->InitPlayerTraits();
+	}
+#endif
 
 	// Update game systems
 	UpdateAllCitiesThisReligion(eReligion);
