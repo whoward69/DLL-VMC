@@ -23,8 +23,8 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 77)
-#define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
+#define MOD_DLL_VERSION_NUMBER ((uint) 79)
+#define MOD_DLL_VERSION_STATUS "a"			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
 
@@ -209,6 +209,8 @@
 #define MOD_TRAITS_ANY_BELIEF                       gCustomMods.isTRAITS_ANY_BELIEF()
 // Enables additional trade route related traits (v52)
 #define MOD_TRAITS_TRADE_ROUTE_BONUSES              gCustomMods.isTRAITS_TRADE_ROUTE_BONUSES()
+// Enables additional unit supply from traits (v78)
+#define MOD_TRAITS_EXTRA_SUPPLY                     gCustomMods.isTRAITS_EXTRA_SUPPLY()
 
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
 #define MOD_POLICIES_CITY_WORKING                   gCustomMods.isPOLICIES_CITY_WORKING()
@@ -628,6 +630,8 @@
 #define MOD_BUGFIX_USE_GETTERS                      (true)
 // Fixes the spy name crash (v53)
 #define MOD_BUGFIX_SPY_NAMES                        (true)
+// Fixes the bug when giving free religious units after the player has founded a religion not appearing in a religious city! (v78)
+#define MOD_BUGFIX_FREE_RELIGIOUS_UNITS             (true)
 // Fixes the issues with using dummy policies, thanks to LeeS for assistance with this (v77)
 #define MOD_BUGFIX_DUMMY_POLICIES                   gCustomMods.isBUGFIX_DUMMY_POLICIES()
 // Fixes the 'radaring' bug/exploit - see https://www.reddit.com/r/nqmod/comments/34reu9/how_to_remove_radaring/ (v74)
@@ -1124,6 +1128,7 @@ public:
 	MOD_OPT_DECL(TRAITS_OTHER_PREREQS);
 	MOD_OPT_DECL(TRAITS_ANY_BELIEF);
 	MOD_OPT_DECL(TRAITS_TRADE_ROUTE_BONUSES);
+	MOD_OPT_DECL(TRAITS_EXTRA_SUPPLY);
 
 	MOD_OPT_DECL(POLICIES_CITY_WORKING);
 

@@ -222,6 +222,11 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(IsDefending);
 	Method(IsInCombat);
 
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_UNITS_MAX_HP)
+	Method(GetMaxHitPointsBase);
+	Method(SetMaxHitPointsBase);
+	Method(ChangeMaxHitPointsBase);
+#endif
 	Method(GetMaxHitPoints);
 	Method(GetCurrHitPoints);
 	Method(IsHurt);
@@ -2269,6 +2274,35 @@ int CvLuaUnit::lIsInCombat(lua_State* L)
 	lua_pushboolean(L, bResult);
 	return 1;
 }
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_UNITS_MAX_HP)
+//------------------------------------------------------------------------------
+int CvLuaUnit::lGetMaxHitPointsBase(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getMaxHitPointsBase();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+//------------------------------------------------------------------------------
+int CvLuaUnit::lSetMaxHitPointsBase(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iValue = lua_tointeger(L, 2);
+
+	pkUnit->setMaxHitPointsBase(iValue);
+	return 0;
+}
+//------------------------------------------------------------------------------
+int CvLuaUnit::lChangeMaxHitPointsBase(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iValue = lua_tointeger(L, 2);
+
+	pkUnit->changeMaxHitPointsBase(iValue);
+	return 0;
+}
+#endif
 //------------------------------------------------------------------------------
 //int maxHitPoints();
 int CvLuaUnit::lGetMaxHitPoints(lua_State* L)

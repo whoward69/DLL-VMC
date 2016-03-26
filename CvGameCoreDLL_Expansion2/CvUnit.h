@@ -1036,6 +1036,10 @@ public:
 #endif
 
 #if defined(MOD_UNITS_MAX_HP)
+	int getMaxHitPointsBase() const;
+	void setMaxHitPointsBase(int iMaxHitPoints);
+	void changeMaxHitPointsBase(int iChange);
+	
 	int getMaxHitPointsChange() const;
 	void changeMaxHitPointsChange(int iChange);
 	int getMaxHitPointsModifier() const;
@@ -1633,6 +1637,7 @@ protected:
 	int m_iNoSupply;
 #endif
 #if defined(MOD_UNITS_MAX_HP)
+	int m_iMaxHitPointsBase;
 	int m_iMaxHitPointsChange;
 	int m_iMaxHitPointsModifier;
 #endif

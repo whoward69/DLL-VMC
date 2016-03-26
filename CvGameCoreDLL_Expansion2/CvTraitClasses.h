@@ -110,6 +110,11 @@ public:
 	int GetRazeSpeedModifier() const;
 	int GetDOFGreatPersonModifier() const;
 	int GetLuxuryHappinessRetention() const;
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	int GetExtraSupply() const;
+	int GetExtraSupplyPerCity() const;
+	int GetExtraSupplyPerPopulation() const;
+#endif
 	int GetExtraSpies() const;
 	int GetUnresearchedTechBonusFromKills() const;
 	int GetExtraFoundedCityTerritoryClaimRange() const;
@@ -287,6 +292,11 @@ protected:
 	int m_iRazeSpeedModifier;
 	int m_iDOFGreatPersonModifier;
 	int m_iLuxuryHappinessRetention;
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	int m_iExtraSupply;
+	int m_iExtraSupplyPerCity;
+	int m_iExtraSupplyPerPopulation;
+#endif
 	int m_iExtraSpies;
 	int m_iUnresearchedTechBonusFromKills;
 	int m_iExtraFoundedCityTerritoryClaimRange;
@@ -652,6 +662,20 @@ public:
 	{
 		return m_iLuxuryHappinessRetention;
 	};
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	int GetExtraSupply() const
+	{
+		return m_iExtraSupply;
+	};
+	int GetExtraSupplyPerCity() const
+	{
+		return m_iExtraSupplyPerCity;
+	};
+	int GetExtraSupplyPerPopulation() const
+	{
+		return m_iExtraSupplyPerPopulation;
+	};
+#endif
 	int GetExtraSpies() const
 	{
 		return m_iExtraSpies;
@@ -1001,6 +1025,11 @@ private:
 	int m_iRazeSpeedModifier;
 	int m_iDOFGreatPersonModifier;
 	int m_iLuxuryHappinessRetention;
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	int m_iExtraSupply;
+	int m_iExtraSupplyPerCity;
+	int m_iExtraSupplyPerPopulation;
+#endif
 	int m_iExtraSpies;
 	int m_iUnresearchedTechBonusFromKills;
 	int m_iExtraFoundedCityTerritoryClaimRange;

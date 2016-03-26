@@ -287,6 +287,7 @@ CvUnit::CvUnit() :
 	, m_iNoSupply(0)
 #endif
 #if defined(MOD_UNITS_MAX_HP)
+	, m_iMaxHitPointsBase(GC.getMAX_HIT_POINTS())
 	, m_iMaxHitPointsChange(0)
 	, m_iMaxHitPointsModifier(0)
 #endif
@@ -1002,10 +1003,6 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 #if defined(MOD_UNITS_NO_SUPPLY)
 	m_iNoSupply = 0;
 #endif
-#if defined(MOD_UNITS_MAX_HP)
-	m_iMaxHitPointsChange = 0;
-	m_iMaxHitPointsModifier = 0;
-#endif
 	m_iHealIfDefeatExcludeBarbariansCount = 0;
 	m_iNumInterceptions = 1;
 	m_iMadeInterceptionCount = 0;
@@ -1046,6 +1043,11 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iBaseCombat = (NO_UNIT != m_eUnitType) ? m_pUnitInfo->GetCombat() : 0;
 #if defined(MOD_API_EXTENSIONS)
 	m_iBaseRangedCombat = (NO_UNIT != m_eUnitType) ? m_pUnitInfo->GetRangedCombat() : 0;
+#endif
+#if defined(MOD_UNITS_MAX_HP)
+	m_iMaxHitPointsBase = (NO_UNIT != m_eUnitType) ? m_pUnitInfo->GetMaxHitPoints() : GC.getMAX_HIT_POINTS();
+	m_iMaxHitPointsChange = 0;
+	m_iMaxHitPointsModifier = 0;
 #endif
 	m_eLeaderUnitType = NO_UNIT;
 	m_eInvisibleType = NO_INVISIBLE;
@@ -11876,7 +11878,7 @@ int CvUnit::GetMaxHitPoints() const
 {
 	VALIDATE_OBJECT
 #if defined(MOD_UNITS_MAX_HP)
-	int iMaxHP = m_pUnitInfo->GetMaxHitPoints();
+	int iMaxHP = getMaxHitPointsBase();
 
 	iMaxHP *= (100 + getMaxHitPointsModifier());
 	iMaxHP /= 100;
@@ -18719,6 +18721,28 @@ void CvUnit::changeNoSupply(int iChange)
 
 #if defined(MOD_UNITS_MAX_HP)
 //	--------------------------------------------------------------------------------
+int CvUnit::getMaxHitPointsBase() const
+{
+	return m_iMaxHitPointsBase;
+}
+
+void CvUnit::setMaxHitPointsBase(int iMaxHitPoints)
+{
+	// Do NOT allow max hit points to be less than 1
+	m_iMaxHitPointsBase = max(1, iMaxHitPoints);
+	
+	// Do NOT allow changing base max HP to kill the unit
+	setDamage(min(getDamage(), max(1, GetMaxHitPoints()-1)));
+
+	setInfoBarDirty(true);
+}
+
+void CvUnit::changeMaxHitPointsBase(int iChange)
+{
+	setMaxHitPointsBase(getMaxHitPointsBase() + iChange);
+}
+
+//	--------------------------------------------------------------------------------
 int CvUnit::getMaxHitPointsChange() const
 {
 	return m_iMaxHitPointsChange;
@@ -20951,6 +20975,7 @@ void CvUnit::read(FDataStream& kStream)
 #endif
 
 #if defined(MOD_UNITS_MAX_HP)
+	MOD_SERIALIZE_READ(78, kStream, m_iMaxHitPointsBase, m_pUnitInfo->GetMaxHitPoints());
 	MOD_SERIALIZE_READ(77, kStream, m_iMaxHitPointsChange, 0);
 	MOD_SERIALIZE_READ(77, kStream, m_iMaxHitPointsModifier, 0)
 #endif
@@ -21128,6 +21153,7 @@ void CvUnit::write(FDataStream& kStream) const
 	MOD_SERIALIZE_WRITE(kStream, m_iNoSupply);
 #endif
 #if defined(MOD_UNITS_MAX_HP)
+	MOD_SERIALIZE_WRITE(kStream, m_iMaxHitPointsBase);
 	MOD_SERIALIZE_WRITE(kStream, m_iMaxHitPointsChange);
 	MOD_SERIALIZE_WRITE(kStream, m_iMaxHitPointsModifier);
 #endif

@@ -228,6 +228,11 @@ protected:
 	static int lIsDefending(lua_State* L);
 	static int lIsInCombat(lua_State* L);
 
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_UNITS_MAX_HP)
+	LUAAPIEXTN(GetMaxHitPointsBase, int);
+	LUAAPIEXTN(SetMaxHitPointsBase, void, int);
+	LUAAPIEXTN(ChangeMaxHitPointsBase, void, int);
+#endif
 	static int lGetMaxHitPoints(lua_State* L);
 	static int lGetCurrHitPoints(lua_State* L);
 	static int lIsHurt(lua_State* L);

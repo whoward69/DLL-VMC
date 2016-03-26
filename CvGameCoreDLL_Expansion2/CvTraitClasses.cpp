@@ -83,6 +83,11 @@ CvTraitEntry::CvTraitEntry() :
 	m_iRazeSpeedModifier(0),
 	m_iDOFGreatPersonModifier(0),
 	m_iLuxuryHappinessRetention(0),
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	m_iExtraSupply(0),
+	m_iExtraSupplyPerCity(0),
+	m_iExtraSupplyPerPopulation(0),
+#endif
 	m_iExtraSpies(0),
 	m_iUnresearchedTechBonusFromKills(0),
 	m_iExtraFoundedCityTerritoryClaimRange(0),
@@ -511,6 +516,26 @@ int CvTraitEntry::GetLuxuryHappinessRetention() const
 {
 	return m_iLuxuryHappinessRetention;
 }
+
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+/// Accessor: number of extra base units supplied
+int CvTraitEntry::GetExtraSupply() const
+{
+	return m_iExtraSupply;
+}
+
+/// Accessor: number of extra units supplied per city
+int CvTraitEntry::GetExtraSupplyPerCity() const
+{
+	return m_iExtraSupplyPerCity;
+}
+
+/// Accessor: number of extra units supplied per population (percentage)
+int CvTraitEntry::GetExtraSupplyPerPopulation() const
+{
+	return m_iExtraSupplyPerPopulation;
+}
+#endif
 
 /// Accessor: number of extra spies
 int CvTraitEntry::GetExtraSpies() const
@@ -1098,7 +1123,7 @@ bool CvTraitEntry::IsObsoleteByBelief(PlayerTypes ePlayer)
 		bObsolete = (GET_PLAYER(ePlayer).HasBelief((BeliefTypes)m_iObsoleteBelief));
 	}
 
-	if (m_iObsoleteBelief != NO_BELIEF) CUSTOMLOG("IsObsoleteByBelief(%i) is %s", m_iObsoleteBelief, (bObsolete ? "true" : "false"));
+	// if (m_iObsoleteBelief != NO_BELIEF) CUSTOMLOG("IsObsoleteByBelief(%i) is %s", m_iObsoleteBelief, (bObsolete ? "true" : "false"));
 	return bObsolete;
 }
 
@@ -1112,7 +1137,7 @@ bool CvTraitEntry::IsEnabledByBelief(PlayerTypes ePlayer)
 		bEnabled = (GET_PLAYER(ePlayer).HasBelief((BeliefTypes)m_iPrereqBelief));
 	}
 
-	if (m_iPrereqBelief != NO_BELIEF) CUSTOMLOG("IsEnabledByBelief(%i) is %s", m_iPrereqBelief, (bEnabled ? "true" : "false"));
+	// if (m_iPrereqBelief != NO_BELIEF) CUSTOMLOG("IsEnabledByBelief(%i) is %s", m_iPrereqBelief, (bEnabled ? "true" : "false"));
 	return bEnabled;
 }
 
@@ -1126,7 +1151,7 @@ bool CvTraitEntry::IsObsoleteByPolicy(PlayerTypes ePlayer)
 		bObsolete = (GET_PLAYER(ePlayer).HasPolicy((PolicyTypes)m_iObsoletePolicy));
 	}
 
-	if (m_iObsoletePolicy != NO_POLICY) CUSTOMLOG("IsObsoleteByPolicy(%i) is %s", m_iObsoletePolicy, (bObsolete ? "true" : "false"));
+	// if (m_iObsoletePolicy != NO_POLICY) CUSTOMLOG("IsObsoleteByPolicy(%i) is %s", m_iObsoletePolicy, (bObsolete ? "true" : "false"));
 	return bObsolete;
 }
 
@@ -1140,7 +1165,7 @@ bool CvTraitEntry::IsEnabledByPolicy(PlayerTypes ePlayer)
 		bEnabled = (GET_PLAYER(ePlayer).HasPolicy((PolicyTypes)m_iPrereqPolicy));
 	}
 
-	if (m_iPrereqPolicy != NO_POLICY) CUSTOMLOG("IsEnabledByPolicy(%i) is %s", m_iPrereqPolicy, (bEnabled ? "true" : "false"));
+	// if (m_iPrereqPolicy != NO_POLICY) CUSTOMLOG("IsEnabledByPolicy(%i) is %s", m_iPrereqPolicy, (bEnabled ? "true" : "false"));
 	return bEnabled;
 }
 #endif
@@ -1220,6 +1245,13 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	m_iRazeSpeedModifier					= kResults.GetInt("RazeSpeedModifier");
 	m_iDOFGreatPersonModifier				= kResults.GetInt("DOFGreatPersonModifier");
 	m_iLuxuryHappinessRetention				= kResults.GetInt("LuxuryHappinessRetention");
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	if (MOD_TRAITS_EXTRA_SUPPLY) {
+		m_iExtraSupply						= kResults.GetInt("ExtraSupply");
+		m_iExtraSupplyPerCity				= kResults.GetInt("ExtraSupplyPerCity");
+		m_iExtraSupplyPerPopulation			= kResults.GetInt("ExtraSupplyPerPopulation");
+	}
+#endif
 	m_iExtraSpies							= kResults.GetInt("ExtraSpies");
 	m_iUnresearchedTechBonusFromKills		= kResults.GetInt("UnresearchedTechBonusFromKills");
 	m_iExtraFoundedCityTerritoryClaimRange  = kResults.GetInt("ExtraFoundedCityTerritoryClaimRange");
@@ -1276,28 +1308,24 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 		if(szTextVal)
 		{
 			m_iObsoleteBelief = GC.getInfoTypeForString(szTextVal, true);
-			CUSTOMLOG("%s is %i", szTextVal, m_iObsoleteBelief);
 		}
 
 		szTextVal = kResults.GetText("PrereqBelief");
 		if(szTextVal)
 		{
 			m_iPrereqBelief = GC.getInfoTypeForString(szTextVal, true);
-			CUSTOMLOG("%s is %i", szTextVal, m_iPrereqBelief);
 		}
 
 		szTextVal = kResults.GetText("ObsoletePolicy");
 		if(szTextVal)
 		{
 			m_iObsoletePolicy = GC.getInfoTypeForString(szTextVal, true);
-			CUSTOMLOG("%s is %i", szTextVal, m_iObsoletePolicy);
 		}
 
 		szTextVal = kResults.GetText("PrereqPolicy");
 		if(szTextVal)
 		{
 			m_iPrereqPolicy = GC.getInfoTypeForString(szTextVal, true);
-			CUSTOMLOG("%s is %i", szTextVal, m_iPrereqPolicy);
 		}
 	}
 #endif
@@ -1938,6 +1966,11 @@ void CvPlayerTraits::InitPlayerTraits()
 			m_iRazeSpeedModifier += trait->GetRazeSpeedModifier();
 			m_iDOFGreatPersonModifier += trait->GetDOFGreatPersonModifier();
 			m_iLuxuryHappinessRetention += trait->GetLuxuryHappinessRetention();
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+			m_iExtraSupply += trait->GetExtraSupply();
+			m_iExtraSupplyPerCity += trait->GetExtraSupplyPerCity();
+			m_iExtraSupplyPerPopulation += trait->GetExtraSupplyPerPopulation();
+#endif
 			m_iExtraSpies += trait->GetExtraSpies();
 			m_iUnresearchedTechBonusFromKills += trait->GetUnresearchedTechBonusFromKills();
 			m_iExtraFoundedCityTerritoryClaimRange += trait->GetExtraFoundedCityTerritoryClaimRange();
@@ -2336,6 +2369,11 @@ void CvPlayerTraits::Reset()
 	m_iRazeSpeedModifier = 0;
 	m_iDOFGreatPersonModifier = 0;
 	m_iLuxuryHappinessRetention = 0;
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	m_iExtraSupply = 0;
+	m_iExtraSupplyPerCity = 0;
+	m_iExtraSupplyPerPopulation = 0;
+#endif
 	m_iExtraSpies = 0;
 	m_iUnresearchedTechBonusFromKills = 0;
 	m_iExtraFoundedCityTerritoryClaimRange = 0;
@@ -3614,6 +3652,12 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 
 	kStream >> m_iLuxuryHappinessRetention;
 
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	MOD_SERIALIZE_READ(78, kStream, m_iExtraSupply, 0);
+	MOD_SERIALIZE_READ(78, kStream, m_iExtraSupplyPerCity, 0);
+	MOD_SERIALIZE_READ(78, kStream, m_iExtraSupplyPerPopulation, 0);
+#endif
+
 	kStream >> m_iExtraSpies;
 
 	kStream >> m_iUnresearchedTechBonusFromKills;
@@ -4008,6 +4052,11 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_iRazeSpeedModifier;
 	kStream << m_iDOFGreatPersonModifier;
 	kStream << m_iLuxuryHappinessRetention;
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	MOD_SERIALIZE_WRITE(kStream, m_iExtraSupply);
+	MOD_SERIALIZE_WRITE(kStream, m_iExtraSupplyPerCity);
+	MOD_SERIALIZE_WRITE(kStream, m_iExtraSupplyPerPopulation);
+#endif
 	kStream << m_iExtraSpies;
 	kStream << m_iUnresearchedTechBonusFromKills;
 	kStream << m_iExtraFoundedCityTerritoryClaimRange;

@@ -1762,13 +1762,31 @@ void CvPlayer::addFreeUnitAI(UnitAITypes eUnitAI, int iCount)
 CvPlot* CvPlayer::addFreeUnit(UnitTypes eUnit, UnitAITypes eUnitAI)
 {
 	CvPlot* pStartingPlot;
+#if defined(MOD_BUGFIX_FREE_RELIGIOUS_UNITS)
+	CvPlot* pBestPlot = NULL;
+#else
 	CvPlot* pBestPlot;
+#endif
 	CvPlot* pLoopPlot;
 	CvPlot* pReturnValuePlot = NULL;
 
 	CvUnitEntry* pkUnitInfo = GC.getUnitInfo(eUnit);
 	if(pkUnitInfo == NULL)
 		return pReturnValuePlot;
+
+#if defined(MOD_BUGFIX_FREE_RELIGIOUS_UNITS)
+	// If pkUnitInfo is a religious unit AND the player has founded a religion, it MUST be dropped in the player's holy city
+	if ((pkUnitInfo->IsSpreadReligion() || pkUnitInfo->IsRemoveHeresy()) && GetReligions()->HasCreatedReligion()) {
+		CvCity* pHolyCity = GetHolyCity();
+		if (pHolyCity && pHolyCity->getOwner() == GetID()) {
+			// We have a holy city and we still own it
+			pBestPlot = pHolyCity->plot();
+		} else {
+			// Ummm, our holy city either doesn't exist (maybe a mod razed it), or it belongs to someone else, better just drop this dude in the capital
+			pBestPlot = getCapitalCity()->plot();
+		}
+	}
+#endif
 
 	if(GC.getGame().isOption(GAMEOPTION_ONE_CITY_CHALLENGE) && isHuman())
 	{
@@ -1830,71 +1848,79 @@ CvPlot* CvPlayer::addFreeUnit(UnitTypes eUnit, UnitAITypes eUnitAI)
 
 	if(pStartingPlot != NULL)
 	{
-		pBestPlot = NULL;
+#if defined(MOD_BUGFIX_FREE_RELIGIOUS_UNITS)
+		// If pBestPlot is not NULL, don't do any of this, as we have already determined the best plot
+		if (pBestPlot == NULL) {
+#else
+			pBestPlot = NULL;
+#endif
 
-		if(isHuman())
-		{
-			if(!(pkUnitInfo->IsFound()))
+			if (isHuman())
 			{
-				DirectionTypes eDirection;
-
-				bool bDirectionValid;
-
-				int iCount = 0;
-
-				// Find a random direction
-				do
+				if (!(pkUnitInfo->IsFound()))
 				{
-					bDirectionValid = true;
+					DirectionTypes eDirection;
 
-					eDirection = (DirectionTypes) GC.getGame().getJonRandNum(NUM_DIRECTION_TYPES, "Placing Starting Units (Human)");
+					bool bDirectionValid;
 
-					if(bDirectionValid)
+					int iCount = 0;
+
+					// Find a random direction
+					do
 					{
-						pLoopPlot = plotDirection(pStartingPlot->getX(), pStartingPlot->getY(), eDirection);
+						bDirectionValid = true;
+
+						eDirection = (DirectionTypes)GC.getGame().getJonRandNum(NUM_DIRECTION_TYPES, "Placing Starting Units (Human)");
+
+						if (bDirectionValid)
+						{
+							pLoopPlot = plotDirection(pStartingPlot->getX(), pStartingPlot->getY(), eDirection);
 
 #if defined(MOD_BUGFIX_NAVAL_FREE_UNITS)
-						if (pkUnitInfo->GetDomainType() == DOMAIN_SEA) {
-							if (pLoopPlot != NULL && pLoopPlot->isWater()) {
-								if (!pLoopPlot->isImpassable()) {
-									if (!(pLoopPlot->isUnit())) {
-										pBestPlot = pLoopPlot;
-										break;
-									}
-								}
-							}
-						} else {
-#endif
-							if(pLoopPlot != NULL && pLoopPlot->getArea() == pStartingPlot->getArea())
-							{
-								if(!pLoopPlot->isImpassable() && !pLoopPlot->isMountain())
-								{
-									if(!(pLoopPlot->isUnit()))
-									{
-										if(!(pLoopPlot->isGoody()))
-										{
+							if (pkUnitInfo->GetDomainType() == DOMAIN_SEA) {
+								if (pLoopPlot != NULL && pLoopPlot->isWater()) {
+									if (!pLoopPlot->isImpassable()) {
+										if (!(pLoopPlot->isUnit())) {
 											pBestPlot = pLoopPlot;
 											break;
 										}
 									}
 								}
 							}
-#if defined(MOD_BUGFIX_NAVAL_FREE_UNITS)
-						}
+							else {
 #endif
-					}
+								if (pLoopPlot != NULL && pLoopPlot->getArea() == pStartingPlot->getArea())
+								{
+									if (!pLoopPlot->isImpassable() && !pLoopPlot->isMountain())
+									{
+										if (!(pLoopPlot->isUnit()))
+										{
+											if (!(pLoopPlot->isGoody()))
+											{
+												pBestPlot = pLoopPlot;
+												break;
+											}
+										}
+									}
+								}
+#if defined(MOD_BUGFIX_NAVAL_FREE_UNITS)
+							}
+#endif
+						}
 
-					// Emergency escape.  Should only really break on Debug Micro map or something really funky
-					iCount++;
+						// Emergency escape.  Should only really break on Debug Micro map or something really funky
+						iCount++;
+					} while (iCount < 1000);
 				}
-				while(iCount < 1000);
 			}
-		}
 
-		if(pBestPlot == NULL)
-		{
-			pBestPlot = pStartingPlot;
+			if (pBestPlot == NULL)
+			{
+				pBestPlot = pStartingPlot;
+			}
+#if defined(MOD_BUGFIX_FREE_RELIGIOUS_UNITS)
 		}
+#endif
 
 		CvUnit* pNewUnit = initUnit(eUnit, pBestPlot->getX(), pBestPlot->getY(), eUnitAI);
 		CvAssert(pNewUnit != NULL);
@@ -9803,8 +9829,6 @@ int CvPlayer::GetNumUnitsSupplied() const
 	iFreeUnits += GetNumUnitsSuppliedByCities();
 	iFreeUnits += GetNumUnitsSuppliedByPopulation();
 
-	// TODO - WH - GetNumUnitsSuppliedByTrait()
-	  
 	if(!isMinorCiv() && !isHuman() && !IsAITeammateOfHuman())
 	{
 		int iMod = (100 + GC.getGame().getHandicapInfo().getAIUnitSupplyPercent());
@@ -9819,21 +9843,36 @@ int CvPlayer::GetNumUnitsSupplied() const
 /// Units supplied from Difficulty Level
 int CvPlayer::GetNumUnitsSuppliedByHandicap() const
 {
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	// Don't need a test here for MOD_TRAITS_EXTRA_SUPPLY being enabled, as if it isn't GetExtraSupply() will return 0
+	return getHandicapInfo().getProductionFreeUnits() + m_pTraits->GetExtraSupply();
+#else
 	return getHandicapInfo().getProductionFreeUnits();
+#endif
 }
 
 //	--------------------------------------------------------------------------------
 /// Units supplied from Difficulty Level
 int CvPlayer::GetNumUnitsSuppliedByCities() const
 {
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	// Don't need a test here for MOD_TRAITS_EXTRA_SUPPLY being enabled, as if it isn't GetExtraSupplyPerCity() will return 0
+	return (getHandicapInfo().getProductionFreeUnitsPerCity() + m_pTraits->GetExtraSupplyPerCity()) * getNumCities();
+#else
 	return getHandicapInfo().getProductionFreeUnitsPerCity() * getNumCities();
+#endif
 }
 
 //	--------------------------------------------------------------------------------
 /// Units supplied from Difficulty Level
 int CvPlayer::GetNumUnitsSuppliedByPopulation() const
 {
+#if defined(MOD_TRAITS_EXTRA_SUPPLY)
+	// Don't need a test here for MOD_TRAITS_EXTRA_SUPPLY being enabled, as if it isn't GetExtraSupplyPerPopulation() will return 0
+	return getTotalPopulation() * (getHandicapInfo().getProductionFreeUnitsPopulationPercent() + m_pTraits->GetExtraSupplyPerPopulation()) / 100;
+#else
 	return getTotalPopulation() * getHandicapInfo().getProductionFreeUnitsPopulationPercent() / 100;
+#endif
 }
 
 //	--------------------------------------------------------------------------------
@@ -29568,7 +29607,10 @@ int CvPlayer::GetHappinessFromVassals() const
 	for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
 	{
 		ePlayer = (PlayerTypes) iPlayerLoop;
-		iHappiness += GetHappinessFromVassal(ePlayer);
+		if(GetID() != ePlayer && GET_PLAYER(ePlayer).isAlive())
+		{
+			iHappiness += GetHappinessFromVassal(ePlayer);
+		}
 	}
 
 	return iHappiness;
