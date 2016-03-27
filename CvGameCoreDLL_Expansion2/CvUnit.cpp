@@ -18730,7 +18730,7 @@ void CvUnit::setMaxHitPointsBase(int iMaxHitPoints)
 {
 	// Do NOT allow max hit points to be less than 1
 	m_iMaxHitPointsBase = max(1, iMaxHitPoints);
-	
+
 	// Do NOT allow changing base max HP to kill the unit
 	setDamage(min(getDamage(), max(1, GetMaxHitPoints()-1)));
 
@@ -20970,6 +20970,15 @@ void CvUnit::read(FDataStream& kStream)
 	kStream >> m_iGreatGeneralCombatModifier;
 	kStream >> m_iIgnoreGreatGeneralBenefit;
 
+	if (uiVersion >= 8)
+	{
+		kStream >> m_iIgnoreZOC;
+	}
+	else
+	{
+		m_iIgnoreZOC = 0;
+	}
+
 #if defined(MOD_UNITS_NO_SUPPLY)
 	MOD_SERIALIZE_READ(77, kStream, m_iNoSupply, 0);
 #endif
@@ -20979,15 +20988,6 @@ void CvUnit::read(FDataStream& kStream)
 	MOD_SERIALIZE_READ(77, kStream, m_iMaxHitPointsChange, 0);
 	MOD_SERIALIZE_READ(77, kStream, m_iMaxHitPointsModifier, 0)
 #endif
-
-	if (uiVersion >= 8)
-	{
-		kStream >> m_iIgnoreZOC;
-	}
-	else
-	{
-		m_iIgnoreZOC = 0;
-	}
 
 	if (uiVersion >= 2)
 	{
