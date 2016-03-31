@@ -1736,28 +1736,31 @@ void CvTeam::DoMakePeace(TeamTypes eTeam, bool bBumpUnits, bool bSuppressNotific
 		if(MOD_DIPLOMACY_CIV4_FEATURES)
 		{
 			//Secondary major declarations
-			for(int iI = 0; iI < MAX_TEAMS; iI++)
+			for(int iI = 0; iI < MAX_CIV_TEAMS; iI++) // Don't need the barbies
 			{
-				CvTeam kTeam = GET_TEAM((TeamTypes)iI);
-				if(kTeam.isAlive())
+				if (iI != m_eID && iI != eTeam) // Don't need ourselves, or those we're making peace with
 				{
-					// Vassal of ours? They make peace with enemy
-					if(kTeam.IsVassal(GetID()))
+					CvTeam& kTeam = GET_TEAM((TeamTypes)iI);
+					if(kTeam.isAlive())
+					{
+						// Vassal of ours? They make peace with enemy, same as us
+						if(kTeam.IsVassal(GetID()))
 					{
 #if defined(MOD_EVENTS_WAR_AND_PEACE)
-						kTeam.DoMakePeace(kTeam.getLeaderID(), bPacifier, eTeam, true, false);
+							kTeam.DoMakePeace(kTeam.getLeaderID(), bPacifier, eTeam, true, false);
 #else
-						kTeam.DoMakePeace(eTeam, true, false);
+							kTeam.DoMakePeace(eTeam, true, false);
 #endif
-					}
-					// Vassal of theirs? They make peace with us
-					else if(GET_TEAM((TeamTypes)iI).IsVassal(eTeam))
-					{
+						}
+						// Vassal of theirs? They make peace with us
+						else if (kTeam.IsVassal(eTeam))
+						{
 #if defined(MOD_EVENTS_WAR_AND_PEACE)
-						kTeam.DoMakePeace(kTeam.getLeaderID(), bPacifier, GetID(), true, false);
+							kTeam.DoMakePeace(kTeam.getLeaderID(), !bPacifier, GetID(), true, false);
 #else
-						kTeam.DoMakePeace(GetID(), true, false);
+							kTeam.DoMakePeace(GetID(), true, false);
 #endif
+						}
 					}
 				}
 			}

@@ -23,7 +23,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 79)
+#define MOD_DLL_VERSION_NUMBER ((uint) 80)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -179,6 +179,8 @@
 // Removes free GP (from buildings, policies, traits, etc) from the GP counters (v61)
 #define MOD_GLOBAL_TRULY_FREE_GP                    gCustomMods.isGLOBAL_TRULY_FREE_GP()
 
+// Displays the opinion weight in the tooltip when meeting a leader (v80)
+#define MOD_DIPLOMACY_BY_NUMBERS                    gCustomMods.isDIPLOMACY_BY_NUMBERS()
 // Tech bonuses from other teams require an embassy or spy in their capital and not from just having met them (v30)
 #define MOD_DIPLOMACY_TECH_BONUSES                  gCustomMods.isDIPLOMACY_TECH_BONUSES()
 // Human players will auto-denounce AI players before going to war with them (v39)
@@ -1112,6 +1114,7 @@ public:
 	MOD_OPT_DECL(GLOBAL_SEPARATE_GP_COUNTERS);
 	MOD_OPT_DECL(GLOBAL_TRULY_FREE_GP);
 	
+	MOD_OPT_DECL(DIPLOMACY_BY_NUMBERS);
 	MOD_OPT_DECL(DIPLOMACY_TECH_BONUSES);
 	MOD_OPT_DECL(DIPLOMACY_AUTO_DENOUNCE);
 	MOD_OPT_DECL(DIPLOMACY_STFU);
