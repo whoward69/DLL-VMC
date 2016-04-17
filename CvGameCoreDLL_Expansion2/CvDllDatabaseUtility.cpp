@@ -389,6 +389,11 @@ bool CvDllDatabaseUtility::PrefetchGameData()
 	//Civilizations - must be after buildings and units
 	PrefetchCollection(GC.getCivilizationInfo(), "Civilizations");
 	PrefetchCollection(GC.getMinorCivInfo(), "MinorCivilizations");
+#if defined(MOD_EVENTS_QUESTS)
+	if (MOD_EVENTS_QUESTS) {
+		PrefetchCollection(GC.getQuestInfo(), "Quests");
+	}
+#endif
 	PrefetchCollection(GC.getTraitInfo(), "Traits");
 	PrefetchCollection(GC.getReligionInfo(), "Religions");
 	PrefetchCollection(GC.getBeliefInfo(), "Beliefs");
@@ -636,6 +641,11 @@ bool CvDllDatabaseUtility::ValidatePrefetchProcess()
 	ValidateVectorSize(getNumFeatureInfos);
 	ValidateVectorSize(getNumCivilizationInfos);
 	ValidateVectorSize(getNumMinorCivInfos);
+#if defined(MOD_EVENTS_QUESTS)
+	if (MOD_EVENTS_QUESTS) {
+		ValidateVectorSize(getNumQuestInfos);
+	}
+#endif
 	ValidateVectorSize(getNumLeaderHeadInfos);
 	ValidateVectorSize(getNumTraitInfos);
 	ValidateVectorSize(getNumUnitInfos);

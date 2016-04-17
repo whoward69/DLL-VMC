@@ -1335,6 +1335,21 @@ public:
 	{
 		return !(IsCombatUnit() || isRanged());
 	}
+
+	inline bool IsMinorCivUnit() const
+	{
+		return (m_eOwner >= MAX_MAJOR_CIVS);
+	}
+
+	inline bool IsBarbarianUnit() const
+	{
+		return (m_eOwner == BARBARIAN_PLAYER);
+	}
+
+	inline bool IsCityStateUnit() const
+	{
+		return IsMinorCivUnit() && !IsBarbarianUnit();
+	}
 #endif
 
 	// Combat eligibility routines

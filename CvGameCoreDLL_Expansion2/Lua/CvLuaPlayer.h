@@ -591,6 +591,10 @@ protected:
 	static int lGetQuestData1(lua_State* L);
 	static int lGetQuestData2(lua_State* L);
 	static int lGetQuestTurnsRemaining(lua_State* L);
+#if defined(MOD_EVENTS_QUESTS)
+	LUAAPIEXTN(DoMinorCivStartQuestForPlayer, void, iMajor, iQuest);
+	LUAAPIEXTN(GetQuestTurnsDuration, int, iMajor, iQuest);
+#endif
 	static int lIsMinorCivContestLeader(lua_State* L);
 	static int lGetMinorCivContestValueForLeader(lua_State* L);
 	static int lGetMinorCivContestValueForPlayer(lua_State* L);
@@ -634,6 +638,10 @@ protected:
 	static int lGetMajorBullyGoldDetails(lua_State* L);
 	static int lCanMajorBullyUnit(lua_State* L);
 	static int lGetMajorBullyUnitDetails(lua_State* L);
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_EVENTS_QUESTS)
+	LUAAPIEXTN(IsEverBulliedByMajor, bool, iPlayer);
+	LUAAPIEXTN(IsRecentlyBulliedByMajor, bool, iPlayer);
+#endif
 	static int lCanMajorBuyout(lua_State* L);
 	static int lGetBuyoutCost(lua_State* L);
 	static int lCanMajorGiftTileImprovement(lua_State* L);
@@ -891,6 +899,9 @@ protected:
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(DismissNotification, void, iIndex, bUserInvoked);
 #endif
+#if defined(MOD_EVENTS_QUESTS)
+	LUAAPIEXTN(AddQuestNotification, void, iCS, sMessage, sSummary, iPlotX, iPlotY, bNewQuest);
+#endif
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_API_PLAYER_LOGS)
 	LUAAPIEXTN(GetDiplomacyLog, table);
 	LUAAPIEXTN(GetMilitaryLog, table);
@@ -1134,6 +1145,18 @@ protected:
 	LUAAPIEXTN(CountAllWorkedResource, int, iResourceType);
 	LUAAPIEXTN(CountAllTerrain, int, iTerrainType);
 	LUAAPIEXTN(CountAllWorkedTerrain, int, iTerrainType);
+#endif
+
+#if defined(MOD_API_LUA_EXTENSIONS)
+	LUAAPIEXTN(GetActiveEconomicStrategies, table);
+	LUAAPIEXTN(IsActiveEconomicStrategy, bool, iStrategy);
+	LUAAPIEXTN(ActivateEconomicStrategy, void, iStrategy);
+	LUAAPIEXTN(DeactivateEconomicStrategy, void, iStrategy);
+
+	LUAAPIEXTN(GetActiveMilitaryStrategies, table);
+	LUAAPIEXTN(IsActiveMilitaryStrategy, bool, iStrategy);
+	LUAAPIEXTN(ActivateMilitaryStrategy, void, iStrategy);
+	LUAAPIEXTN(DeactivateMilitaryStrategy, void, iStrategy);
 #endif
 
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)

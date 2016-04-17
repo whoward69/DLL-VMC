@@ -57,9 +57,9 @@ public:
 	void setupSpaceshipGraphics();
 
 
-#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES)
-	void kill(bool bVenice = false);
-	void PreKill(bool bVenice = false);
+#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES) || defined(MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES)
+	void kill(bool bKeepResources = false);
+	void PreKill(bool bKeepResources = false);
 #else
 	void kill();
 	void PreKill();

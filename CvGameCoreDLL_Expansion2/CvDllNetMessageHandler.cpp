@@ -634,7 +634,11 @@ void CvDllNetMessageHandler::ResponseMinorCivGiftTileImprovement(PlayerTypes eMa
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseMinorCivBuyout(PlayerTypes eMajor, PlayerTypes eMinor)
 {
+#if defined(MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES)
+	GET_PLAYER(eMinor).GetMinorCivAI()->DoBuyout(eMajor, MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES);
+#else
 	GET_PLAYER(eMinor).GetMinorCivAI()->DoBuyout(eMajor);
+#endif
 }
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseMinorNoUnitSpawning(PlayerTypes ePlayer, PlayerTypes eMinor, bool bValue)

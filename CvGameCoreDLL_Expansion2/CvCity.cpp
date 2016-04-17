@@ -1441,8 +1441,8 @@ void CvCity::setupSpaceshipGraphics()
 }
 
 //	--------------------------------------------------------------------------------
-#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES)
-void CvCity::PreKill(bool bVenice)
+#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES) || defined(MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES)
+void CvCity::PreKill(bool bKeepResources)
 #else
 void CvCity::PreKill()
 #endif
@@ -1506,8 +1506,8 @@ void CvCity::PreKill()
 		}
 	}
 
-#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES)
-	plot()->removeMinorResources(bVenice);
+#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES) || defined(MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES)
+	plot()->removeMinorResources(bKeepResources);
 #else
 	if(GET_PLAYER(getOwner()).isMinorCiv())
 	{
@@ -1642,8 +1642,8 @@ void CvCity::PostKill(bool bCapital, CvPlot* pPlot, PlayerTypes eOwner)
 }
 
 //	--------------------------------------------------------------------------------
-#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES)
-void CvCity::kill(bool bVenice)
+#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES) || defined(MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES)
+void CvCity::kill(bool bKeepResources)
 #else
 void CvCity::kill()
 #endif
@@ -1681,8 +1681,8 @@ void CvCity::kill()
 		}
 	}
 
-#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES)
-	PreKill(bVenice);
+#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES) || defined(MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES)
+	PreKill(bKeepResources);
 #else
 	PreKill();
 #endif

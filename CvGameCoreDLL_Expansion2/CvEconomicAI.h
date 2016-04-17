@@ -162,6 +162,9 @@ public:
 	void SetTurnStrategyAdopted(EconomicAIStrategyTypes eStrategy, int iValue);
 
 	void DoTurn();
+#if defined(MOD_API_EXTENSIONS)
+	void UseStrategy(EconomicAIStrategyTypes eStrategy, bool bUsingStrategy);
+#endif
 
 	CvCity* GetBestGreatWorkCity(CvPlot *pStartPlot, GreatWorkType eGreatWork) const;
 

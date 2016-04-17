@@ -1368,24 +1368,6 @@ int CvMilitaryAI::ScoreTarget(CvMilitaryTarget& target, AIOperationTypes eAIOper
 		uliRtnValue /= 100;
 	}
 	
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if (MOD_DIPLOMACY_CITYSTATES) {
-		for(int iMinorLoop = MAX_MAJOR_CIVS; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
-		{
-			PlayerTypes eMinor = (PlayerTypes) iMinorLoop;
-			if (target.m_pTargetCity->getOriginalOwner() == eMinor)
-			{
-				CvPlayer* pMinor = &GET_PLAYER(eMinor);
-				if(pMinor->GetMinorCivAI()->GetQuestData1(m_pPlayer->GetID(), MINOR_CIV_QUEST_LIBERATION) == eMinor)
-				{
-					uliRtnValue *= GC.getAI_MILITARY_RECAPTURING_CITY_STATE();
-					uliRtnValue /= 100;
-				}
-			}
-		}
-	}
-#endif
-
 	// Don't want it to already be targeted by an operation that's not well on its way
 	if(m_pPlayer->IsCityAlreadyTargeted(target.m_pTargetCity, NO_DOMAIN, 50))
 	{
@@ -2631,11 +2613,16 @@ void CvMilitaryAI::UpdateMilitaryStrategies()
 			// Flavor propagation
 			if(bAdoptOrEndStrategy)
 			{
+#if !defined(MOD_API_EXTENSIONS)
 				int iFlavorLoop;
+#endif
 
 				// We should adopt this Strategy
 				if(bTestStrategyStart)
 				{
+#if defined(MOD_API_EXTENSIONS)
+					UseStrategy(eStrategy, true);
+#else
 					SetUsingStrategy(eStrategy, true);
 
 					for(iFlavorLoop = 0; iFlavorLoop < GC.getNumFlavorTypes(); iFlavorLoop++)
@@ -2654,10 +2641,14 @@ void CvMilitaryAI::UpdateMilitaryStrategies()
 
 					if(pStrategy->RequiresCitySpecializationUpdate())
 						GetPlayer()->GetCitySpecializationAI()->SetSpecializationsDirty(SPECIALIZATION_UPDATE_STRATEGY_NOW_ON);
+#endif
 				}
 				// End the Strategy
 				else if(bTestStrategyEnd)
 				{
+#if defined(MOD_API_EXTENSIONS)
+					UseStrategy(eStrategy, false);
+#else
 					SetUsingStrategy(eStrategy, false);
 
 					for(iFlavorLoop = 0; iFlavorLoop < GC.getNumFlavorTypes(); iFlavorLoop++)
@@ -2676,11 +2667,39 @@ void CvMilitaryAI::UpdateMilitaryStrategies()
 
 					if(pStrategy->RequiresCitySpecializationUpdate())
 						GetPlayer()->GetCitySpecializationAI()->SetSpecializationsDirty(SPECIALIZATION_UPDATE_STRATEGY_NOW_OFF);
+#endif
 				}
 			}
 		}
 	}
 }
+
+#if defined(MOD_API_EXTENSIONS)
+void CvMilitaryAI::UseStrategy(MilitaryAIStrategyTypes eStrategy, bool bUsingStrategy)
+{
+	CvMilitaryAIStrategyXMLEntry* pStrategy = GetMilitaryAIStrategies()->GetEntry(eStrategy);
+	int iChange = bUsingStrategy ? 1 : -1;
+			
+	SetUsingStrategy(eStrategy, bUsingStrategy);
+
+	for(int iFlavorLoop = 0; iFlavorLoop < GC.getNumFlavorTypes(); iFlavorLoop++)
+	{
+		m_aiTempFlavors[iFlavorLoop] = pStrategy->GetPlayerFlavorValue(iFlavorLoop) * iChange;
+	}
+
+	GetPlayer()->GetFlavorManager()->ChangeFlavors(m_aiTempFlavors, true);
+
+	for(int iFlavorLoop = 0; iFlavorLoop < GC.getNumFlavorTypes(); iFlavorLoop++)
+	{
+		m_aiTempFlavors[iFlavorLoop] = pStrategy->GetCityFlavorValue(iFlavorLoop) * iChange;
+	}
+
+	GetPlayer()->GetFlavorManager()->ChangeFlavors(m_aiTempFlavors, false);
+
+	if(pStrategy->RequiresCitySpecializationUpdate())
+		GetPlayer()->GetCitySpecializationAI()->SetSpecializationsDirty(bUsingStrategy ? SPECIALIZATION_UPDATE_STRATEGY_NOW_ON : SPECIALIZATION_UPDATE_STRATEGY_NOW_OFF);
+}
+#endif
 
 /// Abort or start operations as appropriate given the current threats and war states
 void CvMilitaryAI::UpdateOperations()

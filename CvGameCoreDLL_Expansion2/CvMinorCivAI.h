@@ -67,20 +67,8 @@ enum MinorCivQuestTypes
     MINOR_CIV_QUEST_DENOUNCE_MAJOR,
     MINOR_CIV_QUEST_SPREAD_RELIGION,
 	MINOR_CIV_QUEST_TRADE_ROUTE,
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	MINOR_CIV_QUEST_WAR,
-	MINOR_CIV_QUEST_CONSTRUCT_NATIONAL_WONDER,
-	MINOR_CIV_QUEST_FIND_CITY_STATE,
-	MINOR_CIV_QUEST_INFLUENCE,
-	MINOR_CIV_QUEST_CONTEST_TOURISM,
-	MINOR_CIV_QUEST_ARCHAEOLOGY,
-	MINOR_CIV_QUEST_CIRCUMNAVIGATION,
-	MINOR_CIV_QUEST_LIBERATION,
-	MINOR_CIV_QUEST_HORDE,
-	MINOR_CIV_QUEST_REBELLION,
-#endif
 
-    NUM_MINOR_CIV_QUEST_TYPES,
+	NUM_MINOR_CIV_QUEST_TYPES,
 };
 FDataStream& operator<<(FDataStream&, const MinorCivQuestTypes&);
 FDataStream& operator>>(FDataStream&, MinorCivQuestTypes&);
@@ -120,6 +108,9 @@ public:
 	int GetStartTurn() const;
 	int GetEndTurn() const;
 	int GetTurnsRemaining(int iCurrentTurn) const;
+#if defined(MOD_EVENTS_QUESTS)
+	int GetTurnsDuration() const;
+#endif
 	int GetPrimaryData() const;
 	int GetSecondaryData() const;
 	int GetInfluenceReward() const;
@@ -128,6 +119,11 @@ public:
 	int GetContestValueForPlayer(PlayerTypes ePlayer);
 	int GetContestValueForLeader();
 	CivsList GetContestLeaders();
+
+#if defined(MOD_EVENTS_QUESTS)
+	bool UseEvents() const;
+	bool IsInternal() const;
+#endif
 
 	// Quest status for assigned player
 	bool IsContestLeader(PlayerTypes ePlayer = NO_PLAYER);
@@ -152,6 +148,9 @@ public:
 	int m_iData1;
 	int m_iData2;
 	bool m_bHandled;
+#if defined(MOD_EVENTS_QUESTS)
+	CvQuestInfo* m_pQuestInfo;
+#endif
 };
 FDataStream& operator>>(FDataStream&, CvMinorCivQuest&);
 FDataStream& operator<<(FDataStream&, const CvMinorCivQuest&);
@@ -223,8 +222,8 @@ public:
 	MinorCivStatusTypes GetStatus() const;
 
 	void DoAddStartingResources(CvPlot* pCityPlot);
-#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES)
-	void DoRemoveStartingResources(CvPlot* pCityPlot, bool bVenice);
+#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES) ||  defined(MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES)
+	void DoRemoveStartingResources(CvPlot* pCityPlot, bool bKeepResources);
 #else
 	void DoRemoveStartingResources(CvPlot* pCityPlot);
 #endif
@@ -320,6 +319,9 @@ public:
 	int GetQuestData1(PlayerTypes ePlayer, MinorCivQuestTypes eType) const;
 	int GetQuestData2(PlayerTypes ePlayer, MinorCivQuestTypes eType) const;
 	int GetQuestTurnsRemaining(PlayerTypes ePlayer, MinorCivQuestTypes eType, int iGameTurn) const;
+#if defined(MOD_EVENTS_QUESTS)
+	int GetQuestTurnsDuration(PlayerTypes ePlayer, MinorCivQuestTypes eType) const;
+#endif
 	bool IsContestLeader(PlayerTypes ePlayer, MinorCivQuestTypes eType);
 	int GetContestValueForLeader(MinorCivQuestTypes eType);
 	int GetContestValueForPlayer(PlayerTypes ePlayer, MinorCivQuestTypes eType);
@@ -327,43 +329,10 @@ public:
 	bool IsRouteConnectionEstablished(PlayerTypes eMajor) const;
 	void SetRouteConnectionEstablished(PlayerTypes eMajor, bool bValue);
 	CvPlot* GetBestNearbyCampToKill();
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	CvPlot* GetBestNearbyDig();
-	//Tests
-	PlayerTypes SpawnHorde();
-	PlayerTypes SpawnRebels();
-	//Ends
-	void SetSacked(bool bValue);
-	bool IsSacked();
-	bool IsRebellion();
-	void SetRebellion(bool bValue);
-	//Countdown
-	void ChangeTurnsSinceRebellion(int iChange);
-	int GetTurnsSinceRebellion() const;
-	void SetTurnsSinceRebellion(int iValue);
-	//Primers
-	void DoRebellion();
-	bool IsValidRebellion();
-	void SetRebellionActive(bool bValue);
-	bool IsRebellionActive();
-	void SetHordeActive(bool bValue);
-	bool IsHordeActive();
-	//Cooldown
-	void ChangeCooldownSpawn(int iChange);
-	int GetCooldownSpawn() const;
-	void SetCooldownSpawn(int iValue);
-#endif
 	ResourceTypes GetNearbyResourceForQuest(PlayerTypes ePlayer);
 	BuildingTypes GetBestWonderForQuest(PlayerTypes ePlayer);
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	BuildingTypes GetBestNationalWonderForQuest(PlayerTypes ePlayer);
-#endif
 	UnitTypes GetBestGreatPersonForQuest(PlayerTypes ePlayer);
 	PlayerTypes GetBestCityStateTarget(PlayerTypes eForPlayer);
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	PlayerTypes GetBestCityStateLiberate(PlayerTypes eForPlayer);
-	PlayerTypes GetBestCityStateMeetTarget(PlayerTypes eForPlayer);
-#endif
 	PlayerTypes GetMostRecentBullyForQuest() const;
 	bool IsWantsMinorDead(PlayerTypes eMinor);
 	PlayerTypes GetBestPlayerToFind(PlayerTypes ePlayer);
@@ -371,9 +340,6 @@ public:
 	bool IsGoodTimeForGiveGoldQuest();
 	bool IsGoodTimeForPledgeToProtectQuest();
 	bool IsGoodTimeForDenounceMajorQuest();
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	bool IsGoodTimeForWarMajorQuest();
-#endif
 
 	// ******************************
 	// ***** Friendship *****
@@ -429,10 +395,6 @@ public:
 	void DoSetBonus(PlayerTypes ePlayer, bool bAdd, bool bFriends, bool bAllies, bool bSuppressNotifications = false, bool bPassedBySomeone = false, PlayerTypes eNewAlly = NO_PLAYER);
 
 	void DoIntrusion();
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	void DoSack();
-	void DoDefection();
-#endif
 
 	// DEPRECATED
 	bool IsMajorIntruding(PlayerTypes eMajor) const;
@@ -522,10 +484,14 @@ public:
 	void SetMajorBoughtOutBy(PlayerTypes eMajor);
 	bool CanMajorBuyout(PlayerTypes eMajor);
 	int GetBuyoutCost(PlayerTypes eMajor);
+#if defined(MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES)
+	void DoBuyout(PlayerTypes eMajor, bool bKeepResources = false);
+#else
 	void DoBuyout(PlayerTypes eMajor);
+#endif
 
-#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES)
-	void DoAcquire(PlayerTypes eMajor, int& iNumUnits, int& iCapitalX, int& iCapitalY, bool bVenice = false);
+#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES) ||  defined(MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES)
+	void DoAcquire(PlayerTypes eMajor, int& iNumUnits, int& iCapitalX, int& iCapitalY, bool bKeepResources = false);
 #else
 	void DoAcquire(PlayerTypes eMajor, int& iNumUnits, int& iCapitalX, int& iCapitalY);
 #endif
@@ -635,15 +601,6 @@ private:
 	int m_aaiNumEnemyUnitsLeftToKillByMajor[MAX_MAJOR_CIVS][MAX_MAJOR_CIVS];
 
 	bool m_abRouteConnectionEstablished[MAX_MAJOR_CIVS];
-
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	bool m_bIsSacked;
-	bool m_bIsRebellion;
-	int m_iIsRebellionCountdown;
-	bool m_bIsRebellionActive;
-	bool m_bIsHordeActive;
-	int m_iCooldownSpawn;
-#endif
 
 	PlayerTypes m_eAlly;
 	int m_iTurnAllied;

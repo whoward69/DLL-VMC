@@ -9298,18 +9298,6 @@ bool CvUnit::trade()
 	CvAssertMsg(eMinor != NO_PLAYER, "Performing a trade mission and not in city state territory. This is bad. Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
 	int iFriendship = getTradeInfluence(pPlot);
 
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	if (MOD_DIPLOMACY_CITYSTATES_QUESTS) {
-		//Added Influence Quest Bonus
-		if(GET_PLAYER(eMinor).GetMinorCivAI()->IsActiveQuestForPlayer(getOwner(), MINOR_CIV_QUEST_INFLUENCE))
-		{	
-			int iBoostPercentage = GC.getINFLUENCE_MINOR_QUEST_BOOST();
-			iFriendship *= 100 + iBoostPercentage;
-			iFriendship /= 100;
-		}
-	}
-#endif
-
 	GET_PLAYER(eMinor).GetMinorCivAI()->ChangeFriendshipWithMajor(getOwner(), iFriendship);
 
 	if(getOwner() == GC.getGame().getActivePlayer())
@@ -9411,7 +9399,7 @@ bool CvUnit::buyCityState()
 			int iNumUnits, iCapitalX, iCapitalY;
 #if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES)
 			// CvUnit::buyCityState() is only ever called via CvTypes::getMISSION_BUY_CITY_STATE(), so this MUST be a "Merchant of Venice" type unit
-			GET_PLAYER(eMinor).GetMinorCivAI()->DoAcquire(getOwner(), iNumUnits, iCapitalX, iCapitalY, true);
+			GET_PLAYER(eMinor).GetMinorCivAI()->DoAcquire(getOwner(), iNumUnits, iCapitalX, iCapitalY, MOD_GLOBAL_VENICE_KEEPS_RESOURCES);
 #else
 			GET_PLAYER(eMinor).GetMinorCivAI()->DoAcquire(getOwner(), iNumUnits, iCapitalX, iCapitalY);
 #endif

@@ -23,7 +23,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 80)
+#define MOD_DLL_VERSION_NUMBER ((uint) 81)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -133,6 +133,8 @@
 #define MOD_GLOBAL_CS_NO_ALLIED_SKIRMISHES          gCustomMods.isGLOBAL_CS_NO_ALLIED_SKIRMISHES()
 // Mercantile City States acquired via a Merchant of Venice do not lose their unique resources (v22)
 #define MOD_GLOBAL_VENICE_KEEPS_RESOURCES           gCustomMods.isGLOBAL_VENICE_KEEPS_RESOURCES()
+// Mercantile City States acquired via Diplomatic Marriage do not lose their unique resources (v81)
+#define MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES      gCustomMods.isGLOBAL_CS_MARRIAGE_KEEPS_RESOURCES()
 // Units attacking from cities, forts or citadels will not follow-up if they kill the defender
 #define MOD_GLOBAL_NO_FOLLOWUP_FROM_CITIES          gCustomMods.isGLOBAL_NO_FOLLOWUP_FROM_CITIES()
 // Units that can move after attacking can also capture civilian units (eg workers in empty barbarian camps) (v32)
@@ -194,7 +196,6 @@
 #define MOD_DIPLOMACY_CITYSTATES                    gCustomMods.isDIPLOMACY_CITYSTATES()
 #if defined(MOD_DIPLOMACY_CITYSTATES)
 #define MOD_DIPLOMACY_CITYSTATES_DIFFICULTY         (MOD_DIPLOMACY_CITYSTATES && gCustomMods.isDIPLOMACY_CITYSTATES_DIFFICULTY())
-#define MOD_DIPLOMACY_CITYSTATES_QUESTS             (MOD_DIPLOMACY_CITYSTATES && gCustomMods.isDIPLOMACY_CITYSTATES_QUESTS())
 #define MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS        (MOD_DIPLOMACY_CITYSTATES && gCustomMods.isDIPLOMACY_CITYSTATES_RESOLUTIONS())
 #define MOD_DIPLOMACY_CITYSTATES_HURRY              (MOD_DIPLOMACY_CITYSTATES && gCustomMods.isDIPLOMACY_CITYSTATES_HURRY())
 #endif
@@ -370,7 +371,7 @@
 #define MOD_EVENTS_MINORS                           gCustomMods.isEVENTS_MINORS()
 
 // Event sent upon a City State giving a gift (v73)
-//   GameEvents.MinorGift.Add(function(iMinor, iMajor, ???) end)
+//   GameEvents.MinorGift.Add(function(iMinor, iMajor, iGift, iFriendshipBoost, 0, bFirstMajorCiv, false, szTxtKeySuffix) end)
 #define MOD_EVENTS_MINORS_GIFTS                     gCustomMods.isEVENTS_MINORS_GIFTS()
 
 // Events sent on interaction with City States (v68)
@@ -390,6 +391,17 @@
 //   GameEvents.PlayerCanTransitMinorCity.Add(function(iPlayer, iCS, iCity, iPlotX, iPlotY) return true end) (v74)
 //   GameEvents.UnitCanTransitMinorCity.Add(function(iPlayer, iUnit, iCS, iCity, iPlotX, iPlotY) return true end) (v74)
 #define MOD_EVENTS_MINORS_INTERACTION               gCustomMods.isEVENTS_MINORS_INTERACTION()
+
+// Events sent by City State quests (v81)
+//   GameEvents.QuestIsAvailable(iPlayer, iCS, iQuest, iData1, iData2) return false end)
+//   GameEvents.QuestIsCompleted.Add(function(iPlayer, iCS, iQuest, bLastTurn) return false end)
+//   GameEvents.QuestIsRevoked.Add(function(iPlayer, iCS, iQuest) return false end)
+//   GameEvents.QuestIsExpired.Add(function(iPlayer, iCS, iQuest) return false end)
+//   GameEvents.QuestStart.Add(function(iPlayer, iCS, iQuest, iStartTurn, iData1, iData2) end)
+//   GameEvents.QuestGetData.Add(function(iPlayer, iCS, iQuest, bData1) return 0 end)
+//   GameEvents.QuestSendNotification.Add(function(iPlayer, iCS, iQuest, iStartTurn, iEndTurn, iData1, iData2, bStarted, bFinished, sNames) end)
+//   GameEvents.QuestContestValue.Add(function(iPlayer, iCS, iQuest) return 0 end)
+#define MOD_EVENTS_QUESTS                           gCustomMods.isEVENTS_QUESTS()
 
 // Events sent by Barbarians (v68)
 //   GameEvents.BarbariansCanFoundCamp.Add(function(iPlotX, iPlotY) return true end)
@@ -440,6 +452,8 @@
 // Events sents on espionage outcomes (v63)
 //   GameEvents.EspionageResult.Add(function(iPlayer, iSpy, iResult, iCityX, iCityY) end)
 //   GameEvents.EspionageState.Add(function(iPlayer, iSpy, iState, iCityX, iCityY) end)
+//   GameEvents.EspionageCanMoveSpyTo.Add(function(iPlayer, iCityOwner, iCity) return true)
+//   GameEvents.EspionageCanStageCoup.Add(function(iPlayer, iCityOwner, iCity) return true)
 #define MOD_EVENTS_ESPIONAGE                         gCustomMods.isEVENTS_ESPIONAGE()
 
 // Event sent to ascertain if a unit can start a paradrop from this tile
@@ -513,8 +527,8 @@
 #define MOD_EVENTS_RESOLUTIONS                      gCustomMods.isEVENTS_RESOLUTIONS()
 
 // Events sent about ideologies and tenets (v51)
-//   GameEvents.PlayerCanAdopyIdeology.Add(function(iPlayer, iIdeology) return true end)
-//   GameEvents.PlayerCanAdopyTenet.Add(function(iPlayer, iTenet) return true end)
+//   GameEvents.PlayerCanAdoptIdeology.Add(function(iPlayer, iIdeology) return true end)
+//   GameEvents.PlayerCanAdoptTenet.Add(function(iPlayer, iTenet) return true end)
 #define MOD_EVENTS_IDEOLOGIES                       gCustomMods.isEVENTS_IDEOLOGIES()
 
 // Events sent by plots (v30)
@@ -590,7 +604,7 @@
 #define MOD_EVENTS_REBASE                           gCustomMods.isEVENTS_REBASE()
 
 // Event sent to see if a command is valid (v46)
-//   GameEvents.PlayerCanDoCommand.Add(function(iPlayer, iUnit, iCommand, iData1, iData2, iPlotX, iPlotY, bTestVisible) return true end)
+//   GameEvents.CanDoCommand.Add(function(iPlayer, iUnit, iCommand, iData1, iData2, iPlotX, iPlotY, bTestVisible) return true end)
 #define MOD_EVENTS_COMMAND                          gCustomMods.isEVENTS_COMMAND()
 
 // Events sent for custom missions (v46)
@@ -604,7 +618,7 @@
 //   GameEvents.CustomMissionDoStep.Add(function(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) return CUSTOM_MISSION_ACTION_AND_DONE end)
 //   GameEvents.CustomMissionCompleted.Add(function(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) return false end)
 //   GameEvents.CustomMissionTargetPlot.Add(function(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) return iPlotIndex end)
-//   GameEvents.CustomMissionCycleTime.Add(function(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) return iCameraTime end) -- iCameraTime is 0, 1, 5 or 10
+//   GameEvents.CustomMissionCameraTime.Add(function(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) return iCameraTime end) -- iCameraTime is 0, 1, 5 or 10
 //   GameEvents.CustomMissionTimerInc.Add(function(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) return iTimerInc end)
 #define MOD_EVENTS_CUSTOM_MISSIONS                  gCustomMods.isEVENTS_CUSTOM_MISSIONS()
 
@@ -959,6 +973,14 @@ enum BattleTypeTypes
 #define GAMEEVENT_PlayerProtected				"PlayerProtected",				"ii"
 #define GAMEEVENT_PlayerRevoked					"PlayerRevoked",				"iib"
 #define GAMEEVENT_PlotCanImprove				"PlotCanImprove",				"iii"
+#define GAMEEVENT_QuestContestValue				"QuestContestValue",			"iii"
+#define GAMEEVENT_QuestGetData					"QuestGetData",					"iiib"
+#define GAMEEVENT_QuestIsAvailable				"QuestIsAvailable",				"iiibii"
+#define GAMEEVENT_QuestIsCompleted				"QuestIsCompleted",				"iiib"
+#define GAMEEVENT_QuestIsExpired				"QuestIsExpired",				"iii"
+#define GAMEEVENT_QuestIsRevoked				"QuestIsRevoked",				"iii"
+#define GAMEEVENT_QuestSendNotification			"QuestSendNotification",		"iiiiiiibbs"
+#define GAMEEVENT_QuestStart					"QuestStart",					"iiibiii"
 #define GAMEEVENT_RebaseTo						"RebaseTo",						"iiii"
 #define GAMEEVENT_ReligionCanHaveBelief			"ReligionCanHaveBelief",		"iii"
 #define GAMEEVENT_ReligionEnhanced				"ReligionEnhanced",				"iiii"
@@ -1093,6 +1115,7 @@ public:
 	MOD_OPT_DECL(GLOBAL_CS_OVERSEAS_TERRITORY);
 	MOD_OPT_DECL(GLOBAL_CS_NO_ALLIED_SKIRMISHES);
 	MOD_OPT_DECL(GLOBAL_VENICE_KEEPS_RESOURCES);
+	MOD_OPT_DECL(GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES);
 	MOD_OPT_DECL(GLOBAL_NO_FOLLOWUP_FROM_CITIES);
 	MOD_OPT_DECL(GLOBAL_CAPTURE_AFTER_ATTACKING);
 	MOD_OPT_DECL(GLOBAL_NO_OCEAN_PLUNDERING);
@@ -1121,7 +1144,6 @@ public:
 	MOD_OPT_DECL(DIPLOMACY_NO_LEADERHEADS);
 	MOD_OPT_DECL(DIPLOMACY_CITYSTATES); 
 	MOD_OPT_DECL(DIPLOMACY_CITYSTATES_DIFFICULTY); 
-	MOD_OPT_DECL(DIPLOMACY_CITYSTATES_QUESTS); 
 	MOD_OPT_DECL(DIPLOMACY_CITYSTATES_RESOLUTIONS); 
 	MOD_OPT_DECL(DIPLOMACY_CITYSTATES_HURRY); 
 	MOD_OPT_DECL(DIPLOMACY_CIV4_FEATURES); 
@@ -1204,6 +1226,7 @@ public:
 	MOD_OPT_DECL(EVENTS_MINORS);
 	MOD_OPT_DECL(EVENTS_MINORS_GIFTS);
 	MOD_OPT_DECL(EVENTS_MINORS_INTERACTION);
+	MOD_OPT_DECL(EVENTS_QUESTS);
 	MOD_OPT_DECL(EVENTS_BARBARIANS);
 	MOD_OPT_DECL(EVENTS_GOODY_CHOICE);
 	MOD_OPT_DECL(EVENTS_GOODY_TECH);

@@ -509,6 +509,9 @@
     <ClCompile Include="CvPlotInfo.cpp">
       <Filter>CustomMods</Filter>
     </ClCompile>
+    <ClCompile Include="CvQuestInfo.cpp">
+      <Filter>CustomMods</Filter>
+    </ClCompile>
     <ClCompile Include="CvAchievementInfo.cpp">
       <Filter>CustomMods</Filter>
     </ClCompile>
@@ -1043,6 +1046,9 @@
       <Filter>CustomMods</Filter>
     </ClInclude>
     <ClInclude Include="CvPlotInfo.h">
+      <Filter>CustomMods</Filter>
+    </ClInclude>
+    <ClInclude Include="CvQuestInfo.h">
       <Filter>CustomMods</Filter>
     </ClInclude>
     <ClInclude Include="CvAchievementInfo.h">

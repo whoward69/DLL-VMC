@@ -119,12 +119,6 @@ protected:
 	static int lIsBarbarian(lua_State* L);
 	static int lIsRevealedBarbarian(lua_State* L);
 	static int lHasBarbarianCamp(lua_State* L);
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	LUAAPIEXTN(HasDig, bool);
-#if !defined(MOD_API_LUA_EXTENSIONS)
-	LUAAPIEXTN(GetPlayerThatBuiltImprovement, int);
-#endif
-#endif
 	static int lIsVisible(lua_State* L);
 	static int lIsActiveVisible(lua_State* L);
 	static int lIsVisibleToWatchingHuman(lua_State* L);

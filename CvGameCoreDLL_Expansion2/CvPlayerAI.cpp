@@ -1871,12 +1871,6 @@ int CvPlayerAI::ScoreCityForMessenger(CvCity* pCity, UnitHandle pUnit)
 
 
 
-	// Is Our Influence worth more here? Definitely take advantage of this.
-	if(pMinorCivAI->IsActiveQuestForPlayer(eID, MINOR_CIV_QUEST_INFLUENCE))
-	{
-		iScore *= 4;
-	}
-	
 	// Do they have a resource we lack?
 	int iResourcesWeLack = pMinorCivAI->GetNumResourcesMajorLacks(eID);
 	if(iResourcesWeLack > 0)

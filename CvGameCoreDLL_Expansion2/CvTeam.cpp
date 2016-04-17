@@ -6664,10 +6664,6 @@ void CvTeam::testCircumnavigated()
 			{
 				if(eTeamID == kPlayer.getTeam())
 				{
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-					GC.getGame().SetTeamThatCircumnavigated(eTeamID);
-#endif
-
 #if !defined(NO_ACHIEVEMENTS)
 					if(!kGame.isGameMultiPlayer() && kPlayer.isHuman())
 					{

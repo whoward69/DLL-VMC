@@ -3119,37 +3119,6 @@ MajorCivApproachTypes CvDiplomacyAI::GetBestApproachTowardsMajorCiv(PlayerTypes 
 			viApproachWeights[MAJOR_CIV_APPROACH_WAR] += /*5*/ GC.getAPPROACH_WAR_CONQUEST_GRAND_STRATEGY();
 	}
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if (MOD_DIPLOMACY_CITYSTATES) {
-		//If we were given a quest to go to war with this player, that should influence our decision. Plus, it probably means he's a total jerk.
-		for(int iMinorLoop = MAX_MAJOR_CIVS; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
-		{
-			PlayerTypes eMinor = (PlayerTypes) iMinorLoop;
-			CvPlayer* pMinor = &GET_PLAYER(eMinor);
-			CvMinorCivAI* pMinorCivAI = pMinor->GetMinorCivAI();
-			TeamTypes eConquerorTeam = GET_TEAM(pMinor->getTeam()).GetKilledByTeam();
-
-			if(pMinorCivAI->IsActiveQuestForPlayer(eMyPlayer, MINOR_CIV_QUEST_WAR))
-			{
-				if(pMinorCivAI->GetQuestData1(eMyPlayer, MINOR_CIV_QUEST_WAR) == ePlayer)
-				{
-					viApproachWeights[MAJOR_CIV_APPROACH_WAR] += /*2*/ GC.getAPPROACH_WAR_MINOR_QUEST_WAR();
-				}
-			}
-			if(pMinorCivAI->IsActiveQuestForPlayer(eMyPlayer, MINOR_CIV_QUEST_LIBERATION))
-			{
-				if(pMinorCivAI->GetQuestData1(eMyPlayer, MINOR_CIV_QUEST_LIBERATION) == eMinor)
-				{
-					if(eConquerorTeam == eTeam)
-					{
-						viApproachWeights[MAJOR_CIV_APPROACH_WAR] += /*2*/ GC.getAPPROACH_WAR_MINOR_QUEST_WAR();
-					}
-				}
-			}
-		}
-	}
-#endif
-
 	////////////////////////////////////
 	// PERSONALITY
 	////////////////////////////////////
@@ -13003,7 +12972,7 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 		if(bShouldShowLeaderScene)
 		{
 #if defined(MOD_DIPLOMACY_STFU)
-			SendAILeaderMessage(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_DISCUSS_AI_REVOKE_VASSALAGE, DIPLO_MESSAGE_REVOKE_VASSALAGE_HOSTILE, ePlayer, LEADERHEAD_ANIM_NEGATIVE);
+			SendAILeaderMessage(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_DISCUSS_AI_REVOKE_VASSALAGE, IsActHostileTowardsHuman(ePlayer) ? DIPLO_MESSAGE_REVOKE_VASSALAGE_HOSTILE : DIPLO_MESSAGE_REVOKE_VASSALAGE, ePlayer, LEADERHEAD_ANIM_NEGATIVE);
 #else
 			if(IsActHostileTowardsHuman(ePlayer))
 				szText = GetDiploStringForMessage(DIPLO_MESSAGE_REVOKE_VASSALAGE_HOSTILE);
@@ -17537,11 +17506,87 @@ const char* GetResponseKeyForMessage(DiploMessageTypes eDiploMessage)
 		return "RESPONSE_INFLUENTIAL_ON_AI";
 	case DIPLO_MESSAGE_OUR_CULTURE_INFLUENTIAL:
 		return "RESPONSE_INFLUENTIAL_ON_HUMAN";
+
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	case DIPLO_MESSAGE_HOSTILE_REPEAT_SHARE_OPINION_NO:
+		return "RESPONSE_HOSTILE_REPEAT_SHARE_OPINION_NO";
+	case DIPLO_MESSAGE_REPEAT_SHARE_OPINION_NO:
+		return "RESPONSE_REPEAT_SHARE_OPINION_NO";
+	case DIPLO_MESSAGE_HOSTILE_SHARE_OPINION_NO:
+		return "RESPONSE_HOSTILE_SHARE_OPINION_NO";
+	case DIPLO_MESSAGE_SHARE_OPINION_NO:
+		return "RESPONSE_SHARE_OPINION_NO";
+	case DIPLO_MESSAGE_TOO_SOON_FOR_SHARE_OPINION:
+		return "RESPONSE_TOO_SOON_FOR_SHARE_OPINION";
+	case DIPLO_MESSAGE_MAPS_OFFER:
+		return "RESPONSE_MAPS_OFFER";
+	case DIPLO_MESSAGE_TECH_OFFER:
+		return "RESPONSE_TECH_OFFER";
+	case DIPLO_MESSAGE_GENEROUS_OFFER:
+		return "RESPONSE_GENEROUS_OFFER";
+	case DIPLO_MESSAGE_HUMAN_REQUEST_YES:
+		return "RESPONSE_HELP_REQUEST_YES";
+	case DIPLO_MESSAGE_HUMAN_REQUEST_TOO_MUCH:
+		return "RESPONSE_HELP_REQUEST_REFUSE_TOO_MUCH";
+	case DIPLO_MESSAGE_HUMAN_REQUEST_TOO_SOON:
+		return "RESPONSE_HELP_REQUEST_REFUSE_TOO_SOON";
+	case DIPLO_MESSAGE_VASSALAGE_ATTACKED_VASSAL:
+		return "RESPONSE_VASSALAGE_ATTACKED_VASSAL";
+	case DIPLO_MESSAGE_GREETING_HOSTILE_VASSALAGE_VASSAL:
+		return "RESPONSE_GREETING_VASSALAGE_VASSAL_HOSTILE";
+	case DIPLO_MESSAGE_GREETING_VASSALAGE_VASSAL:
+		return "RESPONSE_GREETING_VASSALAGE_VASSAL";
+	case DIPLO_MESSAGE_GREETING_HOSTILE_VASSALAGE_MASTER:
+		return "RESPONSE_GREETING_HOSTILE_VASSALAGE_MASTER";
+	case DIPLO_MESSAGE_GREETING_VASSALAGE_MASTER:
+		return "RESPONSE_GREETING_VASSALAGE_MASTER";
+	case DIPLO_MESSAGE_REVOKE_VASSAL_THIRD_OFFER:
+		return "RESPONSE_VASSALAGE_TRADE_REVOKE";
+	case DIPLO_MESSAGE_REVOKE_VASSALAGE_HOSTILE:
+		return "RESPONSE_VASSALAGE_REVOKE_VASSALAGE_HOSTILE";
+	case DIPLO_MESSAGE_REVOKE_VASSALAGE:
+		return "RESPONSE_VASSALAGE_REVOKE_VASSALAGE";
+	case DIPLO_MESSAGE_VASSALAGE_REVOKED_HUMAN_PEACEFUL:
+		return "RESPONSE_VASSALAGE_REVOKED_HUMAN_PEACEFUL";
+	case DIPLO_MESSAGE_VASSALAGE_REVOKED_HUMAN_WAR:
+		return "RESPONSE_VASSALAGE_REVOKED_HUMAN_WAR";
+	case DIPLO_MESSAGE_VASSALAGE_REVOKED_PEACEFUL:
+		return "RESPONSE_VASSALAGE_REVOKED_PEACEFUL";
+	case DIPLO_MESSAGE_VASSALAGE_REVOKED_FORCEFUL:
+		return "RESPONSE_VASSALAGE_REVOKED_FORCEFUL";
+	case DIPLO_MESSAGE_MOVE_TROOPS_ACCEPT:
+		return "RESPONSE_MOVE_TROOPS_ACCEPT";
+	case DIPLO_MESSAGE_MOVE_TROOPS_NEUTRAL:
+		return "RESPONSE_MOVE_TROOPS_NEUTRAL";
+	case DIPLO_MESSAGE_MOVE_TROOPS_NEUTRAL_HOSTILE:
+		return "RESPONSE_MOVE_TROOPS_NEUTRAL_HOSTILE";
+	case DIPLO_MESSAGE_MOVE_TROOPS_REJECT_CONQUEST:
+		return "RESPONSE_MOVE_TROOPS_REJECT_CONQUEST";
+	case DIPLO_MESSAGE_MOVE_TROOPS_REJECT_DECEPTIVE:
+		return "RESPONSE_MOVE_TROOPS_REJECT_DECEPTIVE";
+	case DIPLO_MESSAGE_MOVE_TROOPS_REJECT_HOSTILE:
+		return "RESPONSE_MOVE_TROOPS_REJECT_HOSTILE";
+	case DIPLO_MESSAGE_VASSALAGE_LIBERATED_HUMAN:
+		return "RESPONSE_VASSALAGE_LIBERATED_HUMAN";
+	case DIPLO_MESSAGE_VASSAL_TAXES_RAISED_HUMAN_MASTER:
+		return "RESPONSE_VASSAL_TAXES_RAISED_HUMAN_MASTER";
+	case DIPLO_MESSAGE_VASSAL_TAXES_RAISED_AI_MASTER:
+		return "RESPONSE_VASSAL_TAXES_RAISED_AI_MASTER";
+	case DIPLO_MESSAGE_VASSAL_TAXES_LOWERED_HUMAN_MASTER:
+		return "RESPONSE_VASSAL_TAXES_LOWERED_HUMAN_MASTER";
+	case DIPLO_MESSAGE_VASSAL_TAXES_LOWERED_AI_MASTER:
+		return "RESPONSE_VASSAL_TAXES_LOWERED_AI_MASTER";
+	case DIPLO_MESSAGE_VASSALAGE_LIBERATE_VASSAL:
+		return "RESPONSE_LIBERATE_VASSAL";
+#endif
 	}
 
 	return NULL;
 }
+#endif
 
+#if defined(MOD_DIPLOMACY_STFU)
+// We only handle special cases here, plain messages are handled by GetResponseKeyForMessage() above
 const char* CvDiplomacyAI::GetDiploStringForMessage(DiploMessageTypes eDiploMessage, PlayerTypes eForPlayer, const Localization::String& strOptionalKey1, const Localization::String& strOptionalKey2)
 {
 	CvAssertMsg(eDiploMessage >= 0, "DIPLOMACY_AI: Invalid DiploMessageType.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
@@ -17553,143 +17598,130 @@ const char* CvDiplomacyAI::GetDiploStringForMessage(DiploMessageTypes eDiploMess
 	{
 	case DIPLO_MESSAGE_GREETING_WORKING_AGAINST:
 		return GetDiploTextFromTag("RESPONSE_GREETING_WORKING_AGAINST", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_GREETING_COOP_WAR:
 		return GetDiploTextFromTag("RESPONSE_GREETING_COOP_WAR", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HOSTILE_WE_ATTACKED_YOUR_MINOR:
 		return GetDiploTextFromTag("RESPONSE_HOSTILE_WE_ATTACKED_YOUR_MINOR", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_WE_ATTACKED_YOUR_MINOR:
 		return GetDiploTextFromTag("RESPONSE_WE_ATTACKED_YOUR_MINOR", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HOSTILE_WE_BULLIED_YOUR_MINOR:
 		return GetDiploTextFromTag("RESPONSE_HOSTILE_WE_BULLIED_YOUR_MINOR", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_WE_BULLIED_YOUR_MINOR:
 		return GetDiploTextFromTag("RESPONSE_WE_BULLIED_YOUR_MINOR", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_WORK_AGAINST_SOMEONE:
 		return GetDiploTextFromTag("RESPONSE_WORK_AGAINST_SOMEONE", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_COOP_WAR_REQUEST:
 		return GetDiploTextFromTag("RESPONSE_COOP_WAR_REQUEST", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_COOP_WAR_TIME:
 		return GetDiploTextFromTag("RESPONSE_COOP_WAR_TIME", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_MINOR_CIV_COMPETITION:
 		return GetDiploTextFromTag("RESPONSE_MINOR_CIV_COMPETITION", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HUMAN_ATTACKED_PROTECTED_CITY_STATE:
 		return GetDiploTextFromTag("RESPONSE_ATTACKED_PROTECTED_CITY_STATE", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HUMAN_KILLED_PROTECTED_CITY_STATE:
 		return GetDiploTextFromTag("RESPONSE_KILLED_PROTECTED_CITY_STATE", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HUMAN_BULLIED_PROTECTED_CITY_STATE:
 		return GetDiploTextFromTag("RESPONSE_BULLIED_PROTECTED_CITY_STATE", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_DOF_AI_DENOUNCE_REQUEST:
 		return GetDiploTextFromTag("RESPONSE_DOF_AI_DENOUNCE_REQUEST", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_DOF_AI_WAR_REQUEST:
 		return GetDiploTextFromTag("RESPONSE_DOF_AI_WAR_REQUEST", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HUMAN_DOFED_FRIEND:
 		return GetDiploTextFromTag("RESPONSE_HUMAN_DOFED_FRIEND", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HUMAN_DOFED_ENEMY:
 		return GetDiploTextFromTag("RESPONSE_HUMAN_DOFED_ENEMY", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HUMAN_DENOUNCED_FRIEND:
 		return GetDiploTextFromTag("RESPONSE_HUMAN_DENOUNCED_FRIEND", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HUMAN_DENOUNCED_ENEMY:
 		return GetDiploTextFromTag("RESPONSE_HUMAN_DENOUNCED_ENEMY", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HUMAN_DOF_SO_AI_DOF:
 		return GetDiploTextFromTag("RESPONSE_HUMAN_DOF_SO_AI_DOF", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HUMAN_DENOUNCE_SO_AI_DENOUNCE:
 		return GetDiploTextFromTag("RESPONSE_HUMAN_DENOUNCE_SO_AI_DENOUNCE", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HUMAN_DOF_SO_AI_DENOUNCE:
 		return GetDiploTextFromTag("RESPONSE_HUMAN_DOF_SO_AI_DENOUNCE", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_HUMAN_DENOUNCE_SO_AI_DOF:
 		return GetDiploTextFromTag("RESPONSE_HUMAN_DENOUNCE_SO_AI_DOF", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_GREETING_OUR_DOF_WITH_AI_ENEMY:
 		return GetDiploTextFromTag("RESPONSE_GREETING_OUR_DOF_WITH_ENEMY_OF_AI", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_GREETING_OUR_DOF_WITH_AI_FRIEND:
 		return GetDiploTextFromTag("RESPONSE_GREETING_OUR_DOF_WITH_FRIEND_OF_AI", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_GREETING_DENOUNCED_AI_FRIEND:
 		return GetDiploTextFromTag("RESPONSE_GREETING_DENOUNCED_FRIEND_OF_AI", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_GREETING_DENOUNCED_AI_ENEMY:
 		return GetDiploTextFromTag("RESPONSE_GREETING_DENOUNCED_ENEMY_OF_AI", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_WARNED_ABOUT_INTRIGUE:
 		return GetDiploTextFromTag("RESPONSE_WARNED_ABOUT_INTRIGUE", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_SHARE_INTRIGUE:
 		return GetDiploTextFromTag("RESPONSE_SHARE_INTRIGUE_DECEPTION", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_WE_LIKED_THEIR_PROPOSAL:
 		return GetDiploTextFromTag("RESPONSE_WE_LIKE_HUMAN_PROPOSAL", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_WE_DISLIKED_THEIR_PROPOSAL:
 		return GetDiploTextFromTag("RESPONSE_WE_DISLIKE_HUMAN_PROPOSAL", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_THEY_SUPPORTED_OUR_PROPOSAL:
 		return GetDiploTextFromTag("RESPONSE_HUMAN_SUPPORTED_OUR_PROPOSAL", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_THEY_FOILED_OUR_PROPOSAL:
 		return GetDiploTextFromTag("RESPONSE_HUMAN_FOILED_OUR_PROPOSAL", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_THEY_SUPPORTED_OUR_HOSTING:
 		return GetDiploTextFromTag("RESPONSE_HUMAN_SUPPORTED_OUR_HOSTING", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_SHARE_INTRIGUE_ARMY_SNEAK_ATTACK_UNKNOWN_CITY:
 		return GetDiploTextFromTag("RESPONSE_SHARE_INTRIGUE_ARMY_SNEAK_ATTACK_UNKNOWN_CITY", strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_SHARE_INTRIGUE_AMPHIBIOUS_SNEAK_ATTACK_UNKNOWN_CITY:
 		return GetDiploTextFromTag("RESPONSE_SHARE_INTRIGUE_AMPHIBIOUS_SNEAK_ATTACK_UNKNOWN_CITY", strOptionalKey1);
-		break;
 		
 	case DIPLO_MESSAGE_SHARE_INTRIGUE_ARMY_SNEAK_ATTACK_KNOWN_CITY:
 		return GetDiploTextFromTag("RESPONSE_SHARE_INTRIGUE_ARMY_SNEAK_ATTACK_KNOWN_CITY", strOptionalKey1, strOptionalKey2);
-		break;
 	case DIPLO_MESSAGE_SHARE_INTRIGUE_AMPHIBIOUS_SNEAK_ATTACK_KNOWN_CITY:
 		return GetDiploTextFromTag("RESPONSE_SHARE_INTRIGUE_AMPHIBIOUS_SNEAK_ATTACK_KNOWN_CITY", strOptionalKey1, strOptionalKey2);
-		break;
 	case DIPLO_MESSAGE_ATTACKED_ROOT:
 		return GetAttackedByHumanMessage();
-		break;
 	case DIPLO_MESSAGE_INSULT_ROOT:
 		return GetInsultHumanMessage();
-		break;
 	case DIPLO_MESSAGE_DOW_ROOT:
 		return GetWarMessage(eForPlayer);
-		break;
 	case DIPLO_MESSAGE_END_WORK_WITH_US:
 		return GetEndDoFMessage(eForPlayer);
-		break;
 	case DIPLO_MESSAGE_END_WORK_AGAINST_SOMEONE:
 		return GetEndWorkAgainstSomeoneMessage(eForPlayer, strOptionalKey1);
-		break;
 	case DIPLO_MESSAGE_DECLARATION_PROTECT_CITY_STATE:
 		return GetDiploTextFromTag("RESPONSE_DECLARATION_PROTECT_CITY_STATE", strOptionalKey1, GetPlayer()->getCivilizationShortDescriptionKey());
-		break;
 	case DIPLO_MESSAGE_DECLARATION_ABANDON_CITY_STATE:
 		return GetDiploTextFromTag("RESPONSE_DECLARATION_ABANDON_CITY_STATE", strOptionalKey1, GetPlayer()->getCivilizationShortDescriptionKey());
-		break;
+
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	case DIPLO_MESSAGE_SHARE_OPINION_FRIENDLY:
+		return GetDiploTextFromTag("RESPONSE_SHARE_OPINION_FRIENDLY", strOptionalKey1);
+	case DIPLO_MESSAGE_SHARE_OPINION_NEUTRAL:
+		return GetDiploTextFromTag("RESPONSE_SHARE_OPINION_NEUTRAL", strOptionalKey1);
+	case DIPLO_MESSAGE_SHARE_OPINION_GUARDED:
+		return GetDiploTextFromTag("RESPONSE_SHARE_OPINION_GUARDED", strOptionalKey1);
+	case DIPLO_MESSAGE_SHARE_OPINION_HOSTILE:
+		return GetDiploTextFromTag("RESPONSE_SHARE_OPINION_HOSTILE", strOptionalKey1);
+	case DIPLO_MESSAGE_SHARE_OPINION_WAR:
+		return GetDiploTextFromTag("RESPONSE_SHARE_OPINION_WAR", strOptionalKey1);
+	case DIPLO_MESSAGE_SHARE_OPINION_AFRAID:
+		return GetDiploTextFromTag("RESPONSE_SHARE_OPINION_AFRAID", strOptionalKey1);
+	case DIPLO_MESSAGE_SHARE_OPINION_PLANNING_WAR:
+		return GetDiploTextFromTag("RESPONSE_SHARE_OPINION_PLANNING_WAR", strOptionalKey1);
+	case DIPLO_MESSAGE_SHARE_OPINION_DECEPTIVE:
+		return GetDiploTextFromTag("RESPONSE_SHARE_OPINION_DECEPTIVE", strOptionalKey1);
+#endif
+
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	case DIPLO_MESSAGE_TRADE_ACCEPT_ACCEPTABLE:
+		if(MOD_DIPLOMACY_CIV4_FEATURES && IsOfferedGift(eForPlayer))
+		{
+			SetOfferedGift(eForPlayer, false);
+			SetOfferingGift(eForPlayer, false);
+			return GetDiploTextFromTag("RESPONSE_PLEASED");
+		}
+		
+		return GetDiploTextFromTag("RESPONSE_TRADE_ACCEPT_ACCEPTABLE");
+#endif
 	}
 
 	const char* szResponseKey = GetResponseKeyForMessage(eDiploMessage);
+	if (szResponseKey == NULL) CUSTOMLOG("Missing text for DiploMessage=%i (check GetResponseKeyForMessage in CvDiplomacyAI.cpp)", eDiploMessage);
 	return (szResponseKey ? GetDiploTextFromTag(szResponseKey) : "");
 }
 #else
@@ -18423,12 +18455,8 @@ const char* CvDiplomacyAI::GetDiploStringForMessage(DiploMessageTypes eDiploMess
 			strText = GetDiploTextFromTag("RESPONSE_PLEASED");
 		}
 		else
-		{
 #endif
-		strText = GetDiploTextFromTag("RESPONSE_TRADE_ACCEPT_ACCEPTABLE");
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		}
-#endif
+			strText = GetDiploTextFromTag("RESPONSE_TRADE_ACCEPT_ACCEPTABLE");
 		break;
 
 		// Human gave into AI demand
@@ -28646,32 +28674,6 @@ void CvDiplomacyAI::LogMinorCivQuestType(CvString& strString, MinorCivQuestTypes
 	case MINOR_CIV_QUEST_TRADE_ROUTE:
 		strTemp.Format("Trade Route");
 		break;
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	case MINOR_CIV_QUEST_WAR:
-		strTemp.Format("Declare War on Major");
-		break;
-	case MINOR_CIV_QUEST_CONSTRUCT_NATIONAL_WONDER:
-		strTemp.Format("Construct National Wonder");
-		break;
-	case MINOR_CIV_QUEST_FIND_CITY_STATE:
-		strTemp.Format("Find City State");
-		break;
-	case MINOR_CIV_QUEST_INFLUENCE:
-		strTemp.Format("Influence");
-		break;
-	case MINOR_CIV_QUEST_CONTEST_TOURISM:
-		strTemp.Format("Contest Tourism");
-		break;
-	case MINOR_CIV_QUEST_ARCHAEOLOGY:
-		strTemp.Format("Archaeology");
-		break;
-	case MINOR_CIV_QUEST_CIRCUMNAVIGATION:
-		strTemp.Format("Circumnavigation");
-		break;
-	case MINOR_CIV_QUEST_LIBERATION:
-		strTemp.Format("Liberation");
-		break;
-#endif
 	default:
 		strTemp.Format("XXX");
 		break;

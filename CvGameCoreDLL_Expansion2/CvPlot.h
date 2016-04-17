@@ -202,10 +202,6 @@ public:
 
 	bool HasBarbarianCamp();
 
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	bool HasDig();
-#endif	
-
 	bool isVisible(TeamTypes eTeam, bool bDebug) const
 	{
 		if(bDebug && GC.getGame().isDebugMode())
@@ -573,8 +569,8 @@ public:
 	void setNumResource(int iNum);
 	void changeNumResource(int iChange);
 	int getNumResourceForPlayer(PlayerTypes ePlayer) const;
-#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES)
-	void removeMinorResources(bool bVenice = false);
+#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES) || defined(MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES)
+	void removeMinorResources(bool bKeepResources = false);
 #endif
 
 	ImprovementTypes getImprovementType() const;
@@ -627,11 +623,6 @@ public:
 
 	PlayerTypes GetPlayerThatClearedBarbCampHere() const;
 	void SetPlayerThatClearedBarbCampHere(PlayerTypes eNewValue);
-
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	PlayerTypes GetPlayerThatClearedDigHere() const;
-	void SetPlayerThatClearedDigHere(PlayerTypes eNewValue);
-#endif
 
 	CvCity* GetResourceLinkedCity() const;
 	void SetResourceLinkedCity(const CvCity* pNewValue);
@@ -1012,9 +1003,6 @@ protected:
 	char /*PlayerTypes*/ m_ePlayerResponsibleForImprovement;
 	char /*PlayerTypes*/ m_ePlayerResponsibleForRoute;
 	char /*PlayerTypes*/ m_ePlayerThatClearedBarbCampHere;
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	char /*PlayerTypes*/ m_ePlayerThatClearedDigHere;
-#endif
 	char /*RouteTypes*/ m_eRouteType;
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	short m_eUnitIncrement;

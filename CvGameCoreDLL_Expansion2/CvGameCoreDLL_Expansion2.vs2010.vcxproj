@@ -86,6 +86,7 @@
     <ClCompile Include="CvEventLog.cpp" />
     <ClCompile Include="CvGreatPersonInfo.cpp" />
     <ClCompile Include="CvPlotInfo.cpp" />
+    <ClCompile Include="CvQuestInfo.cpp" />
     <ClCompile Include="CvTargeting.cpp" />
     <ClCompile Include="_precompile.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">Create</PrecompiledHeader>
@@ -328,6 +329,7 @@
     <ClInclude Include="CvProjectClasses.h" />
     <ClInclude Include="CvProjectProductionAI.h" />
     <ClInclude Include="CvPromotionClasses.h" />
+    <ClInclude Include="CvQuestInfo.h" />
     <ClInclude Include="CvRandom.h" />
     <ClInclude Include="CvReligionClasses.h" />
     <ClInclude Include="CvReplayInfo.h" />

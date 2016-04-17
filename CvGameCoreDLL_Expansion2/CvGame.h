@@ -579,11 +579,6 @@ public:
 	int GetNumArchaeologySites() const;
 	int GetNumHiddenArchaeologySites() const;
 
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	TeamTypes GetTeamThatCircumnavigated() const;
-	void SetTeamThatCircumnavigated(TeamTypes eNewValue);
-#endif
-
 #if defined(MOD_API_EXTENSIONS)
 	bool AnyoneHasBelief(BeliefTypes iBeliefType) const;
 	bool AnyoneHasBuilding(BuildingTypes iBuildingType) const;
@@ -696,10 +691,6 @@ protected:
 	TechTypes m_eReligionTech;
 	RouteTypes m_eIndustrialRoute;
 	bool m_bArchaeologyTriggered;
-
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	char /*TeamTypes*/ m_eTeamThatCircumnavigated;
-#endif
 
 	CvString m_strScriptData;
 

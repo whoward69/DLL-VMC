@@ -20,6 +20,10 @@
 #include "CvLuaUnit.h"
 #include "CvLuaDeal.h"
 #include "../CvDiplomacyAI.h"
+#if defined(MOD_API_LUA_EXTENSIONS)
+#include "../CvEconomicAI.h"
+#include "../CvMilitaryAI.h"
+#endif
 #include "../CvMinorCivAI.h"
 #include "../CvDealClasses.h"
 #include "../CvDealAI.h"
@@ -27,6 +31,7 @@
 #include "../CvInternalGameCoreUtils.h"
 #include "ICvDLLUserInterface.h"
 #include "CvDllInterfaces.h"
+
 
 // include this last to turn warnings into errors for code analysis
 #include "LintFree.h"
@@ -602,6 +607,10 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetQuestData1);
 	Method(GetQuestData2);
 	Method(GetQuestTurnsRemaining);
+#if defined(MOD_EVENTS_QUESTS)
+	Method(DoMinorCivStartQuestForPlayer);
+	Method(GetQuestTurnsDuration);
+#endif
 	Method(IsMinorCivContestLeader);
 	Method(GetMinorCivContestValueForLeader);
 	Method(GetMinorCivContestValueForPlayer);
@@ -646,6 +655,10 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetMajorBullyGoldDetails);
 	Method(CanMajorBullyUnit);
 	Method(GetMajorBullyUnitDetails);
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_EVENTS_QUESTS)
+	Method(IsEverBulliedByMajor);
+	Method(IsRecentlyBulliedByMajor);
+#endif
 	Method(CanMajorBuyout);
 	Method(GetBuyoutCost);
 	Method(CanMajorGiftTileImprovement);
@@ -899,6 +912,9 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 #if defined(MOD_API_LUA_EXTENSIONS)
 	Method(DismissNotification);
 #endif
+#if defined(MOD_EVENTS_QUESTS)
+	Method(AddQuestNotification);
+#endif
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_API_PLAYER_LOGS)
 	Method(GetDiplomacyLog);
 	Method(GetMilitaryLog);
@@ -1125,6 +1141,18 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(CountAllWorkedResource);
 	Method(CountAllTerrain);
 	Method(CountAllWorkedTerrain);
+#endif
+
+#if defined(MOD_API_LUA_EXTENSIONS)
+	Method(GetActiveEconomicStrategies);
+	Method(IsActiveEconomicStrategy);
+	Method(ActivateEconomicStrategy);
+	Method(DeactivateEconomicStrategy);
+
+	Method(GetActiveMilitaryStrategies);
+	Method(IsActiveMilitaryStrategy);
+	Method(ActivateMilitaryStrategy);
+	Method(DeactivateMilitaryStrategy);
 #endif
 
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)
@@ -6661,6 +6689,29 @@ int CvLuaPlayer::lGetQuestTurnsRemaining(lua_State* L)
 	lua_pushinteger(L, iResult);
 	return 1;
 }
+#if defined(MOD_EVENTS_QUESTS)
+//------------------------------------------------------------------------------
+int CvLuaPlayer::lDoMinorCivStartQuestForPlayer(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const PlayerTypes ePlayer = (PlayerTypes) lua_tointeger(L, 2);
+	const MinorCivQuestTypes eType = (MinorCivQuestTypes) lua_tointeger(L, 3);
+
+	pkPlayer->GetMinorCivAI()->AddQuestForPlayer(ePlayer, eType, GC.getGame().getGameTurn());
+	return 0;
+}
+//------------------------------------------------------------------------------
+int CvLuaPlayer::lGetQuestTurnsDuration(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const PlayerTypes ePlayer = (PlayerTypes) lua_tointeger(L, 2);
+	const MinorCivQuestTypes eType = (MinorCivQuestTypes) lua_tointeger(L, 3);
+
+	const int iResult = pkPlayer->GetMinorCivAI()->GetQuestTurnsDuration(ePlayer, eType);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+#endif
 //------------------------------------------------------------------------------
 int CvLuaPlayer::lIsMinorCivContestLeader(lua_State* L)
 {
@@ -7041,6 +7092,30 @@ int CvLuaPlayer::lGetMajorBullyUnitDetails(lua_State* L)
 	lua_pushstring(L, sResult);
 	return 1;
 }
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_EVENTS_QUESTS)
+//------------------------------------------------------------------------------
+//bool GetMajorBullyUnitDetails(PlayerTypes eMajor);
+int CvLuaPlayer::lIsEverBulliedByMajor(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	PlayerTypes eMajor = (PlayerTypes)lua_tointeger(L, 2);
+
+	const bool bResult = pkPlayer->GetMinorCivAI()->IsEverBulliedByMajor(eMajor);
+	lua_pushboolean(L, bResult);
+	return 1;
+}
+//------------------------------------------------------------------------------
+//bool GetMajorBullyUnitDetails(PlayerTypes eMajor);
+int CvLuaPlayer::lIsRecentlyBulliedByMajor(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	PlayerTypes eMajor = (PlayerTypes)lua_tointeger(L, 2);
+
+	const bool bResult = pkPlayer->GetMinorCivAI()->IsRecentlyBulliedByMajor(eMajor);
+	lua_pushboolean(L, bResult);
+	return 1;
+}
+#endif
 //------------------------------------------------------------------------------
 //bool CanMajorBuyout(PlayerTypes eMajor);
 int CvLuaPlayer::lCanMajorBuyout(lua_State* L)
@@ -8992,6 +9067,20 @@ int CvLuaPlayer::lDismissNotification(lua_State* L)
 		
 		pNotifications->Dismiss(iIndex, bUserInvoked);
 	}
+
+	return 0;
+}
+#endif
+
+#if defined(MOD_EVENTS_QUESTS)
+//------------------------------------------------------------------------------
+//void AddNotification()
+int CvLuaPlayer::lAddQuestNotification(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const PlayerTypes iCS = (PlayerTypes)lua_tointeger(L, 2);
+	
+	GET_PLAYER(iCS).GetMinorCivAI()->AddQuestNotification(lua_tostring(L, 3), lua_tostring(L, 4), pkPlayer->GetID(), luaL_optint(L, 5, -1), luaL_optint(L, 6, -1), luaL_optbool(L, 7, false));
 
 	return 0;
 }
@@ -11989,6 +12078,132 @@ LUAAPIIMPL(Player, CountAllResource)
 LUAAPIIMPL(Player, CountAllWorkedResource)
 LUAAPIIMPL(Player, CountAllTerrain)
 LUAAPIIMPL(Player, CountAllWorkedTerrain)
+#endif
+
+#if defined(MOD_API_LUA_EXTENSIONS)
+//-------------------------------------------------------------------------
+int CvLuaPlayer::lGetActiveEconomicStrategies(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+
+	lua_createtable(L, 0, 0);
+	
+	if (!pkPlayer->isHuman())
+	{
+		const int t = lua_gettop(L);
+		int idx = 1;
+
+		CvEconomicAI* pEconomicAI = pkPlayer->GetEconomicAI();
+
+		// Loop through all strategies
+		for(int iStrategy = 0; iStrategy < pEconomicAI->GetEconomicAIStrategies()->GetNumEconomicAIStrategies(); iStrategy++)
+		{
+			if (pEconomicAI->IsUsingStrategy((EconomicAIStrategyTypes)iStrategy))
+			{
+				lua_pushinteger(L, iStrategy);
+				lua_rawseti(L, t, idx++);
+			}
+		}
+	}
+
+	return 1;
+}
+//-------------------------------------------------------------------------
+int CvLuaPlayer::lIsActiveEconomicStrategy(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	EconomicAIStrategyTypes eStrategy = (EconomicAIStrategyTypes) lua_tointeger(L, 2);
+
+	const int bResult = !pkPlayer->isHuman() && pkPlayer->GetEconomicAI()->IsUsingStrategy(eStrategy);
+	lua_pushboolean(L, bResult);
+	return 1;
+}
+//-------------------------------------------------------------------------
+int CvLuaPlayer::lActivateEconomicStrategy(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	EconomicAIStrategyTypes eStrategy = (EconomicAIStrategyTypes) lua_tointeger(L, 2);
+
+	if (!pkPlayer->isHuman() && pkPlayer->GetEconomicAI()->IsUsingStrategy(eStrategy) == false)
+	{
+		pkPlayer->GetEconomicAI()->UseStrategy(eStrategy, true);
+	}
+	return 0;
+}
+//-------------------------------------------------------------------------
+int CvLuaPlayer::lDeactivateEconomicStrategy(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	EconomicAIStrategyTypes eStrategy = (EconomicAIStrategyTypes) lua_tointeger(L, 2);
+
+	if (!pkPlayer->isHuman() && pkPlayer->GetEconomicAI()->IsUsingStrategy(eStrategy) == true)
+	{
+		pkPlayer->GetEconomicAI()->UseStrategy(eStrategy, false);
+	}
+	return 0;
+}
+
+//-------------------------------------------------------------------------
+int CvLuaPlayer::lGetActiveMilitaryStrategies(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+
+	lua_createtable(L, 0, 0);
+	
+	if (!pkPlayer->isHuman())
+	{
+		const int t = lua_gettop(L);
+		int idx = 1;
+
+		CvMilitaryAI* pMilitaryAI = pkPlayer->GetMilitaryAI();
+
+		// Loop through all strategies
+		for(int iStrategy = 0; iStrategy < pMilitaryAI->GetMilitaryAIStrategies()->GetNumMilitaryAIStrategies(); iStrategy++)
+		{
+			if (pMilitaryAI->IsUsingStrategy((MilitaryAIStrategyTypes)iStrategy))
+			{
+				lua_pushinteger(L, iStrategy);
+				lua_rawseti(L, t, idx++);
+			}
+		}
+	}
+
+	return 1;
+}
+//-------------------------------------------------------------------------
+int CvLuaPlayer::lIsActiveMilitaryStrategy(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	MilitaryAIStrategyTypes eStrategy = (MilitaryAIStrategyTypes) lua_tointeger(L, 2);
+
+	const int bResult = !pkPlayer->isHuman() && pkPlayer->GetMilitaryAI()->IsUsingStrategy(eStrategy);
+	lua_pushboolean(L, bResult);
+	return 1;
+}
+//-------------------------------------------------------------------------
+int CvLuaPlayer::lActivateMilitaryStrategy(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	MilitaryAIStrategyTypes eStrategy = (MilitaryAIStrategyTypes) lua_tointeger(L, 2);
+
+	if (!pkPlayer->isHuman() && pkPlayer->GetMilitaryAI()->IsUsingStrategy(eStrategy) == false)
+	{
+		pkPlayer->GetMilitaryAI()->UseStrategy(eStrategy, true);
+	}
+	return 0;
+}
+//-------------------------------------------------------------------------
+int CvLuaPlayer::lDeactivateMilitaryStrategy(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	MilitaryAIStrategyTypes eStrategy = (MilitaryAIStrategyTypes) lua_tointeger(L, 2);
+
+	if (!pkPlayer->isHuman() && pkPlayer->GetMilitaryAI()->IsUsingStrategy(eStrategy) == true)
+	{
+		pkPlayer->GetMilitaryAI()->UseStrategy(eStrategy, false);
+	}
+	return 0;
+}
 #endif
 
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)

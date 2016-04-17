@@ -183,6 +183,9 @@ public:
 		m_eArmyTypeBeingBuilt =  NO_ARMY_TYPE;
 	}
 	void DoTurn();
+#if defined(MOD_API_EXTENSIONS)
+	void UseStrategy(MilitaryAIStrategyTypes eStrategy, bool bUsingStrategy);
+#endif
 
 	DefenseState GetLandDefenseState() const
 	{

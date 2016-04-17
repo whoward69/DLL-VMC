@@ -51,7 +51,6 @@
 // ACC: CustomMissionDoStep(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) = CUSTOM_MISSION_ACTION_AND_DONE
 // ANY: CustomMissionCompleted(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn)
 // ACC: CustomMissionTargetPlot(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) = iPlotIndex
-// ACC: CustomMissionCycleTime(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) = iCameraTime (0, 1, 5 or 10)
 // ACC: CustomMissionTimerInc(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) = iTimerInc
 #endif
 
@@ -1910,9 +1909,10 @@ CvPlot* CvUnitMission::LastMissionPlot(UnitHandle hUnit)
 
 #if defined(MOD_EVENTS_CUSTOM_MISSIONS)
 		else if (MOD_EVENTS_CUSTOM_MISSIONS) {
-			int iPlotIndex = -1;
+			int iPlotIndex = 0;
+			// As iPlotIndex has to be initialised to 0, it is not possible to target plot 0
 			if (GAMEEVENTINVOKE_VALUE(iPlotIndex, GAMEEVENT_CustomMissionTargetPlot, hUnit->getOwner(), hUnit->GetID(), pMissionNode->eMissionType, pMissionNode->iData1, pMissionNode->iData2, pMissionNode->iFlags, pMissionNode->iPushTurn) == GAMEEVENTRETURN_VALUE) {
-				if (iPlotIndex >= 0 ) {
+				if (iPlotIndex > 0 ) {
 					CvPlot* pPlot = GC.getMap().plotByIndex(iPlotIndex);
 
 					if (pPlot) {

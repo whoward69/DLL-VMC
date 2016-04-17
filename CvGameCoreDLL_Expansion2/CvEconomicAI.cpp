@@ -783,11 +783,16 @@ void CvEconomicAI::DoTurn()
 			// Flavor propagation
 			if(bAdoptOrEndStrategy)
 			{
+#if !defined(MOD_API_EXTENSIONS)
 				int iFlavorLoop;
+#endif
 
 				// We should adopt this Strategy
 				if(bTestStrategyStart)
 				{
+#if defined(MOD_API_EXTENSIONS)
+					UseStrategy(eStrategy, true);
+#else
 					SetUsingStrategy(eStrategy, true);
 
 					for(iFlavorLoop = 0; iFlavorLoop < GC.getNumFlavorTypes(); iFlavorLoop++)
@@ -803,10 +808,14 @@ void CvEconomicAI::DoTurn()
 					}
 
 					GetPlayer()->GetFlavorManager()->ChangeFlavors(m_aiTempFlavors, false);
+#endif
 				}
 				// End the Strategy
 				else if(bTestStrategyEnd)
 				{
+#if defined(MOD_API_EXTENSIONS)
+					UseStrategy(eStrategy, false);
+#else
 					SetUsingStrategy(eStrategy, false);
 
 					for(iFlavorLoop = 0; iFlavorLoop < GC.getNumFlavorTypes(); iFlavorLoop++)
@@ -822,6 +831,7 @@ void CvEconomicAI::DoTurn()
 					}
 
 					GetPlayer()->GetFlavorManager()->ChangeFlavors(m_aiTempFlavors, false);
+#endif
 				}
 			}
 		}
@@ -856,6 +866,30 @@ void CvEconomicAI::DoTurn()
 #endif
 	}
 }
+
+#if defined(MOD_API_EXTENSIONS)
+void CvEconomicAI::UseStrategy(EconomicAIStrategyTypes eStrategy, bool bUsingStrategy)
+{
+	CvEconomicAIStrategyXMLEntry* pStrategy = GetEconomicAIStrategies()->GetEntry(eStrategy);
+	int iChange = bUsingStrategy ? 1 : -1;
+
+	SetUsingStrategy(eStrategy, bUsingStrategy);
+
+	for(int iFlavorLoop = 0; iFlavorLoop < GC.getNumFlavorTypes(); iFlavorLoop++)
+	{
+		m_aiTempFlavors[iFlavorLoop] = pStrategy->GetPlayerFlavorValue(iFlavorLoop) * iChange;
+	}
+
+	GetPlayer()->GetFlavorManager()->ChangeFlavors(m_aiTempFlavors, true);
+
+	for(int iFlavorLoop = 0; iFlavorLoop < GC.getNumFlavorTypes(); iFlavorLoop++)
+	{
+		m_aiTempFlavors[iFlavorLoop] = pStrategy->GetCityFlavorValue(iFlavorLoop) * iChange;
+	}
+
+	GetPlayer()->GetFlavorManager()->ChangeFlavors(m_aiTempFlavors, false);
+}
+#endif
 
 /// Find the best city to create a Great Work in
 CvCity* CvEconomicAI::GetBestGreatWorkCity(CvPlot *pStartPlot, GreatWorkType eGreatWork) const
@@ -4612,12 +4646,6 @@ int EconomicAIHelpers::IsTestStrategy_ScoreDiplomats(CvPlayer* pPlayer)
 				if(GET_PLAYER(eMinor).GetMinorCivAI()->IsCloseToNotBeingAllies(ePlayer))
 				{
 					iNumCloseNotAllies++;
-				}
-
-				// Is there an active influence quest? Let's take advantage of that.
-				if(GET_PLAYER(eMinor).GetMinorCivAI()->IsActiveQuestForPlayer(ePlayer, MINOR_CIV_QUEST_INFLUENCE))
-				{
-					iNumInfluenceQuest++;
 				}
 
 				//MINOR ALLY TESTS - If other minors are allied, what's our opinion of the ally? 

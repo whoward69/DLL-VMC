@@ -100,12 +100,6 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(IsBarbarian);
 	Method(IsRevealedBarbarian);
 	Method(HasBarbarianCamp);
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	Method(HasDig);
-#if !defined(MOD_API_LUA_EXTENSIONS)
-	Method(GetPlayerThatBuiltImprovement);
-#endif
-#endif
 	Method(IsVisible);
 	Method(IsActiveVisible);
 	Method(IsVisibleToWatchingHuman);
@@ -809,21 +803,6 @@ int CvLuaPlot::lHasBarbarianCamp(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::HasBarbarianCamp);
 }
-
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-//------------------------------------------------------------------------------
-int CvLuaPlot::lHasDig(lua_State* L)
-{
-	return BasicLuaMethod(L, &CvPlot::HasDig);
-}
-#if !defined(MOD_API_LUA_EXTENSIONS)
-//------------------------------------------------------------------------------
-int CvLuaPlot::lGetPlayerThatBuiltImprovement(lua_State* L)
-{
-	return BasicLuaMethod(L, &CvPlot::GetPlayerThatBuiltImprovement);
-}
-#endif
-#endif
 
 //------------------------------------------------------------------------------
 //bool isVisible(TeamTypes eTeam, bool bDebug);

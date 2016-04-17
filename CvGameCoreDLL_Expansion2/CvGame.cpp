@@ -1042,9 +1042,6 @@ void CvGame::uninit()
 	m_eBestGreatPeoplePlayer = NO_PLAYER;
 	m_eReligionTech = NO_TECH;
 	m_eIndustrialRoute = NO_ROUTE;
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	m_eTeamThatCircumnavigated = NO_TEAM;
-#endif
 
 	m_strScriptData = "";
 	m_iEarliestBarbarianReleaseTurn = 0;
@@ -9576,10 +9573,6 @@ void CvGame::Read(FDataStream& kStream)
 	kStream >> m_eReligionTech;
 	kStream >> m_eIndustrialRoute;
 
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	MOD_SERIALIZE_READ(39, kStream, m_eTeamThatCircumnavigated, NO_TEAM);
-#endif
-
 	kStream >> m_strScriptData;
 
 	ArrayWrapper<int> wrapm_aiEndTurnMessagesReceived(MAX_PLAYERS, m_aiEndTurnMessagesReceived);
@@ -9813,10 +9806,6 @@ void CvGame::Write(FDataStream& kStream) const
 	kStream << m_eBestGreatPeoplePlayer;
 	kStream << m_eReligionTech;
 	kStream << m_eIndustrialRoute;
-
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	MOD_SERIALIZE_WRITE(kStream, m_eTeamThatCircumnavigated);
-#endif
 
 	kStream << m_strScriptData;
 
@@ -10285,20 +10274,6 @@ void CvGame::DoUpdateIndustrialRoute()
 
 	m_eIndustrialRoute = eIndustrialRoute;
 }
-
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-//	--------------------------------------------------------------------------------
-TeamTypes CvGame::GetTeamThatCircumnavigated() const
-{
-	return (TeamTypes) m_eTeamThatCircumnavigated;
-}
-
-//	--------------------------------------------------------------------------------
-void CvGame::SetTeamThatCircumnavigated(TeamTypes eNewValue)
-{
-	m_eTeamThatCircumnavigated = eNewValue;
-}
-#endif
 
 //	--------------------------------------------------------------------------------
 CvSiteEvaluatorForSettler* CvGame::GetSettlerSiteEvaluator()

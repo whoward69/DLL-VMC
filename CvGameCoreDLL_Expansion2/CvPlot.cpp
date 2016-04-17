@@ -265,9 +265,6 @@ void CvPlot::reset(int iX, int iY, bool bConstructorCall)
 	m_ePlayerResponsibleForImprovement = NO_PLAYER;
 	m_ePlayerResponsibleForRoute = NO_PLAYER;
 	m_ePlayerThatClearedBarbCampHere = NO_PLAYER;
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	m_ePlayerThatClearedDigHere = NO_PLAYER;
-#endif
 	m_eRouteType = NO_ROUTE;
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	m_eUnitIncrement = 0;
@@ -3407,14 +3404,6 @@ bool CvPlot::HasBarbarianCamp()
 	return (getImprovementType() == GC.getBARBARIAN_CAMP_IMPROVEMENT());
 }
 
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-//	--------------------------------------------------------------------------------
-bool CvPlot::HasDig()
-{
-	return (getResourceType() == GC.getARTIFACT_RESOURCE());
-}
-#endif
-
 //	--------------------------------------------------------------------------------
 bool CvPlot::isActiveVisible(bool bDebug) const
 {
@@ -5482,6 +5471,7 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 				}
 
 #if defined(MOD_DIPLOMACY_CITYSTATES)
+				// TODO - WH - CSD BUG: duplicates code above
 				// Embassy is here (somehow- city-state conquest/reconquest, perhaps?
 				if(MOD_DIPLOMACY_CITYSTATES && getImprovementType() != NO_IMPROVEMENT)
 				{
@@ -5507,6 +5497,7 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 					}
 				}
 #endif
+
 				// Route is here
 				if(getRouteType() != NO_ROUTE && !isCity())
 				{
@@ -6399,17 +6390,17 @@ int CvPlot::getNumResourceForPlayer(PlayerTypes ePlayer) const
 	return iRtnValue;
 }
 
-#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES)
+#if defined(MOD_GLOBAL_VENICE_KEEPS_RESOURCES) || defined(MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES)
 //	--------------------------------------------------------------------------------
 // Lifted from CvMinorCivAI::DoRemoveStartingResources()
-void CvPlot::removeMinorResources(bool bVenice)
+void CvPlot::removeMinorResources(bool bKeepResources)
 {
 	bool bRemoveUniqueLuxury = false;
 
 	if (GC.getMINOR_CIV_MERCANTILE_RESOURCES_KEEP_ON_CAPTURE_DISABLED() == 1)
 		bRemoveUniqueLuxury = true;
 		
-	if (bVenice)
+	if (bKeepResources)
 		bRemoveUniqueLuxury = false;
 
 	if (bRemoveUniqueLuxury)
@@ -7324,20 +7315,6 @@ void CvPlot::SetPlayerThatClearedBarbCampHere(PlayerTypes eNewValue)
 {
 	m_ePlayerThatClearedBarbCampHere = eNewValue;
 }
-
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-//	--------------------------------------------------------------------------------
-PlayerTypes CvPlot::GetPlayerThatClearedDigHere() const
-{
-	return (PlayerTypes) m_ePlayerThatClearedDigHere;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlot::SetPlayerThatClearedDigHere(PlayerTypes eNewValue)
-{
-	m_ePlayerThatClearedDigHere = eNewValue;
-}
-#endif
 
 //	--------------------------------------------------------------------------------
 CvCity* CvPlot::GetResourceLinkedCity() const
@@ -10520,9 +10497,6 @@ void CvPlot::read(FDataStream& kStream)
 	kStream >> m_ePlayerResponsibleForImprovement;
 	kStream >> m_ePlayerResponsibleForRoute;
 	kStream >> m_ePlayerThatClearedBarbCampHere;
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	MOD_SERIALIZE_READ(39, kStream, m_ePlayerThatClearedDigHere, NO_PLAYER);
-#endif
 	kStream >> m_eRouteType;
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	MOD_SERIALIZE_READ(30, kStream, m_eUnitIncrement, 0);
@@ -10698,9 +10672,6 @@ void CvPlot::write(FDataStream& kStream) const
 	kStream << m_ePlayerResponsibleForImprovement;
 	kStream << m_ePlayerResponsibleForRoute;
 	kStream << m_ePlayerThatClearedBarbCampHere;
-#if defined(MOD_DIPLOMACY_CITYSTATES_QUESTS)
-	MOD_SERIALIZE_WRITE(kStream, m_ePlayerThatClearedDigHere);
-#endif
 	kStream << m_eRouteType;
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	MOD_SERIALIZE_WRITE(kStream, m_eUnitIncrement);

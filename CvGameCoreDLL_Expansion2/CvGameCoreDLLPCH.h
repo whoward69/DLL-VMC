@@ -162,6 +162,10 @@ typedef wchar_t          wchar;
 #include "CvCityConnections.h"
 #include "CvAdvisorCounsel.h"
 #include "CvAdvisorRecommender.h"
+#if defined(MOD_EVENTS_QUESTS)
+#include "CvMinorCivAI.h"
+#include "CvQuestInfo.h"
+#endif
 #if defined(MOD_API_ACHIEVEMENTS) || defined(ACHIEVEMENT_HACKS)
 #include "CvAchievementInfo.h"
 #endif
