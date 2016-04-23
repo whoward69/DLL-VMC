@@ -1123,7 +1123,6 @@ bool CvTraitEntry::IsObsoleteByBelief(PlayerTypes ePlayer)
 		bObsolete = (GET_PLAYER(ePlayer).HasBelief((BeliefTypes)m_iObsoleteBelief));
 	}
 
-	// if (m_iObsoleteBelief != NO_BELIEF) CUSTOMLOG("IsObsoleteByBelief(%i) is %s", m_iObsoleteBelief, (bObsolete ? "true" : "false"));
 	return bObsolete;
 }
 
@@ -1137,7 +1136,6 @@ bool CvTraitEntry::IsEnabledByBelief(PlayerTypes ePlayer)
 		bEnabled = (GET_PLAYER(ePlayer).HasBelief((BeliefTypes)m_iPrereqBelief));
 	}
 
-	// if (m_iPrereqBelief != NO_BELIEF) CUSTOMLOG("IsEnabledByBelief(%i) is %s", m_iPrereqBelief, (bEnabled ? "true" : "false"));
 	return bEnabled;
 }
 
@@ -1151,7 +1149,6 @@ bool CvTraitEntry::IsObsoleteByPolicy(PlayerTypes ePlayer)
 		bObsolete = (GET_PLAYER(ePlayer).HasPolicy((PolicyTypes)m_iObsoletePolicy));
 	}
 
-	// if (m_iObsoletePolicy != NO_POLICY) CUSTOMLOG("IsObsoleteByPolicy(%i) is %s", m_iObsoletePolicy, (bObsolete ? "true" : "false"));
 	return bObsolete;
 }
 
@@ -1165,7 +1162,6 @@ bool CvTraitEntry::IsEnabledByPolicy(PlayerTypes ePlayer)
 		bEnabled = (GET_PLAYER(ePlayer).HasPolicy((PolicyTypes)m_iPrereqPolicy));
 	}
 
-	// if (m_iPrereqPolicy != NO_POLICY) CUSTOMLOG("IsEnabledByPolicy(%i) is %s", m_iPrereqPolicy, (bEnabled ? "true" : "false"));
 	return bEnabled;
 }
 #endif
@@ -3332,6 +3328,23 @@ void CvPlayerTraits::ChooseMayaBoost()
 			}
 		}
 	}
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if(MOD_DIPLOMACY_CITYSTATES)
+	{
+#if defined(MOD_BUGFIX_UNITCLASS_NOT_UNIT)
+		ePossibleGreatPerson = m_pPlayer->GetSpecificUnitType("UNITCLASS_GREAT_DIPLOMAT");
+#else
+		ePossibleGreatPerson = (UnitTypes)GC.getInfoTypeForString("UNIT_GREAT_DIPLOMAT");
+#endif
+		if(GetUnitBaktun(ePossibleGreatPerson) == 0)
+		{
+			if(eVictoryStrategy == (AIGrandStrategyTypes) GC.getInfoTypeForString("AIGRANDSTRATEGY_UNITED_NATIONS"))
+			{
+				eDesiredGreatPerson = ePossibleGreatPerson;
+			}
+		}
+	}
+#endif
 
 	// No obvious strategic choice, just go for first one available in a reasonable order
 	if(eDesiredGreatPerson == NO_UNIT)
@@ -3433,6 +3446,20 @@ void CvPlayerTraits::ChooseMayaBoost()
 										{
 											eDesiredGreatPerson = ePossibleGreatPerson;
 										}
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+										else if(MOD_DIPLOMACY_CITYSTATES)
+										{
+#if defined(MOD_BUGFIX_UNITCLASS_NOT_UNIT)
+											ePossibleGreatPerson = m_pPlayer->GetSpecificUnitType("UNITCLASS_GREAT_DIPLOMAT");
+#else
+											ePossibleGreatPerson = (UnitTypes)GC.getInfoTypeForString("UNIT_GREAT_DIPLOMAT");
+#endif
+											if(GetUnitBaktun(ePossibleGreatPerson) == 0)
+											{
+												eDesiredGreatPerson = ePossibleGreatPerson;
+											}
+										}
+#endif
 									}
 								}
 							}

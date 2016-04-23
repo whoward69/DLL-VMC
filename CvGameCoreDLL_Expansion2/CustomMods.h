@@ -23,7 +23,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 81)
+#define MOD_DLL_VERSION_NUMBER ((uint) 82)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -192,13 +192,8 @@
 #define MOD_DIPLOMACY_STFU                          gCustomMods.isDIPLOMACY_STFU()
 // Don't display leader heads (behaves more like multi-player diplomacy) (v67)
 #define MOD_DIPLOMACY_NO_LEADERHEADS                gCustomMods.isDIPLOMACY_NO_LEADERHEADS()
-// Changes for the City State Diplomacy mod by Gazebo - AFFECTS SAVE GAME DATA FORMAT (v35)
+// Changes for the City State Diplomacy mod by Gazebo - AFFECTS SAVE GAME DATA FORMAT (v82)
 #define MOD_DIPLOMACY_CITYSTATES                    gCustomMods.isDIPLOMACY_CITYSTATES()
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-#define MOD_DIPLOMACY_CITYSTATES_DIFFICULTY         (MOD_DIPLOMACY_CITYSTATES && gCustomMods.isDIPLOMACY_CITYSTATES_DIFFICULTY())
-#define MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS        (MOD_DIPLOMACY_CITYSTATES && gCustomMods.isDIPLOMACY_CITYSTATES_RESOLUTIONS())
-#define MOD_DIPLOMACY_CITYSTATES_HURRY              (MOD_DIPLOMACY_CITYSTATES && gCustomMods.isDIPLOMACY_CITYSTATES_HURRY())
-#endif
 // Changes for the CivIV Diplomacy Features mod (v11.04) by Putmalk - AFFECTS SAVE GAME DATA FORMAT (v76)
 #define MOD_DIPLOMACY_CIV4_FEATURES                 gCustomMods.isDIPLOMACY_CIV4_FEATURES()
 
@@ -299,6 +294,9 @@
 #define MOD_AI_SECONDARY_WORKERS                    gCustomMods.isAI_SECONDARY_WORKERS()
 // Fixes the AI's inability to use combat units for founding cities (v26)
 #define MOD_AI_SECONDARY_SETTLERS                   gCustomMods.isAI_SECONDARY_SETTLERS()
+
+// Fixes the AI's inability to pick free Great Prophets, Merchants of Venice, Great Musicians and Great Writers (v82)
+#define MOD_AI_GREAT_PEOPLE_CHOICES                 gCustomMods.isAI_GREAT_PEOPLE_CHOICES()
 
 // Features from the "Smart AI mod" by Ninakoru - see http://forums.civfanatics.com/showthread.php?t=521955 (v50)
 #define MOD_AI_SMART                                gCustomMods.isAI_SMART()
@@ -1143,9 +1141,6 @@ public:
 	MOD_OPT_DECL(DIPLOMACY_STFU);
 	MOD_OPT_DECL(DIPLOMACY_NO_LEADERHEADS);
 	MOD_OPT_DECL(DIPLOMACY_CITYSTATES); 
-	MOD_OPT_DECL(DIPLOMACY_CITYSTATES_DIFFICULTY); 
-	MOD_OPT_DECL(DIPLOMACY_CITYSTATES_RESOLUTIONS); 
-	MOD_OPT_DECL(DIPLOMACY_CITYSTATES_HURRY); 
 	MOD_OPT_DECL(DIPLOMACY_CIV4_FEATURES); 
 
 	MOD_OPT_DECL(TRAITS_CROSSES_ICE);
@@ -1200,6 +1195,7 @@ public:
 
 	MOD_OPT_DECL(AI_SECONDARY_WORKERS);
 	MOD_OPT_DECL(AI_SECONDARY_SETTLERS);
+	MOD_OPT_DECL(AI_GREAT_PEOPLE_CHOICES);
 
 	MOD_OPT_DECL(AI_SMART);
 	MOD_OPT_DECL(AI_SMART_DEALS);

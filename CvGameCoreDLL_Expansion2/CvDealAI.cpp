@@ -1963,7 +1963,15 @@ int CvDealAI::GetDefensivePactValue(bool bFromMe, PlayerTypes eOtherPlayer, bool
 		//}
 		//iItemValue /= 100;
 	}
-
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if(MOD_DIPLOMACY_CITYSTATES)
+	{
+		if(GetPlayer()->GetDefensePactsToVotes() > 0)
+		{
+			iItemValue *= 10;
+		}
+	}
+#endif
 	// Are we trying to find the middle point between what we think this item is worth and what another player thinks it's worth?
 	if(bUseEvenValue)
 	{
@@ -2025,6 +2033,15 @@ int CvDealAI::GetResearchAgreementValue(bool bFromMe, PlayerTypes eOtherPlayer, 
 
 		iItemValue /= 2;
 	}
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if(MOD_DIPLOMACY_CITYSTATES)
+	{
+		if(GetPlayer()->GetRAToVotes() > 0)
+		{
+			iItemValue *= 5;
+		}
+	}
+#endif
 
 	return iItemValue;
 }

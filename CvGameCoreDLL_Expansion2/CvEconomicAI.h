@@ -326,7 +326,6 @@ bool IsTestStrategy_TechLeader(CvPlayer* pPlayer);
 bool IsTestStrategy_NeedArchaeologists(CvPlayer* pPlayer);
 bool IsTestStrategy_EnoughArchaeologists(CvPlayer* pPlayer);
 #if defined(MOD_DIPLOMACY_CITYSTATES)
-int IsTestStrategy_ScoreDiplomats(CvPlayer* pPlayer);
 bool IsTestStrategy_NeedDiplomats(CvPlayer* pPlayer);
 bool IsTestStrategy_NeedDiplomatsCritical(CvPlayer* pPlayer);
 #endif

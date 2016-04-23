@@ -129,6 +129,9 @@ CvImprovementEntry::CvImprovementEntry(void):
 	m_bIgnoreOwnership(false),
 	m_bOnlyCityStateTerritory(false),
 	m_bNoTwoAdjacent(false),
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	m_bIsEmbassy(false),
+#endif
 	m_bAdjacentLuxury(false),
 	m_bAllowsWalkWater(false),
 	m_bCreatedByGreatPerson(false),
@@ -287,6 +290,7 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 	m_iLuxuryCopiesSiphonedFromMinor = kResults.GetInt("LuxuryCopiesSiphonedFromMinor");
 #if defined(MOD_DIPLOMACY_CITYSTATES)
 	if (MOD_DIPLOMACY_CITYSTATES) {
+		m_bIsEmbassy = kResults.GetBool("IsEmbassy");
 		m_iImprovementLeagueVotes = kResults.GetInt("ImprovementLeagueVotes");
 	}
 #endif
@@ -865,7 +869,13 @@ bool CvImprovementEntry::IsOnlyCityStateTerritory() const
 {
 	return m_bOnlyCityStateTerritory;
 }
-
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+/// Can only of this improvement be built in City-State lands?
+bool CvImprovementEntry::IsEmbassy() const
+{
+	return m_bIsEmbassy;
+}
+#endif
 /// Can this improvement not be built adjacent to another one of the same type?
 bool CvImprovementEntry::IsNoTwoAdjacent() const
 {

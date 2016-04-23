@@ -319,9 +319,6 @@ public:
 	bool pillage();
 
 	bool canFound(const CvPlot* pPlot, bool bTestVisible = false) const;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	bool canFoundMid(const CvPlot* pPlot, bool bTestVisible = false) const;
-#endif
 	bool found();
 
 	bool canJoin(const CvPlot* pPlot, SpecialistTypes eSpecialist) const;
@@ -483,10 +480,6 @@ public:
 	void changeRivalTerritoryCount(int iChange);
 	bool isFound() const;
 	bool IsFoundAbroad() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	bool IsFoundMid() const;
-	bool IsFoundLate() const;
-#endif
 	bool IsWork() const;
 	bool isGoldenAge() const;
 	bool isGivesPolicies() const;

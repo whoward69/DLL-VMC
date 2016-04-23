@@ -604,6 +604,12 @@ public:
 	bool AnyoneHasUnitClass(UnitClassTypes iUnitClassType) const;
 #endif
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	TeamTypes GetTeamThatCircumnavigated() const;
+	void SetTeamThatCircumnavigated(TeamTypes eNewValue);
+	void DoBarbCountdown();
+#endif
+
 public:
 
 	//Function to determine city size from city population
@@ -691,6 +697,10 @@ protected:
 	TechTypes m_eReligionTech;
 	RouteTypes m_eIndustrialRoute;
 	bool m_bArchaeologyTriggered;
+
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	char /*TeamTypes*/ m_eTeamThatCircumnavigated;
+#endif
 
 	CvString m_strScriptData;
 

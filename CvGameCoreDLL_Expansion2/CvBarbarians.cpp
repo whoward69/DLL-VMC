@@ -14,6 +14,10 @@
 //static 
 short* CvBarbarians::m_aiPlotBarbCampSpawnCounter = NULL;
 short* CvBarbarians::m_aiPlotBarbCampNumUnitsSpawned = NULL;
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+short* CvBarbarians::m_aiPlotBarbCitySpawnCounter = NULL;
+short* CvBarbarians::m_aiPlotBarbCityNumUnitsSpawned = NULL;
+#endif
 FStaticVector<DirectionTypes, 6, true, c_eCiv5GameplayDLL, 0> CvBarbarians::m_aeValidBarbSpawnDirections;
 
 //	---------------------------------------------------------------------------
@@ -73,6 +77,15 @@ void CvBarbarians::DoBarbCampCleared(CvPlot* pPlot, PlayerTypes ePlayer)
 #endif
 }
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+//	--------------------------------------------------------------------------------
+/// Barbarian city captured, so reset counter
+void CvBarbarians::DoBarbCityCleared(CvPlot* pPlot)
+{
+	m_aiPlotBarbCitySpawnCounter[pPlot->GetPlotIndex()] = -16;
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 /// What turn are we now allowed to Spawn Barbarians on?
 bool CvBarbarians::CanBarbariansSpawn()
@@ -105,6 +118,20 @@ bool CvBarbarians::ShouldSpawnBarbFromCamp(CvPlot* pPlot)
 
 	return false;
 }
+
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+//	--------------------------------------------------------------------------------
+/// Determines when to Spawn a new Barb Unit from a City
+bool CvBarbarians::ShouldSpawnBarbFromCity(CvPlot* pPlot)
+{
+	if (m_aiPlotBarbCitySpawnCounter[pPlot->GetPlotIndex()] == 0)
+	{
+		return true;
+	}
+
+	return false;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 /// Gameplay informing us when a Camp has either been created or spawned a Unit so we can reseed the spawn counter
@@ -157,6 +184,71 @@ void CvBarbarians::DoCampActivationNotice(CvPlot* pPlot)
 	m_aiPlotBarbCampSpawnCounter[pPlot->GetPlotIndex()] = iNumTurnsToSpawn;
 }
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+//	--------------------------------------------------------------------------------
+/// Gameplay informing us when a Camp has either been created or spawned a Unit so we can reseed the spawn counter
+void CvBarbarians::DoCityActivationNotice(CvPlot* pPlot)
+{
+	CvGame& kGame = GC.getGame();
+	// Default to between 8 and 12 turns per spawn
+	//bumped a bit - too many barbs gets annoying.
+	int iNumTurnsToSpawn = 15 + kGame.getJonRandNum(5, "Barb Spawn Rand call");
+
+	// Raging
+	if (kGame.isOption(GAMEOPTION_RAGING_BARBARIANS))
+		iNumTurnsToSpawn /= 2;
+
+#if defined(MOD_BUGFIX_BARB_CAMP_SPAWNING)
+	if (m_aiPlotBarbCityNumUnitsSpawned == NULL) {
+		// Probably means we are being called as CvWorldBuilderMapLoaded is adding camps, MapInit() will follow soon and set everything up correctly
+		return;
+	}
+#endif
+		
+	// Num Units Spawned
+	int iNumUnitsSpawned = m_aiPlotBarbCityNumUnitsSpawned[pPlot->GetPlotIndex()];
+
+	// Reduce turns between spawn if we've pumped out more guys (meaning we're further into the game)
+	iNumTurnsToSpawn -= min(3, iNumUnitsSpawned);	// -1 turns if we've spawned one Unit, -3 turns if we've spawned three
+
+	// Increment # of barbs spawned from this camp
+	m_aiPlotBarbCityNumUnitsSpawned[pPlot->GetPlotIndex()]++;	// This starts at -1 so when a camp is first created it will bump up to 0, which is correct
+
+	//// If it's too early to spawn then add in a small amount to delay things a bit - between 3 and 6 extra turns
+	//if (CanBarbariansSpawn())
+	//{
+	//	iNumTurnsToSpawn += 3;
+	//	iNumTurnsToSpawn += auto_ptr<ICvGame1> pGame = GameCore::GetGame();\n.getJonRandNum(4, "Early game Barb Spawn Rand call");
+	//}
+
+	// Difficulty level can add time between spawns (e.g. Settler is +8 turns)
+	CvHandicapInfo* pHandicapInfo = GC.getHandicapInfo(kGame.getHandicapType());
+	if (pHandicapInfo)
+		iNumTurnsToSpawn += pHandicapInfo->getBarbSpawnMod();
+
+	// Game Speed can increase or decrease amount of time between spawns (ranges from 67 on Quick to 400 on Marathon)
+	CvGameSpeedInfo* pGameSpeedInfo = GC.getGameSpeedInfo(kGame.getGameSpeedType());
+	if (pGameSpeedInfo)
+	{
+		iNumTurnsToSpawn *= pGameSpeedInfo->getBarbPercent();
+		iNumTurnsToSpawn /= 100;
+	}
+
+	m_aiPlotBarbCitySpawnCounter[pPlot->GetPlotIndex()] = iNumTurnsToSpawn;
+}
+//	--------------------------------------------------------------------------------
+/// Gameplay informing a camp has been attacked - make it more likely to spawn
+void CvBarbarians::DoCityAttacked(CvPlot* pPlot)
+{
+	int iCounter = m_aiPlotBarbCitySpawnCounter[pPlot->GetPlotIndex()];
+
+	// Halve the amount of time to spawn
+	int iNewValue = iCounter / 2;
+
+	m_aiPlotBarbCitySpawnCounter[pPlot->GetPlotIndex()] = iNewValue;
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 /// Gameplay informing a camp has been attacked - make it more likely to spawn
 void CvBarbarians::DoCampAttacked(CvPlot* pPlot)
@@ -201,6 +293,31 @@ void CvBarbarians::BeginTurn()
 		{
 			m_aiPlotBarbCampSpawnCounter[iPlotLoop]++;
 		}
+		
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+		if (MOD_DIPLOMACY_CITYSTATES) {
+			if (m_aiPlotBarbCitySpawnCounter[iPlotLoop] > 0)
+			{
+				// No City here any more
+				CvPlot* pPlot = kMap.plotByIndex(iPlotLoop);
+				if (pPlot->isCity() && pPlot->getOwner() != BARBARIAN_PLAYER)
+				{
+					m_aiPlotBarbCitySpawnCounter[iPlotLoop] = -1;
+					m_aiPlotBarbCityNumUnitsSpawned[iPlotLoop] = -1;
+				}
+				else
+				{
+					m_aiPlotBarbCitySpawnCounter[iPlotLoop]--;
+				}
+			}
+
+			// Counter is negative, meaning a camp was cleared here recently and isn't allowed to respawn in the area for a while
+			else if (m_aiPlotBarbCitySpawnCounter[iPlotLoop] < -1)
+			{
+				m_aiPlotBarbCitySpawnCounter[iPlotLoop]++;
+			}
+		}
+#endif
 	}
 }
 
@@ -215,6 +332,17 @@ void CvBarbarians::MapInit(int iWorldNumPlots)
 	{
 		SAFE_DELETE_ARRAY(m_aiPlotBarbCampNumUnitsSpawned);
 	}
+
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if (m_aiPlotBarbCitySpawnCounter != NULL)
+	{
+		SAFE_DELETE_ARRAY(m_aiPlotBarbCitySpawnCounter);
+	}
+	if (m_aiPlotBarbCityNumUnitsSpawned != NULL)
+	{
+		SAFE_DELETE_ARRAY(m_aiPlotBarbCityNumUnitsSpawned);
+	}	
+#endif
 	
 	int iI;
 
@@ -228,12 +356,28 @@ void CvBarbarians::MapInit(int iWorldNumPlots)
 		{
 			m_aiPlotBarbCampNumUnitsSpawned = FNEW(short[iWorldNumPlots], c_eCiv5GameplayDLL, 0);
 		}
+		
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+		if (m_aiPlotBarbCitySpawnCounter == NULL)
+		{
+			m_aiPlotBarbCitySpawnCounter = FNEW(short[iWorldNumPlots], c_eCiv5GameplayDLL, 0);
+		}
+		if (m_aiPlotBarbCityNumUnitsSpawned == NULL)
+		{
+			m_aiPlotBarbCityNumUnitsSpawned = FNEW(short[iWorldNumPlots], c_eCiv5GameplayDLL, 0);
+		}
+#endif
 
 		// Default values
 		for (iI = 0; iI < iWorldNumPlots; ++iI)
 		{
 			m_aiPlotBarbCampSpawnCounter[iI] = -1;
 			m_aiPlotBarbCampNumUnitsSpawned[iI] = -1;
+			
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+			m_aiPlotBarbCitySpawnCounter[iI] = -1;
+			m_aiPlotBarbCityNumUnitsSpawned[iI] = -1;
+#endif
 		}
 	}
 }
@@ -251,6 +395,17 @@ void CvBarbarians::Uninit()
 	{
 		SAFE_DELETE_ARRAY(m_aiPlotBarbCampNumUnitsSpawned);
 	}
+	
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if (m_aiPlotBarbCitySpawnCounter != NULL)
+	{
+		SAFE_DELETE_ARRAY(m_aiPlotBarbCitySpawnCounter);
+	}
+	if (m_aiPlotBarbCityNumUnitsSpawned != NULL)
+	{
+		SAFE_DELETE_ARRAY(m_aiPlotBarbCityNumUnitsSpawned);
+	}
+#endif
 }
 
 //	---------------------------------------------------------------------------
@@ -268,6 +423,11 @@ void CvBarbarians::Read(FDataStream& kStream, uint uiParentVersion)
 
 	kStream >> ArrayWrapper<short>(iWorldNumPlots, m_aiPlotBarbCampSpawnCounter);
 	kStream >> ArrayWrapper<short>(iWorldNumPlots, m_aiPlotBarbCampNumUnitsSpawned);
+	
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	kStream >> ArrayWrapper<short>(iWorldNumPlots, m_aiPlotBarbCitySpawnCounter);
+	kStream >> ArrayWrapper<short>(iWorldNumPlots, m_aiPlotBarbCityNumUnitsSpawned);
+#endif
 }
 
 //	---------------------------------------------------------------------------
@@ -282,6 +442,11 @@ void CvBarbarians::Write(FDataStream& kStream)
 	int iWorldNumPlots = GC.getMap().numPlots();
 	kStream << ArrayWrapper<short>(iWorldNumPlots, m_aiPlotBarbCampSpawnCounter);
 	kStream << ArrayWrapper<short>(iWorldNumPlots, m_aiPlotBarbCampNumUnitsSpawned);
+	
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	kStream << ArrayWrapper<short>(iWorldNumPlots, m_aiPlotBarbCitySpawnCounter);
+	kStream << ArrayWrapper<short>(iWorldNumPlots, m_aiPlotBarbCityNumUnitsSpawned);
+#endif
 }
 
 //	--------------------------------------------------------------------------------

@@ -910,7 +910,10 @@ void CvGameReligions::FoundPantheon(PlayerTypes ePlayer, BeliefTypes eBelief)
 
 #if defined(MOD_TRAITS_OTHER_PREREQS)
 	if (MOD_TRAITS_OTHER_PREREQS) {
+		// Update our traits (some may have become obsolete)
+		kPlayer.GetPlayerTraits()->Reset();
 		kPlayer.GetPlayerTraits()->InitPlayerTraits();
+		kPlayer.recomputePolicyCostModifier();
 	}
 #endif
 
@@ -1078,7 +1081,10 @@ void CvGameReligions::FoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion
 
 #if defined(MOD_TRAITS_OTHER_PREREQS)
 	if (MOD_TRAITS_OTHER_PREREQS) {
+		// Update our traits (some may have become obsolete)
+		kPlayer.GetPlayerTraits()->Reset();
 		kPlayer.GetPlayerTraits()->InitPlayerTraits();
+		kPlayer.recomputePolicyCostModifier();
 	}
 #endif
 
@@ -1337,7 +1343,10 @@ void CvGameReligions::EnhanceReligion(PlayerTypes ePlayer, ReligionTypes eReligi
 
 #if defined(MOD_TRAITS_OTHER_PREREQS)
 	if (MOD_TRAITS_OTHER_PREREQS) {
+		// Update our traits (some may have become obsolete)
+		kPlayer.GetPlayerTraits()->Reset();
 		kPlayer.GetPlayerTraits()->InitPlayerTraits();
+		kPlayer.recomputePolicyCostModifier();
 	}
 #endif
 
@@ -1524,7 +1533,10 @@ void CvGameReligions::AddReformationBelief(PlayerTypes ePlayer, ReligionTypes eR
 
 #if defined(MOD_TRAITS_OTHER_PREREQS)
 	if (MOD_TRAITS_OTHER_PREREQS) {
+		// Update our traits (some may have become obsolete)
+		kPlayer.GetPlayerTraits()->Reset();
 		kPlayer.GetPlayerTraits()->InitPlayerTraits();
+		kPlayer.recomputePolicyCostModifier();
 	}
 #endif
 

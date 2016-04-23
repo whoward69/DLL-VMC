@@ -675,8 +675,8 @@ public:
 	int GetTotalGreatWorkAid() const;
 	void SetTotalGreatWorkAid(int iValue);
 
-	int GetGrowthExtraYield() const;
-	void ChangeGrowthExtraYield(int iChange);
+	int GetGrowthExtraYield(YieldTypes eIndex) const;
+	void ChangeGrowthExtraYield(YieldTypes eIndex, int iChange);
 #endif
 
 	int GetBaseYieldRateFromReligion(YieldTypes eIndex) const;
@@ -1083,10 +1083,10 @@ protected:
 	FAutoVariable<std::vector<int>, CvCity> m_aiBaseYieldRateFromMisc;
 #if defined(MOD_DIPLOMACY_CITYSTATES)
 	FAutoVariable<std::vector<int>, CvCity> m_aiBaseYieldRateFromLeague;
-	int m_iTotalScienceyAid;
-	int m_iTotalArtsyAid;
-	int m_iTotalGreatWorkAid;
-	int m_iChangeGrowthExtraYield;
+	FAutoVariable<int, CvCity> m_iTotalScienceyAid;
+	FAutoVariable<int, CvCity> m_iTotalArtsyAid;
+	FAutoVariable<int, CvCity> m_iTotalGreatWorkAid;
+	FAutoVariable<std::vector<int>, CvCity> m_aiChangeGrowthExtraYield;
 #endif
 	std::vector<int> m_aiBaseYieldRateFromReligion;
 	FAutoVariable<std::vector<int>, CvCity> m_aiYieldRateModifier;

@@ -1945,6 +1945,7 @@ void CvHomelandAI::PlotDiplomatMoves()
 		ExecuteDiplomatMoves();
 	}
 }
+
 /// Find moves for messengers
 void CvHomelandAI::PlotMessengerMoves()
 {
@@ -4019,6 +4020,7 @@ void CvHomelandAI::ExecuteDiplomatMoves()
 		}
 	}
 }
+
 void CvHomelandAI::ExecuteMessengerMoves()
 {
 	FStaticVector< CvHomelandUnit, 64, true, c_eCiv5GameplayDLL >::iterator it;

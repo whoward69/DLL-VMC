@@ -377,6 +377,12 @@ void CvGame::init(HandicapTypes eHandicap)
 	CvGoodyHuts::Reset();
 
 	doUpdateCacheOnTurn();
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if(MOD_DIPLOMACY_CITYSTATES)
+	{
+		DoBarbCountdown();
+	}
+#endif
 }
 
 //	--------------------------------------------------------------------------------
@@ -411,6 +417,68 @@ bool CvGame::init2()
 
 	return true;
 }
+
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+void CvGame::DoBarbCountdown()
+{
+	int iOtherMinorLoop;
+	PlayerTypes eOtherMinor;
+	TeamTypes eLoopTeam;
+	for(int iTeamLoop = 0; iTeamLoop < MAX_CIV_TEAMS; iTeamLoop++)
+	{
+		eLoopTeam = (TeamTypes) iTeamLoop;
+
+		// Another Minor
+		if(!GET_TEAM(eLoopTeam).isMinorCiv())
+			continue;
+
+		// They not alive!
+		if(!GET_TEAM(eLoopTeam).isAlive())
+			continue;
+
+		for(iOtherMinorLoop = 0; iOtherMinorLoop < MAX_CIV_TEAMS; iOtherMinorLoop++)
+		{
+			eOtherMinor = (PlayerTypes) iOtherMinorLoop;
+
+			if(eOtherMinor == NO_PLAYER)
+				continue;
+
+			// Other minor is on this team
+			if(GET_PLAYER(eOtherMinor).getTeam() == eLoopTeam)
+			{
+				if(GET_PLAYER(eOtherMinor).GetMinorCivAI()->GetTurnsSinceRebellion() > 0)
+				{
+					int iRebellionSpawn = GET_PLAYER(eOtherMinor).GetMinorCivAI()->GetTurnsSinceRebellion();
+
+					GET_PLAYER(eOtherMinor).GetMinorCivAI()->ChangeTurnsSinceRebellion(-1);
+
+					//Rebel Spawn - once every 4 turns
+					if (iRebellionSpawn == /*20*/(GC.getMINOR_QUEST_REBELLION_TIMER() * 100) / 100)
+					{
+						GET_PLAYER(eOtherMinor).GetMinorCivAI()->DoRebellion();
+					}
+					else if(iRebellionSpawn == /*16*/(GC.getMINOR_QUEST_REBELLION_TIMER() * 80) / 100)
+					{
+						GET_PLAYER(eOtherMinor).GetMinorCivAI()->DoRebellion();
+					}
+					else if(iRebellionSpawn == /*12*/(GC.getMINOR_QUEST_REBELLION_TIMER() * 60) / 100)
+					{
+						GET_PLAYER(eOtherMinor).GetMinorCivAI()->DoRebellion();
+					}
+					else if(iRebellionSpawn == /*8*/ (GC.getMINOR_QUEST_REBELLION_TIMER() * 40) / 100)
+					{
+						GET_PLAYER(eOtherMinor).GetMinorCivAI()->DoRebellion();
+					}
+					else if(iRebellionSpawn == /*4*/ (GC.getMINOR_QUEST_REBELLION_TIMER() * 20) / 100)
+					{
+						GET_PLAYER(eOtherMinor).GetMinorCivAI()->DoRebellion();
+					}
+				}
+			}
+		}
+	}
+}
+#endif
 
 //------------------------------------------------------------------------------
 // Lua Hooks
@@ -1042,6 +1110,9 @@ void CvGame::uninit()
 	m_eBestGreatPeoplePlayer = NO_PLAYER;
 	m_eReligionTech = NO_TECH;
 	m_eIndustrialRoute = NO_ROUTE;
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	m_eTeamThatCircumnavigated = NO_TEAM;
+#endif
 
 	m_strScriptData = "";
 	m_iEarliestBarbarianReleaseTurn = 0;
@@ -7708,6 +7779,13 @@ void CvGame::doTurn()
 	GetGameLeagues()->DoTurn();
 	GetGameCulture()->DoTurn();
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if(MOD_DIPLOMACY_CITYSTATES)
+	{
+		DoBarbCountdown();
+	}
+#endif
+
 	GC.GetEngineUserInterface()->setCanEndTurn(false);
 	GC.GetEngineUserInterface()->setHasMovedUnit(false);
 
@@ -9573,6 +9651,10 @@ void CvGame::Read(FDataStream& kStream)
 	kStream >> m_eReligionTech;
 	kStream >> m_eIndustrialRoute;
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	MOD_SERIALIZE_READ(82, kStream, m_eTeamThatCircumnavigated, NO_TEAM);
+#endif
+
 	kStream >> m_strScriptData;
 
 	ArrayWrapper<int> wrapm_aiEndTurnMessagesReceived(MAX_PLAYERS, m_aiEndTurnMessagesReceived);
@@ -9806,6 +9888,10 @@ void CvGame::Write(FDataStream& kStream) const
 	kStream << m_eBestGreatPeoplePlayer;
 	kStream << m_eReligionTech;
 	kStream << m_eIndustrialRoute;
+
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	MOD_SERIALIZE_WRITE(kStream, m_eTeamThatCircumnavigated);
+#endif
 
 	kStream << m_strScriptData;
 
@@ -10274,6 +10360,20 @@ void CvGame::DoUpdateIndustrialRoute()
 
 	m_eIndustrialRoute = eIndustrialRoute;
 }
+
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+//	--------------------------------------------------------------------------------
+TeamTypes CvGame::GetTeamThatCircumnavigated() const
+{
+	return (TeamTypes) m_eTeamThatCircumnavigated;
+}
+
+//	--------------------------------------------------------------------------------
+void CvGame::SetTeamThatCircumnavigated(TeamTypes eNewValue)
+{
+	m_eTeamThatCircumnavigated = eNewValue;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 CvSiteEvaluatorForSettler* CvGame::GetSettlerSiteEvaluator()

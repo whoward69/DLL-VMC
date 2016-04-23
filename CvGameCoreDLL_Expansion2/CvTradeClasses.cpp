@@ -21,6 +21,9 @@
 #include "CvInternalGameCoreUtils.h"
 #include "CvWonderProductionAI.h"
 #endif
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+#include "CvMinorCivAI.h"
+#endif
 
 #include "LintFree.h"
 
@@ -1082,6 +1085,101 @@ void CvGameTrade::ClearAllCityStateTradeRoutes (void)
 		}		
 	}
 }
+
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+//  Reset all Civ to City-State trade routes for all players.
+void CvGameTrade::ClearAllCityStateTradeRoutesSpecial (void)
+{
+	for (uint ui = 0; ui < m_aTradeConnections.size(); ui++)
+	{
+		if (IsTradeRouteIndexEmpty(ui))
+		{
+			continue;
+		}
+
+		bool bMatchesDest = (GET_PLAYER(m_aTradeConnections[ui].m_eDestOwner).isMinorCiv());
+		if(bMatchesDest)
+		{
+			if(GET_PLAYER(m_aTradeConnections[ui].m_eDestOwner).GetMinorCivAI()->GetAlly() == m_aTradeConnections[ui].m_eOriginOwner)
+			{
+				bMatchesDest = false;
+			}
+		}
+		if (bMatchesDest)
+		{
+			// if the destination was wiped, the origin gets a trade unit back
+			if (GET_PLAYER(m_aTradeConnections[ui].m_eOriginOwner).isAlive())
+			{
+#if defined(MOD_BUGFIX_UNITCLASS_NOT_UNIT)
+				CvPlayer& kPlayer = GET_PLAYER(m_aTradeConnections[ui].m_eOriginOwner);
+				UnitTypes eUnitType = kPlayer.GetTrade()->GetTradeUnit(m_aTradeConnections[ui].m_eDomain, &kPlayer);
+#else
+				UnitTypes eUnitType = GET_PLAYER(m_aTradeConnections[ui].m_eOriginOwner).GetTrade()->GetTradeUnit(m_aTradeConnections[ui].m_eDomain);
+#endif
+				CvAssertMsg(eUnitType != NO_UNIT, "No trade unit found");
+				if (eUnitType != NO_UNIT)
+				{
+					GET_PLAYER(m_aTradeConnections[ui].m_eOriginOwner).initUnit(eUnitType, m_aTradeConnections[ui].m_iOriginX, m_aTradeConnections[ui].m_iOriginY, UNITAI_TRADE_UNIT);
+				}
+			}
+
+			EmptyTradeRoute(ui);
+		}		
+	}
+}
+//	--------------------------------------------------------------------------------
+//  Reset all Civ to Civ trade routes involving ePlayer and eToPlayer.  Trade routes involving city-states are not reset.
+void CvGameTrade::ClearTradePlayerToPlayer(PlayerTypes ePlayer, PlayerTypes eToPlayer)
+{
+	for (uint ui = 0; ui < m_aTradeConnections.size(); ui++)
+	{
+		if (IsTradeRouteIndexEmpty(ui))
+		{
+			continue;
+		}
+		if(GET_PLAYER(m_aTradeConnections[ui].m_eOriginOwner).isMinorCiv() || GET_PLAYER(m_aTradeConnections[ui].m_eDestOwner).isMinorCiv())
+		{
+			continue;
+		}
+		//Ignore internal routes.
+		if(m_aTradeConnections[ui].m_eOriginOwner == ePlayer && m_aTradeConnections[ui].m_eDestOwner == ePlayer)
+		{
+			continue;
+		}
+		//Ignore internal routes.
+		if(m_aTradeConnections[ui].m_eOriginOwner == eToPlayer && m_aTradeConnections[ui].m_eDestOwner == eToPlayer)
+		{
+			continue;
+		}
+
+		//Origin one of these two?
+		if(m_aTradeConnections[ui].m_eOriginOwner == ePlayer || m_aTradeConnections[ui].m_eOriginOwner == eToPlayer)
+		{
+			//Destination one of these two?
+			if(m_aTradeConnections[ui].m_eDestOwner == ePlayer || m_aTradeConnections[ui].m_eDestOwner == eToPlayer)
+			{
+				// if the destination was wiped, the origin gets a trade unit back
+				if (GET_PLAYER(m_aTradeConnections[ui].m_eOriginOwner).isAlive())
+				{
+					CvPlayer& kPlayer = GET_PLAYER(m_aTradeConnections[ui].m_eOriginOwner);
+#if defined(MOD_BUGFIX_UNITCLASS_NOT_UNIT)
+					UnitTypes eUnitType = kPlayer.GetTrade()->GetTradeUnit(m_aTradeConnections[ui].m_eDomain, &kPlayer);
+#else
+					UnitTypes eUnitType = kPlayer.GetTrade()->GetTradeUnit(m_aTradeConnections[ui].m_eDomain);
+#endif
+					CvAssertMsg(eUnitType != NO_UNIT, "No trade unit found");
+					if (eUnitType != NO_UNIT)
+					{
+						GET_PLAYER(m_aTradeConnections[ui].m_eOriginOwner).initUnit(eUnitType, m_aTradeConnections[ui].m_iOriginX, m_aTradeConnections[ui].m_iOriginY, UNITAI_TRADE_UNIT);
+					}
+				}
+
+				EmptyTradeRoute(ui);
+			}
+		}
+	}
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 /// Called when war is declared between teams

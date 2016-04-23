@@ -25,7 +25,7 @@ namespace LeagueHelpers
 	EraTypes GetGameEraForTrigger();
 	EraTypes GetNextGameEraForTrigger();
 	EraTypes GetNextGameEraForTrigger(EraTypes eThisEra);
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
 	BuildingTypes GetBuildingForTrigger(BuildingTypes eBuilding);
 	ResolutionTypes IsResolutionForTriggerActive(ResolutionTypes eType);
 #endif
@@ -80,7 +80,7 @@ namespace LeagueHelpers
 
 	const int AI_CHOOSE_PROPOSAL_FROM_TOP = 6;
 
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
 	// Moved to xml, use
 	// GC.getLEAGUE_PROPOSERS_PER_SESSION()
 	// GC.getLEAGUE_NUM_LEADERS_FOR_EXTRA_VOTES()
@@ -135,9 +135,10 @@ struct CvResolutionEffects
 	int iScienceyGreatPersonRateMod;
 	int iGreatPersonTileImprovementCulture;
 	int iLandmarkCulture;
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
-	bool bRaiseCityStateInfluenceToAlly;
-	bool bRaiseCityStateInfluenceToFriend;
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	bool bOpenDoor;
+	bool bSphereOfInfluence;
+	bool bDecolonization;
 	int iLimitSpaceshipProduction;
 	int iLimitSpaceshipPurchase;
 	int iIsWorldWar;
@@ -588,7 +589,7 @@ public:
 	int GetPressureForIdeology(PolicyBranchTypes eIdeology);
 	int GetArtsyGreatPersonRateModifier();
 	int GetScienceyGreatPersonRateModifier();
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS) 
+#if defined(MOD_DIPLOMACY_CITYSTATES) 
 	int GetSpaceShipProductionMod();
 	int GetSpaceShipPurchaseMod();
 	int GetWorldWar();
@@ -743,7 +744,7 @@ public:
 	int GetPressureForIdeology(PlayerTypes ePlayer, PolicyBranchTypes eIdeology);
 	int GetArtsyGreatPersonRateModifier(PlayerTypes ePlayer);
 	int GetScienceyGreatPersonRateModifier(PlayerTypes ePlayer);
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
 	int GetSpaceShipProductionMod(PlayerTypes ePlayer);
 	int GetSpaceShipPurchaseMod(PlayerTypes ePlayer);
 	int IsWorldWar(PlayerTypes ePlayer);
@@ -962,7 +963,7 @@ public:
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
 	EraTypes GetEraTrigger() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
 	BuildingTypes GetBuildingTrigger() const;
 	ResolutionTypes GetResolutionTrigger() const;
 #endif
@@ -976,7 +977,7 @@ public:
 
 protected:
 	EraTypes m_eEraTrigger;
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
 	BuildingTypes m_eBuildingTrigger;
 	ResolutionTypes m_eResolutionTrigger;
 #endif
@@ -1116,7 +1117,7 @@ public:
 	int GetGoldenAgePoints() const;
 	int GetCityStateInfluenceBoost() const;
 	int GetBaseBeakersTurnsToCount() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
 	int GetAttackBonusTurns() const;
 	int GetBaseFreeUnits() const;
 	int GetNumFreeGreatPeople() const;
@@ -1132,7 +1133,7 @@ protected:
 	int m_iGoldenAgePoints;
 	int m_iCityStateInfluenceBoost;
 	int m_iBaseBeakersTurnsToCount;
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
 	int m_iGetAttackBonusTurns;
 	int m_iGetBaseFreeUnits;
 	int m_iGetNumFreeGreatPeople;
@@ -1284,9 +1285,10 @@ public:
 	int GetScienceyGreatPersonRateMod() const;
 	int GetGreatPersonTileImprovementCulture() const;
 	int GetLandmarkCulture() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
-	bool IsRaiseCityStateInfluenceToAlly() const;
-	bool IsRaiseCityStateInfluenceToFriend() const;
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	bool IsOpenDoor() const;
+	bool IsSphereOfInfluence() const;
+	bool IsDecolonization() const;
 	int GetSpaceShipProductionMod() const;
 	int GetSpaceShipPurchaseMod() const;
 	int GetWorldWar() const;
@@ -1332,9 +1334,10 @@ protected:
 	int m_iScienceyGreatPersonRateMod;
 	int m_iGreatPersonTileImprovementCulture;
 	int m_iLandmarkCulture;
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
-	bool m_bRaiseCityStateInfluenceToAlly;
-	bool m_bRaiseCityStateInfluenceToFriend;
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	bool m_bOpenDoor;
+	bool m_bSphereOfInfluence;
+	bool m_bDecolonization;
 	int m_iSpaceshipProductionMod;
 	int m_iSpaceshipPurchaseMod;
 	int m_iIsWorldWar;

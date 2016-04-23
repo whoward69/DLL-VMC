@@ -56,6 +56,9 @@ public:
 
 	int AI_foundValue(int iX, int iY, int iMinRivalRange = -1, bool bStartingLoc = false);
 
+#if defined(MOD_AI_GREAT_PEOPLE_CHOICES)
+	bool CanFoundOrEnhanceReligion();
+#endif
 	void AI_chooseFreeGreatPerson();
 	void AI_chooseFreeTech();
 	void AI_chooseResearch();

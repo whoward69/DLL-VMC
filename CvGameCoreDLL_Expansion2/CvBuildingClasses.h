@@ -215,12 +215,13 @@ public:
 	int GetGreatScientistBeakerModifier() const;
 	int GetExtraLeagueVotes() const;
 #if defined(MOD_DIPLOMACY_CITYSTATES)
+	int GetSingleVotes() const;
 	int GetFaithToVotes() const;
 	int GetCapitalsToVotes() const;
 	int GetDoFToVotes() const;
 	int GetRAToVotes() const;
+	int GetDPToVotes() const;
 	int GetGPExpendInfluence() const;
-	int GetGrowthExtraYield() const;
 #endif
 	int GetPreferredDisplayPosition() const;
 	int GetPortraitIndex() const;
@@ -271,6 +272,10 @@ public:
 
 	// Accessor Functions (Arrays)
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	int GetGrowthExtraYield(int i) const;
+	int* GetGrowthExtraYieldArray() const;
+#endif
 	int GetYieldChange(int i) const;
 	int* GetYieldChangeArray() const;
 	int GetYieldChangePerPop(int i) const;
@@ -459,12 +464,13 @@ private:
 	int m_iGreatScientistBeakerModifier;
 	int m_iExtraLeagueVotes;
 #if defined(MOD_DIPLOMACY_CITYSTATES)
+	int m_iSingleLeagueVotes;
 	int m_iFaithToVotesBase;
 	int m_iCapitalsToVotesBase;
 	int m_iDoFToVotesBase;
 	int m_iRAToVotesBase;
+	int m_iDPToVotesBase;
 	int m_iGPExpendInfluenceBase;
-	int m_iGrowthExtraYieldBase;
 #endif
 	int m_iPreferredDisplayPosition;
 	int m_iPortraitIndex;
@@ -526,6 +532,9 @@ private:
 	int* m_piRiverPlotYieldChange;
 	int* m_piLakePlotYieldChange;
 	int* m_piSeaResourceYieldChange;
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	int* m_piGrowthExtraYield;
+#endif
 	int* m_piYieldChange;
 	int* m_piYieldChangePerPop;
 	int* m_piYieldChangePerReligion;

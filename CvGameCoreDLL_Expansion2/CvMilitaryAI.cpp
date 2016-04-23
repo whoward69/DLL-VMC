@@ -1368,6 +1368,24 @@ int CvMilitaryAI::ScoreTarget(CvMilitaryTarget& target, AIOperationTypes eAIOper
 		uliRtnValue /= 100;
 	}
 	
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if (MOD_DIPLOMACY_CITYSTATES) {
+		for(int iMinorLoop = MAX_MAJOR_CIVS; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
+		{
+			PlayerTypes eMinor = (PlayerTypes) iMinorLoop;
+			if (target.m_pTargetCity->getOriginalOwner() == eMinor)
+			{
+				CvPlayer* pMinor = &GET_PLAYER(eMinor);
+				if(pMinor->GetMinorCivAI()->GetQuestData1(m_pPlayer->GetID(), MINOR_CIV_QUEST_LIBERATION) == eMinor)
+				{
+					uliRtnValue *= GC.getAI_MILITARY_RECAPTURING_CITY_STATE();
+					uliRtnValue /= 100;
+				}
+			}
+		}
+	}
+#endif
+
 	// Don't want it to already be targeted by an operation that's not well on its way
 	if(m_pPlayer->IsCityAlreadyTargeted(target.m_pTargetCity, NO_DOMAIN, 50))
 	{
@@ -2741,6 +2759,34 @@ void CvMilitaryAI::UpdateOperations()
 			break;
 		}
 	}
+
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if(MOD_DIPLOMACY_CITYSTATES && !bWillingToAcceptRisk)
+	{
+		// Defend CSs that need help
+		for(int iMinorLoop = 0; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
+		{
+			PlayerTypes eMinor = (PlayerTypes) iMinorLoop;
+			if(GET_PLAYER(eMinor).isMinorCiv() && GET_PLAYER(eMinor).isAlive())
+			{
+				TeamTypes eLoopTeam;
+				for(int iTeamLoop = 0; iTeamLoop < MAX_CIV_TEAMS; iTeamLoop++)
+				{
+					eLoopTeam = (TeamTypes) iTeamLoop;
+
+					if(GET_PLAYER(eMinor).GetMinorCivAI()->IsAllies(m_pPlayer->GetID()))
+					{
+						if(GET_PLAYER(eMinor).GetMinorCivAI()->IsActiveQuestForPlayer(m_pPlayer->GetID(), MINOR_CIV_QUEST_HORDE) || GET_PLAYER(eMinor).GetMinorCivAI()->IsActiveQuestForPlayer(m_pPlayer->GetID(), MINOR_CIV_QUEST_REBELLION))
+						{
+							bWillingToAcceptRisk = true;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+#endif
 
 	//
 	// Operations vs. Barbarians

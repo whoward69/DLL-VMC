@@ -666,6 +666,11 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetGiftTileImprovementCost);
 	Method(AddMinorCivQuestIfAble);
 	Method(GetFriendshipFromUnitGift);
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
+	Method(GetJerk);
+	Method(IsNoAlly);
+	Method(GetPermanentAlly);
+#endif
 
 	Method(IsAlive);
 	Method(IsEverAlive);
@@ -12012,6 +12017,37 @@ int CvLuaPlayer::lGetLiberationPreviewString(lua_State* L)
 #endif
 	return 1;
 }
+
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
+//------------------------------------------------------------------------------
+//int GetJerk(TeamTypes eTeam);
+int CvLuaPlayer::lGetJerk(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const TeamTypes eTeam = (TeamTypes) lua_tointeger(L, 2);
+
+	const int iResult = pkPlayer->GetMinorCivAI()->GetJerk(eTeam);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+//------------------------------------------------------------------------------
+int CvLuaPlayer::lIsNoAlly(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const bool bResult = pkPlayer->GetMinorCivAI()->IsNoAlly();
+	lua_pushboolean(L, bResult);
+	return 1;
+}
+//------------------------------------------------------------------------------
+int CvLuaPlayer::lGetPermanentAlly(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+
+	const int iResult = pkPlayer->GetMinorCivAI()->GetPermanentAlly();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+#endif
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 //------------------------------------------------------------------------------

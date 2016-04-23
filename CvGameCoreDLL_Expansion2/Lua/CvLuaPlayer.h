@@ -1085,6 +1085,12 @@ protected:
 	static int lGetWarmongerPreviewString(lua_State* L);
 	static int lGetLiberationPreviewString(lua_State* L);
 
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
+	LUAAPIEXTN(GetJerk, int);
+	LUAAPIEXTN(IsNoAlly, bool);
+	LUAAPIEXTN(GetPermanentAlly, int);
+#endif
+
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(AddMessage, void, sMessage);
 #endif

@@ -67,6 +67,18 @@ enum MinorCivQuestTypes
     MINOR_CIV_QUEST_DENOUNCE_MAJOR,
     MINOR_CIV_QUEST_SPREAD_RELIGION,
 	MINOR_CIV_QUEST_TRADE_ROUTE,
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	MINOR_CIV_QUEST_WAR,
+	MINOR_CIV_QUEST_CONSTRUCT_NATIONAL_WONDER,
+	MINOR_CIV_QUEST_FIND_CITY_STATE,
+	MINOR_CIV_QUEST_INFLUENCE,
+	MINOR_CIV_QUEST_CONTEST_TOURISM,
+	MINOR_CIV_QUEST_ARCHAEOLOGY,
+	MINOR_CIV_QUEST_CIRCUMNAVIGATION,
+	MINOR_CIV_QUEST_LIBERATION,
+	MINOR_CIV_QUEST_HORDE,
+	MINOR_CIV_QUEST_REBELLION,
+#endif
 
 	NUM_MINOR_CIV_QUEST_TYPES,
 };
@@ -329,10 +341,43 @@ public:
 	bool IsRouteConnectionEstablished(PlayerTypes eMajor) const;
 	void SetRouteConnectionEstablished(PlayerTypes eMajor, bool bValue);
 	CvPlot* GetBestNearbyCampToKill();
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	CvPlot* GetBestNearbyDig();
+	//Tests
+	PlayerTypes SpawnHorde();
+	PlayerTypes SpawnRebels();
+	//Ends
+	void SetSacked(bool bValue);
+	bool IsSacked();
+	bool IsRebellion();
+	void SetRebellion(bool bValue);
+	//Countdown
+	void ChangeTurnsSinceRebellion(int iChange);
+	int GetTurnsSinceRebellion() const;
+	void SetTurnsSinceRebellion(int iValue);
+	//Primers
+	void DoRebellion();
+	bool IsValidRebellion();
+	void SetRebellionActive(bool bValue);
+	bool IsRebellionActive();
+	void SetHordeActive(bool bValue);
+	bool IsHordeActive();
+	//Cooldown
+	void ChangeCooldownSpawn(int iChange);
+	int GetCooldownSpawn() const;
+	void SetCooldownSpawn(int iValue);
+#endif
 	ResourceTypes GetNearbyResourceForQuest(PlayerTypes ePlayer);
 	BuildingTypes GetBestWonderForQuest(PlayerTypes ePlayer);
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	BuildingTypes GetBestNationalWonderForQuest(PlayerTypes ePlayer);
+#endif
 	UnitTypes GetBestGreatPersonForQuest(PlayerTypes ePlayer);
 	PlayerTypes GetBestCityStateTarget(PlayerTypes eForPlayer);
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	PlayerTypes GetBestCityStateLiberate(PlayerTypes eForPlayer);
+	PlayerTypes GetBestCityStateMeetTarget(PlayerTypes eForPlayer);
+#endif
 	PlayerTypes GetMostRecentBullyForQuest() const;
 	bool IsWantsMinorDead(PlayerTypes eMinor);
 	PlayerTypes GetBestPlayerToFind(PlayerTypes ePlayer);
@@ -340,6 +385,9 @@ public:
 	bool IsGoodTimeForGiveGoldQuest();
 	bool IsGoodTimeForPledgeToProtectQuest();
 	bool IsGoodTimeForDenounceMajorQuest();
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	bool IsGoodTimeForWarMajorQuest();
+#endif
 
 	// ******************************
 	// ***** Friendship *****
@@ -395,6 +443,10 @@ public:
 	void DoSetBonus(PlayerTypes ePlayer, bool bAdd, bool bFriends, bool bAllies, bool bSuppressNotifications = false, bool bPassedBySomeone = false, PlayerTypes eNewAlly = NO_PLAYER);
 
 	void DoIntrusion();
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	void DoSack();
+	void DoDefection();
+#endif
 
 	// DEPRECATED
 	bool IsMajorIntruding(PlayerTypes eMajor) const;
@@ -564,6 +616,25 @@ public:
 	bool IsWaryOfTeam(TeamTypes eTeam) const;
 	void SetWaryOfTeam(TeamTypes eTeam, bool bValue);
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	int GetJerk(TeamTypes eTeam) const;
+	void SetJerk(TeamTypes eTeam, int iValue);
+	void ChangeJerk(TeamTypes eTeam, int iChange);
+
+	PlayerTypes GetPermanentAlly() const;
+	void SetPermanentAlly(PlayerTypes ePlayer);
+
+	bool IsNoAlly() const;
+	void SetNoAlly(bool bValue);
+
+	int GetCoupCooldown() const;
+	void SetCoupCooldown(int iValue);
+	void ChangeCoupCooldown(int iValue);
+
+	bool IsSiphoned(PlayerTypes ePlayer) const;
+	void SetSiphoned(PlayerTypes ePlayer, bool bValue);
+#endif
+
 	// ******************************
 	// ***** Misc Helper Functions *****
 	// ******************************
@@ -601,6 +672,27 @@ private:
 	int m_aaiNumEnemyUnitsLeftToKillByMajor[MAX_MAJOR_CIVS][MAX_MAJOR_CIVS];
 
 	bool m_abRouteConnectionEstablished[MAX_MAJOR_CIVS];
+
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	bool m_bIsSacked;
+	bool m_bIsRebellion;
+	int m_iIsRebellionCountdown;
+	bool m_bIsRebellionActive;
+	bool m_bIsHordeActive;
+	int m_iCooldownSpawn;
+#endif
+
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	int m_aiJerk[REALLY_MAX_TEAMS];
+	bool m_abIsMarried[MAX_MAJOR_CIVS];
+	PlayerTypes m_ePermanentAlly;
+	bool m_bNoAlly;
+	int m_iCoup;
+	bool m_abSiphoned[MAX_MAJOR_CIVS];
+	bool m_abCoupAttempted[MAX_MAJOR_CIVS];
+	int m_aiAssignedPlotAreaID[MAX_MAJOR_CIVS];
+	int m_aiTurnsSincePtPWarning[MAX_MAJOR_CIVS];
+#endif
 
 	PlayerTypes m_eAlly;
 	int m_iTurnAllied;

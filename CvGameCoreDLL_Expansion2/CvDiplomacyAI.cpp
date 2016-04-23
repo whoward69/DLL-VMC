@@ -3119,6 +3119,39 @@ MajorCivApproachTypes CvDiplomacyAI::GetBestApproachTowardsMajorCiv(PlayerTypes 
 			viApproachWeights[MAJOR_CIV_APPROACH_WAR] += /*5*/ GC.getAPPROACH_WAR_CONQUEST_GRAND_STRATEGY();
 	}
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if (MOD_DIPLOMACY_CITYSTATES) {
+		//If we were given a quest to go to war with this player, that should influence our decision. Plus, it probably means he's a total jerk.
+		for(int iMinorLoop = MAX_MAJOR_CIVS; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
+		{
+			PlayerTypes eMinor = (PlayerTypes) iMinorLoop;
+			CvPlayer* pMinor = &GET_PLAYER(eMinor);
+			CvMinorCivAI* pMinorCivAI = pMinor->GetMinorCivAI();
+			TeamTypes eConquerorTeam = GET_TEAM(pMinor->getTeam()).GetKilledByTeam();
+
+			if(pMinorCivAI->IsActiveQuestForPlayer(eMyPlayer, MINOR_CIV_QUEST_WAR))
+			{
+				if(pMinorCivAI->GetQuestData1(eMyPlayer, MINOR_CIV_QUEST_WAR) == ePlayer)
+				{
+					viApproachWeights[MAJOR_CIV_APPROACH_WAR] += /*2*/ GC.getAPPROACH_WAR_MINOR_QUEST_WAR();
+					break;
+				}
+			}
+			if(pMinorCivAI->IsActiveQuestForPlayer(eMyPlayer, MINOR_CIV_QUEST_LIBERATION))
+			{
+				if(pMinorCivAI->GetQuestData1(eMyPlayer, MINOR_CIV_QUEST_LIBERATION) == eMinor)
+				{
+					if(eConquerorTeam == eTeam)
+					{
+						viApproachWeights[MAJOR_CIV_APPROACH_WAR] += /*2*/ GC.getAPPROACH_WAR_MINOR_QUEST_WAR();
+						break;
+					}
+				}
+			}
+		}
+	}
+#endif
+
 	////////////////////////////////////
 	// PERSONALITY
 	////////////////////////////////////
@@ -13931,6 +13964,16 @@ void CvDiplomacyAI::DoContactMinorCivs()
 			// Calculate desirability to give this minor gold
 			if(bWantsToMakeGoldGift && !bWantsToBuyoutThisMinor)
 			{
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+				if(MOD_DIPLOMACY_CITYSTATES && GET_PLAYER(eMinor).GetMinorCivAI()->IsNoAlly())
+				{
+					continue;
+				}
+				if(MOD_DIPLOMACY_CITYSTATES && GET_PLAYER(eMinor).GetMinorCivAI()->GetPermanentAlly() == GetPlayer()->GetID())
+				{
+					continue;
+				}
+#endif
 				int iValue = /*100*/ GC.getMC_GIFT_WEIGHT_THRESHOLD();
 				// If we're not protective or friendly, then don't bother with minor diplo
 				if(eApproach == MINOR_CIV_APPROACH_PROTECTIVE || eApproach == MINOR_CIV_APPROACH_FRIENDLY)
@@ -14653,11 +14696,26 @@ void CvDiplomacyAI::DoBulliedCityStateStatement(PlayerTypes ePlayer, DiploStatem
 			{
 				// We don't even want to bother with you again, so do nothing
 #if defined(MOD_DIPLOMACY_CITYSTATES)
-				if (MOD_DIPLOMACY_CITYSTATES) {
-					// WAR! You've broken too many promises, jerk. 
-					//AI declaration
-					DeclareWar(ePlayer);
-					GetPlayer()->GetMilitaryAI()->RequestBasicAttack(ePlayer, 1);
+				if (MOD_DIPLOMACY_CITYSTATES && (GetMajorCivApproach(ePlayer, false) <= MAJOR_CIV_APPROACH_HOSTILE))
+				{
+					const char* strText;
+					bool bActivePlayer = GC.getGame().getActivePlayer() == ePlayer;
+					if(GET_TEAM(GetPlayer()->getTeam()).canDeclareWar(GET_PLAYER(ePlayer).getTeam())) // WH - need blocking with MOD_EVENTS_WAR_AND_PEACE
+					{
+						// WAR! You've broken too many promises, jerk. 
+						//AI declaration
+						GET_TEAM(GetPlayer()->getTeam()).declareWar(GET_PLAYER(ePlayer).getTeam(), false); // WH - need blocking with MOD_EVENTS_WAR_AND_PEACE
+						m_pPlayer->GetCitySpecializationAI()->SetSpecializationsDirty(SPECIALIZATION_UPDATE_NOW_AT_WAR);
+						LogWarDeclaration(ePlayer);
+
+						GetPlayer()->GetMilitaryAI()->RequestBasicAttack(ePlayer, 1);
+
+						if(bActivePlayer)
+						{
+							strText = GetDiploStringForMessage(DIPLO_MESSAGE_DOW_GENERIC);
+							gDLL->GameplayDiplomacyAILeaderMessage(ePlayer, DIPLO_UI_STATE_BLANK_DISCUSSION, strText, LEADERHEAD_ANIM_HATE_NEGATIVE);
+						}
+					}
 				}
 #endif
 			}
@@ -22596,6 +22654,13 @@ bool CvDiplomacyAI::IsDoFAcceptable(PlayerTypes ePlayer)
 	// Base Personality value; ranges from 0 to 10 (ish)
 	iWeight += GetDoFWillingness();
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if(MOD_DIPLOMACY_CITYSTATES && m_pPlayer->GetDoFToVotes() > 0)
+	{
+		iWeight += 10;
+	}
+#endif
+
 	// Weight for Approach
 	if(eApproach == MAJOR_CIV_APPROACH_DECEPTIVE)
 		iWeight += 3;
@@ -22765,7 +22830,7 @@ int CvDiplomacyAI::GetNumDoF()
 
 	return iRtnValue;
 }
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
 int CvDiplomacyAI::GetNumRA()
 {
 	int iRtnValue = 0;
@@ -22778,6 +22843,27 @@ int CvDiplomacyAI::GetNumRA()
 		if(IsPlayerValid(eLoopPlayer))
 		{
 			if(GET_TEAM(GetPlayer()->getTeam()).IsHasResearchAgreement(GET_PLAYER(eLoopPlayer).getTeam()))
+			{
+				iRtnValue++;
+			}
+		}
+	}
+
+	return iRtnValue;
+}
+
+int CvDiplomacyAI::GetNumDefensePacts()
+{
+	int iRtnValue = 0;
+
+	PlayerTypes eLoopPlayer;
+	for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
+	{
+		eLoopPlayer = (PlayerTypes) iPlayerLoop;
+
+		if(IsPlayerValid(eLoopPlayer))
+		{
+			if(GET_TEAM(GetPlayer()->getTeam()).IsHasDefensivePact(GET_PLAYER(eLoopPlayer).getTeam()))
 			{
 				iRtnValue++;
 			}
@@ -28674,6 +28760,38 @@ void CvDiplomacyAI::LogMinorCivQuestType(CvString& strString, MinorCivQuestTypes
 	case MINOR_CIV_QUEST_TRADE_ROUTE:
 		strTemp.Format("Trade Route");
 		break;
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	case MINOR_CIV_QUEST_WAR:
+		strTemp.Format("Declare War on Major");
+		break;
+	case MINOR_CIV_QUEST_CONSTRUCT_NATIONAL_WONDER:
+		strTemp.Format("Construct National Wonder");
+		break;
+	case MINOR_CIV_QUEST_FIND_CITY_STATE:
+		strTemp.Format("Find City State");
+		break;
+	case MINOR_CIV_QUEST_INFLUENCE:
+		strTemp.Format("Influence");
+		break;
+	case MINOR_CIV_QUEST_CONTEST_TOURISM:
+		strTemp.Format("Contest Tourism");
+		break;
+	case MINOR_CIV_QUEST_ARCHAEOLOGY:
+		strTemp.Format("Archaeology");
+		break;
+	case MINOR_CIV_QUEST_CIRCUMNAVIGATION:
+		strTemp.Format("Circumnavigation");
+		break;
+	case MINOR_CIV_QUEST_LIBERATION:
+		strTemp.Format("Liberation");
+		break;
+	case MINOR_CIV_QUEST_HORDE:
+		strTemp.Format("Horde");
+		break;
+	case MINOR_CIV_QUEST_REBELLION:
+		strTemp.Format("Rebellion");
+		break;
+#endif
 	default:
 		strTemp.Format("XXX");
 		break;
@@ -30211,113 +30329,6 @@ void CvDiplomacyAIHelpers::ApplyWarmongerPenalties(PlayerTypes eConqueror, Playe
 						iWarmongerOffset /= 2;
 					}
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-				if (MOD_DIPLOMACY_CITYSTATES) {
-					//RELIGION
-
-					//Religious brothers/sisters should turn a blind eye to war conducted on different faiths.
-					if((GET_PLAYER(eConqueror).GetReligions()->GetReligionInMostCities() ==  GET_PLAYER(eMajor).GetReligions()->GetReligionInMostCities()) && (GET_PLAYER(eConqueror).GetReligions()->GetReligionInMostCities() != NO_RELIGION))
-					{
-						//We don't like it when you war on brothers of the faith.
-						if((GET_PLAYER(eConqueror).GetReligions()->GetReligionInMostCities() != GET_PLAYER(eConquered).GetReligions()->GetReligionInMostCities()))
-						{
-							//If everything is true, halve the standard warmonger amount for this player.
-							iWarmongerOffset /= 2;
-						}
-					}
-					//Religious enemies will not be allowed to expand!
-					if((GET_PLAYER(eConqueror).GetReligions()->GetReligionInMostCities() != GET_PLAYER(eMajor).GetReligions()->GetReligionInMostCities()) && (GET_PLAYER(eConqueror).GetReligions()->GetReligionInMostCities() != NO_RELIGION) && (GET_PLAYER(eMajor).GetReligions()->GetReligionInMostCities() != NO_RELIGION))
-					{
-						//Increased penalties for religious enemies.
-						iWarmongerOffset *= 250;
-						iWarmongerOffset /= 200;
-
-						//We don't like it when you war on brothers of the faith.
-						if((GET_PLAYER(eMajor).GetReligions()->GetReligionInMostCities() == GET_PLAYER(eConquered).GetReligions()->GetReligionInMostCities()))
-						{
-							//If everything is true, double the standard warmonger amount for this player.
-							iWarmongerOffset *= 2;
-						}
-					}
-
-					//IDEOLOGY
-
-					//Are the conqueror and I of the same ideology? We overlook war on our ideological opponents.
-					if((GET_PLAYER(eConqueror).GetPlayerPolicies()->GetLateGamePolicyTree() == GET_PLAYER(eMajor).GetPlayerPolicies()->GetLateGamePolicyTree()) && (GET_PLAYER(eConqueror).GetPlayerPolicies()->GetLateGamePolicyTree() != NO_POLICY_BRANCH_TYPE))
-					{
-						//We don't overlook war on our ideological comrades!
-						if(GET_PLAYER(eConqueror).GetPlayerPolicies()->GetLateGamePolicyTree() != GET_PLAYER(eConquered).GetPlayerPolicies()->GetLateGamePolicyTree())
-						{
-							//If everything is true, halve the standard warmonger amount for this player.
-							iWarmongerOffset /= 2;
-						}
-					}
-					//Are the conqueror and I of different ideologies? We shall not overlook this (especially if they're fighting an ideological ally)!
-					if((GET_PLAYER(eConqueror).GetPlayerPolicies()->GetLateGamePolicyTree() != GET_PLAYER(eMajor).GetPlayerPolicies()->GetLateGamePolicyTree()) && (GET_PLAYER(eConqueror).GetPlayerPolicies()->GetLateGamePolicyTree() != NO_POLICY_BRANCH_TYPE) && (GET_PLAYER(eMajor).GetPlayerPolicies()->GetLateGamePolicyTree() != NO_POLICY_BRANCH_TYPE))
-					{
-						//Increased penalties for ideological enemies.
-						iWarmongerOffset *= 250;
-						iWarmongerOffset /= 200;
-
-						if(GET_PLAYER(eMajor).GetPlayerPolicies()->GetLateGamePolicyTree() == GET_PLAYER(eConquered).GetPlayerPolicies()->GetLateGamePolicyTree() && (GET_PLAYER(eMajor).GetPlayerPolicies()->GetLateGamePolicyTree() != NO_POLICY_BRANCH_TYPE))
-						{
-							//If the conquered player and I are of the same ideology, this will really irritate us.
-						iWarmongerOffset *= 2;
-						}
-					}
-
-					//SANCTIONED
-
-					//Is the conquered player embargoed (i.e. sanctioned)? If so, half warmonger penalties against this civ.
-					if(GC.getGame().GetGameLeagues()->IsTradeEmbargoed(eMajor, eConquered))
-					{
-						iWarmongerOffset /= 2;
-					}
-
-					//JUST WAR
-
-					//Is the Just War resolution enabled? If so, greatly reduce warmonger penalties.
-					if(GC.getGame().GetGameLeagues()->IsWorldWar(eMajor) > 0)
-					{
-						iWarmongerOffset *= 2;
-						iWarmongerOffset /= GC.getWARMONGER_THREAT_DECREASED_WORLD_WAR();
-					}
-					//WORLD PEACE
-
-					//Is the World Peace Accords resolution enabled? If so, greatly increase warmonger penalties.
-					if(GC.getGame().GetGameLeagues()->GetUnitMaintenanceMod(eMajor) > 0)
-					{
-						iWarmongerOffset *= 2;
-					}
-
-					//FRIENDSHIP/Alliances
-					//Relations should matter. If we're friends, we should be a bit more understanding of war (unless, of course, you war on other friends of ours)
-					MajorCivOpinionTypes eConquerorOpinion = GET_PLAYER(eMajor).GetDiplomacyAI()->GetMajorCivOpinion(eConqueror);
-					MajorCivOpinionTypes eConqueredOpinion = GET_PLAYER(eMajor).GetDiplomacyAI()->GetMajorCivOpinion(eConquered);
-				
-					//Allies care the least
-					if((eConquerorOpinion == MAJOR_CIV_OPINION_ALLY) && (eConqueredOpinion <= MAJOR_CIV_OPINION_NEUTRAL))
-					{
-						iWarmongerOffset /= 2;
-					}
-					//
-					else if((eConquerorOpinion > MAJOR_CIV_OPINION_NEUTRAL) && (eConqueredOpinion <= MAJOR_CIV_OPINION_NEUTRAL))
-					{
-						iWarmongerOffset *= 200;
-						iWarmongerOffset /= 250;
-					}
-					else if((eConquerorOpinion <= MAJOR_CIV_OPINION_NEUTRAL) && (eConqueredOpinion >= MAJOR_CIV_OPINION_NEUTRAL))
-					{
-						iWarmongerOffset *= 250;
-						iWarmongerOffset /= 200;
-					}
-					//Enemies we are most sensitive about
-					else if((eConquerorOpinion <= MAJOR_CIV_OPINION_ENEMY) && (eConqueredOpinion >= MAJOR_CIV_OPINION_NEUTRAL))
-					{
-						iWarmongerOffset *= 2;
-					}
-				}
-#endif
 #if defined(MOD_API_EXTENSIONS)
 					CUSTOMLOG("WarmongerTimes100: Att=%i, Def=%i, 3rd=%i, Off=%i, Mod%%=%i, Agg%%=%i, App%%=%i, Total=%i", eConqueror, eConquered, eMajor, iWarmongerOffset, iWarmongerModifier, iWarmongerAggrievedModifier, iWarmongerApproachModifier, (iWarmongerOffset * iWarmongerModifier * iWarmongerAggrievedModifier * (100 + iWarmongerApproachModifier) / 10000));
 					GET_PLAYER(eMajor).GetDiplomacyAI()->ChangeOtherPlayerWarmongerAmountTimes100(eConqueror, iWarmongerOffset * iWarmongerModifier * iWarmongerAggrievedModifier * (100 + iWarmongerApproachModifier) / 10000);

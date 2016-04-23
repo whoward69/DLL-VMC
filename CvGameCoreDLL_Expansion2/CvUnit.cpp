@@ -7618,24 +7618,6 @@ bool CvUnit::canPillage(const CvPlot* pPlot) const
 				}
 			}
 		}
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-		// Special case: Embassy can be in a city-state's lands, don't allow pillaging unless at war with its owner
-		if(MOD_DIPLOMACY_CITYSTATES && pImprovementInfo->GetCityStateExtraVote() > 0)
-		{
-			PlayerTypes eOwner = pPlot->getOwner();
-			PlayerTypes eBuilder = pPlot->GetPlayerThatBuiltImprovement();
-			if (eOwner != NO_PLAYER && GET_PLAYER(eOwner).isMinorCiv())
-			{
-				if (eBuilder != NO_PLAYER && GET_PLAYER(eBuilder).isAlive())
-				{
-					if (!atWar(getTeam(), GET_PLAYER(eBuilder).getTeam()))
-					{
-						return false;
-					}
-				}
-			}
-		}
-#endif
 	}
 
 	// Either nothing to pillage or everything is pillaged to its max
@@ -7914,20 +7896,6 @@ bool CvUnit::found()
 #endif
 	}
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if(MOD_DIPLOMACY_CITYSTATES && m_pUnitInfo->IsFoundMid())
-	{
-		// In an ideal world we'd have getPIONEER_EXTRA_PLOTS and getPIONEER_FOOD_PERCENT (which are in CSD v24 if the standalone source code for that is ever released)
-		kPlayer.cityBoost(getX(), getY(), m_pUnitInfo, GC.getPIONEER_POPULATION_CHANGE(), GC.getPIONEER_POPULATION_CHANGE(), 25);
-	}
-	if(MOD_DIPLOMACY_CITYSTATES && m_pUnitInfo->IsFoundLate())
-	{
-		// In an ideal world we'd have getCOLONIST_EXTRA_PLOTS and getCOLONIST_FOOD_PERCENT (which are in CSD v24 if the standalone source code for that is ever released)
-		kPlayer.cityBoost(getX(), getY(), m_pUnitInfo, GC.getCOLONIST_POPULATION_CHANGE(), GC.getCOLONIST_POPULATION_CHANGE(), 50);
-	}
-#endif
-
-		
 #if defined(MOD_EVENTS_UNIT_FOUNDED)
 	if (MOD_EVENTS_UNIT_FOUNDED) {
 		GAMEEVENTINVOKE_HOOK(GAMEEVENT_UnitCityFounded, getOwner(), GetID(), getUnitType(), getX(), getY());
@@ -9298,6 +9266,48 @@ bool CvUnit::trade()
 	CvAssertMsg(eMinor != NO_PLAYER, "Performing a trade mission and not in city state territory. This is bad. Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
 	int iFriendship = getTradeInfluence(pPlot);
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if (MOD_DIPLOMACY_CITYSTATES) {
+		//Added Influence Quest Bonus
+		if(eMinor != NO_PLAYER && GET_PLAYER(eMinor).GetMinorCivAI()->IsActiveQuestForPlayer(getOwner(), MINOR_CIV_QUEST_INFLUENCE))
+		{	
+			int iBoostPercentage = GC.getINFLUENCE_MINOR_QUEST_BOOST();
+			iFriendship *= 100 + iBoostPercentage;
+			iFriendship /= 100;
+		}
+
+		if (eMinor != NO_PLAYER && (m_pUnitInfo->GetNumInfPerEra() > 0))
+		{
+			for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
+			{
+				PlayerTypes eLoopPlayer = (PlayerTypes) iPlayerLoop;
+				if(eLoopPlayer != NO_PLAYER && !GET_PLAYER(eLoopPlayer).isObserver() && (GET_PLAYER(eLoopPlayer).getTeam() != getTeam()) && !GET_PLAYER(eLoopPlayer).isMinorCiv() && eLoopPlayer != getOwner() && GET_TEAM(GET_PLAYER(eLoopPlayer).getTeam()).isHasMet(GET_PLAYER(eMinor).getTeam()))
+				{
+					GET_PLAYER(eMinor).GetMinorCivAI()->ChangeFriendshipWithMajor(eLoopPlayer, -iFriendship);
+					CvNotifications* pNotifications = GET_PLAYER(eLoopPlayer).GetNotifications();
+					if(pNotifications)
+					{
+						Localization::String strText = Localization::Lookup("TXT_KEY_NOTIFICATION_GREAT_DIPLOMAT_OTHER");
+						strText <<  getNameKey() << iFriendship << GET_PLAYER(eMinor).getNameKey() << GET_PLAYER(getOwner()).getCivilizationAdjectiveKey();
+						Localization::String strSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_GREAT_DIPLOMAT_OTHER_SUMMARY");
+						strSummary << getNameKey() << GET_PLAYER(eMinor).getNameKey();
+						pNotifications->Add(NOTIFICATION_GREAT_PERSON_ACTIVE_PLAYER, strText.toUTF8(), strSummary.toUTF8(), getX(), getY(), getUnitType());
+					}
+				}
+			}
+			CvNotifications* pNotifications = GET_PLAYER(getOwner()).GetNotifications();
+			if(pNotifications)
+			{
+				Localization::String strText = Localization::Lookup("TXT_KEY_NOTIFICATION_GREAT_DIPLOMAT");
+				strText <<  getNameKey() << iFriendship << GET_PLAYER(eMinor).getNameKey();
+				Localization::String strSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_GREAT_DIPLOMAT_SUMMARY");
+				strSummary << getNameKey() << GET_PLAYER(eMinor).getNameKey();
+				pNotifications->Add(NOTIFICATION_GREAT_PERSON_ACTIVE_PLAYER, strText.toUTF8(), strSummary.toUTF8(), getX(), getY(), getUnitType());
+			}
+		}
+	}
+#endif
+
 	GET_PLAYER(eMinor).GetMinorCivAI()->ChangeFriendshipWithMajor(getOwner(), iFriendship);
 
 	if(getOwner() == GC.getGame().getActivePlayer())
@@ -10285,6 +10295,9 @@ bool CvUnit::build(BuildTypes eBuild)
 	}
 
 	int iStartedYet = pPlot->getBuildProgress(eBuild);
+#if defined(MOD_BUGFIX_MINOR)
+	int iWorkRateFactor = 1;
+#endif
 
 	// if we are starting something new wipe out the old thing immediately
 	if(iStartedYet == 0)
@@ -10308,13 +10321,36 @@ bool CvUnit::build(BuildTypes eBuild)
 			}
 		}
 
+#if defined(MOD_BUGFIX_MINOR)
+		/*
+		 * This appears to be a bug, in that we drop out of the if into an exact duplicate of the call below.
+		 * However, this is so long established that if we fix it, we'll get howls of complaints from 999 out of 1000 players
+		 * that build times have increased under some circumstances, or, more likely, "it's broken".
+		 *
+		 * The double call is only a problem if the build takes one turn, ie instantaneous.
+		 * There are no standard builds where this is the case.
+		 *
+		 * The double call is also only an issue if you a) care about the BuildFinished event being duplicated or b)
+		 * have set a maintenance cost on the improvement and are building it outside your territory, in which case you get charged twice
+		 * but will only receive one refund if the improvement is destroyed or the territory captured.
+		 *
+		 * The simple solution is "don't do this!"
+		 *
+		 * The coding solution is to avoid the call and just double the workrate (to allow for the double call),
+		 * dirty but a win-win solution!
+		*/
+		iWorkRateFactor = 2;
+#else
 		// wipe out all build progress also
-
 		bFinished = pPlot->changeBuildProgress(eBuild, workRate(false), getOwner());
-
+#endif
 	}
 
+#if defined(MOD_BUGFIX_MINOR)
+	bFinished = pPlot->changeBuildProgress(eBuild, workRate(false) * iWorkRateFactor, getOwner());
+#else
 	bFinished = pPlot->changeBuildProgress(eBuild, workRate(false), getOwner());
+#endif
 
 #if defined(MOD_EVENTS_PLOT)
 	if (MOD_EVENTS_PLOT) {
@@ -11706,21 +11742,6 @@ bool CvUnit::IsFoundAbroad() const
 	VALIDATE_OBJECT
 	return m_pUnitInfo->IsFoundAbroad();
 }
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-//	--------------------------------------------------------------------------------
-bool CvUnit::IsFoundMid() const
-{
-	VALIDATE_OBJECT
-	return m_pUnitInfo->IsFoundMid();
-}
-//	--------------------------------------------------------------------------------
-bool CvUnit::IsFoundLate() const
-{
-	VALIDATE_OBJECT
-	return m_pUnitInfo->IsFoundLate();
-}
-#endif
 
 //	--------------------------------------------------------------------------------
 bool CvUnit::IsWork() const
@@ -14279,7 +14300,10 @@ void CvUnit::changeHPHealedIfDefeatEnemy(int iValue)
 {
 	VALIDATE_OBJECT
 	m_iHPHealedIfDefeatEnemy += iValue;
+#if !defined(MOD_BUGFIX_MINOR)
+	// If the modder wants this to be negative, then so-be-it
 	CvAssert(getHPHealedIfDefeatEnemy() >= 0);
+#endif
 }
 
 //	--------------------------------------------------------------------------------
@@ -22469,6 +22493,12 @@ bool CvUnit::UnitAttack(int iX, int iY, int iFlags, int iSteps)
 			{
 				CvBarbarians::DoCampAttacked(pDestPlot);
 			}
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+			if(MOD_DIPLOMACY_CITYSTATES && pDestPlot->isCity() && pDestPlot->isBarbarian())
+			{
+				CvBarbarians::DoCityAttacked(pDestPlot);
+			}
+#endif
 		}
 	}
 

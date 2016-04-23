@@ -47,6 +47,10 @@
 #include "CvEnums.h"
 #endif
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+#include "CvBarbarians.h"
+#endif
+
 #include "ICvDLLUserInterface.h"
 #include "CvEnumSerialization.h"
 #include "FStlContainerSerialization.h"
@@ -170,20 +174,6 @@ CvPlayer::CvPlayer() :
 	, m_iConversionModifier(0)
 #endif
 	, m_iExtraLeagueVotes(0)
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	, m_iImprovementLeagueVotes(0)
-	, m_iFaithToVotes(0)
-	, m_iCapitalsToVotes(0)
-	, m_iDoFToVotes(0)
-	, m_iRAToVotes(0)
-	, m_iGPExpendInfluence(0)
-	, m_bIsLeagueAid(false)
-	, m_bIsLeagueScholar(false)
-	, m_bIsLeagueArt(false)
-	, m_iScienceRateFromLeague(0)
-	, m_iScienceRateFromLeagueAid(0)
-	, m_iLeagueCultureCityModifier("CvPlayer::m_iLeagueCultureCityModifier", m_syncArchive)
-#endif
 	, m_iSpecialPolicyBuildingHappiness("CvPlayer::m_iSpecialPolicyBuildingHappiness", m_syncArchive)
 	, m_iWoundedUnitDamageMod("CvPlayer::m_iWoundedUnitDamageMod", m_syncArchive)
 	, m_iUnitUpgradeCostMod("CvPlayer::m_iUnitUpgradeCostMod", m_syncArchive)
@@ -215,9 +205,6 @@ CvPlayer::CvPlayer() :
 	, m_iFreeGreatWritersCreated(0)
 	, m_iFreeGreatArtistsCreated(0)
 	, m_iFreeGreatMusiciansCreated(0)
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	, m_iFreeGreatDiplomatsCreated(0)
-#endif
 #endif
 	, m_iGreatPeopleCreated("CvPlayer::m_iGreatPeopleCreated", m_syncArchive)
 	, m_iGreatGeneralsCreated("CvPlayer::m_iGreatGeneralsCreated", m_syncArchive)
@@ -230,10 +217,6 @@ CvPlayer::CvPlayer() :
 	, m_iGreatWritersCreated(0)
 	, m_iGreatArtistsCreated(0)
 	, m_iGreatMusiciansCreated(0)
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	, m_iGreatDiplomatsCreated(0)
-	, m_iDiplomatsFromFaith(0)
-#endif
 	, m_iMerchantsFromFaith(0)
 	, m_iScientistsFromFaith(0)
 	, m_iWritersFromFaith(0)
@@ -471,6 +454,25 @@ CvPlayer::CvPlayer() :
 	, m_iFaithPurchaseIndex(0)
 	, m_bProcessedAutoMoves(false)
 	, m_kPlayerAchievements(*this)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	, m_iImprovementLeagueVotes("CvPlayer::m_iImprovementLeagueVotes", m_syncArchive)
+	, m_iFaithToVotes("CvPlayer::m_iFaithToVotes", m_syncArchive)
+	, m_iCapitalsToVotes("CvPlayer::m_iCapitalsToVotes", m_syncArchive)
+	, m_iDoFToVotes("CvPlayer::m_iDoFToVotes", m_syncArchive)
+	, m_iRAToVotes("CvPlayer::m_iRAToVotes", m_syncArchive)
+	, m_iDefensePactsToVotes("CvPlayer::m_iDefensePactsToVotes", m_syncArchive)
+	, m_iGPExpendInfluence("CvPlayer::m_iGPExpendInfluence", m_syncArchive)
+	, m_bIsLeagueAid("CvPlayer::m_bIsLeagueAid", m_syncArchive)
+	, m_bIsLeagueScholar("CvPlayer::m_bIsLeagueScholar", m_syncArchive)
+	, m_bIsLeagueArt("CvPlayer::m_bIsLeagueArt", m_syncArchive)
+	, m_iScienceRateFromLeague("CvPlayer::m_iScienceRateFromLeague", m_syncArchive)
+	, m_iScienceRateFromLeagueAid("CvPlayer::m_iScienceRateFromLeagueAid", m_syncArchive)
+	, m_iLeagueCultureCityModifier("CvPlayer::m_iLeagueCultureCityModifier", m_syncArchive)
+	, m_iGreatDiplomatsCreated("CvPlayer::m_iGreatDiplomatsCreated", m_syncArchive)
+	, m_iDiplomatsFromFaith("CvPlayer::m_iDiplomatsFromFaith", m_syncArchive)
+	, m_iGreatDiplomatRateModifier("CvPlayer::m_iGreatDiplomatRateModifier", m_syncArchive)
+	, m_iFreeGreatDiplomatsCreated("CvPlayer::m_iFreeGreatDiplomatsCreated", m_syncArchive)
+#endif
 #if defined(MOD_DIPLOMACY_CIV4_FEATURES)
 	, m_iVassalGoldMaintenanceMod("CvPlayer::m_iVassalGoldMaintenanceMod", m_syncArchive)
 #endif
@@ -883,20 +885,6 @@ void CvPlayer::uninit()
 	m_iConversionModifier = 0;
 #endif
 	m_iExtraLeagueVotes = 0;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	m_iImprovementLeagueVotes = 0;
-	m_iFaithToVotes = 0;
-	m_iCapitalsToVotes = 0;
-	m_iDoFToVotes = 0;
-	m_iRAToVotes = 0;
-	m_iGPExpendInfluence = 0;
-	m_bIsLeagueAid = false;
-	m_bIsLeagueScholar = false;
-	m_bIsLeagueArt = false;
-	m_iScienceRateFromLeague = 0;
-	m_iScienceRateFromLeagueAid = 0;
-	m_iLeagueCultureCityModifier = 0;
-#endif
 	m_iSpecialPolicyBuildingHappiness = 0;
 	m_iWoundedUnitDamageMod = 0;
 	m_iUnitUpgradeCostMod = 0;
@@ -928,9 +916,6 @@ void CvPlayer::uninit()
 	m_iFreeGreatWritersCreated = 0;
 	m_iFreeGreatArtistsCreated = 0;
 	m_iFreeGreatMusiciansCreated = 0;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	m_iFreeGreatDiplomatsCreated = 0;
-#endif
 #endif
 	m_iGreatPeopleCreated = 0;
 	m_iGreatGeneralsCreated = 0;
@@ -943,10 +928,6 @@ void CvPlayer::uninit()
 	m_iGreatWritersCreated = 0;
 	m_iGreatArtistsCreated = 0;
 	m_iGreatMusiciansCreated = 0;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	m_iGreatDiplomatsCreated = 0;
-	m_iDiplomatsFromFaith = 0;
-#endif
 	m_iMerchantsFromFaith = 0;
 	m_iScientistsFromFaith = 0;
 	m_iWritersFromFaith = 0;
@@ -972,9 +953,6 @@ void CvPlayer::uninit()
 	m_iGreatArtistRateModifier = 0;
 	m_iGreatMusicianRateModifier = 0;
 	m_iGreatMerchantRateModifier = 0;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	m_iGreatDiplomatRateModifier = 0;
-#endif
 	m_iGreatScientistRateModifier = 0;
 	m_iGreatScientistBeakerModifier = 0;
 	m_iGreatEngineerRateModifier = 0;
@@ -1134,6 +1112,25 @@ void CvPlayer::uninit()
 	m_bHasAdoptedStateReligion = false;
 	m_bAlliesGreatPersonBiasApplied = false;
 	m_lastGameTurnInitialAIProcessed = -1;
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	m_iImprovementLeagueVotes = 0;
+	m_iFaithToVotes = 0;
+	m_iCapitalsToVotes = 0;
+	m_iDoFToVotes = 0;
+	m_iRAToVotes = 0;
+	m_iDefensePactsToVotes = 0;
+	m_iGPExpendInfluence = 0;
+	m_bIsLeagueAid = false;
+	m_bIsLeagueScholar = false;
+	m_bIsLeagueArt = false;
+	m_iScienceRateFromLeague = 0;
+	m_iScienceRateFromLeagueAid = 0;
+	m_iLeagueCultureCityModifier = 0;
+	m_iFreeGreatDiplomatsCreated = 0;
+	m_iGreatDiplomatsCreated = 0;
+	m_iDiplomatsFromFaith = 0;
+	m_iGreatDiplomatRateModifier = 0;
+#endif
 
 #if defined(MOD_DIPLOMACY_CIV4_FEATURES)
 	m_iVassalGoldMaintenanceMod = 0;
@@ -2058,6 +2055,12 @@ void CvPlayer::acquireCity(CvCity* pOldCity, bool bConquest, bool bGift)
 			locSummary << pOldCity->getNameKey();
 			pNotifications->Add(NOTIFICATION_CITY_LOST, locString.toUTF8(), locSummary.toUTF8(), pOldCity->getX(), pOldCity->getY(), -1);
 		}
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+		if(MOD_DIPLOMACY_CITYSTATES && pOldCity->isBarbarian())
+		{
+			CvBarbarians::DoBarbCityCleared(pOldCity->plot());
+		}
+#endif
 
 		if(!isBarbarian() && !pOldCity->isBarbarian())
 		{
@@ -2236,7 +2239,11 @@ void CvPlayer::acquireCity(CvCity* pOldCity, bool bConquest, bool bGift)
 	// slewis - warmonger calculations
 	if (bConquest)
 	{
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+		if(!isMinorCiv() && !isBarbarian())
+#else
 		if(!isMinorCiv())
+#endif
 		{
 			bool bDoWarmonger = true;
 
@@ -3031,6 +3038,52 @@ void CvPlayer::acquireCity(CvCity* pOldCity, bool bConquest, bool bGift)
 #endif
 		}
 	}
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if(GET_PLAYER(eOldOwner).isMinorCiv() && GET_PLAYER(eOldOwner).getNumCities() == 0)
+	{
+		for(int iMajorLoop = 0; iMajorLoop < MAX_MAJOR_CIVS; iMajorLoop++)
+		{
+			PlayerTypes ePlayer = (PlayerTypes)iMajorLoop;
+			if(ePlayer != NO_PLAYER && !GET_PLAYER(ePlayer).isMinorCiv())
+			{
+				if(GET_PLAYER(eOldOwner).GetIncomingUnitCountdown(ePlayer) > 0)
+				{
+					// Must have capital to actually spawn unit
+					CvCity* pCapital = GET_PLAYER(ePlayer).getCapitalCity();
+					if(pCapital)
+					{
+						if(GET_PLAYER(eOldOwner).GetIncomingUnitType(ePlayer) != NO_UNIT)
+						{
+							CvUnit* pNewUnit = GET_PLAYER(ePlayer).initUnit(GET_PLAYER(eOldOwner).GetIncomingUnitType(ePlayer), pCapital->getX(), pCapital->getY());
+							CvAssert(pNewUnit);
+							if (pNewUnit)
+							{
+								if(pNewUnit->getDomainType() != DOMAIN_AIR)
+								{
+									if (!pNewUnit->jumpToNearestValidPlot())
+									{
+										pNewUnit->kill(false);
+									}
+								}
+								CvNotifications* pNotifications = GET_PLAYER(ePlayer).GetNotifications();
+								if(pNotifications && ePlayer == GC.getGame().getActivePlayer())
+								{
+									Localization::String strSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_CS_GIFT_RETURNED_SUMMARY");
+									strSummary <<  GET_PLAYER(eOldOwner).getCivilizationShortDescriptionKey();
+									Localization::String strNotification = Localization::Lookup("TXT_KEY_NOTIFICATION_CS_GIFT_RETURNED");
+									strNotification <<  GET_PLAYER(eOldOwner).getNameKey();
+									strNotification <<  pNewUnit->getNameKey();
+									pNotifications->Add(NOTIFICATION_GENERIC, strNotification.toUTF8(), strSummary.toUTF8(), pCapital->getX(), pCapital->getY(), -1);
+								}
+							}
+						}
+					}
+				}
+				GET_PLAYER(eOldOwner).GetMinorCivAI()->SetJerk(GET_PLAYER((PlayerTypes) iMajorLoop).getTeam(), 0);
+			}
+		}
+	}			
+#endif
 	// If not, old owner should look at city specializations
 	else
 	{
@@ -3739,9 +3792,15 @@ void CvPlayer::DoLiberatePlayer(PlayerTypes ePlayer, int iOldCityID)
 	//Let's give the Embassies of the defeated player back to the liberated player
 	if(MOD_DIPLOMACY_CITYSTATES && GET_PLAYER(ePlayer).GetImprovementLeagueVotes() > 0)
 	{
-		CvPlayer* eConqueringPlayer = &GET_PLAYER(GET_TEAM(eConquerorTeam).getLeaderID());
-		int iEmbassyVotes = GET_PLAYER(ePlayer).GetImprovementLeagueVotes();
-		eConqueringPlayer->ChangeImprovementLeagueVotes(-iEmbassyVotes);
+		for(int iPlayerLoop = 0; iPlayerLoop < MAX_CIV_PLAYERS; iPlayerLoop++)
+		{
+			ePlayer = (PlayerTypes) iPlayerLoop;
+			if(ePlayer != NO_PLAYER && GET_PLAYER(ePlayer).getTeam() == eConquerorTeam)
+			{
+				int iEmbassyVotes = GET_PLAYER(ePlayer).GetImprovementLeagueVotes();
+				GET_PLAYER(ePlayer).ChangeImprovementLeagueVotes(-iEmbassyVotes);
+			}
+		}
 	}
 #endif
 }
@@ -7703,66 +7762,6 @@ void CvPlayer::found(int iX, int iY)
 	}
 }
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-void CvPlayer::cityBoost(int iX, int iY, CvUnitEntry* pkUnitEntry, int iExtraPlots, int iPopChange, int iFoodPercent)
-{
-	//Advanced Settler Buildings
-	if(pkUnitEntry && !isMinorCiv() && !isBarbarian())
-	{
-		CvPlot* pPlot = GC.getMap().plot(iX, iY);
-		CvCity* pCity = NULL;
-		if(pPlot->isCity())
-		{
-			pCity = GC.getMap().findCity(iX, iY, GetID(), NO_TEAM);
-		}
-
-		if(pCity)
-		{
-			const int iNumBuildingClassInfos = GC.getNumBuildingClassInfos();
-			CvCivilizationInfo& thisCivilization = getCivilizationInfo();
-			for(int iBuildingClassLoop = 0; iBuildingClassLoop < iNumBuildingClassInfos; iBuildingClassLoop++)
-			{
-				const BuildingClassTypes eBuildingClass = (BuildingClassTypes) iBuildingClassLoop;
-				CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo(eBuildingClass);
-				if(!pkBuildingClassInfo)
-				{
-					continue;
-				}
-				if(pkUnitEntry->GetBuildOnFound(eBuildingClass))
-				{
-					const BuildingTypes eFreeBuilding = (BuildingTypes)(thisCivilization.getCivilizationBuildings(eBuildingClass));
-					if(canConstruct(eFreeBuilding) && pCity->isValidBuildingLocation(eFreeBuilding))
-					{
-						pCity->GetCityBuildings()->SetNumRealBuilding(eFreeBuilding, 1);
-					}
-				}
-			}
-		}
-
-		if(GetNewCityExtraPopulation() < iPopChange)
-		{
-			ChangeNewCityExtraPopulation(iPopChange - GetNewCityExtraPopulation());
-		}
-		pCity->setPopulation(GetNewCityExtraPopulation());
-
-		//25% food, to prevent instant-starvation
-		pCity->changeFood((pCity->growthThreshold() * iFoodPercent / 100));
-
-		//And a little territory to boot
-		for (int i = 0; i < iExtraPlots; i++)
-		{
-			CvPlot* pPlotToAcquire = pCity->GetNextBuyablePlot();
-
-			// maybe the player owns ALL of the plots or there are none available?
-			if(pPlotToAcquire)
-			{
-				pCity->DoAcquirePlot(pPlotToAcquire->getX(), pPlotToAcquire->getY());
-			}
-		}
-	}
-}
-#endif
-
 //	--------------------------------------------------------------------------------
 bool CvPlayer::canTrain(UnitTypes eUnit, bool bContinue, bool bTestVisible, bool bIgnoreCost, bool bIgnoreUniqueUnitStatus, CvString* toolTipSink) const
 {
@@ -10009,8 +10008,8 @@ int CvPlayer::calculateResearchModifier(TechTypes eTech)
 	int iLeaguesMod = GC.getGame().GetGameLeagues()->GetResearchMod(GetID(), eTech);
 	if (iLeaguesMod != 0)
 	{
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
-		if(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS && (!isMinorCiv() && !isBarbarian()))
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+		if(MOD_DIPLOMACY_CITYSTATES && (!isMinorCiv() && !isBarbarian()))
 		{
 			//Research bonus for city-state alliances
 			PlayerTypes eMinor;
@@ -10027,7 +10026,7 @@ int CvPlayer::calculateResearchModifier(TechTypes eTech)
 			if(iMinorAllies > 0)
 			{
 				//+5% Science per ally.
-				iLeaguesAidScience += (iMinorAllies * /*5*/ GC.getSCHOLAR_MINOR_ALLY_MULTIPLIER());
+				iLeaguesAidScience += min(50, (iMinorAllies * /*5*/ GC.getSCHOLAR_MINOR_ALLY_MULTIPLIER()));
 				SetScienceRateFromMinorAllies(iLeaguesAidScience);
 				iLeaguesMod += GetScienceRateFromMinorAllies();
 			}
@@ -13519,6 +13518,37 @@ int CvPlayer::TestRAToVotes(int iChange)
 	
 	return iRAToVotes;
 }
+//	--------------------------------------------------------------------------------
+/// Extra league votes from RA
+int CvPlayer::GetDefensePactsToVotes() const
+{
+	return m_iDefensePactsToVotes;
+}
+
+//	--------------------------------------------------------------------------------
+/// Extra league votes from RA
+void CvPlayer::ChangeDefensePactsToVotes(int iChange)
+{
+	m_iDefensePactsToVotes = iChange;
+	CvAssert(m_iDefensePactsToVotes >= 0);
+	if (m_iDefensePactsToVotes < 0)
+	{
+		m_iDefensePactsToVotes = 0;
+	}
+}
+//	--------------------------------------------------------------------------------
+/// Extra league votes from Defense Pacts
+int CvPlayer::TestDefensePactsToVotes(int iChange)
+{
+	int iDefensePactsToVotes = 0;
+	
+	if(iChange > 0)
+	{
+		iDefensePactsToVotes = (GetDiplomacyAI()->GetNumDefensePacts() * iChange);
+	}
+	
+	return iDefensePactsToVotes;
+}
 
 //	--------------------------------------------------------------------------------
 /// Extra influence from GPs
@@ -14338,6 +14368,11 @@ void CvPlayer::DoProcessVotes()
 					{
 						int iTestRA = TestRAToVotes(pkBuildingInfo->GetRAToVotes());
 						ChangeRAToVotes(iTestRA);
+					}
+					if(pkBuildingInfo->GetDPToVotes() > 0)
+					{
+						int iTestDP = TestDefensePactsToVotes(pkBuildingInfo->GetDPToVotes());
+						ChangeDefensePactsToVotes(iTestDP);
 					}
 				}
 			}
@@ -15378,13 +15413,15 @@ void CvPlayer::DoGreatPersonExpended(UnitTypes eGreatPersonUnit)
 			for (int iMinorLoop = MAX_MAJOR_CIVS; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
 			{
 				PlayerTypes eMinorLoop = (PlayerTypes) iMinorLoop;
-
-				CvPlayer* pMinorLoop = &GET_PLAYER(eMinorLoop);
-				if(pMinorLoop->isMinorCiv() && pMinorLoop->isAlive())
+				if(eMinorLoop != NO_PLAYER)
 				{
-					if(GET_TEAM(pMinorLoop->getTeam()).isHasMet(GET_PLAYER(GetID()).getTeam()))
+					CvPlayer* pMinorLoop = &GET_PLAYER(eMinorLoop);
+					if(pMinorLoop->isMinorCiv() && pMinorLoop->isAlive())
 					{
-						pMinorLoop->GetMinorCivAI()->ChangeFriendshipWithMajor(GetID(), iExpendInfluence, false);
+						if(GET_TEAM(pMinorLoop->getTeam()).isHasMet(getTeam()))
+						{
+							pMinorLoop->GetMinorCivAI()->ChangeFriendshipWithMajor(GetID(), iExpendInfluence, false);
+						}
 					}
 				}
 			}
@@ -24532,7 +24569,10 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 
 #if defined(MOD_TRAITS_OTHER_PREREQS)
 	if (MOD_TRAITS_OTHER_PREREQS) {
+		// Update our traits (some may have become obsolete)
+		GetPlayerTraits()->Reset();
 		GetPlayerTraits()->InitPlayerTraits();
+		recomputePolicyCostModifier();
 	}
 #endif
 
@@ -25687,20 +25727,6 @@ void CvPlayer::Read(FDataStream& kStream)
 	{
 		m_iExtraLeagueVotes = 0;
 	}
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	MOD_SERIALIZE_READ(39, kStream, m_iImprovementLeagueVotes, 0);
-	MOD_SERIALIZE_READ(46, kStream, m_iFaithToVotes, 0);
-	MOD_SERIALIZE_READ(46, kStream, m_iCapitalsToVotes, 0);
-	MOD_SERIALIZE_READ(46, kStream, m_iDoFToVotes, 0);
-	MOD_SERIALIZE_READ(46, kStream, m_iRAToVotes, 0);
-	MOD_SERIALIZE_READ(49, kStream, m_iGPExpendInfluence, 0);
-	MOD_SERIALIZE_READ(49, kStream, m_bIsLeagueAid, false);
-	MOD_SERIALIZE_READ(49, kStream, m_bIsLeagueScholar, false);
-	MOD_SERIALIZE_READ(49, kStream, m_bIsLeagueArt, false);
-	MOD_SERIALIZE_READ(49, kStream, m_iScienceRateFromLeague, 0);
-	MOD_SERIALIZE_READ(49, kStream, m_iScienceRateFromLeagueAid, 0);
-	MOD_SERIALIZE_READ(49, kStream, m_iLeagueCultureCityModifier, 0);
-#endif
 	kStream >> m_iSpecialPolicyBuildingHappiness;
 	kStream >> m_iWoundedUnitDamageMod;
 	kStream >> m_iUnitUpgradeCostMod;
@@ -25739,9 +25765,6 @@ void CvPlayer::Read(FDataStream& kStream)
 	MOD_SERIALIZE_READ(61, kStream, m_iFreeGreatWritersCreated, 0);
 	MOD_SERIALIZE_READ(61, kStream, m_iFreeGreatArtistsCreated, 0);
 	MOD_SERIALIZE_READ(61, kStream, m_iFreeGreatMusiciansCreated, 0);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	MOD_SERIALIZE_READ(61, kStream, m_iFreeGreatDiplomatsCreated, 0);
-#endif
 #endif
 	kStream >> m_iGreatPeopleCreated;
 	kStream >> m_iGreatGeneralsCreated;
@@ -25754,10 +25777,6 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iGreatWritersCreated;
 	kStream >> m_iGreatArtistsCreated;
 	kStream >> m_iGreatMusiciansCreated;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	MOD_SERIALIZE_READ(37, kStream, m_iGreatDiplomatsCreated, 0);
-	MOD_SERIALIZE_READ(49, kStream, m_iDiplomatsFromFaith, 0);
-#endif
 	kStream >> m_iMerchantsFromFaith;
 	kStream >> m_iScientistsFromFaith;
 	kStream >> m_iWritersFromFaith;
@@ -25784,9 +25803,6 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iGreatMusicianRateModifier;
 	kStream >> m_iGreatMerchantRateModifier;
 	kStream >> m_iGreatScientistRateModifier;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	MOD_SERIALIZE_READ(37, kStream, m_iGreatDiplomatRateModifier, 0);
-#endif
 	if (uiVersion >= 10)
 	{
 		kStream >> m_iGreatScientistBeakerModifier;
@@ -26331,20 +26347,6 @@ void CvPlayer::Write(FDataStream& kStream) const
 	MOD_SERIALIZE_WRITE(kStream, m_iConversionModifier);
 #endif
 	kStream << m_iExtraLeagueVotes;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	MOD_SERIALIZE_WRITE(kStream, m_iImprovementLeagueVotes);
-	MOD_SERIALIZE_WRITE(kStream, m_iFaithToVotes);
-	MOD_SERIALIZE_WRITE(kStream, m_iCapitalsToVotes);
-	MOD_SERIALIZE_WRITE(kStream, m_iDoFToVotes);
-	MOD_SERIALIZE_WRITE(kStream, m_iRAToVotes);
-	MOD_SERIALIZE_WRITE(kStream, m_iGPExpendInfluence);
-	MOD_SERIALIZE_WRITE(kStream, m_bIsLeagueAid);
-	MOD_SERIALIZE_WRITE(kStream, m_bIsLeagueScholar);
-	MOD_SERIALIZE_WRITE(kStream, m_bIsLeagueArt);
-	MOD_SERIALIZE_WRITE(kStream, m_iScienceRateFromLeague);
-	MOD_SERIALIZE_WRITE(kStream, m_iScienceRateFromLeagueAid);
-	MOD_SERIALIZE_WRITE(kStream, m_iLeagueCultureCityModifier);
-#endif
 	kStream << m_iSpecialPolicyBuildingHappiness;
 	kStream << m_iWoundedUnitDamageMod;
 	kStream << m_iUnitUpgradeCostMod;
@@ -26375,9 +26377,6 @@ void CvPlayer::Write(FDataStream& kStream) const
 	MOD_SERIALIZE_WRITE(kStream, m_iFreeGreatWritersCreated);
 	MOD_SERIALIZE_WRITE(kStream, m_iFreeGreatArtistsCreated);
 	MOD_SERIALIZE_WRITE(kStream, m_iFreeGreatMusiciansCreated);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	MOD_SERIALIZE_WRITE(kStream, m_iFreeGreatDiplomatsCreated);
-#endif
 #endif
 	kStream << m_iGreatPeopleCreated;
 	kStream << m_iGreatGeneralsCreated;
@@ -26390,10 +26389,6 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iGreatWritersCreated;
 	kStream << m_iGreatArtistsCreated;
 	kStream << m_iGreatMusiciansCreated;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	MOD_SERIALIZE_WRITE(kStream, m_iGreatDiplomatsCreated);
-	MOD_SERIALIZE_WRITE(kStream, m_iDiplomatsFromFaith);
-#endif
 	kStream << m_iMerchantsFromFaith;
 	kStream << m_iScientistsFromFaith;
 	kStream << m_iWritersFromFaith;
@@ -26419,9 +26414,6 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iGreatArtistRateModifier;
 	kStream << m_iGreatMusicianRateModifier;
 	kStream << m_iGreatMerchantRateModifier;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	MOD_SERIALIZE_WRITE(kStream, m_iGreatDiplomatRateModifier);
-#endif
 	kStream << m_iGreatScientistRateModifier;
 	kStream << m_iGreatScientistBeakerModifier;
 	kStream << m_iGreatEngineerRateModifier;
@@ -27706,7 +27698,7 @@ int CvPlayer::GetNumPuppetCities() const
 
 	return iNum;
 }
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
 //	--------------------------------------------------------------------------------
 // How many other Capital Cities does this player own
 int CvPlayer::GetNumCapitalCities() const
@@ -28248,8 +28240,8 @@ bool CvPlayer::IsAllowedToTradeWith(PlayerTypes eOtherPlayer)
 		return false;
 	}
 
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
-	if (MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS && GC.getGame().GetGameLeagues()->IsIdeologyEmbargoed(GetID(), eOtherPlayer) && eOtherPlayer != m_eID)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	if (MOD_DIPLOMACY_CITYSTATES && GC.getGame().GetGameLeagues()->IsIdeologyEmbargoed(GetID(), eOtherPlayer) && eOtherPlayer != m_eID)
 	{
 		return false;
 	}

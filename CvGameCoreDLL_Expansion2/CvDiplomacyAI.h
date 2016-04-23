@@ -755,8 +755,9 @@ public:
 	void ChangeDoFCounter(PlayerTypes ePlayer, int iChange);
 
 	int GetNumDoF();
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
 	int GetNumRA();
+	int GetNumDefensePacts();
 #endif
 
 	bool IsDenounceFriendAcceptable(PlayerTypes ePlayer);

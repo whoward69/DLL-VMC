@@ -261,9 +261,6 @@ public:
 #else
 	void found(int iX, int iY);
 #endif
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	void cityBoost(int iX, int iY, CvUnitEntry* pkUnitEntry, int iExtraPlots, int iPopChange, int iFoodPercent);
-#endif
 
 	bool canTrain(UnitTypes eUnit, bool bContinue = false, bool bTestVisible = false, bool bIgnoreCost = false, bool bIgnoreUniqueUnitStatus = false, CvString* toolTipSink = NULL) const;
 	bool canConstruct(BuildingTypes eBuilding, bool bContinue = false, bool bTestVisible = false, bool bIgnoreCost = false, CvString* toolTipSink = NULL) const;
@@ -603,6 +600,11 @@ public:
 	int GetRAToVotes() const;
 	void ChangeRAToVotes(int iChange);
 	int TestRAToVotes(int iChange);
+
+	int GetDefensePactsToVotes() const;
+	void ChangeDefensePactsToVotes(int iChange);
+	int TestDefensePactsToVotes(int iChange);
+
 	int GetGPExpendInfluence() const;
 	void ChangeGPExpendInfluence(int iChange);
 	
@@ -1631,7 +1633,7 @@ public:
 	CvCity* GetClosestFriendlyCity(CvPlot& plot, int iSearchRadius);
 
 	int GetNumPuppetCities() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES_RESOLUTIONS)
+#if defined(MOD_DIPLOMACY_CITYSTATES)
 	int GetNumCapitalCities() const;
 #endif
 	int GetMaxEffectiveCities(bool bIncludePuppets = false);
@@ -2006,18 +2008,23 @@ protected:
 #endif
 	int m_iExtraLeagueVotes;
 #if defined(MOD_DIPLOMACY_CITYSTATES)
-	int m_iImprovementLeagueVotes;
-	int m_iFaithToVotes;
-	int m_iCapitalsToVotes;
-	int m_iDoFToVotes;
-	int m_iRAToVotes;
-	int m_iGPExpendInfluence;
-	bool m_bIsLeagueAid;
-	bool m_bIsLeagueScholar;
-	bool m_bIsLeagueArt;
-	int m_iScienceRateFromLeague;
-	int m_iScienceRateFromLeagueAid;
+	FAutoVariable<int, CvPlayer> m_iImprovementLeagueVotes;
+	FAutoVariable<int, CvPlayer> m_iFaithToVotes;
+	FAutoVariable<int, CvPlayer> m_iCapitalsToVotes;
+	FAutoVariable<int, CvPlayer> m_iDoFToVotes;
+	FAutoVariable<int, CvPlayer> m_iRAToVotes;
+	FAutoVariable<int, CvPlayer> m_iDefensePactsToVotes;
+	FAutoVariable<int, CvPlayer> m_iGPExpendInfluence;
+	FAutoVariable<bool, CvPlayer> m_bIsLeagueAid;
+	FAutoVariable<bool, CvPlayer> m_bIsLeagueScholar;
+	FAutoVariable<bool, CvPlayer> m_bIsLeagueArt;
+	FAutoVariable<int, CvPlayer> m_iScienceRateFromLeague;
+	FAutoVariable<int, CvPlayer> m_iScienceRateFromLeagueAid;
 	FAutoVariable<int, CvPlayer> m_iLeagueCultureCityModifier;
+	FAutoVariable<int, CvPlayer> m_iFreeGreatDiplomatsCreated;
+	FAutoVariable<int, CvPlayer> m_iGreatDiplomatsCreated;
+	FAutoVariable<int, CvPlayer> m_iDiplomatsFromFaith;
+	FAutoVariable<int, CvPlayer> m_iGreatDiplomatRateModifier;
 #endif
 	FAutoVariable<int, CvPlayer> m_iAdvancedStartPoints;
 	FAutoVariable<int, CvPlayer> m_iAttackBonusTurns;
@@ -2042,9 +2049,6 @@ protected:
 	int m_iFreeGreatWritersCreated;
 	int m_iFreeGreatArtistsCreated;
 	int m_iFreeGreatMusiciansCreated;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int m_iFreeGreatDiplomatsCreated;
-#endif
 #endif
 	FAutoVariable<int, CvPlayer> m_iGreatPeopleCreated;
 	FAutoVariable<int, CvPlayer> m_iGreatGeneralsCreated;
@@ -2057,10 +2061,6 @@ protected:
 	int m_iGreatWritersCreated;
 	int m_iGreatArtistsCreated;
 	int m_iGreatMusiciansCreated;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int m_iGreatDiplomatsCreated;
-	int m_iDiplomatsFromFaith;
-#endif
 	int m_iMerchantsFromFaith;
 	int m_iScientistsFromFaith;
 	int m_iWritersFromFaith;
@@ -2086,9 +2086,6 @@ protected:
 	int m_iGreatArtistRateModifier;
 	int m_iGreatMusicianRateModifier;
 	int m_iGreatMerchantRateModifier;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int m_iGreatDiplomatRateModifier;
-#endif
 	int m_iGreatScientistRateModifier;
 	int m_iGreatScientistBeakerModifier;
 	int m_iGreatEngineerRateModifier;

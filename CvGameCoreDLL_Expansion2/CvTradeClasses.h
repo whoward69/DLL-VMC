@@ -101,6 +101,10 @@ public:
 	void ClearAllCivTradeRoutes (PlayerTypes ePlayer); // called from world congress code
 	void ClearAllCityStateTradeRoutes (void); // called from world congress code
 	void CancelTradeBetweenTeams (TeamTypes eTeam1, TeamTypes eTeam2);
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	void ClearAllCityStateTradeRoutesSpecial(void); // called from world congress code
+	void ClearTradePlayerToPlayer(PlayerTypes ePlayer, PlayerTypes eToPlayer); // called from world congress code
+#endif
 
 	void DoAutoWarPlundering(TeamTypes eTeam1, TeamTypes eTeam2); // when war is declared, both sides plunder each others trade routes for cash!
 

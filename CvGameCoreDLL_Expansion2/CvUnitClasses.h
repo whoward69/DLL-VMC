@@ -130,10 +130,6 @@ public:
 	bool IsPillage() const;
 	bool IsFound() const;
 	bool IsFoundAbroad() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	bool IsFoundMid() const;
-	bool IsFoundLate() const;
-#endif
 	int GetCultureBombRadius() const;
 	int GetGoldenAgeTurns() const;
 	int GetFreePolicies() const;
@@ -184,9 +180,6 @@ public:
 	bool GetGreatPeoples(int i) const;
 	bool GetBuildings(int i) const;
 	bool GetBuildingClassRequireds(int i) const;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	bool GetBuildOnFound(int i) const;
-#endif
 	bool GetFreePromotions(int i) const;
 
 	// Derived fields (not in XML)
@@ -299,10 +292,6 @@ private:
 	bool m_bPillage;
 	bool m_bFound;
 	bool m_bFoundAbroad;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	bool m_bFoundMid;
-	bool m_bFoundLate;
-#endif
 	int m_iCultureBombRadius;
 	int m_iGoldenAgeTurns;
 	int m_iFreePolicies;
@@ -351,9 +340,6 @@ private:
 	bool* m_pbGreatPeoples;
 	bool* m_pbBuildings;
 	bool* m_pbBuildingClassRequireds;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	bool* m_pbBuildOnFound;
-#endif
 	bool* m_pbFreePromotions;
 
 	CvString* m_paszEarlyArtDefineTags;
