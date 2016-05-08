@@ -255,6 +255,9 @@ CvUnit::CvUnit() :
 #if defined(MOD_PROMOTIONS_CROSS_ICE)
 	, m_iCanCrossIceCount("CvUnit::m_iCanCrossIceCount", m_syncArchive)
 #endif
+#if defined(MOD_PROMOTIONS_GG_FROM_BARBARIANS)
+	, m_iGGFromBarbariansCount("CvUnit::m_iGGFromBarbariansCount", m_syncArchive)
+#endif
 	, m_iRoughTerrainEndsTurnCount("CvUnit::m_iRoughTerrainEndsTurnCount", m_syncArchive)
 	, m_iEmbarkAbilityCount("CvUnit::m_iEmbarkAbilityCount", m_syncArchive)
 	, m_iHoveringUnitCount("CvUnit::m_iHoveringUnitCount", m_syncArchive)
@@ -282,6 +285,10 @@ CvUnit::CvUnit() :
 	, m_iAttacksMade("CvUnit::m_iAttacksMade", m_syncArchive)
 	, m_iGreatGeneralCount("CvUnit::m_iGreatGeneralCount", m_syncArchive)
 	, m_iGreatAdmiralCount(0)
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	, m_iAuraRangeChange(0)
+	, m_iAuraEffectChange(0)
+#endif
 	, m_iGreatGeneralModifier("CvUnit::m_iGreatGeneralModifier", m_syncArchive)
 #if defined(MOD_UNITS_NO_SUPPLY)
 	, m_iNoSupply(0)
@@ -966,6 +973,9 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 #if defined(MOD_PROMOTIONS_CROSS_ICE)
 	m_iCanCrossIceCount = 0;
 #endif
+#if defined(MOD_PROMOTIONS_GG_FROM_BARBARIANS)
+	m_iGGFromBarbariansCount = 0;
+#endif
 	m_iRoughTerrainEndsTurnCount = 0;
 	m_iEmbarkAbilityCount = 0;
 	m_iHoveringUnitCount = 0;
@@ -995,6 +1005,10 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iAttacksMade = 0;
 	m_iGreatGeneralCount = 0;
 	m_iGreatAdmiralCount = 0;
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	m_iAuraRangeChange = 0;
+	m_iAuraEffectChange = 0;
+#endif
 	m_iGreatGeneralModifier = 0;
 	m_iGreatGeneralReceivesMovementCount = 0;
 	m_iGreatGeneralCombatModifier = 0;
@@ -1305,38 +1319,36 @@ void CvUnit::convert(CvUnit* pUnit, bool bIsUpgrade)
 			bool bGivePromotion = false;
 
 #if defined(MOD_PROMOTIONS_DEEP_WATER_EMBARKATION)
-			if (pkPromotionInfo->IsEmbarkedDeepWater()) {
-				// Deep water promotions are handled as special cases of the general embark promotion
-				continue;
+			if (MOD_PROMOTIONS_DEEP_WATER_EMBARKATION && (pkPromotionInfo->IsAllowsEmbarkation() || pkPromotionInfo->IsEmbarkedAllWater() || pkPromotionInfo->IsEmbarkedDeepWater())) {
+				// if (pUnit->isHasPromotion(ePromotion)) CUSTOMLOG("Removing embarkation promotion %i from %s", iI, getName().c_str());
+				// Embarakation promotions are handled as special case below
+			}
+			else
+			{
+#endif
+				// Old unit has the promotion
+				if (pUnit->isHasPromotion(ePromotion) && !pkPromotionInfo->IsLostWithUpgrade())
+				{
+					bGivePromotion = true;
+				}
+
+				// New unit gets promotion for free (as per XML)
+				else if (getUnitInfo().GetFreePromotions(ePromotion) && (!bIsUpgrade || !pkPromotionInfo->IsNotWithUpgrade()))
+				{
+					bGivePromotion = true;
+				}
+
+				// if we get this due to a policy or wonder
+				else if (GET_PLAYER(getOwner()).IsFreePromotion(ePromotion) && (
+					::IsPromotionValidForUnitCombatType(ePromotion, getUnitType()) || ::IsPromotionValidForCivilianUnitType(ePromotion, getUnitType())))
+				{
+					bGivePromotion = true;
+				}
+#if defined(MOD_PROMOTIONS_DEEP_WATER_EMBARKATION)
 			}
 #endif
-			// Old unit has the promotion
-			if(pUnit->isHasPromotion(ePromotion) && !pkPromotionInfo->IsLostWithUpgrade())
-			{
-				bGivePromotion = true;
-			}
-
-			// New unit gets promotion for free (as per XML)
-			else if(getUnitInfo().GetFreePromotions(ePromotion) && (!bIsUpgrade || !pkPromotionInfo->IsNotWithUpgrade()))
-			{
-				bGivePromotion = true;
-			}
-
-			// if we get this due to a policy or wonder
-			else if(GET_PLAYER(getOwner()).IsFreePromotion(ePromotion) && (
-			            ::IsPromotionValidForUnitCombatType(ePromotion, getUnitType()) || ::IsPromotionValidForCivilianUnitType(ePromotion, getUnitType())))
-			{
-				bGivePromotion = true;
-			}
 
 			setHasPromotion(ePromotion, bGivePromotion);
-
-#if defined(MOD_PROMOTIONS_DEEP_WATER_EMBARKATION)
-			if (MOD_PROMOTIONS_DEEP_WATER_EMBARKATION && bGivePromotion && pkPromotionInfo->IsAllowsEmbarkation() && IsHoveringUnit())
-			{
-				setHasPromotion(GET_PLAYER(getOwner()).GetDeepWaterEmbarkationPromotion(), true);
-			}
-#endif
 		}
 	}
 
@@ -1349,19 +1361,87 @@ void CvUnit::convert(CvUnit* pUnit, bool bIsUpgrade)
 	setDamage(pUnit->getDamage());
 #endif
 	setMoves(pUnit->getMoves());
-#if defined(MOD_PATHFINDER_DEEP_WATER_EMBARKATION)
-	if (MOD_PATHFINDER_DEEP_WATER_EMBARKATION && pUnit->isEmbarked() && IsHoveringUnit() && pPlot->isTerraFirma(this))
-	{
-		setEmbarked(false);
-		// CUSTOMLOG("Changing to hover from embarked");
-	}
-	else
-	{
-		setEmbarked(pUnit->isEmbarked());
-	}
-#else
-	setEmbarked(pUnit->isEmbarked());
+
+#if defined(MOD_PROMOTIONS_DEEP_WATER_EMBARKATION)
+	if (MOD_PROMOTIONS_DEEP_WATER_EMBARKATION) {
+		// We need to be a little bit clever about the embarked state for land units
+		// CUSTOMLOG("Converting unit %s, figuring out required embarkation promotion ...", getName().c_str());
+
+		// Don't use getDomainType() here as it pulls tricks with the hover domain
+		if (DOMAIN_LAND == (DomainTypes)m_pUnitInfo->GetDomainType()) {
+			// Can the new unit get an embarkation promotion?
+			CvPlayer& kPlayer = GET_PLAYER(getOwner());
+
+			if (GET_TEAM(getTeam()).canEmbark() || kPlayer.GetPlayerTraits()->IsEmbarkedAllWater())
+			{
+				PromotionTypes ePromotionEmbarkation = kPlayer.GetDeepWaterEmbarkationPromotion();
+
+				if (::IsPromotionValidForUnitCombatType(ePromotionEmbarkation, getUnitType()))
+				{
+					setHasPromotion(ePromotionEmbarkation, true);
+					// CUSTOMLOG("  ... Giving deep water embarkation promotion %i", ePromotionEmbarkation);
+				}
+				else
+				{
+					ePromotionEmbarkation = kPlayer.GetEmbarkationPromotion();
+
+					if (::IsPromotionValidForUnitCombatType(ePromotionEmbarkation, getUnitType()))
+					{
+						setHasPromotion(ePromotionEmbarkation, true);
+						// CUSTOMLOG("  ... Giving embarkation promotion %i", ePromotionEmbarkation);
+					}
+					else
+					{
+						// CUSTOMLOG("  ... no valid embarkation promotion");
+					}
+				}
+			}
+			else
+			{
+				// CUSTOMLOG("  ... player cannot embark");
+			}
+
+			// With the correct embarkation promotion sorted, we can now work out if the new unit can be here
+			bool bJump = true;
+			// CUSTOMLOG("Converting unit %s, considering location and embarkation state ...", getName().c_str());
+			if (canEnterTerrain(*pPlot) && pPlot->isValidDomainForLocation(*this))
+			{
+				// I can be here, so do nothing
+				bJump = false;
+				// CUSTOMLOG("  ... apparently I can be here");
+			}
+			else if (pPlot->isWater() && (IsHasEmbarkAbility() || IsEmbarkDeepWater()))
+			{
+				// Set embarked and try again
+				setEmbarked(true);
+
+				if (canEnterTerrain(*pPlot) && pPlot->isValidDomainForLocation(*this))
+				{
+					// I can be here embarked, so do nothing
+					bJump = false;
+					// CUSTOMLOG("  ... I can be here, but I need to be embarked");
+				}
+				else
+				{
+					// Otherwise remove the embarked state in preparation of getting out of here
+					setEmbarked(false);
+				}
+			}
+
+			if (bJump) {
+				// I need to get out of here!
+				/* bool bMoved = */ jumpToNearestValidPlot();
+				// CUSTOMLOG("  ... I need to move%s", (bMoved ? "" : " - but I can't!"));
+			}
+		}
+		else
+		{
+			// CUSTOMLOG("  ... not a land unit, no embarkation promotion required");
+		}
+	} else 
 #endif
+		setEmbarked(pUnit->isEmbarked());
+
 #if defined(MOD_API_UNIT_STATS)
 	setStatsTravelled(pUnit->getStatsTravelled());
 	setStatsKilled(pUnit->getStatsKilled());
@@ -3456,16 +3536,25 @@ void CvUnit::move(CvPlot& targetPlot, bool bShow)
 			// Standard check for water <--> land transistion
 			if (targetPlot.isWater() != pOldPlot->isWater() || targetPlot.IsAllowsWalkWater() && pOldPlot->isWater() || targetPlot.isWater() && pOldPlot->IsAllowsWalkWater()) {
 				bChangeEmbarkedState = true;
+			}
+
 #if defined(MOD_PATHFINDER_CROSS_ICE)
-			} else if (canCrossIce()) {
-				// Additional checks for ice <--> ice and water <--> ice transition
-				if (targetPlot.isIce() && pOldPlot->isIce()) {
+			if (canCrossIce()) {
+				// Additional checks for land <--> ice, ice <--> ice and water <--> ice transition
+				if ((!targetPlot.isWater() && pOldPlot->isIce()) || (targetPlot.isIce() && !pOldPlot->isWater())) {
+					// CUSTOMLOG("land <--> ice so do NOT change embarked state");
 					bChangeEmbarkedState = false;
-				} else if ((targetPlot.isWater() && pOldPlot->isIce()) || (targetPlot.isIce() && pOldPlot->isWater())) {
+				}
+				else if (targetPlot.isIce() && pOldPlot->isIce()) {
+					// CUSTOMLOG("ice <--> ice so do NOT change embarked state");
+					bChangeEmbarkedState = false;
+				}
+				else if ((targetPlot.isWater() && pOldPlot->isIce()) || (targetPlot.isIce() && pOldPlot->isWater())) {
+					// CUSTOMLOG("water <--> ice so DO change embarked state");
 					bChangeEmbarkedState = true;
 				}
-#endif
 			}
+#endif
 #if defined(MOD_PATHFINDER_DEEP_WATER_EMBARKATION)
 		}
 #endif
@@ -5036,12 +5125,20 @@ void CvUnit::embark(CvPlot* pPlot)
 {
 	VALIDATE_OBJECT
 	if (canChangeVisibility())
+#if defined(MOD_API_EXTENSIONS)
+		pPlot->changeAdjacentSight(getTeam(), visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 		pPlot->changeAdjacentSight(getTeam(), visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 
 	setEmbarked(true);
 
 	if (canChangeVisibility())
+#if defined(MOD_API_EXTENSIONS)
+		pPlot->changeAdjacentSight(getTeam(), visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 		pPlot->changeAdjacentSight(getTeam(), visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 
 	auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(this));
 	gDLL->GameplayUnitEmbark(pDllUnit.get(), true);
@@ -5059,12 +5156,20 @@ void CvUnit::disembark(CvPlot* pPlot)
 {
 	VALIDATE_OBJECT
 	if (canChangeVisibility())
+#if defined(MOD_API_EXTENSIONS)
+		pPlot->changeAdjacentSight(getTeam(), visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 		pPlot->changeAdjacentSight(getTeam(), visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 
 	setEmbarked(false);
 
 	if (canChangeVisibility())
+#if defined(MOD_API_EXTENSIONS)
+		pPlot->changeAdjacentSight(getTeam(), visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 		pPlot->changeAdjacentSight(getTeam(), visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 
 	auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(this));
 	gDLL->GameplayUnitEmbark(pDllUnit.get(), false);
@@ -12069,10 +12174,18 @@ int CvUnit::GetGenericMaxStrengthModifier(const CvUnit* pOtherUnit, const CvPlot
 		iModifier += iTempModifier;
 
 	// Great General nearby
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	int iAuraEffectChange = 0;
+	if(IsNearGreatGeneral(iAuraEffectChange) && !IsIgnoreGreatGeneralBenefit())
+#else
 	if(IsNearGreatGeneral() && !IsIgnoreGreatGeneralBenefit())
+#endif
 	{
 		iModifier += kPlayer.GetGreatGeneralCombatBonus();
 		iModifier += kPlayer.GetPlayerTraits()->GetGreatGeneralExtraBonus();
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+		iModifier += iAuraEffectChange;
+#endif
 
 		if(IsStackedGreatGeneral())
 		{
@@ -12708,10 +12821,22 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		iModifier += iTempModifier;
 
 	// Great General nearby
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	int iAuraEffectChange = 0;
+	if(IsNearGreatGeneral(iAuraEffectChange) && !IsIgnoreGreatGeneralBenefit())
+#else
 	if(IsNearGreatGeneral() && !IsIgnoreGreatGeneralBenefit())
+#endif
 	{
+#if defined(MOD_BUGFIX_MINOR)
+		iModifier += kPlayer.GetGreatGeneralCombatBonus();
+#else
 		iModifier += /*25*/ GC.getGREAT_GENERAL_STRENGTH_MOD();
+#endif
 		iModifier += pTraits->GetGreatGeneralExtraBonus();
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+		iModifier += iAuraEffectChange;
+#endif
 
 		if(IsStackedGreatGeneral())
 		{
@@ -14091,6 +14216,32 @@ void CvUnit::changeCanCrossIceCount(int iValue)
 	if(iValue != 0)
 	{
 		m_iCanCrossIceCount += iValue;
+	}
+}
+#endif
+
+#if defined(MOD_PROMOTIONS_GG_FROM_BARBARIANS)
+//	--------------------------------------------------------------------------------
+bool CvUnit::isGGFromBarbarians() const
+{
+	VALIDATE_OBJECT
+	return GET_PLAYER(getOwner()).GetPlayerTraits()->IsGGFromBarbarians() || (MOD_PROMOTIONS_GG_FROM_BARBARIANS && getGGFromBarbariansCount() > 0);
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::getGGFromBarbariansCount() const
+{
+	VALIDATE_OBJECT
+	return m_iGGFromBarbariansCount;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeGGFromBarbariansCount(int iValue)
+{
+	VALIDATE_OBJECT
+	if(iValue != 0)
+	{
+		m_iGGFromBarbariansCount += iValue;
 	}
 }
 #endif
@@ -15580,7 +15731,11 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 			}
 
 			if (canChangeVisibility())
+#if defined(MOD_API_EXTENSIONS)
+				pOldPlot->changeAdjacentSight(eOurTeam, visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 				pOldPlot->changeAdjacentSight(eOurTeam, visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 
 			pOldPlot->area()->changeUnitsPerPlayer(getOwner(), -1);
 
@@ -15642,7 +15797,11 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 		if (iMapLayer == DEFAULT_UNIT_MAP_LAYER)
 		{
 			if (canChangeVisibility())
+#if defined(MOD_API_EXTENSIONS)
+				pNewPlot->changeAdjacentSight(eOurTeam, visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true), this); // needs to be here so that the square is considered visible when we move into it...
+#else
 				pNewPlot->changeAdjacentSight(eOurTeam, visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true)); // needs to be here so that the square is considered visible when we move into it...
+#endif
 
 			pNewPlot->addUnit(this, bUpdate);
 
@@ -16333,9 +16492,17 @@ void CvUnit::setReconPlot(CvPlot* pNewValue)
 		{
 			if (canChangeVisibility())
 #if defined(MOD_PROMOTIONS_VARIABLE_RECON)
+#if defined(MOD_API_EXTENSIONS)
+				pOldPlot->changeAdjacentSight(getTeam(), reconRange(), false, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 				pOldPlot->changeAdjacentSight(getTeam(), reconRange(), false, getSeeInvisibleType(), getFacingDirection(true));
+#endif
+#else
+#if defined(MOD_API_EXTENSIONS)
+				pOldPlot->changeAdjacentSight(getTeam(), GC.getRECON_VISIBILITY_RANGE(), false, getSeeInvisibleType(), getFacingDirection(true), *this);
 #else
 				pOldPlot->changeAdjacentSight(getTeam(), GC.getRECON_VISIBILITY_RANGE(), false, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 #endif
 			pOldPlot->changeReconCount(-1); // changeAdjacentSight() tests for getReconCount()
 		}
@@ -16353,9 +16520,17 @@ void CvUnit::setReconPlot(CvPlot* pNewValue)
 			pNewValue->changeReconCount(1); // changeAdjacentSight() tests for getReconCount()
 			if (canChangeVisibility())
 #if defined(MOD_PROMOTIONS_VARIABLE_RECON)
+#if defined(MOD_API_EXTENSIONS)
+				pNewValue->changeAdjacentSight(getTeam(), reconRange(), true, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 				pNewValue->changeAdjacentSight(getTeam(), reconRange(), true, getSeeInvisibleType(), getFacingDirection(true));
+#endif
+#else
+#if defined(MOD_API_EXTENSIONS)
+				pNewValue->changeAdjacentSight(getTeam(), GC.getRECON_VISIBILITY_RANGE(), true, getSeeInvisibleType(), getFacingDirection(true), *this);
 #else
 				pNewValue->changeAdjacentSight(getTeam(), GC.getRECON_VISIBILITY_RANGE(), true, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 #endif
 		}
 	}
@@ -17603,10 +17778,18 @@ void CvUnit::changeExtraVisibilityRange(int iChange)
 	{
 		CvPlot* pkPlot = plot();
 		if (canChangeVisibility())
+#if defined(MOD_API_EXTENSIONS)
+			pkPlot->changeAdjacentSight(getTeam(), visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 			pkPlot->changeAdjacentSight(getTeam(), visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 		m_iExtraVisibilityRange = (m_iExtraVisibilityRange + iChange);
 		if (canChangeVisibility())
+#if defined(MOD_API_EXTENSIONS)
+			pkPlot->changeAdjacentSight(getTeam(), visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 			pkPlot->changeAdjacentSight(getTeam(), visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 	}
 }
 
@@ -17627,9 +17810,17 @@ void CvUnit::changeExtraReconRange(int iChange)
 	if(iChange != 0)
 	{
 		CvPlot* pkPlot = plot();
+#if defined(MOD_API_EXTENSIONS)
+		pkPlot->changeAdjacentSight(getTeam(), reconRange(), false, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 		pkPlot->changeAdjacentSight(getTeam(), reconRange(), false, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 		m_iExtraReconRange = (m_iExtraReconRange + iChange);
+#if defined(MOD_API_EXTENSIONS)
+		pkPlot->changeAdjacentSight(getTeam(), reconRange(), true, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 		pkPlot->changeAdjacentSight(getTeam(), reconRange(), true, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 	}
 }
 #endif
@@ -18337,11 +18528,22 @@ bool CvUnit::IsNearEnemyCitadel(int& iCitadelDamage)
 
 //	--------------------------------------------------------------------------------
 /// Great General close enough to give us a bonus?
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+bool CvUnit::IsNearGreatGeneral(int& iAuraEffectChange) const
+#else
 bool CvUnit::IsNearGreatGeneral() const
+#endif
 {
 	VALIDATE_OBJECT
 
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	bool bFound = false;
+	iAuraEffectChange = 0;
+	
+	int iGreatGeneralRange = /*2*/ GC.getGREAT_GENERAL_MAX_RANGE();
+#else
 	int iGreatGeneralRange = /*2*/ GC.getGREAT_GENERAL_RANGE();
+#endif
 
 	CvPlot* pLoopPlot;
 	IDInfo* pUnitNode;
@@ -18375,6 +18577,29 @@ bool CvUnit::IsNearGreatGeneral() const
 								// Same domain
 								if(pLoopUnit->getDomainType() == getDomainType())
 								{
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+									if (MOD_PROMOTIONS_AURA_CHANGE)
+									{
+										if(plotDistance(getX(), getY(), pLoopUnit->getX(), pLoopUnit->getY()) <= (GC.getGREAT_GENERAL_RANGE() + pLoopUnit->GetAuraRangeChange()))
+										{
+											// We have to check all possible units as one may be better than another
+											if (!bFound)
+											{
+												// Can't do a straight compare for the first one found, as it could have a negative modifier
+												iAuraEffectChange = pLoopUnit->GetAuraEffectChange();
+											}
+											else
+											{
+												if (pLoopUnit->GetAuraEffectChange() > iAuraEffectChange)
+												{
+													iAuraEffectChange = pLoopUnit->GetAuraEffectChange();
+												}
+											}
+										
+											bFound = true;
+										}
+									} else
+#endif
 									return true;
 								}
 							}
@@ -18385,7 +18610,11 @@ bool CvUnit::IsNearGreatGeneral() const
 		}
 	}
 
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	return bFound;
+#else
 	return false;
+#endif
 }
 
 //	--------------------------------------------------------------------------------
@@ -18482,7 +18711,11 @@ int CvUnit::GetReverseGreatGeneralModifier()const
 {
 	VALIDATE_OBJECT
 
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	int iGreatGeneralRange = /*2*/ GC.getGREAT_GENERAL_MAX_RANGE();
+#else
 	int iGreatGeneralRange = /*2*/ GC.getGREAT_GENERAL_RANGE();
+#endif
 
 	CvPlot* pLoopPlot;
 	IDInfo* pUnitNode;
@@ -18662,6 +18895,36 @@ void CvUnit::ChangeGreatAdmiralCount(int iChange)
 	VALIDATE_OBJECT
 	m_iGreatAdmiralCount += iChange;
 }
+
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+//	--------------------------------------------------------------------------------
+int CvUnit::GetAuraRangeChange() const
+{
+	VALIDATE_OBJECT
+	return m_iAuraRangeChange;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeAuraRangeChange(int iChange)
+{
+	VALIDATE_OBJECT
+	m_iAuraRangeChange += iChange;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetAuraEffectChange() const
+{
+	VALIDATE_OBJECT
+	return m_iAuraEffectChange;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeAuraEffectChange(int iChange)
+{
+	VALIDATE_OBJECT
+	m_iAuraEffectChange += iChange;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 int CvUnit::getGreatGeneralModifier() const
@@ -19051,14 +19314,22 @@ void CvUnit::setFacingDirection(DirectionTypes facingDirection)
 	{
 		//remove old fog
 		if (canChangeVisibility())
+#if defined(MOD_API_EXTENSIONS)
+			plot()->changeAdjacentSight(getTeam(), visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 			plot()->changeAdjacentSight(getTeam(), visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 
 		//change direction
 		m_eFacingDirection = facingDirection;
 
 		//clear new fog
 		if (canChangeVisibility())
+#if defined(MOD_API_EXTENSIONS)
+			plot()->changeAdjacentSight(getTeam(), visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 			plot()->changeAdjacentSight(getTeam(), visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 
 		DLLUI->setDirty(ColoredPlots_DIRTY_BIT, true);
 	}
@@ -19452,12 +19723,20 @@ void CvUnit::setSeeInvisibleType(InvisibleTypes InvisibleType)
 		CvPlot* pPlot = GC.getMap().plotCheckInvalid(getX(), getY());
 		if(pPlot && canChangeVisibility())
 		{
+#if defined(MOD_API_EXTENSIONS)
+			pPlot->changeAdjacentSight(getTeam(), visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 			pPlot->changeAdjacentSight(getTeam(), visibilityRange(), false, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 		}
 		m_eSeeInvisibleType = InvisibleType;
 		if(pPlot && canChangeVisibility())
 		{
+#if defined(MOD_API_EXTENSIONS)
+			pPlot->changeAdjacentSight(getTeam(), visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true), this);
+#else
 			pPlot->changeAdjacentSight(getTeam(), visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true));
+#endif
 		}
 	}
 }
@@ -20542,6 +20821,11 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 			changeCanCrossIceCount((thisPromotion.CanCrossIce()) ? iChange : 0);
 		}
 #endif
+#if defined(MOD_PROMOTIONS_GG_FROM_BARBARIANS)
+		if (MOD_PROMOTIONS_GG_FROM_BARBARIANS) {
+			changeGGFromBarbariansCount((thisPromotion.IsGGFromBarbarians()) ? iChange : 0);
+		}
+#endif
 		ChangeRoughTerrainEndsTurnCount((thisPromotion.IsRoughTerrainEndsTurn()) ? iChange : 0);
 		ChangeHoveringUnitCount((thisPromotion.IsHoveringUnit()) ? iChange : 0);
 		changeFlatMovementCostCount((thisPromotion.IsFlatMovementCost()) ? iChange : 0);
@@ -20630,6 +20914,10 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 
 		ChangeGreatGeneralCount(thisPromotion.IsGreatGeneral() ? iChange: 0);
 		ChangeGreatAdmiralCount(thisPromotion.IsGreatAdmiral() ? iChange: 0);
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+		ChangeAuraRangeChange(thisPromotion.GetAuraRangeChange() * iChange);
+		ChangeAuraEffectChange(thisPromotion.GetAuraEffectChange() * iChange);
+#endif
 		changeGreatGeneralModifier(thisPromotion.GetGreatGeneralModifier() * iChange);
 		ChangeGreatGeneralReceivesMovementCount(thisPromotion.IsGreatGeneralReceivesMovement() ? iChange: 0);
 		ChangeGreatGeneralCombatModifier(thisPromotion.GetGreatGeneralCombatModifier() * iChange);
@@ -21031,6 +21319,11 @@ void CvUnit::read(FDataStream& kStream)
 
 	kStream >> m_iGreatAdmiralCount;
 
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	MOD_SERIALIZE_READ(83, kStream, m_iAuraRangeChange, 0);
+	MOD_SERIALIZE_READ(83, kStream, m_iAuraEffectChange, 0);
+#endif
+
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
 	MOD_SERIALIZE_READ(46, kStream, m_strUnitName, getNameKey());
 #endif
@@ -21178,6 +21471,10 @@ void CvUnit::write(FDataStream& kStream) const
 	kStream << m_iCityAttackOnlyCount;
 	kStream << m_iCaptureDefeatedEnemyCount;
 	kStream << m_iGreatAdmiralCount;
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	MOD_SERIALIZE_WRITE(kStream, m_iAuraRangeChange);
+	MOD_SERIALIZE_WRITE(kStream, m_iAuraEffectChange);
+#endif
 
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
 	MOD_SERIALIZE_WRITE(kStream, m_strUnitName);

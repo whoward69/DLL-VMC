@@ -933,7 +933,11 @@ void CvPlayerEspionage::ProcessSpy(uint uiSpyIndex)
 	// if we just established surveillance in the city, turn the lights on
 	if(HasEstablishedSurveillance(uiSpyIndex) && !bHadSurveillance)
 	{
+#if defined(MOD_API_EXTENSIONS)
+		pCity->plot()->changeAdjacentSight(m_pPlayer->getTeam(), GC.getESPIONAGE_SURVEILLANCE_SIGHT_RANGE(), true, NO_INVISIBLE, NO_DIRECTION);
+#else
 		pCity->plot()->changeAdjacentSight(m_pPlayer->getTeam(), GC.getESPIONAGE_SURVEILLANCE_SIGHT_RANGE(), true, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 	}
 }
 
@@ -1580,7 +1584,11 @@ bool CvPlayerEspionage::ExtractSpyFromCity(uint uiSpyIndex)
 	// turn off visibility of city
 	if(bHadSurveillance)
 	{
+#if defined(MOD_API_EXTENSIONS)
+		pCity->plot()->changeAdjacentSight(m_pPlayer->getTeam(), GC.getESPIONAGE_SURVEILLANCE_SIGHT_RANGE(), false, NO_INVISIBLE, NO_DIRECTION);
+#else
 		pCity->plot()->changeAdjacentSight(m_pPlayer->getTeam(), GC.getESPIONAGE_SURVEILLANCE_SIGHT_RANGE(), false, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 	}
 
 	pCity->GetCityEspionage()->m_aiSpyAssignment[m_pPlayer->GetID()] = -1;

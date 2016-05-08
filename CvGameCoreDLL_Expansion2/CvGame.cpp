@@ -60,6 +60,10 @@
 #include "CvInfosSerializationHelper.h"
 #include "CvCityManager.h"
 
+#if defined(MOD_API_LUA_EXTENSIONS)
+#include "CvDllContext.h"
+#endif
+
 // Public Functions...
 // must be included after all other headers
 #include "LintFree.h"
@@ -239,7 +243,11 @@ void CvGame::init(HandicapTypes eHandicap)
 
 		for(int i = 0; i < iNumPlayers; i++)
 		{
+#if defined(MOD_BUGFIX_RANDOM)
+			int j = (getJonRandNum(iNumPlayers - i, NULL) + i);
+#else
 			int j = (getJonRand().get(iNumPlayers - i, NULL) + i);
+#endif
 
 			if(i != j)
 			{
@@ -1585,6 +1593,13 @@ void CvGame::update()
 					CheckPlayerTurnDeactivate();
 
 					changeTurnSlice(1);
+
+#if defined(MOD_AI_MP_DIPLOMACY)
+					if (MOD_AI_MP_DIPLOMACY) {
+						// JdH: humans may have been activated, check for AI diplomacy
+						CvDiplomacyRequests::DoAIDiplomacyWithHumans();
+					}
+#endif
 
 					gDLL->FlushTurnReminders();
 				}
@@ -7875,6 +7890,12 @@ void CvGame::doTurn()
 		}
 	}
 
+#if defined(MOD_AI_MP_DIPLOMACY)
+	if (MOD_AI_MP_DIPLOMACY) {
+		CvDiplomacyRequests::DoAIDiplomacyWithHumans();
+	}
+#endif
+
 	// Victory stuff
 	testVictory();
 
@@ -8729,6 +8750,9 @@ void CvGame::updateTimers()
 		}
 	}
 
+#if defined(MOD_AI_MP_DIPLOMACY)
+	if (!MOD_AI_MP_DIPLOMACY) {
+#endif
 	if(isHotSeat())
 	{
 		// For Hot Seat, all the AIs will get a chance to do diplomacy with the active human player
@@ -8740,6 +8764,9 @@ void CvGame::updateTimers()
 				CvDiplomacyRequests::DoAIDiplomacy(eActivePlayer);
 		}
 	}
+#if defined(MOD_AI_MP_DIPLOMACY)
+	}
+#endif
 }
 
 //	-----------------------------------------------------------------------------------------------
@@ -9338,7 +9365,14 @@ CvRandom& CvGame::getMapRand()
 //	--------------------------------------------------------------------------------
 int CvGame::getMapRandNum(int iNum, const char* pszLog)
 {
+#if defined(MOD_BUGFIX_RANDOM)
+	if (iNum > 0)
+		return m_mapRand.get(iNum, pszLog);
+
+	return -(int)m_mapRand.get(-iNum, pszLog);
+#else
 	return m_mapRand.get(iNum, pszLog);
+#endif
 }
 
 
@@ -9354,7 +9388,14 @@ CvRandom& CvGame::getJonRand()
 /// Allows for logging.
 int CvGame::getJonRandNum(int iNum, const char* pszLog)
 {
+#if defined(MOD_BUGFIX_RANDOM)
+	if (iNum > 0)
+		return m_jonRand.get(iNum, pszLog);
+
+	return -(int)m_jonRand.get(-iNum, pszLog);
+#else
 	return m_jonRand.get(iNum, pszLog);
+#endif
 }
 
 //	--------------------------------------------------------------------------------
@@ -9374,10 +9415,18 @@ int CvGame::getJonRandNumVA(int iNum, const char* pszLog, ...)
 		vsprintf_s(szOutput, uiOutputSize, pszLog, vl);
 		va_end(vl);
 
+#if defined(MOD_BUGFIX_RANDOM)
+		return getJonRandNum(iNum, szOutput);
+#else
 		return m_jonRand.get(iNum, szOutput);
+#endif
 	}
 	else
+#if defined(MOD_BUGFIX_RANDOM)
+		return getJonRandNum(iNum, NULL);
+#else
 		return m_jonRand.get(iNum);
+#endif
 }
 
 //	--------------------------------------------------------------------------------
@@ -9385,7 +9434,14 @@ int CvGame::getJonRandNumVA(int iNum, const char* pszLog, ...)
 /// This should only be called by operations that will not effect gameplay!
 int CvGame::getAsyncRandNum(int iNum, const char* pszLog)
 {
+#if defined(MOD_BUGFIX_RANDOM)
+	if (iNum > 0)
+		return GC.getASyncRand().get(iNum, pszLog);
+
+	return -(int)GC.getASyncRand().get(-iNum, pszLog);
+#else
 	return GC.getASyncRand().get(iNum, pszLog);
+#endif
 }
 
 //	--------------------------------------------------------------------------------
@@ -10428,6 +10484,24 @@ CvTacticalAnalysisMap* CvGame::GetTacticalAnalysisMap()
 {
 	return m_pTacticalMap;
 }
+
+#if defined(MOD_API_LUA_EXTENSIONS)
+//	--------------------------------------------------------------------------------
+CvString CvGame::getDllGuid() const
+{
+	CvString szDllGuid = "";
+	
+	GUID guid = CvDllGameContext::GetSingleton()->GetDLLGUID();
+	unsigned long d1 = guid.Data1;
+	unsigned short d2 = guid.Data2;
+	unsigned short d3 = guid.Data3;
+	unsigned char* d4 = guid.Data4;
+
+	CvString::format(szDllGuid, "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X", d1, d2, d3, d4[0], d4[1], d4[2], d4[3], d4[4], d4[5], d4[6], d4[7]);
+
+	return szDllGuid;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 CvAdvisorCounsel* CvGame::GetAdvisorCounsel()

@@ -13,6 +13,9 @@
 #include "ICvDLLUserInterface.h"
 #include "CvEnumSerialization.h"
 #include "CvDllPlot.h"
+#if defined(MOD_AI_MP_DIPLOMACY)
+#include "CvDiplomacyRequests.h"
+#endif
 
 // Include this after all other headers.
 #include "LintFree.h"
@@ -528,7 +531,16 @@ void CvNotifications::Dismiss(int iLookupIndex, bool bUserInvoked)
 				{
 					GC.GetEngineUserInterface()->SetPolicyNotificationSeen(true);
 				}
+#if defined(MOD_BUGFIX_MINOR)
+				break;
+#endif
 			}
+#if defined(MOD_AI_MP_DIPLOMACY)
+			case NOTIFICATION_PLAYER_DEAL_RECEIVED:
+			{
+				break;
+			}
+#endif
 			default:
 				break;
 			}
@@ -1002,7 +1014,28 @@ void CvNotifications::Activate(Notification& notification)
 	break;
 	case NOTIFICATION_PLAYER_DEAL_RECEIVED:
 	{
+#if defined(MOD_AI_MP_DIPLOMACY)
+		if (MOD_AI_MP_DIPLOMACY) {
+			PlayerTypes eFrom = static_cast<PlayerTypes>(notification.m_iX);
+			CvPlayer& kFrom = GET_PLAYER(eFrom);
+			if (kFrom.isHuman() && notification.m_iY != -2 /* request hack */)
+			{
+				// Keep old PvP notification behaviour
+				GC.GetEngineUserInterface()->OpenPlayerDealScreen(eFrom);
+			}
+			else
+			{
+				// This request was sent by an AI.
+				PlayerTypes eTo = notification.m_ePlayerID;
+				CvPlayer& kTo = GET_PLAYER(eTo);
+				kTo.GetDiplomacyRequests()->ActivateAllFrom(eFrom);
+			}
+		} else {
+#endif
 		GC.GetEngineUserInterface()->OpenPlayerDealScreen((PlayerTypes) notification.m_iX);
+#if defined(MOD_AI_MP_DIPLOMACY)
+		}
+#endif
 	}
 	break;
 	case NOTIFICATION_FREE_GREAT_PERSON:
@@ -1768,7 +1801,14 @@ bool CvNotifications::IsNotificationExpired(int iIndex)
 		CvGame& game = GC.getGame();
 		CvGameDeals* pDeals = game.GetGameDeals();
 
+#if defined(MOD_AI_MP_DIPLOMACY)
+		bool bCond = (MOD_AI_MP_DIPLOMACY) ?
+			(pDeals->GetProposedDeal(m_ePlayer, (PlayerTypes)(m_aNotifications[iIndex].m_iX), true) == NULL) :
+			(!pDeals->ProposedDealExists(m_ePlayer, (PlayerTypes)(m_aNotifications[iIndex].m_iX)));
+		if(bCond)
+#else
 		if(!pDeals->ProposedDealExists(m_ePlayer, (PlayerTypes)(m_aNotifications[iIndex].m_iX)))
+#endif
 		{
 			return true;
 		}
@@ -1779,10 +1819,27 @@ bool CvNotifications::IsNotificationExpired(int iIndex)
 		CvGame& game = GC.getGame();
 		CvGameDeals* pDeals = game.GetGameDeals();
 
+#if defined(MOD_AI_MP_DIPLOMACY)
+		if (MOD_AI_MP_DIPLOMACY) {
+			PlayerTypes eFrom = static_cast<PlayerTypes>(m_aNotifications[iIndex].m_iX);
+			if (m_aNotifications[iIndex].m_iY != -1 /* no deal request */)
+			{
+				// TODO: check why AI to human deal notifications don't expire here
+				return false;
+			}
+			else if (game.GetGameDeals()->GetProposedDeal(eFrom, m_ePlayer, true) == NULL)
+			{
+				return true;
+			}
+		} else {
+#endif
 		if(!pDeals->ProposedDealExists((PlayerTypes)(m_aNotifications[iIndex].m_iX),  m_ePlayer))
 		{
 			return true;
 		}
+#if defined(MOD_AI_MP_DIPLOMACY)
+		}
+#endif
 	}
 	break;
 	case NOTIFICATION_DEMAND_RESOURCE:

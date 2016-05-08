@@ -1497,7 +1497,11 @@ int CvPlot::seeThroughLevel(bool bIncludeShubbery) const
 
 
 //	--------------------------------------------------------------------------------
+#if defined(MOD_API_EXTENSIONS)
+void CvPlot::changeSeeFromSight(TeamTypes eTeam, DirectionTypes eDirection, int iFromLevel, bool bIncrement, InvisibleTypes eSeeInvisible, CvUnit* pUnit)
+#else
 void CvPlot::changeSeeFromSight(TeamTypes eTeam, DirectionTypes eDirection, int iFromLevel, bool bIncrement, InvisibleTypes eSeeInvisible)
+#endif
 {
 	CvPlot* pPlot;
 	int iThroughLevel;
@@ -1512,7 +1516,11 @@ void CvPlot::changeSeeFromSight(TeamTypes eTeam, DirectionTypes eDirection, int 
 		{
 			if((iFromLevel > iThroughLevel) || (pPlot->seeFromLevel(eTeam) > iFromLevel))
 			{
+#if defined(MOD_API_EXTENSIONS)
+				pPlot->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, false, pUnit);
+#else
 				pPlot->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, false);
+#endif
 			}
 		}
 	}
@@ -1520,8 +1528,15 @@ void CvPlot::changeSeeFromSight(TeamTypes eTeam, DirectionTypes eDirection, int 
 
 //	--------------------------------------------------------------------------------
 // while this looks more complex than the previous version, it should run much faster
+#if defined(MOD_API_EXTENSIONS)
+void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, InvisibleTypes eSeeInvisible, DirectionTypes eFacingDirection, CvUnit* pUnit)
+#else
 void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, InvisibleTypes eSeeInvisible, DirectionTypes eFacingDirection, bool bBasedOnUnit)
+#endif
 {
+#if defined(MOD_API_EXTENSIONS)
+	bool bBasedOnUnit = (pUnit != NULL);
+#endif
 	//check one extra outer ring
 	int iRangeWithOneExtraRing = iRange + 1;
 
@@ -1544,8 +1559,13 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, I
 			{
 				if(eFacingDirection != NO_DIRECTION)
 				{
+#if defined(MOD_API_EXTENSIONS)
+					pPlotToCheck->changeVisibilityCount(eTeam, 1, eSeeInvisible, false /*bInformExplorationTracking*/, false, pUnit);
+					pPlotToCheck->changeVisibilityCount(eTeam, -1, eSeeInvisible, false /*bInformExplorationTracking*/, false, pUnit);
+#else
 					pPlotToCheck->changeVisibilityCount(eTeam, 1, eSeeInvisible, false /*bInformExplorationTracking*/, false);
 					pPlotToCheck->changeVisibilityCount(eTeam, -1, eSeeInvisible, false /*bInformExplorationTracking*/, false);
+#endif
 				}
 			}
 
@@ -1665,7 +1685,11 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, I
 							pPlotToCheck->setScratchPad(iHighestLevel);
 							if(iSecondInwardLevel < iThisPlotLevel || ((iCenterLevel >= iSecondInwardLevel) && (thisRing < iRangeWithOneExtraRing)))
 							{								
+#if defined(MOD_API_EXTENSIONS)
+								pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2) ? true : false, pUnit);
+#else
 								pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2)?true:false);
+#endif
 							}
 						}
 						else if(fSecondDist - fFirstDist > 0.05)   // we are closer to the first point
@@ -1674,7 +1698,11 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, I
 							pPlotToCheck->setScratchPad(iHighestLevel);
 							if(iFirstInwardLevel < iThisPlotLevel || ((iCenterLevel >= iFirstInwardLevel) && (thisRing < iRangeWithOneExtraRing)))
 							{								
+#if defined(MOD_API_EXTENSIONS)
+								pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2) ? true : false, pUnit);
+#else
 								pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2)?true:false);
+#endif
 							}
 						}
 						else
@@ -1693,7 +1721,11 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, I
 							}
 							if(iLowestInwardLevel < iThisPlotLevel || ((iCenterLevel >= iLowestInwardLevel) && (thisRing < iRangeWithOneExtraRing)))
 							{								
+#if defined(MOD_API_EXTENSIONS)
+								pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2) ? true : false, pUnit);
+#else
 								pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2)?true:false);
+#endif
 							}
 						}
 					}
@@ -1703,7 +1735,11 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, I
 						pPlotToCheck->setScratchPad(iHighestLevel);
 						if(iFirstInwardLevel < iThisPlotLevel || ((iCenterLevel >= iFirstInwardLevel) && (thisRing < iRangeWithOneExtraRing)))
 						{							
+#if defined(MOD_API_EXTENSIONS)
+							pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2) ? true : false, pUnit);
+#else
 							pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2)?true:false);
+#endif
 						}
 					}
 					else if(iSecondInwardLevel != INVALID_RING && !bSecondHalfBlocked)
@@ -1712,7 +1748,11 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, I
 						pPlotToCheck->setScratchPad(iHighestLevel);
 						if(iSecondInwardLevel < iThisPlotLevel || ((iCenterLevel >= iSecondInwardLevel) && (thisRing < iRangeWithOneExtraRing)))
 						{							
+#if defined(MOD_API_EXTENSIONS)
+							pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2) ? true : false, pUnit);
+#else
 							pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2)?true:false);
+#endif
 						}
 					}
 					else if(iFirstInwardLevel != INVALID_RING)
@@ -1721,7 +1761,11 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, I
 						pPlotToCheck->setScratchPad(iHighestLevel);
 						if(iFirstInwardLevel < iThisPlotLevel || ((iCenterLevel >= iFirstInwardLevel) && (thisRing < iRangeWithOneExtraRing)))
 						{
+#if defined(MOD_API_EXTENSIONS)
+							pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2) ? true : false, pUnit);
+#else
 							pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2)?true:false);
+#endif
 						}
 					}
 					else if(iSecondInwardLevel != INVALID_RING)
@@ -1730,7 +1774,11 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, I
 						pPlotToCheck->setScratchPad(iHighestLevel);
 						if(iSecondInwardLevel < iThisPlotLevel || ((iCenterLevel >= iSecondInwardLevel) && (thisRing < iRangeWithOneExtraRing)))
 						{							
+#if defined(MOD_API_EXTENSIONS)
+							pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2) ? true : false, pUnit);
+#else
 							pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2)?true:false);
+#endif
 						}
 					}
 					else // I have no idea how this can happen, but...
@@ -1741,7 +1789,11 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, I
 				}
 				else // this is the center point
 				{					
+#if defined(MOD_API_EXTENSIONS)
+					pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2) ? true : false, pUnit);
+#else
 					pPlotToCheck->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), eSeeInvisible, true, (bBasedOnUnit && thisRing < 2)?true:false);
+#endif
 					pPlotToCheck->setScratchPad(0);
 				}
 			}
@@ -1892,7 +1944,11 @@ void CvPlot::updateSight(bool bIncrement)
 	// Owned
 	if(isOwned())
 	{
+#if defined(MOD_API_EXTENSIONS)
+		changeAdjacentSight(getTeam(), GC.getPLOT_VISIBILITY_RANGE(), bIncrement, NO_INVISIBLE, NO_DIRECTION);
+#else
 		changeAdjacentSight(getTeam(), GC.getPLOT_VISIBILITY_RANGE(), bIncrement, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 
 		// if this tile is owned by a minor share the visibility with my ally
 		if(pCity)
@@ -1902,7 +1958,11 @@ void CvPlot::updateSight(bool bIncrement)
 				PlayerTypes ePlayer = (PlayerTypes)ui;
 				if(GET_PLAYER(ePlayer).GetEspionage()->HasEstablishedSurveillanceInCity(pCity))
 				{
+#if defined(MOD_API_EXTENSIONS)
+					changeAdjacentSight(GET_PLAYER(ePlayer).getTeam(), GC.getESPIONAGE_SURVEILLANCE_SIGHT_RANGE(), bIncrement, NO_INVISIBLE, NO_DIRECTION);
+#else
 					changeAdjacentSight(GET_PLAYER(ePlayer).getTeam(), GC.getESPIONAGE_SURVEILLANCE_SIGHT_RANGE(), bIncrement, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 				}
 			}
 		}
@@ -1914,7 +1974,11 @@ void CvPlot::updateSight(bool bIncrement)
 			CvMinorCivAI* pMinorCivAI = thisPlayer.GetMinorCivAI();
 			if(pMinorCivAI && pMinorCivAI->GetAlly() != NO_PLAYER)
 			{
+#if defined(MOD_API_EXTENSIONS)
+				changeAdjacentSight(GET_PLAYER(pMinorCivAI->GetAlly()).getTeam(), GC.getPLOT_VISIBILITY_RANGE(), bIncrement, NO_INVISIBLE, NO_DIRECTION);
+#else
 				changeAdjacentSight(GET_PLAYER(pMinorCivAI->GetAlly()).getTeam(), GC.getPLOT_VISIBILITY_RANGE(), bIncrement, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 			}
 		}
 	}
@@ -1930,7 +1994,11 @@ void CvPlot::updateSight(bool bIncrement)
 		if(pLoopUnit)
 		{
 			if (pLoopUnit->canChangeVisibility())
+#if defined(MOD_API_EXTENSIONS)
+				changeAdjacentSight(pLoopUnit->getTeam(), pLoopUnit->visibilityRange(), bIncrement, pLoopUnit->getSeeInvisibleType(), pLoopUnit->getFacingDirection(true), pLoopUnit);
+#else
 				changeAdjacentSight(pLoopUnit->getTeam(), pLoopUnit->visibilityRange(), bIncrement, pLoopUnit->getSeeInvisibleType(), pLoopUnit->getFacingDirection(true));
+#endif
 		}
 	}
 
@@ -1946,9 +2014,17 @@ void CvPlot::updateSight(bool bIncrement)
 				if(pLoopUnit->getReconPlot() == this && pLoopUnit->canChangeVisibility())
 				{
 #if defined(MOD_PROMOTIONS_VARIABLE_RECON)
+#if defined(MOD_API_EXTENSIONS)
+					changeAdjacentSight(pLoopUnit->getTeam(), pLoopUnit->reconRange(), bIncrement, pLoopUnit->getSeeInvisibleType(), pLoopUnit->getFacingDirection(true), pLoopUnit);
+#else
 					changeAdjacentSight(pLoopUnit->getTeam(), pLoopUnit->reconRange(), bIncrement, pLoopUnit->getSeeInvisibleType(), pLoopUnit->getFacingDirection(true));
+#endif
+#else
+#if defined(MOD_API_EXTENSIONS)
+					changeAdjacentSight(pLoopUnit->getTeam(), iRange, bIncrement, pLoopUnit->getSeeInvisibleType(), pLoopUnit->getFacingDirection(true), pLoopUnit);
 #else
 					changeAdjacentSight(pLoopUnit->getTeam(), iRange, bIncrement, pLoopUnit->getSeeInvisibleType(), pLoopUnit->getFacingDirection(true));
+#endif
 #endif
 				}
 			}
@@ -5299,7 +5375,11 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 			// Plot was owned by someone else
 			if(isOwned())
 			{
+#if defined(MOD_API_EXTENSIONS)
+				changeAdjacentSight(getTeam(), GC.getPLOT_VISIBILITY_RANGE(), false, NO_INVISIBLE, NO_DIRECTION);
+#else
 				changeAdjacentSight(getTeam(), GC.getPLOT_VISIBILITY_RANGE(), false, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 
 				// if this tile is owned by a minor share the visibility with my ally
 				if(pOldCity)
@@ -5309,7 +5389,11 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 						PlayerTypes ePlayer = (PlayerTypes)ui;
 						if(GET_PLAYER(ePlayer).GetEspionage()->HasEstablishedSurveillanceInCity(pOldCity))
 						{
+#if defined(MOD_API_EXTENSIONS)
+							changeAdjacentSight(GET_PLAYER(ePlayer).getTeam(), GC.getESPIONAGE_SURVEILLANCE_SIGHT_RANGE(), false, NO_INVISIBLE, NO_DIRECTION);
+#else
 							changeAdjacentSight(GET_PLAYER(ePlayer).getTeam(), GC.getESPIONAGE_SURVEILLANCE_SIGHT_RANGE(), false, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 						}
 					}
 				}
@@ -5320,7 +5404,11 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 					CvMinorCivAI* pMinorCivAI = thisPlayer.GetMinorCivAI();
 					if(pMinorCivAI && pMinorCivAI->GetAlly() != NO_PLAYER)
 					{
+#if defined(MOD_API_EXTENSIONS)
+						changeAdjacentSight(GET_PLAYER(pMinorCivAI->GetAlly()).getTeam(), GC.getPLOT_VISIBILITY_RANGE(), false, NO_INVISIBLE, NO_DIRECTION);
+#else
 						changeAdjacentSight(GET_PLAYER(pMinorCivAI->GetAlly()).getTeam(), GC.getPLOT_VISIBILITY_RANGE(), false, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 					}
 				}
 
@@ -5476,7 +5564,11 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 					m_purchaseCity.iID = -1;
 				}
 
+#if defined(MOD_API_EXTENSIONS)
+				changeAdjacentSight(getTeam(), GC.getPLOT_VISIBILITY_RANGE(), true, NO_INVISIBLE, NO_DIRECTION);
+#else
 				changeAdjacentSight(getTeam(), GC.getPLOT_VISIBILITY_RANGE(), true, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 
 				// if this tile is owned by a minor share the visibility with my ally
 				if(pOldCity)
@@ -5486,7 +5578,11 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 						PlayerTypes ePlayer = (PlayerTypes)ui;
 						if(GET_PLAYER(ePlayer).GetEspionage()->HasEstablishedSurveillanceInCity(pOldCity))
 						{
+#if defined(MOD_API_EXTENSIONS)
+							changeAdjacentSight(GET_PLAYER(ePlayer).getTeam(), GC.getESPIONAGE_SURVEILLANCE_SIGHT_RANGE(), true, NO_INVISIBLE, NO_DIRECTION);
+#else
 							changeAdjacentSight(GET_PLAYER(ePlayer).getTeam(), GC.getESPIONAGE_SURVEILLANCE_SIGHT_RANGE(), true, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 						}
 					}
 				}
@@ -5497,7 +5593,11 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 					CvMinorCivAI* pMinorCivAI = thisPlayer.GetMinorCivAI();
 					if(pMinorCivAI && pMinorCivAI->GetAlly() != NO_PLAYER)
 					{
+#if defined(MOD_API_EXTENSIONS)
+						changeAdjacentSight(GET_PLAYER(pMinorCivAI->GetAlly()).getTeam(), GC.getPLOT_VISIBILITY_RANGE(), true, NO_INVISIBLE, NO_DIRECTION);
+#else
 						changeAdjacentSight(GET_PLAYER(pMinorCivAI->GetAlly()).getTeam(), GC.getPLOT_VISIBILITY_RANGE(), true, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 					}
 				}
 
@@ -8690,7 +8790,11 @@ void CvPlot::changePlayerCityRadiusCount(PlayerTypes eIndex, int iChange)
 }
 
 //	--------------------------------------------------------------------------------
+#if defined(MOD_API_EXTENSIONS)
+PlotVisibilityChangeResult CvPlot::changeVisibilityCount(TeamTypes eTeam, int iChange, InvisibleTypes eSeeInvisible, bool bInformExplorationTracking, bool bAlwaysSeeInvisible, CvUnit* pUnit)
+#else
 PlotVisibilityChangeResult CvPlot::changeVisibilityCount(TeamTypes eTeam, int iChange, InvisibleTypes eSeeInvisible, bool bInformExplorationTracking, bool bAlwaysSeeInvisible)
+#endif
 {
 	CvCity* pCity;
 	CvPlot* pAdjacentPlot;
@@ -8729,7 +8833,11 @@ PlotVisibilityChangeResult CvPlot::changeVisibilityCount(TeamTypes eTeam, int iC
 			{
 				eResult = VISIBILITY_CHANGE_TO_VISIBLE;
 				bool bOldRevealed = isRevealed(eTeam);
+#if defined(MOD_API_EXTENSIONS)
+				if (!setRevealed(eTeam, true, pUnit))	// Change to revealed, returns true if the visibility was changed
+#else
 				if (!setRevealed(eTeam, true))	// Change to revealed, returns true if the visibility was changed
+#endif
 				{
 					// The visibility was not changed because it was already revealed, but we are changing to a visible state as well, so we must update.
 					// Just trying to avoid redundant messages.
@@ -9078,7 +9186,11 @@ void CvPlot::SetNoSettling(PlayerTypes eMajor, bool bValue)
 }
 
 //	--------------------------------------------------------------------------------
+#if defined(MOD_API_EXTENSIONS)
+bool CvPlot::setRevealed(TeamTypes eTeam, bool bNewValue, CvUnit* pUnit, bool bTerrainOnly, TeamTypes eFromTeam)
+#else
 bool CvPlot::setRevealed(TeamTypes eTeam, bool bNewValue, bool bTerrainOnly, TeamTypes eFromTeam)
+#endif
 {
 	int iI;
 	
@@ -9122,7 +9234,7 @@ bool CvPlot::setRevealed(TeamTypes eTeam, bool bNewValue, bool bTerrainOnly, Tea
 
 #if defined(MOD_EVENTS_NW_DISCOVERY)
 					if (MOD_EVENTS_NW_DISCOVERY) {
-						GAMEEVENTINVOKE_HOOK(GAMEEVENT_NaturalWonderDiscovered, eTeam, getFeatureType(), getX(), getY(), (getNumMajorCivsRevealed() == 0));
+						GAMEEVENTINVOKE_HOOK(GAMEEVENT_NaturalWonderDiscovered, eTeam, getFeatureType(), getX(), getY(), (getNumMajorCivsRevealed() == 0), (pUnit?pUnit->getOwner():NO_PLAYER), (pUnit?pUnit->GetID():-1));
 					} else {
 #endif
 					ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
@@ -9487,7 +9599,7 @@ bool CvPlot::setRevealed(TeamTypes eTeam, bool bNewValue, bool bTerrainOnly, Tea
 	CvTeam& kTeam = GET_TEAM(eTeam);
 	
 	if (MOD_EVENTS_TILE_REVEALED && bNewValue) {
-		GAMEEVENTINVOKE_HOOK(GAMEEVENT_TileRevealed, getX(), getY(), eTeam, eFromTeam, (kTeam.isMajorCiv() && iRevealedMajors == 0));
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_TileRevealed, getX(), getY(), eTeam, eFromTeam, (kTeam.isMajorCiv() && iRevealedMajors == 0), (pUnit ? pUnit->getOwner() : NO_PLAYER), (pUnit ? pUnit->GetID() : -1));
 	}
 
 	// This is badly named, as it's actually an on/off "revealed to any major" flag, not a counter

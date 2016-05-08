@@ -21,9 +21,19 @@
  *****                                                                  *****
  ****************************************************************************
  ****************************************************************************/
+
+/****************************************************************************
+ ****************************************************************************
+ *****                                                                  *****
+ *****   FOR THE LOVE OF GOD - GET YOUR OWN INTERNAL GUID FOR THE DLL   *****
+ *****                                                                  *****
+ *****                   AND STOP USING MINE!!!!!                       *****
+ *****                                                                  *****
+ ****************************************************************************
+ ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 82)
+#define MOD_DLL_VERSION_NUMBER ((uint) 83)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -42,11 +52,13 @@
 
 // Comment out this line to switch off all custom mod logging
 #define CUSTOMLOGDEBUG "CustomMods.log"
-// true/false to include/exclude file name and line number in the log
-#define CUSTOMLOGFILEINFO true
+// Define to include the file name and line number in the log
+#define CUSTOMLOGFILEINFO
+// Define to include the function name in the log
+#define CUSTOMLOGFUNCINFO
 
 // Comment out this line to switch off all unified yield logging
-#define UNIFIEDLOGDEBUG "UnifiedYields.log"
+// #define UNIFIEDLOGDEBUG "UnifiedYields.log"
 
 // Comment out this line to remove minidumps - see http://forums.civfanatics.com/showthread.php?t=498919
 // If minidumps are enabled, do NOT set GenerateDebugInfo=No (Props -> Config Props -> Linker -> Debugging)
@@ -197,6 +209,8 @@
 // Changes for the CivIV Diplomacy Features mod (v11.04) by Putmalk - AFFECTS SAVE GAME DATA FORMAT (v76)
 #define MOD_DIPLOMACY_CIV4_FEATURES                 gCustomMods.isDIPLOMACY_CIV4_FEATURES()
 
+// Permits units to earn GG/GA points from killing barbarians (v83)
+#define MOD_TRAITS_GG_FROM_BARBARIANS               gCustomMods.isTRAITS_GG_FROM_BARBARIANS()
 // Permits land units to cross ice - AFFECTS SAVE GAME DATA FORMAT
 #define MOD_TRAITS_CROSSES_ICE                      gCustomMods.isTRAITS_CROSSES_ICE()
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
@@ -216,6 +230,10 @@
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
 #define MOD_TECHS_CITY_WORKING                      gCustomMods.isTECHS_CITY_WORKING()
 
+// Permits variable great general and admiral aura ranges (v83)
+#define MOD_PROMOTIONS_AURA_CHANGE                  gCustomMods.isPROMOTIONS_AURA_CHANGE()
+// Permits units to earn GG/GA points from killing barbarians (v83)
+#define MOD_PROMOTIONS_GG_FROM_BARBARIANS           gCustomMods.isPROMOTIONS_GG_FROM_BARBARIANS()
 // Permits variable recon ranges by creating extra recon range promotions (like extra sight range)
 #define MOD_PROMOTIONS_VARIABLE_RECON               gCustomMods.isPROMOTIONS_VARIABLE_RECON()
 // Permits land units to cross mountains (like the Carthage trait)
@@ -640,6 +658,8 @@
 
 // Minor bug fixes (missing catch-all else clauses, etc) (v30 onwards)
 #define MOD_BUGFIX_MINOR 							(true)
+// Fixes some minor issues with the random number generator (v83)
+#define MOD_BUGFIX_RANDOM							(true)
 // Recodes direct access to (certain) member variables to use the associated getter/setter methods (v72 onwards)
 #define MOD_BUGFIX_USE_GETTERS                      (true)
 // Fixes the spy name crash (v53)
@@ -802,15 +822,33 @@ enum BattleTypeTypes
 
 // Custom mod logger
 #if defined(CUSTOMLOGDEBUG)
-#define CUSTOMLOG(sFmt, ...) {																		\
-	CvString sMsg; CvString::format(sMsg, sFmt, __VA_ARGS__);										\
-	if (CUSTOMLOGFILEINFO) {																		\
-		CvString sLine; CvString::format(sLine, "%s[%i] - %s", __FILE__, __LINE__, sMsg.c_str());	\
-		LOGFILEMGR.GetLog(CUSTOMLOGDEBUG, FILogFile::kDontTimeStamp)->Msg(sLine.c_str());			\
-	} else {																						\
-		LOGFILEMGR.GetLog(CUSTOMLOGDEBUG, FILogFile::kDontTimeStamp)->Msg(sMsg.c_str());			\
-	}																								\
+#if defined(CUSTOMLOGFILEINFO) && defined(CUSTOMLOGFUNCINFO)
+#define CUSTOMLOG(sFmt, ...) {																					\
+	CvString sMsg; CvString::format(sMsg, sFmt, __VA_ARGS__);													\
+	CvString sLine; CvString::format(sLine, "%s[%i]: %s - %s", __FILE__, __LINE__, __FUNCTION__, sMsg.c_str());	\
+	LOGFILEMGR.GetLog(CUSTOMLOGDEBUG, FILogFile::kDontTimeStamp)->Msg(sLine.c_str());							\
 }
+#endif
+#if defined(CUSTOMLOGFILEINFO) && !defined(CUSTOMLOGFUNCINFO)
+#define CUSTOMLOG(sFmt, ...) {																					\
+	CvString sMsg; CvString::format(sMsg, sFmt, __VA_ARGS__);													\
+	CvString sLine; CvString::format(sLine, "%s[%i] - %s", __FILE__, __LINE__, sMsg.c_str());					\
+	LOGFILEMGR.GetLog(CUSTOMLOGDEBUG, FILogFile::kDontTimeStamp)->Msg(sLine.c_str());							\
+}
+#endif
+#if !defined(CUSTOMLOGFILEINFO) && defined(CUSTOMLOGFUNCINFO)
+#define CUSTOMLOG(sFmt, ...) {																					\
+	CvString sMsg; CvString::format(sMsg, sFmt, __VA_ARGS__);													\
+	CvString sLine; CvString::format(sLine, "%s - %s", __FUNCTION__, sMsg.c_str());								\
+	LOGFILEMGR.GetLog(CUSTOMLOGDEBUG, FILogFile::kDontTimeStamp)->Msg(sLine.c_str());							\
+}
+#endif
+#if !defined(CUSTOMLOGFILEINFO) && !defined(CUSTOMLOGFUNCINFO)
+#define CUSTOMLOG(sFmt, ...) {																					\
+	CvString sMsg; CvString::format(sMsg, sFmt, __VA_ARGS__);													\
+	LOGFILEMGR.GetLog(CUSTOMLOGDEBUG, FILogFile::kDontTimeStamp)->Msg(sMsg.c_str());							\
+}
+#endif
 #else
 #define CUSTOMLOG(sFmt, ...) __noop
 #endif
@@ -930,7 +968,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_MinorAlliesChanged			"MinorAlliesChanged",			"iibii"
 #define GAMEEVENT_MinorFriendsChanged			"MinorFriendsChanged",			"iibii"
 #define GAMEEVENT_MinorGift						"MinorGift",					"iiiiibbs"
-#define GAMEEVENT_NaturalWonderDiscovered		"NaturalWonderDiscovered",		"iiiib"
+#define GAMEEVENT_NaturalWonderDiscovered		"NaturalWonderDiscovered",		"iiiibii"
 #define GAMEEVENT_NuclearDetonation				"NuclearDetonation",			"iiibb"
 #define GAMEEVENT_PantheonFounded				"PantheonFounded",				"iiii"
 #define GAMEEVENT_ParadropAt					"ParadropAt",					"iiiiii"
@@ -991,7 +1029,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_TileFeatureChanged			"TileFeatureChanged",			"iiiii"
 #define GAMEEVENT_TileImprovementChanged		"TileImprovementChanged",		"iiiiib"
 #define GAMEEVENT_TileOwnershipChanged			"TileOwnershipChanged",			"iiii"
-#define GAMEEVENT_TileRevealed					"TileRevealed",					"iiiib"
+#define GAMEEVENT_TileRevealed					"TileRevealed",					"iiiibii"
 #define GAMEEVENT_TileRouteChanged				"TileRouteChanged",				"iiiiib"
 #define GAMEEVENT_UiDiploEvent					"UiDiploEvent",					"iiii"
 #define GAMEEVENT_UnitCanHaveAnyUpgrade			"UnitCanHaveAnyUpgrade",		"ii"
@@ -1143,6 +1181,7 @@ public:
 	MOD_OPT_DECL(DIPLOMACY_CITYSTATES); 
 	MOD_OPT_DECL(DIPLOMACY_CIV4_FEATURES); 
 
+	MOD_OPT_DECL(TRAITS_GG_FROM_BARBARIANS);
 	MOD_OPT_DECL(TRAITS_CROSSES_ICE);
 	MOD_OPT_DECL(TRAITS_CITY_WORKING);
 	MOD_OPT_DECL(TRAITS_OTHER_PREREQS);
@@ -1154,6 +1193,8 @@ public:
 
 	MOD_OPT_DECL(TECHS_CITY_WORKING);
 
+	MOD_OPT_DECL(PROMOTIONS_AURA_CHANGE);
+	MOD_OPT_DECL(PROMOTIONS_GG_FROM_BARBARIANS);
 	MOD_OPT_DECL(PROMOTIONS_VARIABLE_RECON);
 	MOD_OPT_DECL(PROMOTIONS_CROSS_MOUNTAINS);
 	MOD_OPT_DECL(PROMOTIONS_CROSS_OCEANS);

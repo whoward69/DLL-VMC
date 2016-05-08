@@ -257,6 +257,10 @@ protected:
 	static int lGetPublicOpinionTooltip(lua_State* L);
 	static int lGetPublicOpinionUnhappiness(lua_State* L);
 	static int lGetPublicOpinionUnhappinessTooltip(lua_State* L);
+#if defined(MOD_API_LUA_EXTENSIONS)
+	LUAAPIEXTN(ChangeInfluenceOnAllPlayers, void, iBaseInfluence, bApplyModifiers, bModifyForGameSpeed);
+	LUAAPIEXTN(ChangeInfluenceOnPlayer, void, iPlayer, iBaseInfluence, bApplyModifiers, bModifyForGameSpeed);
+#endif
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(DoSwapGreatWorks, void, iFocusYield);
@@ -520,6 +524,10 @@ protected:
 
 	static int lGetMaxConscript(lua_State* L);
 	static int lGetOverflowResearch(lua_State* L);
+#if defined(MOD_API_LUA_EXTENSIONS)
+	LUAAPIEXTN(SetOverflowResearch, void, iResearch);
+	LUAAPIEXTN(ChangeOverflowResearch, void, iResearch);
+#endif
 	static int lGetExpInBorderModifier(lua_State* L);
 
 	static int lGetLevelExperienceModifier(lua_State* L);

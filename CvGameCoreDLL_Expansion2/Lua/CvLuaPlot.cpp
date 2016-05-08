@@ -1713,7 +1713,15 @@ int CvLuaPlot::lChangeVisibilityCount(lua_State* L)
 	const bool bInformExplorationTracking = lua_toboolean(L, 5);
 	const bool bAlwaysSeeInvisible = lua_toboolean(L, 6);
 
-	pkPlot->changeVisibilityCount(eTeam, iChange, static_cast<InvisibleTypes>(eSeeInvisible), bInformExplorationTracking, bAlwaysSeeInvisible);
+	if(lua_gettop(L) >= 7)
+	{
+		CvUnit* pkUnit = CvLuaUnit::GetInstance(L, 7);
+		pkPlot->changeVisibilityCount(eTeam, iChange, static_cast<InvisibleTypes>(eSeeInvisible), bInformExplorationTracking, bAlwaysSeeInvisible, pkUnit);
+	}
+	else
+	{
+		pkPlot->changeVisibilityCount(eTeam, iChange, static_cast<InvisibleTypes>(eSeeInvisible), bInformExplorationTracking, bAlwaysSeeInvisible);
+	}
 
 	return 0;
 }
@@ -1793,7 +1801,19 @@ int CvLuaPlot::lSetRevealed(lua_State* L)
 	const bool bNewValue = lua_toboolean(L, 3);
 	const bool bTerrainOnly = luaL_optint(L, 4, 0);
 	const TeamTypes eFromTeam = (TeamTypes)luaL_optint(L, 5, NO_TEAM);
+#if defined(MOD_API_EXTENSIONS)
+	if(lua_gettop(L) >= 6)
+	{
+		CvUnit* pkUnit = CvLuaUnit::GetInstance(L, 6);
+		pkPlot->setRevealed(eTeam, bNewValue, pkUnit, bTerrainOnly, eFromTeam);
+	}
+	else
+	{
+		pkPlot->setRevealed(eTeam, bNewValue, NULL, bTerrainOnly, eFromTeam);
+	}
+#else
 	pkPlot->setRevealed(eTeam, bNewValue, bTerrainOnly, eFromTeam);
+#endif
 
 	return 0;
 }

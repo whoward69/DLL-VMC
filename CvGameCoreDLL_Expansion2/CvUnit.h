@@ -609,6 +609,12 @@ public:
 	void changeCanCrossIceCount(int iValue);
 #endif
 
+#if defined(MOD_PROMOTIONS_GG_FROM_BARBARIANS)
+	bool isGGFromBarbarians() const;
+	int getGGFromBarbariansCount() const;
+	void changeGGFromBarbariansCount(int iValue);
+#endif
+
 	bool IsRoughTerrainEndsTurn() const;
 	int GetRoughTerrainEndsTurnCount() const;
 	void ChangeRoughTerrainEndsTurnCount(int iValue);
@@ -993,7 +999,11 @@ public:
 	bool IsNearEnemyCitadel(int& iCitadelDamage);
 
 	// Great General Stuff
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	bool IsNearGreatGeneral(int& iAuraEffectChange) const;
+#else
 	bool IsNearGreatGeneral() const;
+#endif
 	bool IsStackedGreatGeneral() const;
 	int GetGreatGeneralStackMovement() const;
 	int GetReverseGreatGeneralModifier() const;
@@ -1010,6 +1020,13 @@ public:
 	bool IsGreatAdmiral() const;
 	int GetGreatAdmiralCount() const;
 	void ChangeGreatAdmiralCount(int iChange);
+
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	int GetAuraRangeChange() const;
+	void ChangeAuraRangeChange(int iChange);
+	int GetAuraEffectChange() const;
+	void ChangeAuraEffectChange(int iChange);
+#endif
 
 	int getGreatGeneralModifier() const;
 	void changeGreatGeneralModifier(int iChange);
@@ -1610,6 +1627,9 @@ protected:
 #if defined(MOD_PROMOTIONS_CROSS_ICE)
 	FAutoVariable<int, CvUnit> m_iCanCrossIceCount;
 #endif
+#if defined(MOD_PROMOTIONS_GG_FROM_BARBARIANS)
+	FAutoVariable<int, CvUnit> m_iGGFromBarbariansCount;
+#endif
 	FAutoVariable<int, CvUnit> m_iRoughTerrainEndsTurnCount;
 	FAutoVariable<int, CvUnit> m_iEmbarkAbilityCount;
 	FAutoVariable<int, CvUnit> m_iHoveringUnitCount;
@@ -1636,6 +1656,10 @@ protected:
 	FAutoVariable<int, CvUnit> m_iAttacksMade;
 	FAutoVariable<int, CvUnit> m_iGreatGeneralCount;
 	int m_iGreatAdmiralCount;
+#if defined(MOD_PROMOTIONS_AURA_CHANGE)
+	int m_iAuraRangeChange;
+	int m_iAuraEffectChange;
+#endif
 	FAutoVariable<int, CvUnit> m_iGreatGeneralModifier;
 	int m_iGreatGeneralReceivesMovementCount;
 	int m_iGreatGeneralCombatModifier;

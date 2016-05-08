@@ -69,7 +69,11 @@ CvRandom::CvRandom(const CvRandom& source) :
 
 bool CvRandom::operator==(const CvRandom& source) const
 {
+#if defined(MOD_BUGFIX_RANDOM)
+	return(m_ulRandomSeed == source.m_ulRandomSeed && m_ulCallCount == source.m_ulCallCount);
+#else
 	return(m_ulRandomSeed == source.m_ulRandomSeed);
+#endif
 }
 
 bool CvRandom::operator!=(const CvRandom& source) const
@@ -107,9 +111,13 @@ void CvRandom::reset(unsigned long ulSeed)
 	// Uninit class
 	uninit();
 
+#if defined(MOD_BUGFIX_RANDOM)
+	reseed(ulSeed);
+#else
 	recordCallStack();
 	m_ulRandomSeed = ulSeed;
 	m_ulResetCount++;
+#endif
 }
 
 unsigned short CvRandom::get(unsigned short usNum, const char* pszLog)
@@ -186,6 +194,9 @@ void CvRandom::reseed(unsigned long ulNewValue)
 	recordCallStack();
 	m_ulResetCount++;
 	m_ulRandomSeed = ulNewValue;
+#if defined(MOD_BUGFIX_RANDOM)
+	m_ulCallCount = 0;
+#endif
 }
 
 

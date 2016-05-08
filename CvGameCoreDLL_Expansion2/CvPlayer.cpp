@@ -4801,17 +4801,35 @@ void CvPlayer::doTurn()
 				GetTrade()->DoTurn();
 				GetMilitaryAI()->ResetCounters();
 				GetGrandStrategyAI()->DoTurn();
+#if defined(MOD_AI_MP_DIPLOMACY)
+				if (MOD_AI_MP_DIPLOMACY) {
+					// We only do AI to AI diplomacy here.
+					// See CvDiplomacyRequests::DoAIDiplomacyWithHumans() for AI to human diplomacy
+					GetDiplomacyAI()->DoTurn(NO_PLAYER, DIPLO_AI_PLAYERS);
+				} else {
+#endif
 				if(GC.getGame().isHotSeat() && !isHuman())
 				{
 					// In Hotseat, AIs only do their diplomacy pass for other AIs on their turn
 					// Diplomacy toward a human is done at the beginning of the humans turn.
+#if defined(MOD_AI_MP_DIPLOMACY)
+					GetDiplomacyAI()->DoTurn(NO_PLAYER, DIPLO_AI_PLAYERS);		// Do diplomacy for toward everyone
+#else
 					GetDiplomacyAI()->DoTurn((PlayerTypes)CvDiplomacyAI::DIPLO_AI_PLAYERS);		// Do diplomacy for toward everyone
+#endif
 				}
 				else
+#if defined(MOD_AI_MP_DIPLOMACY)
+					GetDiplomacyAI()->DoTurn(NO_PLAYER, DIPLO_ALL_PLAYERS);	// Do diplomacy for toward everyone
+#else
 					GetDiplomacyAI()->DoTurn((PlayerTypes)CvDiplomacyAI::DIPLO_ALL_PLAYERS);	// Do diplomacy for toward everyone
+#endif
 
 				if (!isHuman())
 					bHasActiveDiploRequest = CvDiplomacyRequests::HasActiveDiploRequestWithHuman(GetID());
+#if defined(MOD_AI_MP_DIPLOMACY)
+				}
+#endif
 			}
 		}
 	}
@@ -18866,6 +18884,14 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 				doWarnings();
 			}
 
+#if defined(MOD_AI_MP_DIPLOMACY)
+			if (MOD_AI_MP_DIPLOMACY && isHuman())
+			{
+				// We just activated a human, later the AI players need to try to contact the player
+				CvDiplomacyRequests::s_aDiploHumans.push_back(GetID());
+			}
+#endif
+
 			if(GetID() == kGame.getActivePlayer())
 			{
 				GetUnitCycler().Rebuild();
@@ -23710,7 +23736,11 @@ void CvPlayer::doAdvancedStartAction(AdvancedStartActionTypes eAction, int iX, i
 		{
 			if(getAdvancedStartPoints() >= iCost)
 			{
+#if defined(MOD_API_EXTENSIONS)
+				pPlot->setRevealed(getTeam(), true, NULL, true);
+#else
 				pPlot->setRevealed(getTeam(), true, true);
+#endif
 				changeAdvancedStartPoints(-iCost);
 			}
 		}
@@ -23718,7 +23748,11 @@ void CvPlayer::doAdvancedStartAction(AdvancedStartActionTypes eAction, int iX, i
 		// Remove Visibility from the Plot
 		else
 		{
+#if defined(MOD_API_EXTENSIONS)
+			pPlot->setRevealed(getTeam(), false, NULL, true);
+#else
 			pPlot->setRevealed(getTeam(), false, true);
+#endif
 			changeAdvancedStartPoints(iCost);
 		}
 	}

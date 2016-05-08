@@ -59,6 +59,9 @@ FDataStream& operator>>(FDataStream&, DeclarationLogData&);
 class CvDiplomacyAI
 {
 public:
+#if defined(MOD_AI_MP_DIPLOMACY)
+	// DiplomacyPlayerType moved to CvEnums.h
+#else
 	enum DiplomacyPlayerType
 	{
 	    DIPLO_FIRST_PLAYER		=  0,
@@ -66,6 +69,7 @@ public:
 	    DIPLO_AI_PLAYERS		= -2,
 	    DIPLO_HUMAN_PLAYERS		= -3
 	};
+#endif
 
 	struct MinorGoldGiftInfo
 	{
@@ -95,7 +99,11 @@ public:
 	// Turn Stuff
 	/////////////////////////////////////////////////////////
 
+#if defined(MOD_AI_MP_DIPLOMACY)
+	void DoTurn(PlayerTypes eTargetPlayer, DiplomacyPlayerType eTargetPlayerType=DIPLO_FIRST_PLAYER);
+#else
 	void DoTurn(PlayerTypes eTargetPlayer);
+#endif
 	void DoCounters();
 
 	/////////////////////////////////////////////////////////
@@ -1212,6 +1220,9 @@ public:
 	void ChangeDiploLogStatementTurnForIndex(PlayerTypes ePlayer, int iIndex, int iChange);
 
 	int GetNumTurnsSinceStatementSent(PlayerTypes ePlayer, DiploStatementTypes eDiploLogStatement);
+#if defined(MOD_AI_MP_DIPLOMACY)
+	int GetNumTurnsSinceSomethingSent(PlayerTypes ePlayer);
+#endif
 
 	// Minor Civ Log
 	void LogMinorCivGiftGold(PlayerTypes ePlayer, int iOldFriendship, int iGold, bool bSaving, bool bWantQuickBoost, PlayerTypes ePlayerTryingToPass);
@@ -1522,6 +1533,10 @@ private:
 		char m_aacCoopWarAcceptedState[MAX_MAJOR_CIVS* MAX_MAJOR_CIVS];
 		short m_aaiCoopWarCounter[MAX_MAJOR_CIVS* MAX_MAJOR_CIVS];
 
+#if defined(MOD_AI_MP_DIPLOMACY)
+		float m_aTradePriority[MAX_MAJOR_CIVS]; // current ai to human trade priority
+#endif
+
 #if defined(MOD_DIPLOMACY_CIV4_FEATURES)
 		bool m_abShareOpinionAccepted[MAX_MAJOR_CIVS];
 		short m_aiShareOpinionCounter[MAX_MAJOR_CIVS];
@@ -1810,12 +1825,21 @@ private:
 	typedef std::vector<PlayerTypes> PlayerTypesArray;
 	PlayerTypesArray	m_aGreetPlayers;
 
+#if defined(MOD_AI_MP_DIPLOMACY)
+	DiplomacyPlayerType m_eTargetPlayerType;
+#endif
 	PlayerTypes			m_eTargetPlayer;
 
 	// Data members for injecting test messages
 	PlayerTypes			m_eTestToPlayer;
 	DiploStatementTypes m_eTestStatement;
 	int					m_iTestStatementArg1;
+
+#if defined(MOD_AI_MP_DIPLOMACY)
+	// Greetings are send as Notifications immediately. No need to queue them
+	// Instead we need introduce a system to decide which players to do diplomacy with in simultaneous multiplayer:
+	void DoUpdateHumanTradePriority(PlayerTypes ePlayer, int iOpinionWeight);
+#endif
 };
 
 namespace CvDiplomacyAIHelpers

@@ -561,13 +561,16 @@ bool CvMinorCivQuest::IsComplete()
 	}
 
 #if defined(MOD_EVENTS_QUESTS)
-	if (UseEvents() && !IsInternal()) {
-		if (GAMEEVENTINVOKE_TESTANY(GAMEEVENT_QuestIsCompleted, m_eAssignedPlayer, m_eMinor, m_eType, (GetEndTurn() == GC.getGame().getGameTurn())) == GAMEEVENTRETURN_TRUE) {
-			return true;
-		}
-		
-		return false;
-	} else {
+    if (UseEvents() && !IsInternal()) {
+        // Always for non-contests, only at the end for contests
+        if (!m_pQuestInfo->isContest() || GetEndTurn() == GC.getGame().getGameTurn()) {
+            if (GAMEEVENTINVOKE_TESTANY(GAMEEVENT_QuestIsCompleted, m_eAssignedPlayer, m_eMinor, m_eType, (GetEndTurn() == GC.getGame().getGameTurn())) == GAMEEVENTRETURN_TRUE) {
+                return true;
+            }
+        }
+        
+        return false;
+    } else {
 #endif
 	if(m_eType == MINOR_CIV_QUEST_ROUTE)
 	{
@@ -3108,15 +3111,35 @@ void CvMinorCivAI::DoPickPersonality()
 	switch(eRandPersonality)
 	{
 	case MINOR_CIV_PERSONALITY_FRIENDLY:
+#if defined(MOD_AI_MP_DIPLOMACY)
+		if (MOD_AI_MP_DIPLOMACY) {
+		pFlavors[eFlavorCityDefense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorCityDefense] + 2, 2, 2, 12) - 2;
+		pFlavors[eFlavorDefense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorDefense] + 2, 2, 2, 12) - 2;
+		pFlavors[eFlavorOffense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorOffense] + 2, 2, 2, 12) - 2;
+		} else {
+#endif
 		pFlavors[eFlavorCityDefense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorCityDefense], -2, 0, 10);
 		pFlavors[eFlavorDefense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorDefense], -2, 0, 10);
 		pFlavors[eFlavorOffense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorOffense], -2, 0, 10);
+#if defined(MOD_AI_MP_DIPLOMACY)
+		}
+#endif
 		pFlavorManager->ResetToBasePersonality();
 		break;
 	case MINOR_CIV_PERSONALITY_HOSTILE:
+#if defined(MOD_AI_MP_DIPLOMACY)
+		if (MOD_AI_MP_DIPLOMACY) {
+		pFlavors[eFlavorCityDefense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorCityDefense] - 2, 2, -2, 8) + 2;
+		pFlavors[eFlavorDefense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorDefense] - 2, 2, -2, 8) + 2;
+		pFlavors[eFlavorOffense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorOffense] - 2, 2, -2, 8) + 2;
+		} else {
+#endif
 		pFlavors[eFlavorCityDefense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorCityDefense], 2, 0, 10);
 		pFlavors[eFlavorDefense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorDefense], 2, 0, 10);
 		pFlavors[eFlavorOffense] = pFlavorManager->GetAdjustedValue(pFlavors[eFlavorOffense], 2, 0, 10);
+#if defined(MOD_AI_MP_DIPLOMACY)
+		}
+#endif
 		pFlavorManager->ResetToBasePersonality();
 		break;
 	}
@@ -8777,7 +8800,11 @@ void CvMinorCivAI::SetAlly(PlayerTypes eNewAlly)
 			CvPlot* pPlot = theMap.plotByIndexUnchecked(iI);
 			if(pPlot->getOwner() == m_pPlayer->GetID())
 			{
+#if defined(MOD_API_EXTENSIONS)
+				pPlot->changeAdjacentSight(GET_PLAYER(eOldAlly).getTeam(), iPlotVisRange, false, NO_INVISIBLE, NO_DIRECTION);
+#else
 				pPlot->changeAdjacentSight(GET_PLAYER(eOldAlly).getTeam(), iPlotVisRange, false, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 			}
 		}
 		if(eOldAlly == GC.getGame().getActivePlayer())
@@ -8800,7 +8827,11 @@ void CvMinorCivAI::SetAlly(PlayerTypes eNewAlly)
 			CvPlot* pPlot = theMap.plotByIndexUnchecked(iI);
 			if(pPlot->getOwner() == m_pPlayer->GetID())
 			{
+#if defined(MOD_API_EXTENSIONS)
+				pPlot->changeAdjacentSight(kNewAlly.getTeam(), iPlotVisRange, true, NO_INVISIBLE, NO_DIRECTION);
+#else
 				pPlot->changeAdjacentSight(kNewAlly.getTeam(), iPlotVisRange, true, NO_INVISIBLE, NO_DIRECTION, false);
+#endif
 			}
 		}
 
