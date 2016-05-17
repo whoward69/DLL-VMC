@@ -369,6 +369,10 @@ CvDiplomacyAI::CvDiplomacyAI():
 
 	m_eStateAllWars(STATE_ALL_WARS_NEUTRAL),
 
+#if defined(MOD_AI_MP_DIPLOMACY)
+	m_eTargetPlayerType(DIPLO_ALL_PLAYERS),
+#endif
+
 #if defined(MOD_DIPLOMACY_STFU)
 	m_pStfuResponseQuery(NULL),
 	m_pStfuQuery(NULL),
@@ -2267,6 +2271,7 @@ void CvDiplomacyAI::DoTurn(PlayerTypes eTargetPlayer)
 		DoUpdatePlanningExchanges();
 		DoContactMinorCivs();
 		DoContactMajorCivs();
+
 #if defined(MOD_AI_MP_DIPLOMACY)
 		// JdH => cleanup AI to AI deals (was all deals before)
 		GC.getGame().GetGameDeals()->DoCancelAllProposedDealsWithPlayer(GetPlayer()->GetID(), DIPLO_AI_PLAYERS);
@@ -5637,7 +5642,11 @@ void CvDiplomacyAI::DoMakePeaceWithMinors()
 						{
 							if(!GET_PLAYER(eLoopPlayer).GetMinorCivAI()->IsPeaceBlocked(GetPlayer()->getTeam()))
 							{
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+								GET_TEAM(GetTeam()).makePeace(GET_PLAYER(eLoopPlayer).getTeam(), true, false, GetPlayer()->GetID());
+#else
 								GET_TEAM(GetTeam()).makePeace(GET_PLAYER(eLoopPlayer).getTeam());
+#endif
 								LogPeaceMade(eLoopPlayer);
 							}
 						}
@@ -6282,8 +6291,16 @@ void CvDiplomacyAI::DeclareWar(PlayerTypes ePlayer)
 			// JdH => deciding whether to send a notification or pop up directly is done in SendRequest
 			if (CvPreGame::isHuman(ePlayer))
 			{
+#if defined(MOD_DIPLOMACY_STFU)
+				SendAILeaderMessage(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_AI_DECLARED_WAR, DIPLO_MESSAGE_DOW_ROOT, ePlayer, LEADERHEAD_ANIM_DECLARE_WAR);
+#else
 				const char* strText = GetDiploStringForMessage(DIPLO_MESSAGE_DOW_ROOT, ePlayer);
+#if defined(MOD_API_PLAYER_LOGS)
+				CvDiplomacyRequests::SendRequest(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_AI_DECLARED_WAR, DIPLO_MESSAGE_DOW_ROOT, ePlayer, strText, LEADERHEAD_ANIM_DECLARE_WAR);
+#else
 				CvDiplomacyRequests::SendRequest(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_AI_DECLARED_WAR, strText, LEADERHEAD_ANIM_DECLARE_WAR);
+#endif
+#endif
 			}
 		} else {
 #endif
@@ -9102,7 +9119,11 @@ void CvDiplomacyAI::DoUpdateOnePlayerExpansionAggressivePosture(PlayerTypes ePla
 
 	// Irrelevant if we can't declare war on these guys
 	CvTeam &kMyTeam = GET_TEAM(GetPlayer()->getTeam());
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+	if (!kMyTeam.isAtWar(GET_PLAYER(ePlayer).getTeam()) && !kMyTeam.canDeclareWar(GET_PLAYER(ePlayer).getTeam(), GetPlayer()->GetID()))
+#else
 	if (!kMyTeam.isAtWar(GET_PLAYER(ePlayer).getTeam()) && !kMyTeam.canDeclareWar(GET_PLAYER(ePlayer).getTeam()))
+#endif
 	{
 		return;
 	}
@@ -11130,8 +11151,16 @@ void CvDiplomacyAI::DoFirstContact(PlayerTypes ePlayer)
 			{
 				if (!IsAtWar(ePlayer) && CvPreGame::isHuman(ePlayer))
 				{
+#if defined(MOD_DIPLOMACY_STFU)
+					SendAILeaderMessage(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_DEFAULT_ROOT, DIPLO_MESSAGE_INTRO, LEADERHEAD_ANIM_INTRO);
+#else
 					const char* szText = GetDiploStringForMessage(DIPLO_MESSAGE_INTRO);
+#if defined(MOD_API_PLAYER_LOGS)
+					CvDiplomacyRequests::SendRequest(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_DEFAULT_ROOT, DIPLO_MESSAGE_INTRO, szText, LEADERHEAD_ANIM_INTRO);
+#else
 					CvDiplomacyRequests::SendRequest(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_DEFAULT_ROOT, szText, LEADERHEAD_ANIM_INTRO);
+#endif
+#endif
 				}
 			}
 		} else {
@@ -11294,7 +11323,15 @@ void CvDiplomacyAI::DoKilledByPlayer(PlayerTypes ePlayer)
 		DisplayAILeaderMessage(GetPlayer()->GetID(), DIPLO_UI_STATE_BLANK_DISCUSSION, DIPLO_MESSAGE_DEFEATED, LEADERHEAD_ANIM_DEFEATED);
 #else
 		const char* szText = GetDiploStringForMessage(DIPLO_MESSAGE_DEFEATED);
+#if defined(MOD_AI_MP_DIPLOMACY)
+		if (MOD_AI_MP_DIPLOMACY) {
+			CvDiplomacyRequests::SendRequest(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_BLANK_DISCUSSION, szText, LEADERHEAD_ANIM_DEFEATED);
+		} else {
+#endif
 		gDLL->GameplayDiplomacyAILeaderMessage(GetPlayer()->GetID(), DIPLO_UI_STATE_BLANK_DISCUSSION, szText, LEADERHEAD_ANIM_DEFEATED);
+#if defined(MOD_AI_MP_DIPLOMACY)
+		}
+#endif
 #endif
 
 #if !defined(NO_ACHIEVEMENTS)
@@ -13383,8 +13420,16 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 			CvDeal kDeal = *pDeal;
 
 			// Don't need to call DoOffer because we check to see if the deal works for both sides BEFORE sending
+#if defined(MOD_AI_MP_DIPLOMACY)
+			if (MOD_AI_MP_DIPLOMACY) {
+				GC.getGame().GetGameDeals()->FinalizeDeal(*pDeal, true);
+			} else {
+#endif
 			GC.getGame().GetGameDeals()->AddProposedDeal(kDeal);
 			GC.getGame().GetGameDeals()->FinalizeDeal(GetPlayer()->GetID(), ePlayer, true);
+#if defined(MOD_AI_MP_DIPLOMACY)
+			}
+#endif
 
 			LogPeaceMade(ePlayer);
 		}
@@ -13520,6 +13565,7 @@ void CvDiplomacyAI::DoContactMajorCivs()
 			DoContactPlayer(eLoopPlayer);
 		}
 	}
+		
 	if (m_eTargetPlayer == DIPLO_ALL_PLAYERS || m_eTargetPlayer == DIPLO_HUMAN_PLAYERS)
 	{
 		// JdH => contact humans by priority, but use a notification system instead of pop up the diplo screen
@@ -14950,11 +14996,19 @@ void CvDiplomacyAI::DoBulliedCityStateStatement(PlayerTypes ePlayer, DiploStatem
 				{
 					const char* strText;
 					bool bActivePlayer = GC.getGame().getActivePlayer() == ePlayer;
-					if(GET_TEAM(GetPlayer()->getTeam()).canDeclareWar(GET_PLAYER(ePlayer).getTeam())) // WH - need blocking with MOD_EVENTS_WAR_AND_PEACE
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+					if (GET_TEAM(GetPlayer()->getTeam()).canDeclareWar(GET_PLAYER(ePlayer).getTeam(), GetPlayer()->GetID()))
+#else
+					if (GET_TEAM(GetPlayer()->getTeam()).canDeclareWar(GET_PLAYER(ePlayer).getTeam()))
+#endif
 					{
 						// WAR! You've broken too many promises, jerk. 
 						//AI declaration
-						GET_TEAM(GetPlayer()->getTeam()).declareWar(GET_PLAYER(ePlayer).getTeam(), false); // WH - need blocking with MOD_EVENTS_WAR_AND_PEACE
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+						GET_TEAM(GetPlayer()->getTeam()).declareWar(GET_PLAYER(ePlayer).getTeam(), false, GetPlayer()->GetID());
+#else
+						GET_TEAM(GetPlayer()->getTeam()).declareWar(GET_PLAYER(ePlayer).getTeam(), false);
+#endif
 						m_pPlayer->GetCitySpecializationAI()->SetSpecializationsDirty(SPECIALIZATION_UPDATE_NOW_AT_WAR);
 						LogWarDeclaration(ePlayer);
 
@@ -19468,7 +19522,11 @@ void CvDiplomacyAI::DoFromUIDiploEvent(PlayerTypes eFromPlayer, FromUIDiploEvent
 		
 		if(MOD_DIPLOMACY_CIV4_FEATURES && IsVassal(eFromPlayer))
 		{
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+			GET_TEAM(eFromTeam).declareWar(GetTeam(), false, eFromPlayer);
+#else
 			GET_TEAM(eFromTeam).declareWar(GetTeam());
+#endif
 		}
 #endif
 
@@ -21388,7 +21446,11 @@ void CvDiplomacyAI::DoFromUIDiploEvent(PlayerTypes eFromPlayer, FromUIDiploEvent
 			else if(iResponse == 2)
 			{
 				// Declare war on human!
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+				GET_TEAM(GetTeam()).declareWar(eFromTeam, false, GetPlayer()->GetID());
+#else
 				GET_TEAM(GetTeam()).declareWar(eFromTeam);
+#endif
 				if(bActivePlayer)
 				{
 					if(IsGoingForWorldConquest())
@@ -24925,9 +24987,17 @@ void CvDiplomacyAI::ChangeNumCiviliansReturnedToMe(PlayerTypes ePlayer, int iCha
 		{
 #if defined(MOD_AI_MP_DIPLOMACY)
 			if (MOD_AI_MP_DIPLOMACY) {
-				const char* strText = GetDiploStringForMessage(DIPLO_MESSAGE_RETURNED_CIVILIAN);
 				// TODO: what about GC.GetEngineUserInterface()->SetForceDiscussionModeQuitOnBack(true)?
+#if defined(MOD_DIPLOMACY_STFU)
+				SendAILeaderMessage(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_BLANK_DISCUSSION, DIPLO_MESSAGE_RETURNED_CIVILIAN, LEADERHEAD_ANIM_POSITIVE, -1);
+#else
+				const char* strText = GetDiploStringForMessage(DIPLO_MESSAGE_RETURNED_CIVILIAN);
+#if defined(MOD_API_PLAYER_LOGS)
+				CvDiplomacyRequests::SendRequest(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_BLANK_DISCUSSION, DIPLO_MESSAGE_RETURNED_CIVILIAN, strText, LEADERHEAD_ANIM_POSITIVE, -1);
+#else
 				CvDiplomacyRequests::SendRequest(GetPlayer()->GetID(), ePlayer, DIPLO_UI_STATE_BLANK_DISCUSSION, strText, LEADERHEAD_ANIM_POSITIVE, -1);
+#endif
+#endif
 			} else {
 #endif
 			if(!GC.getGame().isNetworkMultiPlayer())	// KWG: Candidate for !GC.getGame().IsOption(GAMEOPTION_SIMULTANEOUS_TURNS)

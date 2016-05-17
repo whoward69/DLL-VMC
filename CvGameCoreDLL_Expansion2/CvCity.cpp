@@ -14015,6 +14015,10 @@ bool CvCity::CanPlaceUnitHere(UnitTypes eUnitType)
 		bCombat = true;
 	}
 
+#if defined(MOD_GLOBAL_STACKING_RULES)
+	int iSameTypeUnits = 0;
+#endif
+
 	CvPlot* pPlot = plot();
 
 	const IDInfo* pUnitNode;
@@ -14038,10 +14042,14 @@ bool CvCity::CanPlaceUnitHere(UnitTypes eUnitType)
 			// Units of the same type OR Units belonging to different civs
 			if(CvGameQueries::AreUnitsSameType(eUnitType, pLoopUnit->getUnitType()))
 			{
+#if defined(MOD_GLOBAL_STACKING_RULES)
+				if (++iSameTypeUnits >= GC.getCITY_UNIT_LIMIT())
+#endif
 				return false;
 			}
 		}
 	}
+
 	return true;
 }
 

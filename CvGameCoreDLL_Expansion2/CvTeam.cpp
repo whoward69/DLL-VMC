@@ -8304,7 +8304,11 @@ void CvTeam::DoEndVassal(TeamTypes eTeam, bool bPeaceful, bool bSuppressNotifica
 	// Not peaceful end of vassalage? Declare war!
 	if(!bPeaceful)
 	{
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+		declareWar(eTeam, false, getLeaderID());
+#else
 		declareWar(eTeam);
+#endif
 	}
 
 	// Update war/peace relationships for all of eTeam's vassals
@@ -8435,7 +8439,11 @@ void CvTeam::DoUpdateVassalWarPeaceRelationships()
 	// Never at war with Master
 	if(isAtWar(eMaster))
 	{
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+		makePeace(eMaster, true, false, getLeaderID());
+#else
 		makePeace(eMaster);
+#endif
 	}
 
 	TeamTypes eTeam;

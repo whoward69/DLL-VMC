@@ -432,7 +432,11 @@ void CvDiplomacyRequests::SendRequest(PlayerTypes eFromPlayer, PlayerTypes eToPl
 				// dummy deal for AI to Human requests
 				GC.getGame().GetGameDeals()->AddProposedDeal(CvDeal(eFromPlayer, eToPlayer));
 			}
+#if defined(MOD_API_PLAYER_LOGS)
+			pkDiploRequests->Add(eFromPlayer, eDiploType, eDiploMessage, pszMessage, eAnimationType, iExtraGameData);
+#else
 			pkDiploRequests->Add(eFromPlayer, eDiploType, pszMessage, eAnimationType, iExtraGameData);
+#endif
 		} else {
 #endif
 		if(!CvPreGame::isNetworkMultiplayerGame() && GC.getGame().getActivePlayer() == eToPlayer)
@@ -482,7 +486,11 @@ void CvDiplomacyRequests::SendDealRequest(PlayerTypes eFromPlayer, PlayerTypes e
 			CvAssert(pkDeal->GetFromPlayer() == eFromPlayer);
 			CvAssert(pkDeal->GetToPlayer() == eToPlayer);
 			GC.getGame().GetGameDeals()->AddProposedDeal(*pkDeal); // propose the deal (needed for activation...)
+#if defined(MOD_API_PLAYER_LOGS)
+			pDiploRequests->Add(eFromPlayer, eDiploType, eDiploMessage, pszMessage, eAnimationType, -1);
+#else
 			pDiploRequests->Add(eFromPlayer, eDiploType, pszMessage, eAnimationType, -1);
+#endif
 		}
 	} else {
 #endif

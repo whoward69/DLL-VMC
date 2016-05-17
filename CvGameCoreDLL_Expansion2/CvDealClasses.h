@@ -274,7 +274,7 @@ public:
 	bool RemoveProposedDeal(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, CvDeal* pDealOut, bool latest);
 	bool FinalizeDeal(CvDeal kDeal, bool bAccepted);
 	bool FinalizeDeal(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, bool bAccepted, bool latest);
-	void FinalizeDealValidAndAccepted(CvDeal& kDeal, bool bAccepted, CvWeightedVector<TeamTypes, MAX_CIV_TEAMS, true>& veNowAtPeacePairs);
+	void FinalizeDealValidAndAccepted(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, CvDeal& kDeal, bool bAccepted, CvWeightedVector<TeamTypes, MAX_CIV_TEAMS, true>& veNowAtPeacePairs);
 	void FinalizeDealNotify(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, CvWeightedVector<TeamTypes, MAX_CIV_TEAMS, true>& veNowAtPeacePairs);
 #endif
 	bool FinalizeDeal(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, bool bAccepted);
@@ -288,9 +288,10 @@ public:
 	PlayerTypes HasMadeProposal(PlayerTypes eFromPlayer);
 	bool ProposedDealExists(PlayerTypes eFromPlayer, PlayerTypes eToPlayer);
 #if defined(MOD_AI_MP_DIPLOMACY)
-	CvDeal* GetProposedDeal(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, bool latest);
-#endif
+	CvDeal* GetProposedDeal(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, bool latest = false);
+#else
 	CvDeal* GetProposedDeal(PlayerTypes eFromPlayer, PlayerTypes eToPlayer);
+#endif
 
 	CvDeal* GetCurrentDeal(PlayerTypes ePlayer, uint index);
 	CvDeal* GetHistoricDeal(PlayerTypes ePlayer, uint indx);

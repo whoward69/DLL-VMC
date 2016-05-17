@@ -308,21 +308,52 @@ int CvLuaTeam::lCanChangeWarPeace(lua_State* L)
 //bool canDeclareWar(TeamTypes eTeam);
 int CvLuaTeam::lCanDeclareWar(lua_State* L)
 {
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+	CvTeam* pkTeam = GetInstance(L);
+	TeamTypes eOtherTeam = (TeamTypes)lua_tointeger(L, 2);
+	PlayerTypes eOriginatingPlayer = (PlayerTypes)luaL_optint(L, 3, -1);
+
+	const bool bCanDeclareWar = pkTeam->canDeclareWar(eOtherTeam, eOriginatingPlayer);
+	lua_pushboolean(L, bCanDeclareWar);
+	return 1;
+#else
 	return BasicLuaMethod(L, &CvTeam::canDeclareWar);
+#endif
 }
 
 //------------------------------------------------------------------------------
 //void declareWar(TeamTypes eTeam);
 int CvLuaTeam::lDeclareWar(lua_State* L)
 {
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+	CvTeam* pkTeam = GetInstance(L);
+	TeamTypes eOtherTeam = (TeamTypes)lua_tointeger(L, 2);
+	const bool bDefensivePact = luaL_optbool(L, 3, false);
+	PlayerTypes eOriginatingPlayer = (PlayerTypes)luaL_optint(L, 4, -1);
+
+	pkTeam->declareWar(eOtherTeam, bDefensivePact, eOriginatingPlayer);
+	return 0;
+#else
 	return BasicLuaMethod(L, &CvTeam::declareWar);
+#endif
 }
 
 //------------------------------------------------------------------------------
 //void makePeace(TeamTypes eTeam);
 int CvLuaTeam::lMakePeace(lua_State* L)
 {
+#if defined(MOD_EVENTS_WAR_AND_PEACE)
+	CvTeam* pkTeam = GetInstance(L);
+	TeamTypes eOtherTeam = (TeamTypes)lua_tointeger(L, 2);
+	const bool bBumpUnits = luaL_optbool(L, 3, true);
+	const bool bSuppressNotification = luaL_optbool(L, 4, false);
+	PlayerTypes eOriginatingPlayer = (PlayerTypes)luaL_optint(L, 5, -1);
+
+	pkTeam->makePeace(eOtherTeam, bBumpUnits, bSuppressNotification, eOriginatingPlayer);
+	return 0;
+#else
 	return BasicLuaMethod(L, &CvTeam::makePeace);
+#endif
 }
 
 //------------------------------------------------------------------------------

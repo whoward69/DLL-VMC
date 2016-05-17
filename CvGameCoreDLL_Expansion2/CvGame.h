@@ -419,6 +419,9 @@ public:
 
 	bool isGreatPersonBorn(CvString& szName) const;
 	void addGreatPersonBornName(const CvString& szName);
+#if defined(MOD_API_EXTENSIONS)
+	void removeGreatPersonBornName(const CvString& szName);
+#endif
 
 	CvRandom& getMapRand();
 	int getMapRandNum(int iNum, const char* pszLog);

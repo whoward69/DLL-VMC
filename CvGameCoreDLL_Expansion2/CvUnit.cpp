@@ -321,6 +321,9 @@ CvUnit::CvUnit() :
 	, m_strUnitName("")
 #endif
 	, m_strName("")
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+	, m_strGreatName("")
+#endif
 	, m_eGreatWork(NO_GREAT_WORK)
 	, m_iTourismBlastStrength(0)
 	, m_bPromotionReady("CvUnit::m_bPromotionReady", m_syncArchive)
@@ -473,7 +476,9 @@ void CvUnit::initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitA
 	SetGreatWork(NO_GREAT_WORK);
 	iUnitName = GC.getGame().getUnitCreatedCount(getUnitType());
 	int iNumNames = getUnitInfo().GetNumUnitNames();
+#if !defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
 	if(iUnitName < iNumNames)
+#endif
 	{
 		if(iNameOffset == -1)
 		{
@@ -506,6 +511,12 @@ void CvUnit::initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitA
 				setName(strName);
 				SetGreatWork(getUnitInfo().GetGreatWorks(iIndex));
 				GC.getGame().addGreatPersonBornName(strName);
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+				if (MOD_GLOBAL_NO_LOST_GREATWORKS) {
+					// setName strips undesirable characters, but we stored those into the list of GPs born, so we need to keep the original name
+					setGreatName(strName);
+				}
+#endif
 				break;
 			}
 		}
@@ -1083,6 +1094,9 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_strUnitName = "";
 #endif
 	m_strName = "";
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+	m_strGreatName = "";
+#endif
 	m_eGreatWork = NO_GREAT_WORK;
 	m_iTourismBlastStrength = 0;
 	m_strNameIAmNotSupposedToBeUsedAnyMoreBecauseThisShouldNotBeCheckedAndWeNeedToPreserveSaveGameCompatibility = "";
@@ -1693,6 +1707,16 @@ void CvUnit::kill(bool bDelay, PlayerTypes ePlayer /*= NO_PLAYER*/)
 		return;
 	}
 
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+	if(MOD_GLOBAL_NO_LOST_GREATWORKS && !bDelay)
+	{
+		if (HasUnusedGreatWork())
+		{
+			CUSTOMLOG("Killing a Great Writer, Artist or Musician who didn't create their Great Work!");
+			GC.getGame().removeGreatPersonBornName(getGreatName());
+		}
+	}
+#endif
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// EVERYTHING AFTER THIS LINE OCCURS UPON THE ACTUAL DELETION OF THE UNIT AND NOT WITH A DELAYED DEATH
@@ -20025,6 +20049,22 @@ void CvUnit::setName(CvString strNewValue)
 	DLLUI->setDirty(UnitInfo_DIRTY_BIT, true);
 }
 
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+//	--------------------------------------------------------------------------------
+const CvString CvUnit::getGreatName() const
+{
+	VALIDATE_OBJECT
+	return m_strGreatName.GetCString();
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::setGreatName(CvString strName)
+{
+	VALIDATE_OBJECT
+	m_strGreatName = strName;
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 GreatWorkType CvUnit::GetGreatWork() const
 {
@@ -20037,6 +20077,20 @@ void CvUnit::SetGreatWork(GreatWorkType eGreatWork)
 	VALIDATE_OBJECT
 	m_eGreatWork = eGreatWork;
 }
+
+#if defined(MOD_API_EXTENSIONS)
+//	--------------------------------------------------------------------------------
+bool CvUnit::HasGreatWork() const
+{
+	return (m_eGreatWork != NO_GREAT_WORK);
+}
+
+//	--------------------------------------------------------------------------------
+bool CvUnit::HasUnusedGreatWork() const
+{
+	return (HasGreatWork() && !GC.getGame().GetGameCulture()->IsGreatWorkCreated(m_eGreatWork));
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 int CvUnit::GetTourismBlastStrength() const
@@ -21328,6 +21382,9 @@ void CvUnit::read(FDataStream& kStream)
 	MOD_SERIALIZE_READ(46, kStream, m_strUnitName, getNameKey());
 #endif
 	kStream >> m_strName;
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+	MOD_SERIALIZE_READ(84, kStream, m_strGreatName, "");
+#endif
 
 	kStream >> m_iScenarioData;
 
@@ -21480,6 +21537,9 @@ void CvUnit::write(FDataStream& kStream) const
 	MOD_SERIALIZE_WRITE(kStream, m_strUnitName);
 #endif
 	kStream << m_strName;
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+	MOD_SERIALIZE_WRITE(kStream, m_strGreatName);
+#endif
 
 	kStream << m_iScenarioData;
 	kStream << *m_pReligion;

@@ -1179,8 +1179,16 @@ public:
 #endif
 	const CvString getNameNoDesc() const;
 	void setName(const CvString strNewValue);
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+	const CvString getGreatName() const;
+	void setGreatName(CvString strName);
+#endif
 	GreatWorkType GetGreatWork() const;
 	void SetGreatWork(GreatWorkType eGreatWork);
+#if defined(MOD_API_EXTENSIONS)
+	bool HasGreatWork() const;
+	bool HasUnusedGreatWork() const;
+#endif
 	int GetTourismBlastStrength() const;
 	void SetTourismBlastStrength(int iValue);
 
@@ -1771,6 +1779,9 @@ protected:
 	CvString m_strUnitName;
 #endif
 	CvString m_strName;
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+	CvString m_strGreatName;
+#endif
 	GreatWorkType m_eGreatWork;
 	int m_iTourismBlastStrength;
 

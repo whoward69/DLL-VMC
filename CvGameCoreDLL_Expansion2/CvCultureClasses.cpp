@@ -385,6 +385,20 @@ PlayerTypes CvGameCulture::GetGreatWorkController(int iIndex) const
 }
 
 #if defined(MOD_API_EXTENSIONS)
+bool CvGameCulture::IsGreatWorkCreated(GreatWorkType eType) const
+{
+	GreatWorkList::const_iterator it;
+	for(it = m_CurrentGreatWorks.begin(); it != m_CurrentGreatWorks.end(); it++)
+	{
+		if ((*it).m_eType == eType)
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 CvCity* CvGameCulture::GetGreatWorkCity(int iIndex) const
 {
 	CvAssertMsg (iIndex < GetNumGreatWorks(), "Bad Great Work index");

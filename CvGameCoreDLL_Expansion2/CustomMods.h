@@ -33,7 +33,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 83)
+#define MOD_DLL_VERSION_NUMBER ((uint) 84)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -139,6 +139,8 @@
 #define MOD_GLOBAL_CS_LIBERATE_AFTER_BUYOUT         gCustomMods.isGLOBAL_CS_LIBERATE_AFTER_BUYOUT()
 // City States give different gifts depending on their type (cultural, religious, maritime, etc)
 #define MOD_GLOBAL_CS_GIFTS                         gCustomMods.isGLOBAL_CS_GIFTS()
+// Units gifted from City States receive XP from their spawning city, not the CS capital (v84)
+#define MOD_GLOBAL_CS_GIFTS_LOCAL_XP                gCustomMods.isGLOBAL_CS_GIFTS_LOCAL_XP()
 // City States allied to a major behave as an overseas territory of that major (v39)
 #define MOD_GLOBAL_CS_OVERSEAS_TERRITORY            gCustomMods.isGLOBAL_CS_OVERSEAS_TERRITORY()
 // City States at war with each other but allied to the same major will declare peace (v39)
@@ -182,6 +184,8 @@
 #define MOD_GLOBAL_NUKES_MELT_ICE                   gCustomMods.isGLOBAL_NUKES_MELT_ICE() 
 // Great Works can generate different yields than just culture (v25)
 #define MOD_GLOBAL_GREATWORK_YIELDTYPES             gCustomMods.isGLOBAL_GREATWORK_YIELDTYPES() 
+// Great Artists, Writers and Musicians that do NOT create Great Works can be "reborn" (v84)
+#define MOD_GLOBAL_NO_LOST_GREATWORKS               gCustomMods.isGLOBAL_NO_LOST_GREATWORKS() 
 // Units of this type will not be gifted by City States (v46)
 #define MOD_GLOBAL_EXCLUDE_FROM_GIFTS               gCustomMods.isGLOBAL_EXCLUDE_FROM_GIFTS()
 // Units of this type may move after being upgraded (v46)
@@ -315,6 +319,9 @@
 
 // Fixes the AI's inability to pick free Great Prophets, Merchants of Venice, Great Musicians and Great Writers (v82)
 #define MOD_AI_GREAT_PEOPLE_CHOICES                 gCustomMods.isAI_GREAT_PEOPLE_CHOICES()
+
+// Enables JdH's MP Diplomacy code (v84)
+#define MOD_AI_MP_DIPLOMACY                         gCustomMods.isAI_MP_DIPLOMACY()
 
 // Features from the "Smart AI mod" by Ninakoru - see http://forums.civfanatics.com/showthread.php?t=521955 (v50)
 #define MOD_AI_SMART                                gCustomMods.isAI_SMART()
@@ -874,11 +881,17 @@ enum BattleTypeTypes
 
 
 // GlobalDefines wrappers
-#define GD_INT_DECL(name)       int m_i##name
-#define GD_INT_DEF(name)        inline int get##name() { return m_i##name; }
-#define GD_INT_INIT(name, def)  m_i##name(def)
-#define GD_INT_CACHE(name)      m_i##name = getDefineINT(#name); CUSTOMLOG("<Defines>: %s = %i", #name, m_i##name)
-#define GD_INT_GET(name)        GC.get##name()
+#define GD_INT_DECL(name)         int m_i##name
+#define GD_INT_DEF(name)          inline int get##name() { return m_i##name; }
+#define GD_INT_INIT(name, def)    m_i##name(def)
+#define GD_INT_CACHE(name)        m_i##name = getDefineINT(#name); CUSTOMLOG("<Defines>: %s = %i", #name, m_i##name)
+#define GD_INT_GET(name)          GC.get##name()
+
+#define GD_FLOAT_DECL(name)       float m_f##name
+#define GD_FLOAT_DEF(name)        inline float get##name() { return m_f##name; }
+#define GD_FLOAT_INIT(name, def)  m_f##name(def)
+#define GD_FLOAT_CACHE(name)      m_f##name = getDefineFLOAT(#name); CUSTOMLOG("<Defines>: %s = %f", #name, m_f##name)
+#define GD_FLOAT_GET(name)        GC.get##name()
 
 
 // LUA API wrappers
@@ -1148,6 +1161,7 @@ public:
 	MOD_OPT_DECL(GLOBAL_CS_RAZE_RARELY);
 	MOD_OPT_DECL(GLOBAL_CS_LIBERATE_AFTER_BUYOUT);
 	MOD_OPT_DECL(GLOBAL_CS_GIFTS);
+	MOD_OPT_DECL(GLOBAL_CS_GIFTS_LOCAL_XP);
 	MOD_OPT_DECL(GLOBAL_CS_OVERSEAS_TERRITORY);
 	MOD_OPT_DECL(GLOBAL_CS_NO_ALLIED_SKIRMISHES);
 	MOD_OPT_DECL(GLOBAL_VENICE_KEEPS_RESOURCES);
@@ -1167,6 +1181,7 @@ public:
 	MOD_OPT_DECL(GLOBAL_PARATROOPS_AA_DAMAGE);
 	MOD_OPT_DECL(GLOBAL_NUKES_MELT_ICE); 
 	MOD_OPT_DECL(GLOBAL_GREATWORK_YIELDTYPES); 
+	MOD_OPT_DECL(GLOBAL_NO_LOST_GREATWORKS); 
 	MOD_OPT_DECL(GLOBAL_EXCLUDE_FROM_GIFTS);
 	MOD_OPT_DECL(GLOBAL_MOVE_AFTER_UPGRADE);
 	MOD_OPT_DECL(GLOBAL_CANNOT_EMBARK);
@@ -1237,6 +1252,7 @@ public:
 	MOD_OPT_DECL(AI_SECONDARY_WORKERS);
 	MOD_OPT_DECL(AI_SECONDARY_SETTLERS);
 	MOD_OPT_DECL(AI_GREAT_PEOPLE_CHOICES);
+	MOD_OPT_DECL(AI_MP_DIPLOMACY);
 
 	MOD_OPT_DECL(AI_SMART);
 	MOD_OPT_DECL(AI_SMART_DEALS);

@@ -3038,6 +3038,7 @@ void CvPlayer::acquireCity(CvCity* pOldCity, bool bConquest, bool bGift)
 #endif
 		}
 	}
+
 #if defined(MOD_DIPLOMACY_CITYSTATES)
 	if(GET_PLAYER(eOldOwner).isMinorCiv() && GET_PLAYER(eOldOwner).getNumCities() == 0)
 	{
@@ -26249,6 +26250,30 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_units;
 	kStream >> m_armyAIs;
 
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	kStream >> m_iImprovementLeagueVotes;
+	kStream >> m_iFaithToVotes;
+	kStream >> m_iCapitalsToVotes;
+	kStream >> m_iDoFToVotes;
+	kStream >> m_iRAToVotes;
+	kStream >> m_iDefensePactsToVotes;
+	kStream >> m_iGPExpendInfluence;
+	kStream >> m_bIsLeagueAid;
+	kStream >> m_bIsLeagueScholar;
+	kStream >> m_bIsLeagueArt;
+	kStream >> m_iScienceRateFromLeague;
+	kStream >> m_iScienceRateFromLeagueAid;
+	kStream >> m_iLeagueCultureCityModifier;
+	kStream >> m_iGreatDiplomatsCreated;
+	kStream >> m_iDiplomatsFromFaith;
+	kStream >> m_iGreatDiplomatRateModifier;
+	kStream >> m_iFreeGreatDiplomatsCreated;
+#endif
+
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	kStream >> m_iVassalGoldMaintenanceMod;
+#endif
+
 	{
 		m_AIOperations.clear();
 		uint iSize;
@@ -26757,6 +26782,30 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_cities;
 	kStream << m_units;
 	kStream << m_armyAIs;
+
+#if defined(MOD_DIPLOMACY_CITYSTATES)
+	kStream << m_iImprovementLeagueVotes;
+	kStream << m_iFaithToVotes;
+	kStream << m_iCapitalsToVotes;
+	kStream << m_iDoFToVotes;
+	kStream << m_iRAToVotes;
+	kStream << m_iDefensePactsToVotes;
+	kStream << m_iGPExpendInfluence;
+	kStream << m_bIsLeagueAid;
+	kStream << m_bIsLeagueScholar;
+	kStream << m_bIsLeagueArt;
+	kStream << m_iScienceRateFromLeague;
+	kStream << m_iScienceRateFromLeagueAid;
+	kStream << m_iLeagueCultureCityModifier;
+	kStream << m_iGreatDiplomatsCreated;
+	kStream << m_iDiplomatsFromFaith;
+	kStream << m_iGreatDiplomatRateModifier;
+	kStream << m_iFreeGreatDiplomatsCreated;
+#endif
+
+#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
+	kStream << m_iVassalGoldMaintenanceMod;
+#endif
 
 	{
 		uint iSize = m_AIOperations.size();
