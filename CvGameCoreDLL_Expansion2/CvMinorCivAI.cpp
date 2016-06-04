@@ -9780,19 +9780,17 @@ void CvMinorCivAI::DoLiberationByMajor(PlayerTypes eLiberator, TeamTypes eConque
 	}
 
 	// Influence for liberator - raise to ally status
+	int iNewInfluence = max(iHighestOtherMajorInfluence + GC.getMINOR_LIBERATION_FRIENDSHIP(), GetBaseFriendshipWithMajor(eLiberator) + GC.getMINOR_LIBERATION_FRIENDSHIP());
+	iNewInfluence = max(GetAlliesThreshold(), iNewInfluence); // Must be at least enough to make us allies
+
 #if defined(MOD_DIPLOMACY_CITYSTATES)
-	int iNewInfluence = 0;
 	if(MOD_DIPLOMACY_CITYSTATES && (IsNoAlly() || GetPermanentAlly() != NO_PLAYER))
 	{
 		iNewInfluence = (GetFriendsThreshold() + 10); // Must be at least enough to make us allies
 	}
-	else
-	{
 #endif
-	int iNewInfluence = max(iHighestOtherMajorInfluence + GC.getMINOR_LIBERATION_FRIENDSHIP(), GetBaseFriendshipWithMajor(eLiberator) + GC.getMINOR_LIBERATION_FRIENDSHIP());
-	iNewInfluence = max(GetAlliesThreshold(), iNewInfluence); // Must be at least enough to make us allies
+
 #if defined(MOD_DIPLOMACY_CITYSTATES)
-	}
 	//Was this liberated from a barbarian? Less influence for you!
 	if(MOD_DIPLOMACY_CITYSTATES && GET_PLAYER(BARBARIAN_PLAYER).getTeam() == eConquerorTeam)
 	{
@@ -9807,6 +9805,7 @@ void CvMinorCivAI::DoLiberationByMajor(PlayerTypes eLiberator, TeamTypes eConque
 		}
 	}
 #endif
+
 	SetFriendshipWithMajor(eLiberator, iNewInfluence);
 
 	// Notification for liberator

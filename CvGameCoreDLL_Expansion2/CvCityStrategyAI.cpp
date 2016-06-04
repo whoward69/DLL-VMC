@@ -807,6 +807,12 @@ void CvCityStrategyAI::ChooseProduction(bool bUseAsyncRandom, BuildingTypes eIgn
 			}
 		}
 
+#if defined(MOD_AI_SMART_V3)
+		if (MOD_AI_SMART_V3)
+		{
+			iTempWeight = GetUnitProductionAI()->GetTempWeightRevised(eUnitForOperation, iTempWeight);
+		}
+#endif
 		if (iTempWeight > 0)
 		{
 			m_Buildables.push_back(buildable, iTempWeight);
@@ -829,6 +835,12 @@ void CvCityStrategyAI::ChooseProduction(bool bUseAsyncRandom, BuildingTypes eIgn
 		// add in the weight of this unit as if I were deciding to build it without having a reason
 		iTempWeight += m_pUnitProductionAI->GetWeight(eUnitForArmy);
 
+#if defined(MOD_AI_SMART_V3)
+		if (MOD_AI_SMART_V3)
+		{
+			iTempWeight = GetUnitProductionAI()->GetTempWeightRevised(eUnitForArmy, iTempWeight);
+		}
+#endif
 		if (iTempWeight > 0)
 		{
 			m_Buildables.push_back(buildable, iTempWeight);
@@ -908,6 +920,10 @@ void CvCityStrategyAI::ChooseProduction(bool bUseAsyncRandom, BuildingTypes eIgn
 				{
 					iTempWeight = 0;
 				}
+				
+#if defined(MOD_AI_SMART_V3)
+				if (!MOD_AI_SMART_V3)
+#endif
 				// it also avoids military training buildings - since it can't build units
 				if(pkBuildingInfo->GetDomainFreeExperience(DOMAIN_LAND))
 				{
@@ -928,6 +944,140 @@ void CvCityStrategyAI::ChooseProduction(bool bUseAsyncRandom, BuildingTypes eIgn
 					}
 				}
 			}
+			
+#if defined(MOD_AI_SMART_V3)
+			if (MOD_AI_SMART_V3)
+			{
+				const CvBuildingClassInfo& kbClassInfo = pkBuildingInfo->GetBuildingClassInfo();
+				// Buiding that only can produce one in empire? (National/World wonder)
+				if((kbClassInfo.getMaxPlayerInstances() == 1) || (kbClassInfo.getMaxGlobalInstances() == 1))
+				{
+					// All worls wonders have a specific restriction behavior.
+					bool bIsWorldWonder = kbClassInfo.getMaxGlobalInstances() == 1;
+
+					// Grand Temple restriction!
+					bool bRequireHolyCity = pkBuildingInfo->IsRequiresHolyCity();
+
+					// Hermitage, Tourist Center
+					bool bIsCultureRelatedBuilding = (pkBuildingInfo->GetCultureRateModifier() > 0) || ((pkBuildingInfo->GetLandmarksTourismPercent() + pkBuildingInfo->GetGreatWorksTourismModifier()) > 0);
+
+					// National college, Oxford University
+					bool bIsScienceBoostBuilding = (pkBuildingInfo->GetYieldModifier(YIELD_SCIENCE) > 0) || (pkBuildingInfo->GetYieldChange(YIELD_SCIENCE) > 1);
+
+					// All Guilds
+					bool bIsGreatPeopleProvider = pkBuildingInfo->GetSpecialistCount() > 0;
+
+					// National Epic
+					bool bIsGreatPleopleBooster = pkBuildingInfo->GetGreatPeopleRateModifier() > 0;
+
+					// East India Company
+					bool bIsTradeRouteBooster = (pkBuildingInfo->GetTradeRouteRecipientBonus() + pkBuildingInfo->GetTradeRouteTargetBonus()) > 0;
+
+					// Iron works, Circus Maximus, National Intelligence agency, any custom National wonder without any bonus previously checked.
+					bool bOtherNationalWonder = !bIsWorldWonder && !bRequireHolyCity && !bIsCultureRelatedBuilding && !bIsScienceBoostBuilding && !bIsGreatPeopleProvider && !bIsGreatPleopleBooster && !bIsTradeRouteBooster;
+
+					CvWeightedVector<CvCity *, SAFE_ESTIMATE_NUM_CITIES, true> weightedCityList;
+					CvCity* pLoopCity = NULL;
+					int iLoop = 0;
+					int nonPuppetCities = 0;
+					// Lets check some values in all cities.
+					for(pLoopCity = kPlayer.firstCity(&iLoop); pLoopCity != NULL; pLoopCity = kPlayer.nextCity(&iLoop))
+					{
+						if (!pLoopCity->IsPuppet())
+						{
+							nonPuppetCities++;
+							// City could build current building being checked?
+							if (pLoopCity->canConstruct(eLoopBuilding))
+							{
+								int cityScore = 0;
+
+								if (bRequireHolyCity)
+								{
+									// canConstruct filter will filter out any non holy city.
+									cityScore += 100;
+								}
+
+								if (bIsCultureRelatedBuilding)
+								{
+									cityScore += pLoopCity->getJONSCulturePerTurn();
+								}
+								if(bIsScienceBoostBuilding)
+								{
+									cityScore += pLoopCity->getYieldRate(YIELD_SCIENCE, true);
+								}
+								if (bIsGreatPleopleBooster)
+								{
+									int gpCount = pLoopCity->GetCityCitizens()->GetTotalSpecialistCount();
+									if (gpCount > 2)
+									{
+										cityScore += (gpCount * 20);
+									}								
+								}
+								if (bIsGreatPeopleProvider)
+								{
+									int gpScore = pLoopCity->foodDifference() + pLoopCity->getPopulation() - (pLoopCity->GetCityCitizens()->GetTotalSpecialistCount() * 2);
+									if (gpScore > 7)
+									{
+										cityScore += (gpScore * 5);
+									}								
+								}
+								if (bIsTradeRouteBooster)
+								{
+									CvPlayerTrade* pTrade = GET_PLAYER(m_pCity->getOwner()).GetTrade();
+									if(pTrade)
+									{
+										int iLandTrade = pTrade->GetNumPotentialConnections(pLoopCity, DOMAIN_LAND);
+										int iSeaTrade = pTrade->GetNumPotentialConnections(pLoopCity, DOMAIN_SEA);
+										cityScore += (iLandTrade + iSeaTrade);
+									}
+									else
+									{
+										// Shouldn't happen, but anyways...
+										bOtherNationalWonder = true;
+									}
+								}
+
+								if (bOtherNationalWonder || bIsWorldWonder)
+								{
+									cityScore += pLoopCity->getCurrentProductionDifference(true, false);
+								}
+
+								if (cityScore > 0)
+								{
+									weightedCityList.push_back(pLoopCity, cityScore);
+								}							
+							}
+						}
+					}
+
+					// Start checking more cities for wide empires, starting at two cities with 5 non-puppets, for wonders 3.
+					int cityDivisor = bIsWorldWonder? 3 : 5;
+					int numCitiesChecked = min(weightedCityList.size(), (1 + (nonPuppetCities / cityDivisor)));
+					bool bValidCity = false;
+					// Sort for higher scored cities on top.
+					weightedCityList.SortItems();
+					for (int cityIt = 0; cityIt < numCitiesChecked; cityIt++)
+					{
+						if ((weightedCityList.GetElement(cityIt)->GetID() == GetCity()->GetID()) && (weightedCityList.GetWeight(cityIt) > 0))
+						{
+							bValidCity = true;
+							if (!bIsWorldWonder)
+							{
+								// We also boost the national wonder weight: we want it ASAP.
+								iTempWeight = (iTempWeight * 3) / 2;
+							}
+							break;
+						}
+					}				
+
+					if (!bValidCity)
+					{
+						iTempWeight = 0;
+					}
+				}
+			}
+#endif
+
 			if(iTempWeight > 0)
 				m_Buildables.push_back(buildable, iTempWeight);
 		}
@@ -995,6 +1145,12 @@ void CvCityStrategyAI::ChooseProduction(bool bUseAsyncRandom, BuildingTypes eIgn
 						}
 					}
 				}
+#if defined(MOD_AI_SMART_V3)
+				if (MOD_AI_SMART_V3)
+				{
+					iTempWeight = GetUnitProductionAI()->GetTempWeightRevised((UnitTypes)iUnitLoop, iTempWeight);
+				}
+#endif
 
 
 				if(iTempWeight > 0)
@@ -2349,7 +2505,92 @@ bool CityStrategyAIHelpers::IsTestCityStrategy_NeedTileImprovers(AICityStrategyT
 	}
 	else
 	{
+#if defined(MOD_AI_SMART_V3)
+		int iNumCities = 1;
+		
+		if (MOD_AI_SMART_V3)
+		{
+			CvCity* pLoopCity = NULL;
+			int iLoop = 0;
+			int iNumImprovedTiles = 0;
+			int iNumEmptyTiles = 0;
+			// Lets check some values in all cities.
+			for(pLoopCity = kPlayer.firstCity(&iLoop); pLoopCity != NULL; pLoopCity = kPlayer.nextCity(&iLoop))
+			{
+				// Look at all Tiles and count improved vs uninproved.
+				CvPlot* pLoopPlot;
+#if defined(MOD_GLOBAL_CITY_WORKING)
+				for (int iPlotLoop = 0; iPlotLoop < pLoopCity->GetNumWorkablePlots(); iPlotLoop++)
+#else
+				for (int iPlotLoop = 0; iPlotLoop < NUM_CITY_PLOTS; iPlotLoop++)
+#endif
+				{
+					pLoopPlot = plotCity(pLoopCity->getX(), pLoopCity->getY(), iPlotLoop);
+
+					if(pLoopPlot != NULL)
+					{
+						if(pLoopPlot->getOwner() == pCity->getOwner())
+						{
+							if(!pLoopPlot->isWater())
+							{
+								if(pLoopPlot->getImprovementType() != NO_IMPROVEMENT)
+								{
+									if (pLoopPlot->IsImprovementPillaged())
+									{
+										iNumEmptyTiles++;
+									}
+									else
+									{
+										iNumImprovedTiles++;
+									}
+								}
+								else
+								{
+									for(int iBuildIndex = 0; iBuildIndex < GC.getNumBuildInfos(); iBuildIndex++)
+									{
+										BuildTypes eBuild = (BuildTypes) iBuildIndex;
+										CvBuildInfo* pBuildInfo = GC.getBuildInfo(eBuild);
+										if(pBuildInfo == NULL)
+											continue;
+
+										ImprovementTypes eImprovement = (ImprovementTypes) pBuildInfo->getImprovement();
+									
+										if(eImprovement == NO_IMPROVEMENT)
+											continue;
+
+										if(kPlayer.canBuild(pLoopPlot, eBuild, false /*bTestEra*/, false /*bTestVisible*/, false /*bTestGold*/, false))
+										{
+											iNumEmptyTiles++;
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		
+			if ((iNumImprovedTiles * 3) < iNumEmptyTiles)
+			{
+				iNumCities = max(1, (iCurrentNumCities * 4) / 3);
+			}
+			else if ((iNumEmptyTiles * 3) < iNumImprovedTiles)
+			{
+				iNumCities = max(1, (iCurrentNumCities * 3) / 4);
+			}
+			else
+			{
+				iNumCities = iCurrentNumCities;
+			}
+		}
+		else
+		{
+			iNumCities = max(1, (iCurrentNumCities * 3) / 4);
+		}
+#else
 		int iNumCities = max(1, (iCurrentNumCities * 3) / 4);
+#endif
 		if(iNumWorkers >= iNumCities)
 			return false;
 		// If we're losing at war, return false
@@ -2782,9 +3023,30 @@ bool CityStrategyAIHelpers::IsTestCityStrategy_CapitalNeedSettler(AICityStrategy
 				int iWeightThreshold = pCityStrategy->GetWeightThreshold() + iWeightThresholdModifier;	// 130
 
 				int iGameTurn = GC.getGame().getGameTurn();
+#if defined(MOD_AI_SMART_V3)
+				bool bReturn;
+					
+				if(MOD_AI_SMART_V3)
+				{
+					int iDifficultyBonus = 4 * (200 - ((GC.getGame().getHandicapInfo().getAIGrowthPercent() + GC.getGame().getHandicapInfo().getAITrainPercent()) / 2));
+					iDifficultyBonus = (iDifficultyBonus * 100) / ((GC.getGame().getGameSpeedInfo().getGrowthPercent() + GC.getGame().getGameSpeedInfo().getTrainPercent()) / 2);
+					bReturn = ((iCitiesPlusSettlers == 1 && ((iGameTurn * iDifficultyBonus) / 100) > iWeightThreshold) ||
+						(iCitiesPlusSettlers == 2 && ((iGameTurn * iDifficultyBonus) / 200) > iWeightThreshold) ||
+						(iCitiesPlusSettlers == 3 && ((iGameTurn * iDifficultyBonus) / 400) > iWeightThreshold));
+				}
+				else
+				{
+					bReturn = ((iCitiesPlusSettlers == 1 && (iGameTurn * 4) > iWeightThreshold) ||
+						(iCitiesPlusSettlers == 2 && (iGameTurn * 2) > iWeightThreshold) ||
+						(iCitiesPlusSettlers == 3 && iGameTurn > iWeightThreshold));
+				}
+				
+				if (bReturn)
+#else
 				if((iCitiesPlusSettlers == 1 && (iGameTurn * 4) > iWeightThreshold) ||
 					(iCitiesPlusSettlers == 2 && (iGameTurn * 2) > iWeightThreshold) || 
 					(iCitiesPlusSettlers == 3 && iGameTurn > iWeightThreshold) )
+#endif
 				{
 					return true;
 				}

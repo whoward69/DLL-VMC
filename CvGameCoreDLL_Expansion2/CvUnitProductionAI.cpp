@@ -12,6 +12,9 @@
 #include "CvInfosSerializationHelper.h"
 // include this after all other headers
 #include "LintFree.h"
+#if defined(MOD_AI_SMART_V3)
+#include "CvMilitaryAI.h"
+#endif
 
 
 /// Constructor
@@ -153,6 +156,58 @@ int CvUnitProductionAI::GetWeight(UnitTypes eUnit)
 {
 	return m_UnitAIWeights.GetWeight(eUnit);
 }
+
+#if defined(MOD_AI_SMART_V3)
+int CvUnitProductionAI::GetTempWeightRevised(UnitTypes eUnit, int iTempWeight)
+{
+	if(iTempWeight == 0)
+		return 0;
+
+	CvUnitEntry* pkUnitEntry = GC.getUnitInfo(eUnit);
+	if (!pkUnitEntry)
+		return 0;
+
+	int tempWeightRevised = iTempWeight;
+
+	CvPlayerAI& kPlayer = GET_PLAYER(m_pCity->getOwner());
+	DomainTypes eDomain = (DomainTypes) pkUnitEntry->GetDomainType();
+
+	bool isDefenseCriticalStatus = false;
+	MilitaryAIStrategyTypes eNeedLandCritical = (MilitaryAIStrategyTypes) GC.getInfoTypeForString("MILITARYAISTRATEGY_EMPIRE_DEFENSE_CRITICAL");
+	if(eNeedLandCritical != NO_MILITARYAISTRATEGY && kPlayer.GetMilitaryAI()->IsUsingStrategy(eNeedLandCritical))
+	{
+		isDefenseCriticalStatus = true;
+	}
+
+	int iGameTurn = GC.getGame().getGameTurn();
+
+	if ((pkUnitEntry->GetCombat() > 0) && (eDomain == DOMAIN_LAND) && (pkUnitEntry->GetDefaultUnitAIType() != UNITAI_EXPLORE))
+	{
+		int combatUnits = kPlayer.GetNumUnitsWithDomain(DOMAIN_LAND, true) - kPlayer.GetNumUnitsWithUnitAI(UNITAI_EXPLORE, true, false);
+
+		// From turn 11, we want at least one wandering combat unit per cities + workers + settlers.
+		// This will prevent very early attacks and the need of operation units vs barbs when is too late.
+		if((iGameTurn > 10) && (iGameTurn < 40) && !isDefenseCriticalStatus)
+		{
+			int coreUnitsNeed = kPlayer.getNumCities() + kPlayer.GetNumUnitsWithUnitAI(UNITAI_SETTLE) + kPlayer.GetNumUnitsWithUnitAI(UNITAI_WORKER);
+			if (combatUnits < coreUnitsNeed)
+			{
+				tempWeightRevised *= 40;
+			}
+		}
+		else if (isDefenseCriticalStatus)
+		{
+			// Just to prevent some civs totally neglecting military units.
+			int multiplier = kPlayer.GetMilitaryAI()->GetMandatoryReserveSize() / max(1, combatUnits);
+			if (multiplier > 1)
+			{
+				tempWeightRevised *= multiplier;
+			}			
+		}
+	}
+	return tempWeightRevised;	
+}
+#endif
 
 /// Recommend highest-weighted unit
 UnitTypes CvUnitProductionAI::RecommendUnit(UnitAITypes eUnitAIType)

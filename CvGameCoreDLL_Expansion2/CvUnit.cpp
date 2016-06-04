@@ -11702,15 +11702,6 @@ int CvUnit::GetRange() const
 	return (m_pUnitInfo->GetRange() + m_iExtraRange);
 }
 
-#if defined(MOD_AI_SMART_RANGED_UNITS)
-// Special property to get unit range+ move possibility.
-int CvUnit::GetRangeWithMovement() const
-{
-	VALIDATE_OBJECT
-	return ((getDomainType() == DOMAIN_AIR) ? GetRange() : (GetRange() + baseMoves() - (isMustSetUpToRangedAttack() ? 1 : 0)));
-}
-#endif
-
 //	--------------------------------------------------------------------------------
 int CvUnit::GetNukeDamageLevel() const
 {
@@ -13416,6 +13407,54 @@ int CvUnit::GetAirStrikeDefenseDamage(const CvUnit* pAttacker, bool bIncludeRand
 
 	return iDefenderDamage;
 }
+
+#if defined(MOD_AI_SMART_V3)
+int CvUnit::EnemyScoreAtRange(const CvPlot* pPlot, bool onlyInterceptors) const
+{
+	VALIDATE_OBJECT
+	if(pPlot == NULL)
+	{
+		pPlot = plot();
+	}
+
+	int interceptorCount = 0;
+	CvPlayer& playerOwner = GET_PLAYER(m_eOwner);
+
+	// Loop through all the players
+	for(int iI = 0; iI < MAX_PLAYERS; iI++)
+	{
+		CvPlayer& kPlayer = GET_PLAYER((PlayerTypes)iI);
+		if(kPlayer.isAlive() && kPlayer.GetID() != playerOwner.GetID())
+		{
+			if (atWar(kPlayer.getTeam(), playerOwner.getTeam()))
+			{
+				CvUnit* pLoopUnit;
+				int iLoopUnit = 0;
+				for (pLoopUnit = kPlayer.firstUnit(&iLoopUnit); pLoopUnit != NULL; pLoopUnit = kPlayer.nextUnit(&iLoopUnit))
+				{
+					// Must be able to intercept or have combat value.
+					if (!pLoopUnit->isDelayedDeath() && (pLoopUnit->canAirDefend() || (!onlyInterceptors && (pLoopUnit->GetBaseCombatStrength() > 0))))
+					{
+						int plDistance = plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pPlot->getX(), pPlot->getY());
+						int rangeScore = GetRange() + (pLoopUnit->canAirDefend() ? (pLoopUnit->getUnitInfo().GetAirInterceptRange() / 2) : 0);
+						// Check a minimum range to be a target to intercept
+						if (plDistance <= rangeScore)
+						{
+							interceptorCount++;
+						}
+						// This is considered close range, counts double.
+						if (plDistance <= (rangeScore / 2))
+						{
+							interceptorCount++;
+						}
+					}
+				}
+			}
+		}
+	}
+	return interceptorCount;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 CvUnit* CvUnit::GetBestInterceptor(const CvPlot& interceptPlot, CvUnit* pkDefender /* = NULL */, bool bLandInterceptorsOnly /*false*/, bool bVisibleInterceptorsOnly /*false*/) const
@@ -21627,17 +21666,24 @@ bool CvUnit::canRangeStrike() const
 }
 
 //	--------------------------------------------------------------------------------
-bool CvUnit::canEverRangeStrikeAt(int iX, int iY) const
+#if defined(MOD_AI_SMART_V3)
+//AMS: Special property to get unit range+ move possibility.
+int CvUnit::GetRangePlusMoveToshot() const
 {
-#if defined(MOD_AI_SMART_RANGED_UNITS)
 	VALIDATE_OBJECT
-	return canEverRangeStrikeAtFromPlot(iX, iY, plot());
+	return ((getDomainType() == DOMAIN_AIR) ? GetRange() : (GetRange() + baseMoves() - (isMustSetUpToRangedAttack() ? 1 : 0)));
 }
+#endif
 
-// Same as original canEverRangeStrikeAt but with plot as parameter
-bool CvUnit::canEverRangeStrikeAtFromPlot(int iX, int iY, CvPlot* pSourcePlot) const
+#if defined(MOD_AI_SMART_V3)
+bool CvUnit::canEverRangeStrikeAt(int iX, int iY, const CvPlot* pSourcePlot) const
+#else
+bool CvUnit::canEverRangeStrikeAt(int iX, int iY) const
+#endif
 {
-	VALIDATE_OBJECT
+#if defined(MOD_AI_SMART_V3)
+	if (!pSourcePlot)
+		pSourcePlot = plot();
 #else
 	CvPlot* pSourcePlot = plot();
 #endif
@@ -21812,11 +21858,12 @@ bool CvUnit::canRangeStrikeAt(int iX, int iY, bool bNeedWar, bool bNoncombatAllo
 	return true;
 }
 
-#if defined(MOD_AI_SMART_RANGED_UNITS)
-// Optimized function to evaluate free plots for move and fire.
-void CvUnit::GetMovablePlotListOpt(vector<CvPlot*>& plotData, CvPlot* plotTarget, bool exitOnFound)
+#if defined(MOD_AI_SMART_V3)
+//AMS: Optimized function to retrieve free plots for move and fire.
+void CvUnit::GetMovablePlotListOpt(vector<CvPlot*>& plotData, CvPlot* plotTarget, bool exitOnFound, bool bIgnoreFriendlyUnits)
 {
 	VALIDATE_OBJECT
+	CvAStarNode* pNode;
 	int xVariance = max(abs((getX() - plotTarget->getX()) / 2), 1);
 	int yVariance = max(abs((getY() - plotTarget->getY()) / 2), 1);
 	int xMin = min(getX(), plotTarget->getX()) - yVariance;
@@ -21832,22 +21879,44 @@ void CvUnit::GetMovablePlotListOpt(vector<CvPlot*>& plotData, CvPlot* plotTarget
 			{
 				CvPlot* currentPlot = GC.getMap().plotCheckInvalid(iDX, iDY);
 
-				// Check is empty plot
-				if ((currentPlot != NULL) && !currentPlot->isImpassable() && !currentPlot->isUnit() && !currentPlot->isCity())
+				if (currentPlot->isUnit())
+				{
+					if (!bIgnoreFriendlyUnits)
+					{
+						continue;
+					}
+					UnitHandle pFriendlyUnit = currentPlot->getBestDefender(GET_PLAYER(getOwner()).GetID());
+					if (!pFriendlyUnit)
+					{
+						continue;
+					}
+				}
+
+				// Check is valid plot
+				if ((currentPlot != NULL) && !currentPlot->isImpassable() && !currentPlot->isCity())
 				{
 					//Check plot is in unit range
 					if (GetRange() >= plotDistance(currentPlot->getX(), currentPlot->getY(), plotTarget->getX(), plotTarget->getY()))
 					{
-						if(TurnsToReachTarget(this, currentPlot, false /*bReusePaths*/, false /*bIgnoreUnits*/, true /*bIgnoreStacking*/) == 0)
+						// Updated this part based on AUI that checks the movement left for siegue.
+						if(canEverRangeStrikeAt(plotTarget->getX(), plotTarget->getY(), currentPlot))
 						{
-							// Can shoot to the target from plot?
-							if(canEverRangeStrikeAtFromPlot(plotTarget->getX(), plotTarget->getY(), currentPlot))
+							pNode = NULL;
+							GC.GetTacticalAnalysisMapFinder().SetData(this);
+							if (GC.GetTacticalAnalysisMapFinder().GeneratePath(getX(), getY(), currentPlot->getX(), currentPlot->getY(), MOVE_UNITS_IGNORE_DANGER | MOVE_IGNORE_STACKING, false))
 							{
-								plotData.push_back(currentPlot);
-
-								if (exitOnFound)
+								pNode = GC.GetTacticalAnalysisMapFinder().GetLastNode();
+							}
+							if (pNode)
+							{
+								if (pNode->m_iData2 == 1 && pNode->m_iData1 > (isMustSetUpToRangedAttack() ? 1 : 0))
 								{
-									return;
+									plotData.push_back(currentPlot);
+
+									if (exitOnFound)
+									{
+										return;
+									}
 								}
 							}
 						}
@@ -24287,6 +24356,31 @@ void CvUnit::AI_promote()
 	}
 }
 
+#if defined(MOD_AI_SMART_V3)
+//	-----------------------------------------------------------
+// Ninakoru: Little function to calculate with promotion values
+int CvUnit::GetPromotionValue(int promotionBonus, int unitExtraValue, int matchFlavorValue, int baseValue)
+{
+	VALIDATE_OBJECT
+
+	int result = 0;
+	int iExtra = 0;
+	int primaryValue = 15;
+
+	if (unitExtraValue != 0)
+	{
+		iExtra = 12;
+	}
+
+	if (promotionBonus != 0)
+	{
+		result = primaryValue + matchFlavorValue + iExtra + baseValue;
+	}
+
+	return result;
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 // XXX make sure we include any new UnitAITypes...
 int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
@@ -24304,6 +24398,14 @@ int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
 	int iValue = 0;
 
 	int iTemp;
+#if defined(MOD_AI_SMART_V3)
+	int lowPriority = 100;
+	int mediumPriority	 = 110;
+	int highPriority = 120;
+	int absolutePriority = 200;
+	int plotPercents;
+	int doubleMove;
+#endif
 	int iExtra;
 	int iI;
 
@@ -24321,6 +24423,275 @@ int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
 	int iFlavorNaval = pFlavorMgr->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_NAVAL"));
 	int iFlavorAir = pFlavorMgr->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_AIR"));
 
+#if defined(MOD_AI_SMART_V3)
+	if (MOD_AI_SMART_V3)
+	{
+		int iFlavorOffDef = (iFlavorOffense + iFlavorDefense) / 2;
+
+		// If we are damaged, insta heal is the way to go
+		if(pkPromotionInfo->IsInstaHeal())
+		{
+			// Half health or less?
+			if(getDamage() >= (GetMaxHitPoints() / 2))
+			{
+				iValue = absolutePriority;   // Enough to lock this one up
+			}
+			else
+			{
+				// Give insta-heal a very low priority otherwise.
+				iValue = GetPromotionValue(pkPromotionInfo->IsInstaHeal() ? 1 : 0, -20, 0, lowPriority);
+			}
+		}
+
+		// High priority promotions
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetExtraAttacks(), 0, iFlavorOffense, highPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->IsAlwaysHeal() ? 1 : 0, 0, iFlavorDefense, highPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->IsBlitz() ? 1 : 0, 0, iFlavorMobile, highPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetRangeChange(), 0, iFlavorRanged, getDomainType() == DOMAIN_AIR ? mediumPriority : highPriority);
+		}
+
+		if (iValue == 0)
+		{
+			plotPercents = 0;
+			doubleMove = 0;
+
+			for(iI = 0; iI < GC.getNumTerrainInfos(); iI++)
+			{
+				const TerrainTypes eTerrain = static_cast<TerrainTypes>(iI);
+				CvTerrainInfo* pkTerrainInfo = GC.getTerrainInfo(eTerrain);
+
+				if(pkTerrainInfo)
+				{
+					plotPercents += pkPromotionInfo->GetTerrainAttackPercent(iI) + pkPromotionInfo->GetTerrainDefensePercent(iI);
+					doubleMove += pkPromotionInfo->GetTerrainDoubleMove(iI) ? 1 : 0;
+				}
+			}
+
+			iValue = GetPromotionValue(doubleMove, 0, iFlavorMobile, highPriority);
+
+			if (iValue == 0)
+			{
+				iValue = GetPromotionValue(plotPercents, 0, iFlavorOffDef, mediumPriority);
+			}
+		}
+
+		if (iValue == 0)
+		{
+			plotPercents = 0;
+			doubleMove = 0;
+
+			for(iI = 0; iI < GC.getNumFeatureInfos(); iI++)
+			{
+				const FeatureTypes eFeature = static_cast<FeatureTypes>(iI);
+				CvFeatureInfo* pkFeatureInfo = GC.getFeatureInfo(eFeature);
+
+				if(pkFeatureInfo)
+				{
+					plotPercents += pkPromotionInfo->GetFeatureAttackPercent(iI) + pkPromotionInfo->GetFeatureDefensePercent(iI);
+					doubleMove += pkPromotionInfo->GetFeatureDoubleMove(iI) ? 1 : 0;
+				}
+			}
+
+			iValue = GetPromotionValue(doubleMove, 0, iFlavorMobile, highPriority);
+
+			if (iValue == 0)
+			{
+				iValue = GetPromotionValue(plotPercents, 0, iFlavorOffDef, mediumPriority);
+			}
+		}
+
+		// Medium priority promotions
+		if (iValue == 0)
+		{
+			iTemp = pkPromotionInfo->GetEnemyHealChange() + pkPromotionInfo->GetNeutralHealChange() + pkPromotionInfo->GetFriendlyHealChange() + pkPromotionInfo->GetAdjacentTileHealChange();
+			iValue = GetPromotionValue(iTemp, getDefenseModifier(), iFlavorDefense, mediumPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->IsRangeAttackIgnoreLOS() ? 1 : 0, 0, iFlavorRanged, mediumPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetAttackWoundedMod(), getExtraAttackWoundedMod(), iFlavorOffense, mediumPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetMovesChange(), 0, iFlavorMobile, mediumPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetAttackFortifiedMod(), getExtraAttackFortifiedMod(), iFlavorOffense, mediumPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->IsCanMoveAfterAttacking() ? 1 : 0, 0, iFlavorMobile, mediumPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetNumInterceptionChange(), 0, iFlavorDefense, mediumPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(getDomainType() == DOMAIN_AIR ? pkPromotionInfo->GetInterceptionDefenseDamageModifier() : 0, GetInterceptionDefenseDamageModifier(), iFlavorAir, mediumPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetCargoChange(), 0, iFlavorNaval, mediumPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetAttackMod(), getDomainType() == DOMAIN_SEA ? 1 : 0, iFlavorMobile, mediumPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetRangedDefenseMod(), getExtraRangedDefenseModifier(), iFlavorDefense, mediumPriority);
+		}
+
+		// Low priority promotions
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetCityAttackPercent(), getDomainType() == DOMAIN_SEA ? 1 : getExtraCityAttackPercent(), iFlavorOffense, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetCityDefensePercent(), getExtraCityDefensePercent(), iFlavorDefense, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iTemp = pkPromotionInfo->GetOpenAttackPercent() + pkPromotionInfo->GetOpenDefensePercent();
+			iValue = GetPromotionValue(iTemp, getExtraOpenAttackPercent() + getExtraOpenDefensePercent() + (canMoveAfterAttacking() ? 1 : 0), iFlavorOffDef, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iTemp = pkPromotionInfo->GetRoughAttackPercent() + pkPromotionInfo->GetRoughDefensePercent();
+			iValue = GetPromotionValue(iTemp, getExtraRoughAttackPercent() + getExtraRoughDefensePercent(), iFlavorOffDef, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetOpenRangedAttackMod(), getExtraOpenRangedAttackMod(), iFlavorRanged, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetRoughRangedAttackMod(), getExtraRoughRangedAttackMod(), iFlavorRanged, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetVisibilityChange(), 0, iFlavorRecon, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue((pkPromotionInfo->IsAmphib() || pkPromotionInfo->IsRiver()) ? 1 : 0, 0, iFlavorOffense, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetDefenseMod(), getDefenseModifier(), iFlavorDefense, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetFlankAttackModifier(), maxMoves() > 2 ? 1 : 0, iFlavorMobile, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iTemp = (GC.getPromotionInfo(ePromotion)->IsHealOutsideFriendly() && getDomainType() == DOMAIN_SEA) ? 1 : 0;
+			iValue = GetPromotionValue(iTemp, 0, iFlavorNaval, mediumPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(canAirPatrol(NULL) ? pkPromotionInfo->GetInterceptionCombatModifier() : 0, GetInterceptionCombatModifier(), iFlavorAir, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(canAirSweep() ? pkPromotionInfo->GetAirSweepCombatModifier() : 0, GetAirSweepCombatModifier(), iFlavorAir, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iTemp = 0;
+
+			for(iI = 0; iI < GC.getNumUnitCombatClassInfos(); iI++)
+			{
+				const UnitCombatTypes eUnitCombat = static_cast<UnitCombatTypes>(iI);
+				CvBaseInfo* pkUnitCombatInfo = GC.getUnitCombatClassInfo(eUnitCombat);
+
+				if(pkUnitCombatInfo)
+				{
+					iTemp += pkPromotionInfo->GetUnitCombatModifierPercent(iI);
+				}
+			}
+
+			iValue = GetPromotionValue(iTemp, 0, iFlavorOffDef, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iTemp = 0;
+
+			for(iI = 0; iI < NUM_DOMAIN_TYPES; iI++)
+			{
+				iTemp += pkPromotionInfo->GetDomainModifierPercent(iI);
+			}
+
+			iValue = GetPromotionValue(iTemp, getDomainType() == DOMAIN_SEA ? 1 : 0, iFlavorOffDef, lowPriority);
+		}
+
+		// Unknown promotion? Always give at least a random priority with some flavor
+		if (iValue == 0)
+		{
+			iTemp = lowPriority + GC.getGame().getJonRandNum(20, "AI Promote Unknown");
+			iValue = GetPromotionValue(1, 0, iFlavorOffDef, iTemp);
+
+			// Logging to keep track on promotions not handled on the script.
+			if(GC.getLogging() && GC.getAILogging())
+			{
+				CvString szMsg;
+				szMsg.Format("UNKNOWN PROMOTION %s.", getName().GetCString());
+				GET_PLAYER(m_eOwner).GetTacticalAI()->LogTacticalMessage(szMsg, true /*bSkipLogDominanceZone*/);
+			}
+		}
+
+		//AMS: Higher random from original 15 to 25
+		iValue += GC.getGame().getJonRandNum(25, "AI Promote");
+	}
+	else
+	{
+#endif
 	// If we are damaged, insta heal is the way to go
 	if(pkPromotionInfo->IsInstaHeal())
 	{
@@ -24934,6 +25305,9 @@ int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
 	{
 		iValue += GC.getGame().getJonRandNum(15, "AI Promote");
 	}
+#if defined(MOD_AI_SMART_V3)
+	}
+#endif
 
 	return iValue;
 }

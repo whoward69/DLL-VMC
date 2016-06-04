@@ -259,8 +259,8 @@ public:
 	};
 	UnitTypes GetUnitForArmy(CvCity* pCity) const;
 	bool WillAirUnitRebase(CvUnit* pUnit) const;
-#if defined(MOD_AI_SMART_AIR_TACTICS)
-	int GetMaxPossibleInterceptions(CvPlot* pCenterPlot) const;
+#if defined(MOD_AI_SMART_V3)
+	int GetMaxPossibleInterceptions(CvPlot* pCenterPlot, bool bCountPercents = false) const;
 #endif
 	int GetNumEnemyAirUnitsInRange(CvPlot* pCenterPlot, int iRange, bool bCountFighters, bool bCountBombers) const;
 	CvPlot *GetBestAirSweepTarget(CvUnit* pFighter) const;

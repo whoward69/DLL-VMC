@@ -33,7 +33,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 84)
+#define MOD_DLL_VERSION_NUMBER ((uint) 85)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -312,6 +312,9 @@
 // Enables production to be stockpiled (v28)
 #define MOD_PROCESS_STOCKPILE                       gCustomMods.isPROCESS_STOCKPILE()
 
+// Stops the AI from adding zero-value items (eg late game horses) into trade offers (v85)
+#define MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS            gCustomMods.isAI_NO_ZERO_VALUE_TRADE_ITEMS()
+
 // Fixes the AI's inability to use combat units as secondary workers (v26)
 #define MOD_AI_SECONDARY_WORKERS                    gCustomMods.isAI_SECONDARY_WORKERS()
 // Fixes the AI's inability to use combat units for founding cities (v26)
@@ -323,34 +326,8 @@
 // Enables JdH's MP Diplomacy code (v84)
 #define MOD_AI_MP_DIPLOMACY                         gCustomMods.isAI_MP_DIPLOMACY()
 
-// Features from the "Smart AI mod" by Ninakoru - see http://forums.civfanatics.com/showthread.php?t=521955 (v50)
-#define MOD_AI_SMART                                gCustomMods.isAI_SMART()
-#if defined(MOD_AI_SMART)
-// Omit obsolete/no value items as part of a deal if asked to balance things out (v50)
-#define MOD_AI_SMART_DEALS                          (MOD_AI_SMART && gCustomMods.isAI_SMART_DEALS())
-// Use Great people more effectively, plant some improvements early, and later use GP powers (v50)
-#define MOD_AI_SMART_GREAT_PEOPLE                   (MOD_AI_SMART && gCustomMods.isAI_SMART_GREAT_PEOPLE())
-// Delay grand strategy bias until the Renaissance (v50)
-#define MOD_AI_SMART_GRAND_STRATEGY                 (MOD_AI_SMART && gCustomMods.isAI_SMART_GRAND_STRATEGY())
-// Make better policy choices ignoring grand strategy until medieval and giving less importance to opening branches vs unlocked branches (v50)
-#define MOD_AI_SMART_POLICY_CHOICE                  (MOD_AI_SMART && gCustomMods.isAI_SMART_POLICY_CHOICE())
-// Stop making archaeologists sooner and also disband archaeologists if there are not valid targets (v50)
-#define MOD_AI_SMART_ARCHAEOLOGISTS                 (MOD_AI_SMART && gCustomMods.isAI_SMART_ARCHAEOLOGISTS())
-// Disband long obsolete units, eg triremes in industrial era (v50)
-#define MOD_AI_SMART_DISBAND                        (MOD_AI_SMART && gCustomMods.isAI_SMART_DISBAND())
-// Upgrade more units per turn if there are lots of units that can be upgraded. Also upgrade air units more often (v50)
-#define MOD_AI_SMART_UPGRADES                       (MOD_AI_SMART && gCustomMods.isAI_SMART_UPGRADES())
-// Units with at least 75% health will avoid healing (v50)
-#define MOD_AI_SMART_HEALING                        (MOD_AI_SMART && gCustomMods.isAI_SMART_HEALING())
-// Units won't randomly embark to water tiles (v50)
-#define MOD_AI_SMART_FLEE_FROM_DANGER               (MOD_AI_SMART && gCustomMods.isAI_SMART_FLEE_FROM_DANGER())
-// Ranged units are always able to move AND shoot on the same turn and should not attack over and over a city with 1 HP remaining. (v51)
-#define MOD_AI_SMART_RANGED_UNITS                   (MOD_AI_SMART && gCustomMods.isAI_SMART_RANGED_UNITS())
-// AI will hold planes back for interceptions and perform air sweep missions more efficiently, if enemy aircraft are nearby (v50)
-#define MOD_AI_SMART_AIR_TACTICS                    (MOD_AI_SMART && gCustomMods.isAI_SMART_AIR_TACTICS())
-// Improves the AI's melee tactics (v51)
-#define MOD_AI_SMART_MELEE_TACTICS                  (MOD_AI_SMART && gCustomMods.isAI_SMART_MELEE_TACTICS())
-#endif
+// Features from the "Smart AI V3 mod" by Ninakoru - see http://forums.civfanatics.com/showthread.php?t=562319 (v85)
+#define MOD_AI_SMART_V3                             gCustomMods.isAI_SMART_V3()
 
 // Events sent when terraforming occurs (v33)
 //   GameEvents.TerraformingMap.Add(function(iEvent, iLoad) end)
@@ -1249,24 +1226,12 @@ public:
 
 	MOD_OPT_DECL(PROCESS_STOCKPILE);
 
+	MOD_OPT_DECL(AI_NO_ZERO_VALUE_TRADE_ITEMS);
 	MOD_OPT_DECL(AI_SECONDARY_WORKERS);
 	MOD_OPT_DECL(AI_SECONDARY_SETTLERS);
 	MOD_OPT_DECL(AI_GREAT_PEOPLE_CHOICES);
 	MOD_OPT_DECL(AI_MP_DIPLOMACY);
-
-	MOD_OPT_DECL(AI_SMART);
-	MOD_OPT_DECL(AI_SMART_DEALS);
-	MOD_OPT_DECL(AI_SMART_GREAT_PEOPLE);
-	MOD_OPT_DECL(AI_SMART_GRAND_STRATEGY);
-	MOD_OPT_DECL(AI_SMART_POLICY_CHOICE);
-	MOD_OPT_DECL(AI_SMART_ARCHAEOLOGISTS);
-	MOD_OPT_DECL(AI_SMART_DISBAND);
-	MOD_OPT_DECL(AI_SMART_UPGRADES);
-	MOD_OPT_DECL(AI_SMART_HEALING);
-	MOD_OPT_DECL(AI_SMART_FLEE_FROM_DANGER);
-	MOD_OPT_DECL(AI_SMART_RANGED_UNITS);
-	MOD_OPT_DECL(AI_SMART_AIR_TACTICS);
-	MOD_OPT_DECL(AI_SMART_MELEE_TACTICS);
+	MOD_OPT_DECL(AI_SMART_V3);
 
 	MOD_OPT_DECL(EVENTS_TERRAFORMING);
 	MOD_OPT_DECL(EVENTS_TILE_IMPROVEMENTS);

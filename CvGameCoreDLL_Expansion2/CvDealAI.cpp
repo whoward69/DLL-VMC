@@ -2594,8 +2594,8 @@ void CvDealAI::DoAddVoteCommitmentToThem(CvDeal* pDeal, PlayerTypes eThem, bool 
 						int iItemValue = GetTradeItemValue(TRADE_ITEM_VOTE_COMMITMENT, /*bFromMe*/ false, eThem, iProposalID, iVoteChoice, iNumVotes, bRepeal, -1, bUseEvenValue);
 
 						// If adding this to the deal doesn't take it over the limit, do it
-#if defined(MOD_AI_SMART_DEALS)
-						if((!MOD_AI_SMART_DEALS || iItemValue > 0) && (iItemValue + iTotalValue <= iAmountOverWeWillRequest))
+#if defined(MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS)
+						if((iItemValue > 0) && (iItemValue + iTotalValue <= iAmountOverWeWillRequest))
 #else
 						if(iItemValue + iTotalValue <= iAmountOverWeWillRequest)
 #endif
@@ -2639,8 +2639,8 @@ void CvDealAI::DoAddVoteCommitmentToUs(CvDeal* pDeal, PlayerTypes eThem, bool bD
 						int iItemValue = GetTradeItemValue(TRADE_ITEM_VOTE_COMMITMENT, /*bFromMe*/ true, eThem, iProposalID, iVoteChoice, iNumVotes, bRepeal, -1, bUseEvenValue);
 
 						// If adding this to the deal doesn't take it under the min limit, do it
-#if defined(MOD_AI_SMART_DEALS)
-						if((!MOD_AI_SMART_DEALS || iItemValue > 0) && (-iItemValue + iTotalValue >= iAmountUnderWeWillOffer))
+#if defined(MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS)
+						if((iItemValue > 0) && (-iItemValue + iTotalValue >= iAmountUnderWeWillOffer))
 #else
 						if(-iItemValue + iTotalValue >= iAmountUnderWeWillOffer)
 #endif
@@ -2702,8 +2702,8 @@ void CvDealAI::DoAddResourceToThem(CvDeal* pDeal, PlayerTypes eThem, bool bDontC
 					iItemValue = GetTradeItemValue(TRADE_ITEM_RESOURCES, /*bFromMe*/ false, eThem, eResource, iResourceQuantity, -1, /*bFlag1*/false, iDealDuration, bUseEvenValue);
 
 					// If adding this to the deal doesn't take it over the limit, do it
-#if defined(MOD_AI_SMART_DEALS)
-					if((!MOD_AI_SMART_DEALS || iItemValue > 0) && (iItemValue + iTotalValue <= iAmountOverWeWillRequest))
+#if defined(MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS)
+					if((iItemValue > 0) && (iItemValue + iTotalValue <= iAmountOverWeWillRequest))
 #else
 					if(iItemValue + iTotalValue <= iAmountOverWeWillRequest)
 #endif
@@ -2742,8 +2742,8 @@ void CvDealAI::DoAddResourceToThem(CvDeal* pDeal, PlayerTypes eThem, bool bDontC
 					iItemValue = GetTradeItemValue(TRADE_ITEM_RESOURCES, /*bFromMe*/ false, eThem, eResource, iResourceQuantity, -1, /*bFlag1*/false, iDealDuration, bUseEvenValue);
 
 					// If adding this to the deal doesn't take it over the limit, do it
-#if defined(MOD_AI_SMART_DEALS)
-					if((!MOD_AI_SMART_DEALS || iItemValue > 0) && (iItemValue + iTotalValue <= iAmountOverWeWillRequest))
+#if defined(MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS)
+					if((iItemValue > 0) && (iItemValue + iTotalValue <= iAmountOverWeWillRequest))
 #else
 					if(iItemValue + iTotalValue <= iAmountOverWeWillRequest)
 #endif
@@ -2813,8 +2813,8 @@ void CvDealAI::DoAddResourceToUs(CvDeal* pDeal, PlayerTypes eThem, bool bDontCha
 					iItemValue = GetTradeItemValue(TRADE_ITEM_RESOURCES, /*bFromMe*/ true, eThem, eResource, iResourceQuantity, -1, /*bFlag1*/false, iDealDuration, bUseEvenValue);
 
 					// If adding this to the deal doesn't take it under the min limit, do it
-#if defined(MOD_AI_SMART_DEALS)
-					if((!MOD_AI_SMART_DEALS || iItemValue > 0) && (-iItemValue + iTotalValue >= iAmountUnderWeWillOffer))
+#if defined(MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS)
+					if((iItemValue > 0) && (-iItemValue + iTotalValue >= iAmountUnderWeWillOffer))
 #else
 					if(-iItemValue + iTotalValue >= iAmountUnderWeWillOffer)
 #endif
@@ -2854,11 +2854,11 @@ void CvDealAI::DoAddEmbassyToThem(CvDeal* pDeal, PlayerTypes eThem, bool bDontCh
 					int iItemValue = GetTradeItemValue(TRADE_ITEM_ALLOW_EMBASSY, /*bFromMe*/ false, eThem, -1, -1, -1, /*bFlag1*/false, -1, bUseEvenValue);
 
 					// If adding this to the deal doesn't take it over the limit, do it
-#if defined(MOD_AI_SMART_DEALS)
-					if((!MOD_AI_SMART_DEALS || iItemValue > 0) && (iItemValue + iTotalValue <= iAmountOverWeWillRequest))
+#if defined(MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS)
+					if((iItemValue > 0) && (iItemValue + iTotalValue <= iAmountOverWeWillRequest))
 #else
 					if(iItemValue + iTotalValue <= iAmountOverWeWillRequest)
-#endif
+#endif					
 					{
 						pDeal->AddAllowEmbassy(eThem);
 						iTotalValue = GetDealValue(pDeal, iValueImOffering, iValueTheyreOffering, bUseEvenValue);
@@ -2890,11 +2890,11 @@ void CvDealAI::DoAddEmbassyToUs(CvDeal* pDeal, PlayerTypes eThem, bool bDontChan
 					int iItemValue = GetTradeItemValue(TRADE_ITEM_ALLOW_EMBASSY, /*bFromMe*/ true, eThem, -1, -1, -1, /*bFlag1*/false, -1, bUseEvenValue);
 
 					// If adding this to the deal doesn't take it under the min limit, do it
-#if defined(MOD_AI_SMART_DEALS)
-					if((!MOD_AI_SMART_DEALS || iItemValue > 0) && (-iItemValue + iTotalValue >= iAmountUnderWeWillOffer))
+#if defined(MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS)
+					if((iItemValue > 0) && (-iItemValue + iTotalValue >= iAmountUnderWeWillOffer))
 #else
 					if(-iItemValue + iTotalValue >= iAmountUnderWeWillOffer)
-#endif
+#endif	
 					{
 						pDeal->AddAllowEmbassy(eMyPlayer);
 						iTotalValue = GetDealValue(pDeal, iValueImOffering, iValueTheyreOffering, bUseEvenValue);
@@ -2926,8 +2926,8 @@ void CvDealAI::DoAddOpenBordersToThem(CvDeal* pDeal, PlayerTypes eThem, bool bDo
 					int iItemValue = GetTradeItemValue(TRADE_ITEM_OPEN_BORDERS, /*bFromMe*/ false, eThem, -1, -1, -1, /*bFlag1*/false, iDealDuration, bUseEvenValue);
 
 					// If adding this to the deal doesn't take it over the limit, do it
-#if defined(MOD_AI_SMART_DEALS)
-					if((!MOD_AI_SMART_DEALS || iItemValue > 0) && (iItemValue + iTotalValue <= iAmountOverWeWillRequest))
+#if defined(MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS)
+					if((iItemValue > 0) && (iItemValue + iTotalValue <= iAmountOverWeWillRequest))
 #else
 					if(iItemValue + iTotalValue <= iAmountOverWeWillRequest)
 #endif
@@ -2962,8 +2962,8 @@ void CvDealAI::DoAddOpenBordersToUs(CvDeal* pDeal, PlayerTypes eThem, bool bDont
 					int iItemValue = GetTradeItemValue(TRADE_ITEM_OPEN_BORDERS, /*bFromMe*/ true, eThem, -1, -1, -1, /*bFlag1*/false, iDealDuration, bUseEvenValue);
 
 					// If adding this to the deal doesn't take it under the min limit, do it
-#if defined(MOD_AI_SMART_DEALS)
-					if((!MOD_AI_SMART_DEALS || iItemValue > 0) && (-iItemValue + iTotalValue >= iAmountUnderWeWillOffer))
+#if defined(MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS)
+					if((iItemValue > 0) && (-iItemValue + iTotalValue >= iAmountUnderWeWillOffer))
 #else
 					if(-iItemValue + iTotalValue >= iAmountUnderWeWillOffer)
 #endif

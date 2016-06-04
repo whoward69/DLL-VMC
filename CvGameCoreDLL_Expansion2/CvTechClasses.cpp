@@ -1010,7 +1010,15 @@ void CvPlayerTechs::SetLocalePriorities()
 
 				if(pLoopPlot->getOwner() == pCity->getOwner() || (iDistance <= 2 && pLoopPlot->getOwner() == NO_PLAYER))
 				{
+#if defined(MOD_AI_SMART_V3)
+					int multiplierValue = 1;
+#endif
+
+#if defined(MOD_AI_SMART_V3)
+					if(MOD_AI_SMART_V3 || !pLoopPlot->isWater())
+#else
 					if(!pLoopPlot->isWater())
+#endif
 					{
 						ResourceTypes eResource = pLoopPlot->getResourceType(m_pPlayer->getTeam());
 						if(eResource == NO_RESOURCE)
@@ -1032,13 +1040,35 @@ void CvPlayerTechs::SetLocalePriorities()
 								const ImprovementTypes eImprovement = (ImprovementTypes)pkBuildInfo->getImprovement();
 								if(eImprovement != NO_IMPROVEMENT)
 								{
-									CvImprovementEntry* pkImprovementInfo = GC.getImprovementInfo(eImprovement);
-									if(pkImprovementInfo && pkImprovementInfo->IsImprovementResourceTrade(eResource))
+#if defined(MOD_AI_SMART_V3)
+									if (MOD_AI_SMART_V3)
 									{
-										eCorrectBuild = eBuild;
-										eCorrectImprovement = eImprovement;
-										break;
+										if(pLoopPlot->canHaveImprovement(eImprovement))
+										{
+											CvImprovementEntry* pkImprovementInfo = GC.getImprovementInfo(eImprovement);
+											if (pkImprovementInfo && pkImprovementInfo->IsImprovementResourceTrade(eResource))
+											{
+												multiplierValue = 2;
+											}
+										
+											eCorrectBuild = eBuild;
+											eCorrectImprovement = eImprovement;
+											break;
+										}
 									}
+									else
+									{
+#endif
+										CvImprovementEntry* pkImprovementInfo = GC.getImprovementInfo(eImprovement);
+										if(pkImprovementInfo && pkImprovementInfo->IsImprovementResourceTrade(eResource))
+										{
+											eCorrectBuild = eBuild;
+											eCorrectImprovement = eImprovement;
+											break;
+										}
+#if defined(MOD_AI_SMART_V3)
+									}
+#endif
 								}
 							}
 						}
@@ -1058,8 +1088,23 @@ void CvPlayerTechs::SetLocalePriorities()
 							CvAssert(iTech < m_pTechs->GetNumTechs());		// Just assert on a value off the top end, a -1 is ok to just skip silently
 							if (iTech >= 0 && iTech < m_pTechs->GetNumTechs())
 							{
-								m_piLocaleTechPriority[iTech]++;
-								m_peLocaleTechResources[iTech] = eResource;
+#if defined(MOD_AI_SMART_V3)
+								if (MOD_AI_SMART_V3)
+								{
+									m_piLocaleTechPriority[iTech] += multiplierValue;
+									if (multiplierValue == 2)
+									{
+										m_peLocaleTechResources[iTech] = eResource;								
+									}
+								}
+								else
+								{
+#endif
+									m_piLocaleTechPriority[iTech]++;
+									m_peLocaleTechResources[iTech] = eResource;
+#if defined(MOD_AI_SMART_V3)
+								}
+#endif
 							}
 						}
 					}
@@ -1549,7 +1594,13 @@ void CvPlayerTechs::AddFlavorAsStrategies(int iPropagatePercent)
 	}
 
 	// Now populate the AI with the current flavor information
+#if defined(MOD_AI_SMART_V3)
+	int iDifficultyBonus = (200 - ((GC.getGame().getHandicapInfo().getAIGrowthPercent() + GC.getGame().getHandicapInfo().getAITrainPercent()) / 2));
+	int estimatedTurnsWithDiff = MOD_AI_SMART_V3 ? (GC.getGame().getDefaultEstimateEndTurn() * 90) / iDifficultyBonus : GC.getGame().getDefaultEstimateEndTurn();
+	int iGameProgressFactor = (GC.getGame().getElapsedGameTurns() * 1000) / estimatedTurnsWithDiff;
+#else
 	int iGameProgressFactor = (GC.getGame().getElapsedGameTurns() * 1000) / GC.getGame().getDefaultEstimateEndTurn();
+#endif
 	iGameProgressFactor = min(900,max(100,iGameProgressFactor));
 	for(int iFlavor = 0; iFlavor < GC.getNumFlavorTypes(); iFlavor++)
 	{
@@ -1558,11 +1609,25 @@ void CvPlayerTechs::AddFlavorAsStrategies(int iPropagatePercent)
 		// Scale the current to the same scale as the personality
 		iCurrentFlavorValue = (iCurrentFlavorValue * 10) / iBiggestFlavor;
 
+#if defined(MOD_AI_SMART_V3)
+		int iPersonalityFlavorValue = m_pPlayer->GetGrandStrategyAI()->GetPersonalityAndGrandStrategy((FlavorTypes) iFlavor, MOD_AI_SMART_V3 /*bBoostGSMainFlavor*/);
+#else
 		int iPersonalityFlavorValue = m_pPlayer->GetGrandStrategyAI()->GetPersonalityAndGrandStrategy((FlavorTypes) iFlavor);
+#endif
 
 		// this should give a more even blend between the personality and long term strategy and the more fickle current needs
 		// in the beginning of the game it will be responsive to current events, but later it should try to go for the goal more strongly
 		int iFlavorValue = ((iCurrentFlavorValue * (1000 - iGameProgressFactor)) + (iPersonalityFlavorValue * iGameProgressFactor)) / 1000;
+
+#if defined(MOD_AI_SMART_V3)
+		// Try always give a significant flavor, as is easily zeroed with previous computations...
+		if (MOD_AI_SMART_V3 && iFlavorValue < 10)
+		{
+			int flavorDivisor = (iGameProgressFactor > 500) ? 8 : 4;
+			int boostValue = (10 - iFlavorValue) / flavorDivisor;
+			iFlavorValue += boostValue;
+		}
+#endif
 
 		if(iFlavorValue > 0)
 		{

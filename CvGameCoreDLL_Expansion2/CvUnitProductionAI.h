@@ -39,6 +39,9 @@ public:
 	// Establish/retrieve weights for one flavor
 	void AddFlavorWeights(FlavorTypes eFlavor, int iWeight);
 	int GetWeight(UnitTypes eUnit);
+#if defined(MOD_AI_SMART_V3)
+	int GetTempWeightRevised(UnitTypes eUnit, int iTempWeight);
+#endif
 
 	// Recommend highest-weighted unit
 	UnitTypes RecommendUnit(UnitAITypes eUnitAIType = NO_UNITAI);

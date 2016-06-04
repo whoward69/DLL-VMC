@@ -233,7 +233,7 @@ private:
 	void DoAntiquitySites();
 	void DisbandExtraWorkers();
 	void DisbandExtraArchaeologists();
-#if defined(MOD_AI_SMART_DISBAND)
+#if defined(MOD_AI_SMART_V3)
 	void DisbandLongObsoleteUnits();
 #endif
 

@@ -465,9 +465,6 @@ public:
 	bool hasMoved() const;
 
 	int GetRange() const;
-#if defined(MOD_AI_SMART_RANGED_UNITS)
-	int GetRangeWithMovement() const;
-#endif
 	int GetNukeDamageLevel() const;
 
 	bool canBuildRoute() const;
@@ -530,6 +527,9 @@ public:
 	bool canAirAttack() const;
 	bool canAirDefend(const CvPlot* pPlot = NULL) const;
 
+#if defined(MOD_AI_SMART_V3)
+	int EnemyScoreAtRange(const CvPlot* pPlot, bool onlyInterceptors) const;
+#endif
 	int GetAirStrikeDefenseDamage(const CvUnit* pAttacker, bool bIncludeRand = true) const;
 
 	CvUnit* GetBestInterceptor(const CvPlot& pPlot, CvUnit* pkDefender = NULL, bool bLandInterceptorsOnly=false, bool bVisibleInterceptorsOnly=false) const;
@@ -1270,11 +1270,15 @@ public:
 	bool isPotentialEnemy(TeamTypes eTeam, const CvPlot* pPlot = NULL) const;
 
 	bool canRangeStrike() const;
-#if defined(MOD_AI_SMART_RANGED_UNITS)
-	bool canEverRangeStrikeAtFromPlot(int iX, int iY, CvPlot* pSourcePlot) const;
-	void GetMovablePlotListOpt(vector<CvPlot*>& plotData, CvPlot* plotTarget, bool exitOnFound);
+#if defined(MOD_AI_SMART_V3)
+	int GetRangePlusMoveToshot() const;
+	void GetMovablePlotListOpt(vector<CvPlot*>& plotData, CvPlot* plotTarget, bool exitOnFound, bool bIgnoreFriendlyUnits = false);
 #endif
+#if defined(MOD_AI_SMART_V3)
+	bool canEverRangeStrikeAt(int iX, int iY, const CvPlot* pSourcePlot = NULL) const;
+#else
 	bool canEverRangeStrikeAt(int iX, int iY) const;
+#endif
 	bool canRangeStrikeAt(int iX, int iY, bool bNeedWar = true, bool bNoncombatAllowed = true) const;
 
 	bool IsAirSweepCapable() const;
@@ -1315,6 +1319,9 @@ public:
 	void AI_promote();
 	UnitAITypes AI_getUnitAIType() const;
 	void AI_setUnitAIType(UnitAITypes eNewValue);
+#if defined(MOD_AI_SMART_V3)
+	int GetPromotionValue(int promotionBonus, int unitExtraValue, int matchFlavorValue, int baseValue);
+#endif
 	int AI_promotionValue(PromotionTypes ePromotion);
 
 	GreatPeopleDirectiveTypes GetGreatPeopleDirective() const;

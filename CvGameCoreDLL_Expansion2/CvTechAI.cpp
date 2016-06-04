@@ -114,6 +114,10 @@ void CvTechAI::AddFlavorWeights(FlavorTypes eFlavor, int iWeight, int iPropagati
 		{
 			// Set its weight by looking at tech's weight for this flavor and using iWeight multiplier passed in
 			paiTempWeights[iTech] = entry->GetFlavorValue(eFlavor) * iWeight;
+#if defined(MOD_BUGFIX_MINOR)
+			// Applying multipliers is not going to change the fact it's zero!
+			if (paiTempWeights[iTech] == 0) continue;
+#endif
 
 			// Multiply the weight by any special player-specific weighting (i.e. to prioritize civ unique bonuses)
 			paiTempWeights[iTech] *= m_pCurrentTechs->GetPlayer()->GetPlayerTechs()->GetCivTechPriority(eTech);
@@ -132,6 +136,10 @@ void CvTechAI::AddFlavorWeights(FlavorTypes eFlavor, int iWeight, int iPropagati
 		CvTechEntry* entry = m_pCurrentTechs->GetTechs()->GetEntry(iTech);
 		if(entry)
 		{
+#if defined(MOD_BUGFIX_MINOR)
+			// Adding zero is not going to achieve a lot!
+			if(paiTempWeights[iTech] != 0)
+#endif
 			m_TechAIWeights.IncreaseWeight(iTech, paiTempWeights[iTech]);
 		}
 	}
@@ -174,6 +182,11 @@ TechTypes CvTechAI::ChooseNextTech(CvPlayer *pPlayer, bool bFreeTech)
 	}
 
 	// Reweight our possible choices by their cost, but only if cost is actually a factor!
+#if defined(MOD_AI_SMART_V3)
+	if (MOD_AI_SMART_V3)
+		ReweightByCost(pPlayer, bFreeTech);
+	else
+#endif
 	if(!bFreeTech)
 		ReweightByCost(pPlayer);
 
@@ -319,13 +332,28 @@ void CvTechAI::PropagateWeights(int iTech, int iWeight, int iPropagationPercent,
 		{
 			int iPropagatedWeight = iWeight * iPropagationPercent / 100;
 
+#if defined(MOD_AI_SMART_V3)
+			FFastVector<pair<int, int>> propagation_techs;
+#endif
 			// Loop through all prerequisites
+#if defined(MOD_BUGFIX_MINOR)
+			for(int iI = 0; iI < GC.getNUM_AND_TECH_PREREQS(); iI++)
+#else
 			for(int iI = 0; iI < GC.getNUM_OR_TECH_PREREQS(); iI++)
+#endif
 			{
 				// Did we find a prereq?
 				int iPrereq = pkTechInfo->GetPrereqAndTechs(iI);
 				if(iPrereq != NO_TECH)
 				{
+#if defined(MOD_AI_SMART_V3)
+					if (MOD_AI_SMART_V3)
+					{
+						propagation_techs.push_back(pair<int, int> (iPrereq, iPropagatedWeight));
+					}
+					else
+					{
+#endif
 					// Apply reduced weight here.  Note that we apply these to the master weight array, not
 					// the temporary one.  The temporary one is just used to hold the newly weighted techs
 					// (from which this weight propagation must originate).
@@ -336,6 +364,9 @@ void CvTechAI::PropagateWeights(int iTech, int iWeight, int iPropagationPercent,
 					{
 						PropagateWeights(iPrereq, iPropagatedWeight, iPropagationPercent, iPropagationLevel++);
 					}
+#if defined(MOD_AI_SMART_V3)
+					}
+#endif
 				}
 				else
 				{
@@ -343,17 +374,45 @@ void CvTechAI::PropagateWeights(int iTech, int iWeight, int iPropagationPercent,
 				}
 
 			}
+			
+#if defined(MOD_AI_SMART_V3)
+			if (MOD_AI_SMART_V3 && !propagation_techs.empty())
+			{
+				for(unsigned int it = 0; it < propagation_techs.size(); it++)
+				{
+					if (propagation_techs[it].second > 0)
+					{
+						// Future tech propagation fix
+						int distributedWeight = pkTechInfo->IsRepeat() ? (propagation_techs[it].second * 2) : (propagation_techs[it].second / propagation_techs.size());
+
+						m_TechAIWeights.IncreaseWeight(propagation_techs[it].first, distributedWeight);
+						PropagateWeights(propagation_techs[it].first, distributedWeight, iPropagationPercent, iPropagationLevel++);
+					}					
+				}
+			}
+#endif
 		}
 	}
 }
 
 /// Recompute weights taking into account tech cost
+#if defined(MOD_AI_SMART_V3)
+void CvTechAI::ReweightByCost(CvPlayer *pPlayer, bool bWantsExpensive)
+#else
 void CvTechAI::ReweightByCost(CvPlayer *pPlayer)
+#endif
 {
 	TechTypes eTech;
 
 	// April 2014 Balance Patch: if lots of science overflow, want to pick an expensive tech
 	bool bNeedExpensiveTechs = pPlayer->getOverflowResearchTimes100() > (pPlayer->GetScienceTimes100() * 2);
+
+#if defined(MOD_AI_SMART_V3)
+	if (MOD_AI_SMART_V3 && bWantsExpensive)
+	{
+		bNeedExpensiveTechs = true;
+	}
+#endif
 
 	for(int iI = 0; iI < m_ResearchableTechs.size(); iI++)
 	{

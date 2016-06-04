@@ -2169,8 +2169,15 @@ void CvMilitaryAI::UpdateBaseData()
 	int iFlavorOffense = m_pPlayer->GetGrandStrategyAI()->GetPersonalityAndGrandStrategy((FlavorTypes)GC.getInfoTypeForString("FLAVOR_OFFENSE"));
 	int iFlavorDefense = m_pPlayer->GetGrandStrategyAI()->GetPersonalityAndGrandStrategy((FlavorTypes)GC.getInfoTypeForString("FLAVOR_DEFENSE"));
 
+#if defined(MOD_AI_SMART_V3)
+	// This value will be between 10 and 100 based on highest threat without Xml values altered.
+	int threatBase = MOD_AI_SMART_V3 ? GetThreatWeight(m_pPlayer->GetMilitaryAI()->GetHighestThreat()) * 10 : m_pPlayer->GetMilitaryAI()->GetHighestThreat();
+	// Result value will be really between 0.5 and 1.5 this time!
+	fMultiplier = (float)0.40 + (((float)(threatBase + iFlavorOffense + iFlavorDefense)) / (float)100.0);
+#else
 	// Scale up or down based on true threat level and a bit by flavors (multiplier should range from about 0.5 to about 1.5)
 	fMultiplier = (float)0.40 + (((float)(m_pPlayer->GetMilitaryAI()->GetHighestThreat() + iFlavorOffense + iFlavorDefense)) / (float)100.0);
+#endif
 
 	// first get the number of defenders that we think we need
 
@@ -2181,10 +2188,19 @@ void CvMilitaryAI::UpdateBaseData()
 	iNumUnitsWanted += (int)(m_pPlayer->getNumCities() * /*1.0*/ GC.getAI_STRATEGY_DEFEND_MY_LANDS_UNITS_PER_CITY());
 	iNumUnitsWanted += m_pPlayer->GetNumUnitsWithUnitAI(UNITAI_SETTLE, true);
 
+#if defined(MOD_AI_SMART_V3)
+	int iDifficulty = MOD_AI_SMART_V3 ? 200 - GC.getGame().getHandicapInfo().getAIUnitCostPercent() : 100;
+	// Lets add the percentage difference based on unit maintenance.
+	iNumUnitsWanted = (iNumUnitsWanted * iDifficulty) / 100;
+#endif
 	m_iMandatoryReserveSize = (int)((float)iNumUnitsWanted * fMultiplier);
 
 	// add in a few for the difficulty level (all above Chieftain are boosted)
+#if defined(MOD_AI_SMART_V3)
+	iDifficulty = MOD_AI_SMART_V3 ? 0 : max(0,GC.getGame().getHandicapInfo().GetID() - 1);
+#else
 	int iDifficulty = max(0,GC.getGame().getHandicapInfo().GetID() - 1);
+#endif
 	m_iMandatoryReserveSize += iDifficulty;
 
 	m_iMandatoryReserveSize = max(1,m_iMandatoryReserveSize);
@@ -2209,7 +2225,11 @@ void CvMilitaryAI::UpdateBaseData()
 				bConquestGrandStrategy = true;
 			}
 		}
+#if defined(MOD_AI_SMART_V3)
+		if(!MOD_AI_SMART_V3 && bConquestGrandStrategy)
+#else
 		if(bConquestGrandStrategy)
+#endif
 		{
 			iNumUnitsWanted *= 2;
 		}
@@ -2217,11 +2237,33 @@ void CvMilitaryAI::UpdateBaseData()
 		// add in a few more if the player is bold
 		iNumUnitsWanted += m_pPlayer->GetDiplomacyAI()->GetBoldness();
 
+#if defined(MOD_AI_SMART_V3)
+		if (!MOD_AI_SMART_V3)
+		{
+#endif
 		// add in more if we are playing on a high difficulty
 		iNumUnitsWanted += iDifficulty;
 
 		iNumUnitsWanted = (int)((float)iNumUnitsWanted * fMultiplier);
+#if defined(MOD_AI_SMART_V3)
+		}
+#endif
 
+#if defined(MOD_AI_SMART_V3)
+		if (MOD_AI_SMART_V3)
+		{
+			iNumUnitsWanted = (iNumUnitsWanted * iDifficulty) / 125;
+
+			iNumUnitsWanted = (int)((float)iNumUnitsWanted * fMultiplier);
+
+			iNumUnitsWanted += m_iMandatoryReserveSize;
+
+			if(bConquestGrandStrategy)
+			{
+				iNumUnitsWanted = (iNumUnitsWanted * 3) / 2;
+			}
+		}
+#endif
 		iNumUnitsWanted = max(1,iNumUnitsWanted);
 	}
 
@@ -2233,7 +2275,12 @@ void CvMilitaryAI::UpdateBaseData()
 		m_iMandatoryReserveSize /= 3;
 	}
 
+#if defined(MOD_AI_SMART_V3)
+	if (!MOD_AI_SMART_V3) iNumUnitsWanted += m_iMandatoryReserveSize;
+	m_iRecommendedMilitarySize = iNumUnitsWanted;
+#else
 	m_iRecommendedMilitarySize = m_iMandatoryReserveSize + iNumUnitsWanted;
+#endif
 }
 
 /// Update how we're doing on defensive units
@@ -3746,7 +3793,13 @@ bool CvMilitaryAI::WillAirUnitRebase(CvUnit* pUnit) const
 	bool bNeedsToMove = false;
 	if (pUnitPlot->isCity())
 	{
+#if defined(MOD_AI_SMART_V3)
+		// Don't force move from a city only because has 20% + damage, wait until damage more than half...
+		int iDivisor = MOD_AI_SMART_V3 ? 2 : 5;
+		if (pUnitPlot->getPlotCity()->getDamage() > (pUnitPlot->getPlotCity()->GetMaxHitPoints() / iDivisor))
+#else
 		if (pUnitPlot->getPlotCity()->getDamage() > (pUnitPlot->getPlotCity()->GetMaxHitPoints() / 5))
+#endif
 		{
 			bNeedsToMove = true;
 		}
@@ -3756,10 +3809,20 @@ bool CvMilitaryAI::WillAirUnitRebase(CvUnit* pUnit) const
 		CvUnit *pCarrier = pUnit->getTransportUnit();
 		if (pCarrier)
 		{
+#if defined(MOD_AI_SMART_V3)
+			// don't force moving out if carrier still in decent shape...
+			int iDivisor = MOD_AI_SMART_V3 ? 3 : 5;
+#if defined(MOD_UNITS_MAX_HP)
+			if (pCarrier->getDamage() > (pCarrier->GetMaxHitPoints() / iDivisor))
+#else
+			if (pCarrier->getDamage() > (GC.getMAX_HIT_POINTS() / iDivisor))
+#endif
+#else
 #if defined(MOD_UNITS_MAX_HP)
 			if (pCarrier->getDamage() > (pCarrier->GetMaxHitPoints() / 5))
 #else
 			if (pCarrier->getDamage() > (GC.getMAX_HIT_POINTS() / 5))
+#endif
 #endif
 			{
 				bNeedsToMove = true;
@@ -3770,7 +3833,11 @@ bool CvMilitaryAI::WillAirUnitRebase(CvUnit* pUnit) const
 	// Is this a fighter that doesn't have any useful missions nearby
 	if (pUnit->canAirPatrol(NULL) || pUnit->canAirSweep())
 	{
+#if defined(MOD_AI_SMART_V3)
+		int iNumNearbyEnemyAirUnits = MOD_AI_SMART_V3 ? pUnit->EnemyScoreAtRange(pUnit->plot(), true) : GetNumEnemyAirUnitsInRange(pUnitPlot, pUnit->GetRange(), true /*bCountFighters*/, true /*bCountBombers*/);
+#else
 		int iNumNearbyEnemyAirUnits = GetNumEnemyAirUnitsInRange(pUnitPlot, pUnit->GetRange(), true /*bCountFighters*/, true /*bCountBombers*/);
+#endif
 		if (iNumNearbyEnemyAirUnits == 0 && !GetBestAirSweepTarget(pUnit))
 		{
 			bNeedsToMove = true;
@@ -3788,10 +3855,19 @@ bool CvMilitaryAI::WillAirUnitRebase(CvUnit* pUnit) const
 	{
 		CvPlot* pLoopUnitPlot = pLoopUnit->plot();
 
+#if defined(MOD_AI_SMART_V3)
+		int iDivisor = MOD_AI_SMART_V3 ? 4 : 5;
+#if defined(MOD_UNITS_MAX_HP)
+		if(pLoopUnit->getDamage() > (pLoopUnit->GetMaxHitPoints() / iDivisor))  // this might not be a good place to land
+#else
+		if(pLoopUnit->getDamage() > (GC.getMAX_HIT_POINTS() / iDivisor))  // this might not be a good place to land
+#endif
+#else
 #if defined(MOD_UNITS_MAX_HP)
 		if(pLoopUnit->getDamage() > (pLoopUnit->GetMaxHitPoints() / 5))  // this might not be a good place to land
 #else
 		if(pLoopUnit->getDamage() > (GC.getMAX_HIT_POINTS() / 5))  // this might not be a good place to land
+#endif
 #endif
 		{
 			continue;
@@ -3821,10 +3897,19 @@ bool CvMilitaryAI::WillAirUnitRebase(CvUnit* pUnit) const
 	{
 		CvPlot* pLoopUnitPlot = pLoopUnit->plot();
 
+#if defined(MOD_AI_SMART_V3)
+		int iDivisor = MOD_AI_SMART_V3 ? 4 : 5;
+#if defined(MOD_UNITS_MAX_HP)
+		if(pLoopUnit->getDamage() > (pLoopUnit->GetMaxHitPoints() / iDivisor))  // this might not be a good place to land
+#else
+		if(pLoopUnit->getDamage() > (GC.getMAX_HIT_POINTS() / iDivisor))  // this might not be a good place to land
+#endif
+#else
 #if defined(MOD_UNITS_MAX_HP)
 		if(pLoopUnit->getDamage() > (pLoopUnit->GetMaxHitPoints() / 5))  // this might not be a good place to land
 #else
 		if(pLoopUnit->getDamage() > (GC.getMAX_HIT_POINTS() / 5))  // this might not be a good place to land
+#endif
 #endif
 		{
 			continue;
@@ -3855,7 +3940,12 @@ bool CvMilitaryAI::WillAirUnitRebase(CvUnit* pUnit) const
 	{
 		CvPlot* pTarget = pLoopCity->plot();
 
+#if defined(MOD_AI_SMART_V3)
+		int iDivisor = MOD_AI_SMART_V3 ? 3 : 5;
+		if(pLoopCity->getDamage() > (pLoopCity->GetMaxHitPoints() / iDivisor))
+#else
 		if(pLoopCity->getDamage() > (pLoopCity->GetMaxHitPoints() / 5))
+#endif
 		{
 			continue;
 		}
@@ -3872,46 +3962,42 @@ bool CvMilitaryAI::WillAirUnitRebase(CvUnit* pUnit) const
 	return false;
 }
 
-#if defined(MOD_AI_SMART_AIR_TACTICS)
-// Get all possible interceptions on that plot, doesn't use visibility to offset AI inability to remember air attacks.
-int CvMilitaryAI::GetMaxPossibleInterceptions(CvPlot* pTargetPlot) const
+#if defined(MOD_AI_SMART_V3)
+/// AMS: Get all possible interceptions on that plot, doesn't use visibility to offset AI inability to remember air attacks.
+int CvMilitaryAI::GetMaxPossibleInterceptions(CvPlot* pTargetPlot, bool bCountPercents) const
 {
 	int iRtnValue = 0;
+	int iLoopUnit;
+	CvUnit* pLoopUnit;
 
 	// Loop through all the players
-	for(int iI = 0; iI < MAX_PLAYERS; iI++)
+	for (int iI = 0; iI < MAX_PLAYERS; iI++)
 	{
 		CvPlayer& kPlayer = GET_PLAYER((PlayerTypes)iI);
 
-		if(kPlayer.isAlive() && kPlayer.GetID() != m_pPlayer->GetID())
+		if (kPlayer.isAlive() && kPlayer.GetID() != m_pPlayer->GetID())
 		{
 			if (atWar(kPlayer.getTeam(), m_pPlayer->getTeam()))
 			{
 				// Loop through their units looking for intercept capable units
-				int iLoopUnit = 0;
-
-				for(CvUnit* pLoopUnit = kPlayer.firstUnit(&iLoopUnit); pLoopUnit != NULL; pLoopUnit = kPlayer.nextUnit(&iLoopUnit))
+				iLoopUnit = 0;
+				for (pLoopUnit = kPlayer.firstUnit(&iLoopUnit); pLoopUnit != NULL; pLoopUnit = kPlayer.nextUnit(&iLoopUnit))
 				{
-					// Must be able to intercept
-					if(!pLoopUnit->isDelayedDeath() && pLoopUnit->canAirDefend() && !pLoopUnit->isInCombat())
+					// Must be able to intercept this turn
+					if (!pLoopUnit->isDelayedDeath() && pLoopUnit->canAirDefend() && !pLoopUnit->isInCombat() && !pLoopUnit->isOutOfInterceptions())
 					{
-						// Must still be able to intercept this turn.
-						if(!pLoopUnit->isOutOfInterceptions())
+						// Must either be a non-air Unit, or an air Unit that hasn't moved this turn and is on intercept duty
+						if ((pLoopUnit->getDomainType() != DOMAIN_AIR) || !(pLoopUnit->hasMoved() && pLoopUnit->GetActivityType() == ACTIVITY_INTERCEPT))
 						{
-							// Must either be a non-air Unit, or an air Unit that hasn't moved this turn
-							if((pLoopUnit->getDomainType() != DOMAIN_AIR) || !(pLoopUnit->hasMoved()))
+							// Test range
+							if (plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pTargetPlot->getX(), pTargetPlot->getY()) <= pLoopUnit->getUnitInfo().GetAirInterceptRange())
 							{
-								// Must either be a non-air Unit or an air Unit on intercept
-								if((pLoopUnit->getDomainType() != DOMAIN_AIR) || (pLoopUnit->GetActivityType() == ACTIVITY_INTERCEPT))
+								if (pLoopUnit->currInterceptionProbability() > 0)
 								{
-									// Test range
-									if(plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pTargetPlot->getX(), pTargetPlot->getY()) <= pLoopUnit->getUnitInfo().GetAirInterceptRange())
-									{
-										if (pLoopUnit->currInterceptionProbability() > 0)
-										{
-											iRtnValue++;
-										}
-									}
+									if (bCountPercents)
+										iRtnValue += pLoopUnit->currInterceptionProbability();
+									else
+										iRtnValue++;
 								}
 							}
 						}
@@ -3921,12 +4007,15 @@ int CvMilitaryAI::GetMaxPossibleInterceptions(CvPlot* pTargetPlot) const
 		}
 	}
 
+	if (bCountPercents)
+		iRtnValue /= 100;
+
 	return iRtnValue;
 }
 #endif
 
 /// Assess nearby enemy air assets
-#if defined(MOD_AI_SMART_AIR_TACTICS)
+#if defined(MOD_AI_SMART_V3)
 // Add half of unit range to the calculations.
 int CvMilitaryAI::GetNumEnemyAirUnitsInRange(CvPlot* pCenterPlot, int iRange, bool bCountFighters, bool bCountBombers) const
 #else
@@ -3949,10 +4038,9 @@ int CvMilitaryAI::GetNumEnemyAirUnitsInRange(CvPlot* pCenterPlot, int /*iRange*/
 				{
 					if (pLoopUnit->getDomainType() == DOMAIN_AIR)
 					{
-#if defined(MOD_AI_SMART_AIR_TACTICS)
+#if defined(MOD_AI_SMART_V3)
 						// Just to keep fighters closer to high range bombers (stealth bombers)
-						int iAcceptableDistance = MOD_AI_SMART_AIR_TACTICS ? min(pLoopUnit->GetRange(), 12) + (iRange / 2) : 10;
-						// distance was checked to a fixed 10 value
+						int iAcceptableDistance = MOD_AI_SMART_V3 ? min(pLoopUnit->GetRange(), 12) + (iRange / 2) : 10;
 						if ( plotDistance(pCenterPlot->getX(), pCenterPlot->getY(), pLoopUnit->getX(), pLoopUnit->getY()) <= iAcceptableDistance )
 #else
 						if ( plotDistance(pCenterPlot->getX(), pCenterPlot->getY(), pLoopUnit->getX(), pLoopUnit->getY()) <= 10 )
@@ -4899,7 +4987,10 @@ bool MilitaryAIHelpers::IsTestStrategy_NeedAirCarriers(CvPlayer* pPlayer)
 {
 	int iNumLoadableAirUnits = 0;
 	int iNumTotalCargoSpace = 0;
-
+#if defined(MOD_AI_SMART_V3)
+	int iNumCargoUnits = 0;
+	int iNumNavalUnits = 0;
+#endif
 	CvUnit* pLoopUnit;
 	int iLoop;
 	SpecialUnitTypes eSpecialUnitPlane = (SpecialUnitTypes) GC.getInfoTypeForString("SPECIALUNIT_FIGHTER");
@@ -4908,6 +4999,12 @@ bool MilitaryAIHelpers::IsTestStrategy_NeedAirCarriers(CvPlayer* pPlayer)
 		// Don't count civilians or exploration units
 		if(pLoopUnit->AI_getUnitAIType() != UNITAI_EXPLORE && pLoopUnit->AI_getUnitAIType() != UNITAI_EXPLORE_SEA)
 		{
+#if defined(MOD_AI_SMART_V3)
+			if(pLoopUnit->getDomainType() == DOMAIN_SEA)
+			{
+				iNumNavalUnits++;
+			}
+#endif
 			if(pLoopUnit->cargoSpace() > 0)
 			{
 				if(pLoopUnit->specialCargo() != NO_SPECIALUNIT)
@@ -4925,6 +5022,9 @@ bool MilitaryAIHelpers::IsTestStrategy_NeedAirCarriers(CvPlayer* pPlayer)
 						continue;
 					}
 				}
+#if defined(MOD_AI_SMART_V3)
+				iNumCargoUnits++;
+#endif
 				iNumTotalCargoSpace += pLoopUnit->cargoSpace();
 			}
 			else if (pLoopUnit->getSpecialUnitType() == eSpecialUnitPlane)
@@ -4939,7 +5039,11 @@ bool MilitaryAIHelpers::IsTestStrategy_NeedAirCarriers(CvPlayer* pPlayer)
 	int iFactor = GC.getAI_CONFIG_MILITARY_AIRCRAFT_PER_CARRIER_SPACE();
 	if (iNumLoadableAirUnits > iFactor*iNumTotalCargoSpace)
 #else
+#if defined(MOD_AI_SMART_V3)
+	if ((iNumLoadableAirUnits > iNumTotalCargoSpace) && (!MOD_AI_SMART_V3 || ((iNumNavalUnits / 4) >= iNumCargoUnits)))
+#else
 	if (iNumLoadableAirUnits > iNumTotalCargoSpace)
+#endif
 #endif
 	{
 		return true;

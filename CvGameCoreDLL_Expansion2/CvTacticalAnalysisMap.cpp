@@ -725,8 +725,27 @@ void CvTacticalAnalysisMap::AddToDominanceZones(int iIndex, CvTacticalAnalysisCe
 				{
 					iStrength = pEnemyUnit->GetBaseCombatStrength(true);
 				}
+#if defined(MOD_AI_SMART_V3)
+				int iEnemyRangedStrength = pEnemyUnit->GetMaxRangedCombatStrength(NULL, /*pCity*/ NULL, true, true);
+
+				if (MOD_AI_SMART_V3)
+				{
+					if (!pCell->IsVisible())
+					{
+						iStrength /= 2;
+						iEnemyRangedStrength /= 2;
+					}
+					
+					iEnemyRangedStrength = iEnemyRangedStrength * m_iUnitStrengthMultiplier;
+				}
+#endif				
+
 				pZone->AddEnemyStrength(iStrength * m_iUnitStrengthMultiplier);
+#if defined(MOD_AI_SMART_V3)
+				pZone->AddEnemyRangedStrength(iEnemyRangedStrength);
+#else
 				pZone->AddEnemyRangedStrength(pEnemyUnit->GetMaxRangedCombatStrength(NULL, /*pCity*/ NULL, true, true));
+#endif				
 				pZone->AddEnemyUnitCount(1);
 				if(pEnemyUnit->isRanged())
 				{
@@ -773,12 +792,24 @@ void CvTacticalAnalysisMap::CalculateMilitaryStrengths()
 				if(pZone->GetTerritoryType() == TACTICAL_TERRITORY_FRIENDLY)
 				{
 					pZone->AddFriendlyStrength(iStrength);
+#if defined(MOD_AI_SMART_V3)
+					pZone->AddFriendlyRangedStrength(pClosestCity->getStrengthValue(MOD_AI_SMART_V3));
+#else
 					pZone->AddFriendlyRangedStrength(pClosestCity->getStrengthValue());
+#endif
 				}
+#if defined(MOD_AI_SMART_V3)
+				else if(!MOD_AI_SMART_V3 || pZone->GetTerritoryType() == TACTICAL_TERRITORY_ENEMY)
+#else
 				else
+#endif
 				{
 					pZone->AddEnemyStrength(iStrength);
+#if defined(MOD_AI_SMART_V3)
+					pZone->AddEnemyRangedStrength(pClosestCity->getStrengthValue(MOD_AI_SMART_V3));
+#else
 					pZone->AddEnemyRangedStrength(pClosestCity->getStrengthValue());
+#endif
 				}
 
 				// Loop through all of OUR units first
@@ -787,13 +818,22 @@ void CvTacticalAnalysisMap::CalculateMilitaryStrengths()
 					if(pLoopUnit->IsCombatUnit())
 					{
 						if(pLoopUnit->getDomainType() == DOMAIN_AIR ||
+#if defined(MOD_AI_SMART_V3)
+								//ranged power is cross-domain!
+								(MOD_AI_SMART_V3 && pLoopUnit->isRanged()) ||
+#endif
 						        (pLoopUnit->getDomainType() == DOMAIN_LAND && !pZone->IsWater()) ||
 						        (pLoopUnit->getDomainType() == DOMAIN_SEA && pZone->IsWater()))
 						{
 							iDistance = plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pClosestCity->getX(), pClosestCity->getY());
 							if (iDistance <= m_iTacticalRange)
 							{
+#if defined(MOD_AI_SMART_V3)
+								int iRange = MOD_AI_SMART_V3 ? MIN(4 - iDistance, 0) : 4 - iDistance;
+								iMultiplier = m_iTacticalRange + iRange;
+#else
 								iMultiplier = (m_iTacticalRange + 4 - iDistance);  // "4" so unit strength isn't totally dominated by proximity to city
+#endif
 								if(iMultiplier > 0)
 								{
 									int iUnitStrength = pLoopUnit->GetBaseCombatStrengthConsideringDamage();
@@ -833,6 +873,10 @@ void CvTacticalAnalysisMap::CalculateMilitaryStrengths()
 							if(pLoopUnit->IsCombatUnit())
 							{
 								if(pLoopUnit->getDomainType() == DOMAIN_AIR ||
+#if defined(MOD_AI_SMART_V3)
+										//ranged power is cross-domain!
+										(MOD_AI_SMART_V3 && pLoopUnit->isRanged()) ||
+#endif
 								        (pLoopUnit->getDomainType() == DOMAIN_LAND && !pZone->IsWater()) ||
 								        (pLoopUnit->getDomainType() == DOMAIN_SEA && pZone->IsWater()))
 								{
@@ -844,7 +888,12 @@ void CvTacticalAnalysisMap::CalculateMilitaryStrengths()
 										iDistance = plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pClosestCity->getX(), pClosestCity->getY());
 										if (iDistance <= m_iTacticalRange)
 										{
+#if defined(MOD_AI_SMART_V3)
+											int iRange = MOD_AI_SMART_V3 ? MIN(4 - iDistance, 0) : 4 - iDistance;
+											iMultiplier = m_iTacticalRange + iRange;  // 4 because action may still be spread out over the zone
+#else
 											iMultiplier = (m_iTacticalRange + 4 - iDistance);  // "4" so unit strength isn't totally dominated by proximity to city
+#endif
 											if(!pPlot->isVisible(eTeam) && !pPlot->isAdjacentVisible(eTeam, false))
 											{
 												bVisible = false;

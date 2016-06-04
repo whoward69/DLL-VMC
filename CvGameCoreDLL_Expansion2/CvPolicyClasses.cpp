@@ -3778,7 +3778,7 @@ bool CvPlayerPolicies::CanUnlockPolicyBranch(PolicyBranchTypes eBranchType)
 	return true;
 }
 
-#if defined(MOD_AI_SMART_POLICY_CHOICE)
+#if defined(MOD_AI_SMART_V3)
 /// can the player unlock eBranchType right now?
 bool CvPlayerPolicies::IsEraPrereqBranch(PolicyBranchTypes eBranchType)
 {
@@ -4764,10 +4764,10 @@ void CvPlayerPolicies::AddFlavorAsStrategies(int iPropagatePercent)
 
 //		NEW WAY: use PERSONALITY flavors (since policy choices are LONG-TERM)
 //		EVEN NEWER WAY: add in a modifier for the Grand Strategy we are running (since these are also long term)
-#if defined(MOD_AI_SMART_GRAND_STRATEGY)
-		// NEWER NEWER WAY: don't add grand strategy factor before medieval era, the AI still doesn't know if the Grand Strategy is solid.
+#if defined(MOD_AI_SMART_V3)
+		// Before medieval era, the AI still doesn't know if the Grand Strategy is solid.
 		EraTypes eMedieval = (EraTypes) GC.getInfoTypeForString("ERA_MEDIEVAL", true);
-		if (MOD_AI_SMART_GRAND_STRATEGY && m_pPlayer->GetCurrentEra() < eMedieval)
+		if (MOD_AI_SMART_V3 && m_pPlayer->GetCurrentEra() < eMedieval)
 		{
 			iFlavorValue = m_pPlayer->GetFlavorManager()->GetPersonalityIndividualFlavor((FlavorTypes) iFlavor);
 		}

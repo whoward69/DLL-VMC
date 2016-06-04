@@ -302,7 +302,7 @@ private:
 	void ExecuteSSPartAdds();
 	void ExecuteSSPartMoves();
 	void ExecuteTreasureMoves();
-#if defined(MOD_AI_SMART_AIR_TACTICS)
+#if defined(MOD_AI_SMART_V3)
 	void ExecuteAircraftInterceptions();
 #endif
 	void ExecuteAircraftMoves();
