@@ -3969,17 +3969,8 @@ void CvUnitCombat::ApplyPostCombatTraitEffects(CvUnit* pkWinner, CvUnit* pkLoser
 	int iExistingDelay = 0;
 
 	// "Heal if defeat enemy" promotion; doesn't apply if defeat a barbarian
-#if defined(MOD_BUGFIX_MINOR)
-	// If the modder wants the healing to be negative (ie additional damage), then let it be
-	if(pkWinner->getHPHealedIfDefeatEnemy() != 0 && (pkLoser->getOwner() != BARBARIAN_PLAYER || !(pkWinner->IsHealIfDefeatExcludeBarbarians())))
-#else
 	if(pkWinner->getHPHealedIfDefeatEnemy() > 0 && (pkLoser->getOwner() != BARBARIAN_PLAYER || !(pkWinner->IsHealIfDefeatExcludeBarbarians())))
-#endif
 	{
-#if defined(MOD_BUGFIX_MINOR)
-		// Apply the healing/damage - but don't let the unit die!
-		pkWinner->changeDamage(max(0, min(pkWinner->GetMaxHitPoints()-1, pkWinner->getDamage() - pkWinner->getHPHealedIfDefeatEnemy())));
-#else
 		if(pkWinner->getHPHealedIfDefeatEnemy() > pkWinner->getDamage())
 		{
 			pkWinner->changeDamage(-pkWinner->getDamage());
@@ -3988,8 +3979,22 @@ void CvUnitCombat::ApplyPostCombatTraitEffects(CvUnit* pkWinner, CvUnit* pkLoser
 		{
 			pkWinner->changeDamage(-pkWinner->getHPHealedIfDefeatEnemy());
 		}
-#endif
 	}
+#if defined(MOD_BUGFIX_MINOR)
+	// If the modder wants the healing to be negative (ie additional damage), then let it be
+	else if(pkWinner->getHPHealedIfDefeatEnemy() < 0 && (pkLoser->getOwner() != BARBARIAN_PLAYER || !(pkWinner->IsHealIfDefeatExcludeBarbarians())))
+	{
+		if(pkWinner->getHPHealedIfDefeatEnemy() <= (pkWinner->getDamage() - pkWinner->GetMaxHitPoints()))
+		{
+			// The graphics engine expects the unit to be alive here, so do NOT inflict enough damage to kill it!
+			pkWinner->setDamage(pkWinner->GetMaxHitPoints()-1);
+		}
+		else
+		{
+			pkWinner->changeDamage(-pkWinner->getHPHealedIfDefeatEnemy());
+		}
+	}
+#endif
 
 	CvPlayer& kPlayer = GET_PLAYER(pkWinner->getOwner());
 	if (pkWinner->GetGoldenAgeValueFromKills() > 0)

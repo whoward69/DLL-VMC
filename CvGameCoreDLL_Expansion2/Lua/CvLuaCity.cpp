@@ -250,6 +250,9 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(GetJONSCulturePerTurnFromGreatWorks);
 	Method(GetJONSCulturePerTurnFromTraits);
 	Method(GetJONSCulturePerTurnFromReligion);
+#if defined(MOD_BUGFIX_LUA_API)
+	Method(ChangeJONSCulturePerTurnFromReligion);
+#endif
 	Method(GetJONSCulturePerTurnFromLeagues);
 
 	Method(GetCultureRateModifier);
@@ -279,6 +282,9 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(GetFaithPerTurnFromPolicies);
 	Method(GetFaithPerTurnFromTraits);
 	Method(GetFaithPerTurnFromReligion);
+#if defined(MOD_BUGFIX_LUA_API)
+	Method(ChangeFaithPerTurnFromReligion);
+#endif
 
 	Method(IsReligionInCity);
 	Method(IsHolyCityForReligion);
@@ -4071,7 +4077,7 @@ int CvLuaCity::lPushOrder(lua_State* L)
 	const OrderTypes eOrder	= (OrderTypes)lua_tointeger(L, 2);
 	const int iData1		= lua_tointeger(L, 3);
 	const int iData2		= lua_tointeger(L, 4);
-	const bool bSave		= lua_tointeger(L, 5);
+	const bool bSave		= lua_tointeger(L, 5); // While this looks like a bug (should be lua_toboolean), fixing it will break a large number of game core .lua files!
 	const bool bPop			= lua_toboolean(L, 6);
 	const bool bAppend		= lua_toboolean(L, 7);
 	const bool bForce		= luaL_optint(L, 8, 0);
@@ -4111,7 +4117,11 @@ int CvLuaCity::lGetOrderFromQueue(lua_State* L)
 		{
 			lua_pushinteger(L, pkOrder->eOrderType);
 			lua_pushinteger(L, pkOrder->iData1);
+#if defined(MOD_BUGFIX_LUA_API)
+			lua_pushinteger(L, pkOrder->iData2);
+#else
 			lua_pushinteger(L, pkOrder->iData1);
+#endif
 			lua_pushboolean(L, pkOrder->bSave);
 			lua_pushboolean(L, pkOrder->bRush);
 			return 5;

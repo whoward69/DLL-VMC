@@ -1265,8 +1265,20 @@ int CvLuaTeam::lSetHasTech(lua_State* L)
 	const TechTypes eIndex = (TechTypes)lua_tointeger(L, 2);
 	const bool bNewValue = lua_toboolean(L, 3);
 	const PlayerTypes ePlayer = (PlayerTypes)lua_tointeger(L, 4);
+
+#if defined(MOD_BUGFIX_LUA_API)
+	bool bFirst = lua_toboolean(L, 4);
+	bool bAnnounce = lua_toboolean(L, 5);
+
+	if (lua_gettop(L) == 6)
+	{
+		bFirst = lua_toboolean(L, 5);
+		bAnnounce = lua_toboolean(L, 6);
+	}
+#else
 	const bool bFirst = lua_toboolean(L, 4);
 	const bool bAnnounce = lua_toboolean(L, 5);
+#endif
 
 	pkTeam->setHasTech(eIndex, bNewValue, ePlayer, bFirst, bAnnounce);
 	return 0;

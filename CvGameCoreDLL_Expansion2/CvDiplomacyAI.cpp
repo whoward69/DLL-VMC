@@ -20992,6 +20992,15 @@ void CvDiplomacyAI::DoFromUIDiploEvent(PlayerTypes eFromPlayer, FromUIDiploEvent
 				gDLL->GameplayDiplomacyAILeaderMessage(eMyPlayer, DIPLO_UI_STATE_BLANK_DISCUSSION, strText, LEADERHEAD_ANIM_POSITIVE);
 #endif
 			}
+			
+#if defined(MOD_DIPLOMACY_STFU)
+			if (MOD_DIPLOMACY_STFU)
+			{
+				// The (human) player just forgave the AI for spying on them, so make sure the AI doesn't immediately ask for forgiveness!
+				DoAddNewStatementToDiploLog(eFromPlayer, DIPLO_STATEMENT_KILLED_MY_SPY);
+				CUSTOMLOG("AI player %i will NOT ask human player %i for forgiveness for spying, as that player just forgave them!", eMyPlayer, eFromPlayer);
+			}
+#endif
 		}
 
 		break;

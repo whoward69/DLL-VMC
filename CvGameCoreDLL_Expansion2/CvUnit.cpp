@@ -7777,6 +7777,14 @@ bool CvUnit::canPillage(const CvPlot* pPlot) const
 	{
 		return false;
 	}
+	
+#if defined(MOD_EVENTS_UNIT_ACTIONS)
+	if (MOD_EVENTS_UNIT_ACTIONS) {
+		if (GAMEEVENTINVOKE_TESTALL(GAMEEVENT_UnitCanPillage, getOwner(), GetID(), eImprovementType, pPlot->getRouteType()) == GAMEEVENTRETURN_FALSE) {
+			return false;
+		}
+	}
+#endif
 
 	return true;
 }
@@ -7835,6 +7843,17 @@ bool CvUnit::pillage()
 				// TODO: add scripting support for "doPillageGold"
 				iPillageGold = GC.getGame().getJonRandNum(pkImprovement->GetPillageGold(), "Pillage Gold 1");
 				iPillageGold += GC.getGame().getJonRandNum(pkImprovement->GetPillageGold(), "Pillage Gold 2");
+
+#if defined(MOD_EVENTS_UNIT_ACTIONS)
+				if (MOD_EVENTS_UNIT_ACTIONS) {
+					int iValue = 0;
+					if (GAMEEVENTINVOKE_VALUE(iValue, GAMEEVENT_UnitPillageGold, getOwner(), GetID(), eTempImprovement, pkImprovement->GetPillageGold()) == GAMEEVENTRETURN_VALUE) {
+						iPillageGold = iValue;
+						CUSTOMLOG("Pillage gold is %i", iPillageGold);
+					}
+				}
+#endif
+
 				iPillageGold += (getPillageChange() * iPillageGold) / 100;
 
 				if(iPillageGold > 0)
