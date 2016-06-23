@@ -391,6 +391,9 @@ protected:
 
 	static int lGetX(lua_State* L);
 	static int lGetY(lua_State* L);
+#if defined(MOD_API_LUA_EXTENSIONS)
+	LUAAPIEXTN(GetXY, int); // Returns int X, int Y
+#endif
 	static int lSetXY(lua_State* L);
 	static int lAt(lua_State* L);
 	static int lAtPlot(lua_State* L);

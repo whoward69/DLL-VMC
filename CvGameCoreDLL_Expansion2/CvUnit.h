@@ -53,6 +53,12 @@ struct CvUnitCaptureDefinition
 	bool bAsIs;
 #if defined(MOD_API_EXTENSIONS)
 	int iScenarioData;
+	CvString sName;
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+	CvString sGreatName;
+#endif
+	GreatWorkType eGreatWork;
+	int iTourismBlastStrength;
 #endif
 	ReligionTypes eReligion;
 	int iReligiousStrength;
@@ -70,6 +76,12 @@ struct CvUnitCaptureDefinition
 		, bAsIs(false)
 #if defined(MOD_API_EXTENSIONS)
 		, iScenarioData(0)
+		, sName(NULL)
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+		, sGreatName(NULL)
+#endif
+		, eGreatWork(NO_GREAT_WORK)
+		, iTourismBlastStrength(0)
 #endif
 		, eReligion(NO_RELIGION)
 		, iReligiousStrength(0)

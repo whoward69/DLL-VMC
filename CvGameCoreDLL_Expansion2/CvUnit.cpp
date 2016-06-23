@@ -1712,7 +1712,7 @@ void CvUnit::kill(bool bDelay, PlayerTypes ePlayer /*= NO_PLAYER*/)
 	{
 		if (HasUnusedGreatWork())
 		{
-			CUSTOMLOG("Killing a Great Writer, Artist or Musician who didn't create their Great Work!");
+			CUSTOMLOG("Killing a Great Writer, Artist or Musician who didn't create their Great Work (%s)", getGreatName().c_str());
 			GC.getGame().removeGreatPersonBornName(getGreatName());
 		}
 	}
@@ -1880,14 +1880,25 @@ bool CvUnit::getCaptureDefinition(CvUnitCaptureDefinition* pkCaptureDef, PlayerT
 	kCaptureDef.eCaptureUnitType = NO_UNIT;
 #if defined(MOD_API_EXTENSIONS)
 	kCaptureDef.iScenarioData = m_iScenarioData;
+
+    // If this is a GP with need to keep their details
+	if (IsGreatPerson()) {
+		kCaptureDef.sName = getName();
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+		kCaptureDef.sGreatName = getGreatName();
 #endif
+		kCaptureDef.eGreatWork = m_eGreatWork;
+		kCaptureDef.iTourismBlastStrength = m_iTourismBlastStrength;
+	}
+#endif
+
 	if (GetReligionData())
 	{
 		kCaptureDef.eReligion = GetReligionData()->GetReligion();
 		kCaptureDef.iReligiousStrength = GetReligionData()->GetReligiousStrength();
 		kCaptureDef.iSpreadsLeft = GetReligionData()->GetSpreadsLeft();
 	}
-
+	
 	// Captured as is?
 	if(IsCapturedAsIs())
 	{
@@ -1961,6 +1972,23 @@ bool CvUnit::getCaptureDefinition(CvUnitCaptureDefinition* pkCaptureDef, PlayerT
 
 #if defined(MOD_API_EXTENSIONS)
 					pkCapturedUnit->setScenarioData(kCaptureDef.iScenarioData);
+					
+					// If we have a great person, use their details
+					if (pkCapturedUnit->IsGreatPerson())
+					{
+						pkCapturedUnit->setName(kCaptureDef.sName);
+#if defined(MOD_GLOBAL_NO_LOST_GREATWORKS)
+						if (MOD_GLOBAL_NO_LOST_GREATWORKS && pkCapturedUnit->HasUnusedGreatWork())
+						{
+							CUSTOMLOG("Renaming a Great Writer, Artist or Musician who didn't create their Great Work (%s)", pkCapturedUnit->getGreatName().c_str());
+							GC.getGame().removeGreatPersonBornName(pkCapturedUnit->getGreatName());
+						}
+
+						pkCapturedUnit->setGreatName(kCaptureDef.sGreatName);
+#endif
+						pkCapturedUnit->SetGreatWork(kCaptureDef.eGreatWork);
+						pkCapturedUnit->SetTourismBlastStrength(kCaptureDef.iTourismBlastStrength);
+					}
 #endif
 
 					if(GC.getLogging() && GC.getAILogging())
@@ -7680,6 +7708,14 @@ bool CvUnit::canPillage(const CvPlot* pPlot) const
 		return false;
 	}
 
+#if defined(MOD_BUGFIX_MINOR)
+	// Bail early if the unit has no moves left
+	if (getMoves() <= 0)
+	{
+		return false;
+	}
+#endif
+
 	if(!(getUnitInfo().IsPillage()))
 	{
 		return false;
@@ -7856,7 +7892,12 @@ bool CvUnit::pillage()
 
 				iPillageGold += (getPillageChange() * iPillageGold) / 100;
 
-				if(iPillageGold > 0)
+#if defined(MOD_API_EXTENSIONS)
+				// Trust the modder if they set negative gold
+				if (iPillageGold != 0)
+#else
+				if (iPillageGold > 0)
+#endif
 				{
 					GET_PLAYER(getOwner()).GetTreasury()->ChangeGold(iPillageGold);
 

@@ -104,6 +104,9 @@ CvImprovementEntry::CvImprovementEntry(void):
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	m_bMakesPassable(false),
 #endif
+#if defined(MOD_GLOBAL_NO_FOLLOWUP)
+	m_bNoFollowup(false),
+#endif
 	m_bFreshWaterMakesValid(false),
 	m_bRiverSideMakesValid(false),
 	m_bNoFreshWater(false),
@@ -241,7 +244,14 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 	m_bMountainsMakesValid = kResults.GetBool("MountainsMakesValid");
 #endif
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
-	m_bMakesPassable = kResults.GetBool("MakesPassable");
+	if (MOD_GLOBAL_PASSABLE_FORTS) {
+		m_bMakesPassable = kResults.GetBool("MakesPassable");
+	}
+#endif
+#if defined(MOD_GLOBAL_NO_FOLLOWUP)
+	if (MOD_GLOBAL_NO_FOLLOWUP) {
+		m_bNoFollowup = kResults.GetBool("NoFollowup");
+	}
 #endif
 	m_bFreshWaterMakesValid = kResults.GetBool("FreshWaterMakesValid");
 	m_bRiverSideMakesValid = kResults.GetBool("RiverSideMakesValid");
@@ -738,6 +748,14 @@ bool CvImprovementEntry::IsMountainsMakesValid() const
 bool CvImprovementEntry::IsMakesPassable() const
 {
 	return m_bMakesPassable;
+}
+#endif
+
+#if defined(MOD_GLOBAL_NO_FOLLOWUP)
+/// Units won't follow up from this improvement
+bool CvImprovementEntry::IsNoFollowup() const
+{
+	return m_bNoFollowup;
 }
 #endif
 

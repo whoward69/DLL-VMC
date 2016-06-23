@@ -981,6 +981,14 @@ bool CvUnitMission::CanStartMission(UnitHandle hUnit, int iMission, int iData1, 
 		return false;
 	}
 
+#if defined(MOD_BUGFIX_MINOR)
+	// Bail early if the unit has no moves left
+	if (hUnit->maxMoves() > 0 && hUnit->getMoves() <= 0)
+	{
+		return false;
+	}
+#endif
+
 	// Prevented by scripting?
 	ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
 	if(pkScriptSystem)

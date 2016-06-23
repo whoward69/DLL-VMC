@@ -320,16 +320,32 @@ void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender
 		}
 
 #if defined(MOD_GLOBAL_NO_FOLLOWUP_FROM_CITIES)
-		if (MOD_GLOBAL_NO_FOLLOWUP_FROM_CITIES) {
-			// If the attacker is in a city, fort or citadel, don't advance
-			static ImprovementTypes eImprovementFort = (ImprovementTypes)GC.getInfoTypeForString("IMPROVEMENT_FORT");
-			static ImprovementTypes eImprovementCitadel = (ImprovementTypes)GC.getInfoTypeForString("IMPROVEMENT_CITADEL");
-			CvPlot* attackPlot = kAttacker.plot();
+		// If the attacker is in a city, don't advance
+		if (MOD_GLOBAL_NO_FOLLOWUP_FROM_CITIES && kAttacker.plot()->isCity()) {
+			CUSTOMLOG("Attacker %s is in a city/fort/citadel at (%i, %i) - they will not follow up", kAttacker.getName().GetCString(), kAttacker.getX(), kAttacker.getY());
+			bAdvance = false;
+		}
+#endif
 
-			if (attackPlot->isCity() || attackPlot->getImprovementType() == eImprovementFort || attackPlot->getImprovementType() == eImprovementCitadel) {
-				CUSTOMLOG("Attacker %s is in a city/fort/citadel at (%i, %i) - they will not follow up", kAttacker.getName().GetCString(), attackPlot->getX(), attackPlot->getY());
+#if defined(MOD_GLOBAL_NO_FOLLOWUP) || defined(MOD_EVENTS_UNIT_ACTIONS)
+		ImprovementTypes eImprovement = kAttacker.plot()->getImprovementType();
+		
+		if (eImprovement != NO_IMPROVEMENT) {
+#if defined(MOD_GLOBAL_NO_FOLLOWUP)
+			if (MOD_GLOBAL_NO_FOLLOWUP && GC.getImprovementInfo(eImprovement)->IsNoFollowup()) {
+				// The attacker is in a designated improvement (fort, citadel, etc), so don't advance
+				CUSTOMLOG("Attacker %s is in a designated improvement (%i) at (%i, %i) - they will not follow up", kAttacker.getName().GetCString(), eImprovement, kAttacker.getX(), kAttacker.getY());
 				bAdvance = false;
 			}
+#endif
+
+#if defined(MOD_EVENTS_UNIT_ACTIONS)
+			if (MOD_EVENTS_UNIT_ACTIONS && bAdvance) {
+				if (GAMEEVENTINVOKE_TESTALL(GAMEEVENT_UnitCanFollowupFrom, kAttacker.getOwner(), kAttacker.GetID(), eImprovement, kAttacker.getX(), kAttacker.getY(), pkDefender->getX(), pkDefender->getY()) == GAMEEVENTRETURN_FALSE) {
+					bAdvance = false;
+				}
+			}
+#endif
 		}
 #endif
 

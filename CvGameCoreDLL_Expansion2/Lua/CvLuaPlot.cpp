@@ -156,6 +156,7 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(GetX);
 	Method(GetY);
 #if defined(MOD_API_LUA_EXTENSIONS)
+	Method(GetXY);
 	Method(GetIndex);
 #endif
 	Method(At);
@@ -1115,6 +1116,18 @@ int CvLuaPlot::lGetY(lua_State* L)
 	return BasicLuaMethod(L, &CvPlot::getY);
 }
 #if defined(MOD_API_LUA_EXTENSIONS)
+//------------------------------------------------------------------------------
+//int, int getXY();
+int CvLuaPlot::lGetXY(lua_State* L)
+{
+	CvPlot* pkPlot = GetInstance(L);
+	const int iX = pkPlot->getX();
+	const int iY = pkPlot->getY();
+
+	lua_pushinteger(L, iX);
+	lua_pushinteger(L, iY);
+	return 2;
+}
 //------------------------------------------------------------------------------
 //int getIndex();
 int CvLuaPlot::lGetIndex(lua_State* L)

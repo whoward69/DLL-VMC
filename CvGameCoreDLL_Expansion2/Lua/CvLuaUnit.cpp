@@ -380,6 +380,9 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 
 	Method(GetX);
 	Method(GetY);
+#if defined(MOD_API_LUA_EXTENSIONS)
+	Method(GetXY);
+#endif
 	Method(SetXY);
 	Method(At);
 	Method(AtPlot);
@@ -3625,6 +3628,20 @@ int CvLuaUnit::lGetY(lua_State* L)
 	lua_pushinteger(L, iResult);
 	return 1;
 }
+#if defined(MOD_API_LUA_EXTENSIONS)
+//------------------------------------------------------------------------------
+//int, int getXY();
+int CvLuaUnit::lGetXY(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iX = pkUnit->getX();
+	const int iY = pkUnit->getY();
+
+	lua_pushinteger(L, iX);
+	lua_pushinteger(L, iY);
+	return 2;
+}
+#endif
 //------------------------------------------------------------------------------
 //void setXY(int iX, int iY, bool bGroup = false, bool bUpdate = true, bool bShow = false, bCheckPlotVisible = false);
 int CvLuaUnit::lSetXY(lua_State* L)

@@ -102,6 +102,9 @@ public:
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	bool IsMakesPassable() const;
 #endif
+#if defined(MOD_GLOBAL_NO_FOLLOWUP)
+	bool IsNoFollowup() const;
+#endif
 	bool IsFreshWaterMakesValid() const;
 	bool IsRiverSideMakesValid() const;
 	bool IsNoFreshWater() const;
@@ -240,6 +243,9 @@ protected:
 #endif
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	bool m_bMakesPassable;
+#endif
+#if defined(MOD_GLOBAL_NO_FOLLOWUP)
+	bool m_bNoFollowup;
 #endif
 	bool m_bFreshWaterMakesValid;
 	bool m_bRiverSideMakesValid;

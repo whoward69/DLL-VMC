@@ -194,6 +194,9 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(GetID);
 	Method(GetX);
 	Method(GetY);
+#if defined(MOD_API_LUA_EXTENSIONS)
+	Method(GetXY);
+#endif
 	Method(At);
 	Method(AtPlot);
 	Method(Plot);
@@ -1925,6 +1928,20 @@ int CvLuaCity::lGetY(lua_State* L)
 	lua_pushinteger(L, iResult);
 	return 1;
 }
+#if defined(MOD_API_LUA_EXTENSIONS)
+//------------------------------------------------------------------------------
+//int, int getXY();
+int CvLuaCity::lGetXY(lua_State* L)
+{
+	CvCity* pkCity = GetInstance(L);
+	const int iX = pkCity->getX();
+	const int iY = pkCity->getY();
+
+	lua_pushinteger(L, iX);
+	lua_pushinteger(L, iY);
+	return 2;
+}
+#endif
 //------------------------------------------------------------------------------
 //bool at(int iX, int iY);
 int CvLuaCity::lAt(lua_State* L)

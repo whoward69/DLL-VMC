@@ -33,7 +33,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 86)
+#define MOD_DLL_VERSION_NUMBER ((uint) 87)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -151,7 +151,9 @@
 #define MOD_GLOBAL_VENICE_KEEPS_RESOURCES           gCustomMods.isGLOBAL_VENICE_KEEPS_RESOURCES()
 // Mercantile City States acquired via Diplomatic Marriage do not lose their unique resources (v81)
 #define MOD_GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES      gCustomMods.isGLOBAL_CS_MARRIAGE_KEEPS_RESOURCES()
-// Units attacking from cities, forts or citadels will not follow-up if they kill the defender
+// Units attacking from designated improvements (forts, citadels, etc) will not follow-up if they kill the defender (v87)
+#define MOD_GLOBAL_NO_FOLLOWUP                      gCustomMods.isGLOBAL_NO_FOLLOWUP()
+// Units attacking from cities will not follow-up if they kill the defender
 #define MOD_GLOBAL_NO_FOLLOWUP_FROM_CITIES          gCustomMods.isGLOBAL_NO_FOLLOWUP_FROM_CITIES()
 // Units that can move after attacking can also capture civilian units (eg workers in empty barbarian camps) (v32)
 #define MOD_GLOBAL_CAPTURE_AFTER_ATTACKING          gCustomMods.isGLOBAL_CAPTURE_AFTER_ATTACKING()
@@ -485,6 +487,7 @@
 // Events sent as units perform actions (v86)
 //   GameEvents.UnitCanPillage.Add(function(iPlayer, iUnit, iImprovement, iRoute) return true end)
 //   GameEvents.UnitPillageGold.Add(function(iPlayer, iUnit, iImprovement, iGold) return iGold end)
+//   GameEvents.UnitCanFollowupFrom.Add(function(iPlayer, iUnit, iImprovement, iFromX, iFromY, iToX, iToY) return true end) (v87)
 #define MOD_EVENTS_UNIT_ACTIONS                     gCustomMods.isEVENTS_UNIT_ACTIONS()
 
 // Events sent as units are promoted/upgraded
@@ -1033,6 +1036,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_TileRevealed					"TileRevealed",					"iiiibii"
 #define GAMEEVENT_TileRouteChanged				"TileRouteChanged",				"iiiiib"
 #define GAMEEVENT_UiDiploEvent					"UiDiploEvent",					"iiii"
+#define GAMEEVENT_UnitCanFollowupFrom			"UnitCanFollowupFrom",			"iiiiiii"
 #define GAMEEVENT_UnitCanHaveAnyUpgrade			"UnitCanHaveAnyUpgrade",		"ii"
 #define GAMEEVENT_UnitCanHaveGreatWork			"UnitCanHaveGreatWork",			"iii"
 #define GAMEEVENT_UnitCanHaveName				"UnitCanHaveName",				"iii"
@@ -1157,6 +1161,7 @@ public:
 	MOD_OPT_DECL(GLOBAL_CS_NO_ALLIED_SKIRMISHES);
 	MOD_OPT_DECL(GLOBAL_VENICE_KEEPS_RESOURCES);
 	MOD_OPT_DECL(GLOBAL_CS_MARRIAGE_KEEPS_RESOURCES);
+	MOD_OPT_DECL(GLOBAL_NO_FOLLOWUP);
 	MOD_OPT_DECL(GLOBAL_NO_FOLLOWUP_FROM_CITIES);
 	MOD_OPT_DECL(GLOBAL_CAPTURE_AFTER_ATTACKING);
 	MOD_OPT_DECL(GLOBAL_NO_OCEAN_PLUNDERING);
