@@ -13158,7 +13158,11 @@ TechTypes CvMinorCivAI::GetGoodTechPlayerDoesntHave(PlayerTypes ePlayer, int iRo
 
 
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
+#if defined(MOD_BUGFIX_MINOR)
+	CvTeam& kTeam = GET_TEAM(kPlayer.getTeam());
+#else
 	CvTeam kTeam = GET_TEAM(kPlayer.getTeam());
+#endif
 
 	for(int iTechLoop = 0; iTechLoop < GC.getNumTechInfos(); iTechLoop++)
 	{

@@ -29277,7 +29277,7 @@ bool CvPlayer::IsAtPeaceWith(PlayerTypes iPlayer) const
 
 bool CvPlayer::IsAtWar() const
 {
-	CvTeam kTeam = GET_TEAM(getTeam());
+	CvTeam& kTeam = GET_TEAM(getTeam());
 
 	for (int iTeam = 0; iTeam < (MAX_TEAMS-1); iTeam++) {
 		if (GET_TEAM((TeamTypes)iTeam).isAlive() && kTeam.isAtWar((TeamTypes)iTeam)) {
@@ -29290,7 +29290,7 @@ bool CvPlayer::IsAtWar() const
 
 bool CvPlayer::IsAtWarAnyMajor() const
 {
-	CvTeam kTeam = GET_TEAM(getTeam());
+	CvTeam& kTeam = GET_TEAM(getTeam());
 
 	for (int iTeam = 0; iTeam < (MAX_TEAMS-1); iTeam++) {
 		if (GET_TEAM((TeamTypes)iTeam).isAlive() && GET_TEAM((TeamTypes)iTeam).isMajorCiv() && kTeam.isAtWar((TeamTypes)iTeam)) {
@@ -29303,7 +29303,7 @@ bool CvPlayer::IsAtWarAnyMajor() const
 
 bool CvPlayer::IsAtWarAnyMinor() const
 {
-	CvTeam kTeam = GET_TEAM(getTeam());
+	CvTeam& kTeam = GET_TEAM(getTeam());
 
 	for (int iTeam = 0; iTeam < (MAX_TEAMS-1); iTeam++) {
 		if (GET_TEAM((TeamTypes)iTeam).isAlive() && GET_TEAM((TeamTypes)iTeam).isMinorCiv() && kTeam.isAtWar((TeamTypes)iTeam)) {
@@ -29316,7 +29316,7 @@ bool CvPlayer::IsAtWarAnyMinor() const
 
 bool CvPlayer::IsAtWarWith(PlayerTypes iPlayer) const
 {
-	CvTeam kTeam = GET_TEAM(getTeam());
+	CvTeam& kTeam = GET_TEAM(getTeam());
 
 	return (iPlayer >= 0 && iPlayer < MAX_PLAYERS && kTeam.isAtWar(GET_PLAYER(iPlayer).getTeam()));
 }

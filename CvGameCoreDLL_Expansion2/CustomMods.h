@@ -33,7 +33,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 87)
+#define MOD_DLL_VERSION_NUMBER ((uint) 88)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -533,6 +533,8 @@
 
 // Events sent about resolutions (v51)
 //   GameEvents.PlayerCanPropose.Add(function(iPlayer, iResolution, iChoice, bEnact) return true end)
+//   GameEvents.ResolutionProposing.Add(function(iPlayer, iLeague) return false; end) (v88)
+//   GameEvents.ResolutionVoting.Add(function(iPlayer, iLeague) return false; end) (v88)
 //   GameEvents.ResolutionResult.Add(function(iResolution, iChoice, bEnact, bPassed) end)
 #define MOD_EVENTS_RESOLUTIONS                      gCustomMods.isEVENTS_RESOLUTIONS()
 
@@ -1026,7 +1028,9 @@ enum BattleTypeTypes
 #define GAMEEVENT_ReligionEnhanced				"ReligionEnhanced",				"iiii"
 #define GAMEEVENT_ReligionFounded				"ReligionFounded",				"iiiiiiii"
 #define GAMEEVENT_ReligionReformed				"ReligionReformed",				"iiiiiii"
+#define GAMEEVENT_ResolutionProposing			"ResolutionProposing",			"ii"
 #define GAMEEVENT_ResolutionResult				"ResolutionResult",				"iibb"
+#define GAMEEVENT_ResolutionVoting				"ResolutionVoting",				"ii"
 #define GAMEEVENT_TeamSetEra					"TeamSetEra",					"iib"
 #define GAMEEVENT_TerraformingMap				"TerraformingMap",				"ii"
 #define GAMEEVENT_TerraformingPlot				"TerraformingPlot",				"iiiiiiii"

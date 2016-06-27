@@ -577,6 +577,9 @@ public:
 
 	// Resolution Effect Queries
 	bool IsTradeEmbargoed(PlayerTypes eTrader, PlayerTypes eRecipient);
+#if defined(MOD_API_EXTENSIONS)
+	bool IsPlayerEmbargoed(PlayerTypes ePlayer);
+#endif
 	bool IsLuxuryHappinessBanned(ResourceTypes eLuxury);
 	int GetResearchMod(TechTypes eTech);
 	int GetFeatureYieldChange(FeatureTypes eFeature, YieldTypes eYield);

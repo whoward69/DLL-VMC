@@ -4686,6 +4686,28 @@ bool CvLeague::IsTradeEmbargoed(PlayerTypes eTrader, PlayerTypes eRecipient)
 	return false;
 }
 
+#if defined(MOD_API_EXTENSIONS)
+bool CvLeague::IsPlayerEmbargoed(PlayerTypes ePlayer)
+{
+	if (ePlayer < 0 || ePlayer >= MAX_CIV_PLAYERS) return false;
+	bool bMinor = GET_PLAYER(ePlayer).isMinorCiv();
+
+	for (ActiveResolutionList::iterator it = m_vActiveResolutions.begin(); it != m_vActiveResolutions.end(); it++) {
+		if (bMinor) {
+			if (it->GetEffects()->bEmbargoCityStates) {
+				return true;
+			}
+		} else {			
+			if (it->GetEffects()->bEmbargoPlayer && ePlayer == (PlayerTypes) it->GetProposerDecision()->GetDecision()) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+#endif
+
 bool CvLeague::IsLuxuryHappinessBanned(ResourceTypes eResource)
 {
 	for (ActiveResolutionList::iterator it = m_vActiveResolutions.begin(); it != m_vActiveResolutions.end(); it++)
@@ -7086,9 +7108,6 @@ void CvLeague::NotifyProposalResult(CvEnactProposal* pProposal)
 	
 #if defined(MOD_EVENTS_RESOLUTIONS)
 		iDecision = pProposal->GetProposerDecision()->GetDecision();
-		if (MOD_EVENTS_RESOLUTIONS) {
-			GAMEEVENTINVOKE_HOOK(GAMEEVENT_ResolutionResult, pProposal->GetType(), iDecision, true, pProposal->IsPassed(GetVotesSpentThisSession()));
-		}
 #endif
 	}
 
@@ -8091,6 +8110,17 @@ void CvGameLeagues::DoPlayerTurn(CvPlayer& kPlayer)
 					}
 					else
 					{
+#if defined(MOD_EVENTS_RESOLUTIONS)
+						bool bAllUsed = false;
+						
+						if (MOD_EVENTS_RESOLUTIONS) {
+							if (GAMEEVENTINVOKE_TESTANY(GAMEEVENT_ResolutionProposing, kPlayer.GetID(), it->GetID()) == GAMEEVENTRETURN_TRUE) {
+								bAllUsed = true;
+							}
+						}
+						
+						if (!bAllUsed)
+#endif
 						kPlayer.GetLeagueAI()->DoProposals(it);
 					}
 				}
@@ -8121,6 +8151,18 @@ void CvGameLeagues::DoPlayerTurn(CvPlayer& kPlayer)
 							}
 							else
 							{
+#if defined(MOD_EVENTS_RESOLUTIONS)
+								bool bAllUsed = false;
+								
+								if (MOD_EVENTS_RESOLUTIONS && it->GetRemainingVotesForMember(kPlayer.GetID()) > 0) {
+									if (GAMEEVENTINVOKE_TESTANY(GAMEEVENT_ResolutionVoting, kPlayer.GetID(), it->GetID()) == GAMEEVENTRETURN_TRUE) {
+										bAllUsed = true;
+									}
+								}
+						
+								if (!bAllUsed)
+#endif
+								
 								kPlayer.GetLeagueAI()->DoVotes(it);
 							}
 						}
