@@ -9367,6 +9367,7 @@ bool CvPlot::setRevealed(TeamTypes eTeam, bool bNewValue, bool bTerrainOnly, Tea
 						// Scale up or down based on difficulty
 						if(iFinderGold > 0)
 						{
+							// TODO - WH - scale this by game speed as well as difficulty
 							const int iStandardHandicap = GC.getInfoTypeForString("HANDICAP_PRINCE");
 							if(iStandardHandicap >= 0)
 							{

@@ -354,9 +354,19 @@ public:
 	int getGameTurnLastExpanded() const;
 	void setGameTurnLastExpanded(int iNewValue);
 
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	int getPopulation(bool bIncludeAutomatons = false) const;
+#else
 	int getPopulation() const;
+#endif
 	void setPopulation(int iNewValue, bool bReassignPop = true);
 	void changePopulation(int iChange, bool bReassignPop = true);
+	
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	int getAutomatons() const;
+	void setAutomatons(int iNewValue, bool bReassignPop = true);
+	void changeAutomatons(int iChange, bool bReassignPop = true);
+#endif
 
 	long getRealPopulation() const;
 
@@ -994,6 +1004,9 @@ protected:
 	FAutoVariable<int, CvCity> m_iGameTurnAcquired;
 	FAutoVariable<int, CvCity> m_iGameTurnLastExpanded;
 	FAutoVariable<int, CvCity> m_iPopulation;
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	int m_iAutomatons;
+#endif
 	FAutoVariable<int, CvCity> m_iHighestPopulation;
 	int m_iExtraHitPoints;
 

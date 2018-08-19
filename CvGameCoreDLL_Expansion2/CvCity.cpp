@@ -122,6 +122,9 @@ CvCity::CvCity() :
 	, m_iGameTurnAcquired("CvCity::m_iGameTurnAcquired", m_syncArchive)
 	, m_iGameTurnLastExpanded("CvCity::m_iGameTurnLastExpanded", m_syncArchive)
 	, m_iPopulation("CvCity::m_iPopulation", m_syncArchive)
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	, m_iAutomatons(0)
+#endif
 	, m_iHighestPopulation("CvCity::m_iHighestPopulation", m_syncArchive)
 	, m_iExtraHitPoints(0)
 	, m_iNumGreatPeople("CvCity::m_iNumGreatPeople", m_syncArchive)
@@ -855,6 +858,9 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_iGameTurnFounded = 0;
 	m_iGameTurnAcquired = 0;
 	m_iPopulation = 0;
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	m_iAutomatons = 0;
+#endif
 	m_iHighestPopulation = 0;
 	m_iExtraHitPoints = 0;
 	m_iNumGreatPeople = 0;
@@ -1206,6 +1212,12 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 		m_pCityCulture->Init(this);
 
 		AI_reset();
+
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+		if (m_eOwner != NO_PLAYER) {
+			setAutomatons(GET_TEAM(GET_PLAYER(getOwner()).getTeam()).getCityAutomatonWorkers());
+		}
+#endif
 	}
 }
 
@@ -1434,6 +1446,9 @@ void CvCity::PreKill()
 		DLLUI->clearSelectedCities();
 	}
 
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	setAutomatons(0);
+#endif
 	setPopulation(0);
 
 	CvPlot* pPlot = plot();
@@ -7903,10 +7918,18 @@ void CvCity::setGameTurnLastExpanded(int iNewValue)
 
 
 //	--------------------------------------------------------------------------------
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+int CvCity::getPopulation(bool bIncludeAutomatons /* = false */) const
+#else
 int CvCity::getPopulation() const
+#endif
 {
 	VALIDATE_OBJECT
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	return m_iPopulation + (bIncludeAutomatons ? getAutomatons() : 0);
+#else
 	return m_iPopulation;
+#endif
 }
 
 //	---------------------------------------------------------------------------------
@@ -7936,7 +7959,11 @@ void CvCity::setPopulation(int iNewValue, bool bReassignPop /* = true */)
 				// Need to Remove Citizens
 				for(int iNewPopLoop = -iPopChange; iNewPopLoop--;)
 				{
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+					GetCityCitizens()->DoRemoveWorstCitizen(false, NO_SPECIALIST, iNewValue + getAutomatons());
+#else
 					GetCityCitizens()->DoRemoveWorstCitizen(false, NO_SPECIALIST, iNewValue);
+#endif
 				}
 
 				// Fixup the unassigned workers
@@ -8123,6 +8150,71 @@ void CvCity::changePopulation(int iChange, bool bReassignPop)
 	// Update the religious system
 	GetCityReligions()->DoPopulationChange(iChange);
 }
+
+
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+//	--------------------------------------------------------------------------------
+int CvCity::getAutomatons() const
+{
+	VALIDATE_OBJECT
+	return m_iAutomatons;
+}
+
+//	---------------------------------------------------------------------------------
+//	Be very careful with setting bReassignPop to false.  This assumes that the caller
+//  is manually adjusting the worker assignments *and* handling the setting of
+//  the CityCitizens unassigned worker value.
+void CvCity::setAutomatons(int iNewValue, bool bReassignPop /* = true */)
+{
+	VALIDATE_OBJECT
+	int iChange = iNewValue - getAutomatons();
+
+	if (iChange != 0) {
+		if (bReassignPop && iChange < 0) {
+			// If we are reducing automatons, remove the workers first
+			for (int iNewPopLoop = -iChange; iNewPopLoop--;) {
+				GetCityCitizens()->DoRemoveWorstCitizen(false, NO_SPECIALIST, iNewValue + getPopulation());
+			}
+
+			// Fixup the unassigned workers
+			int iUnassignedWorkers = GetCityCitizens()->GetNumUnassignedCitizens();
+			CvAssert(iUnassignedWorkers >= -iChange);
+			GetCityCitizens()->ChangeNumUnassignedCitizens(std::max(iChange, -iUnassignedWorkers));
+		}
+
+		m_iAutomatons = iNewValue;
+		CvAssert(getAutomatons() >= 0);
+
+		if (bReassignPop && iChange > 0) {
+			// Give new automatons something to do in the City
+			GetCityCitizens()->ChangeNumUnassignedCitizens(iChange);
+
+			// Need to Add Citizens
+			for (int iNewPopLoop = 0; iNewPopLoop < iChange; iNewPopLoop++) {
+				GetCityCitizens()->DoAddBestCitizenFromUnassigned();
+			}
+		}
+
+		setLayoutDirty(true);
+		plot()->plotAction(PUF_makeInfoBarDirty);
+
+		if((getOwner() == GC.getGame().getActivePlayer()) && isCitySelected())
+		{
+			DLLUI->setDirty(SelectionButtons_DIRTY_BIT, true);
+			DLLUI->setDirty(CityScreen_DIRTY_BIT, true);
+		}
+
+		DLLUI->setDirty(CityInfo_DIRTY_BIT, true);
+	}
+}
+
+//	---------------------------------------------------------------------------------
+void CvCity::changeAutomatons(int iChange, bool bReassignPop)
+{
+	VALIDATE_OBJECT
+	setAutomatons(getAutomatons() + iChange, bReassignPop);
+}
+#endif
 
 
 //	--------------------------------------------------------------------------------
@@ -15368,6 +15460,9 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iGameTurnAcquired;
 	kStream >> m_iPopulation;
 	kStream >> m_iHighestPopulation;
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	MOD_SERIALIZE_READ(89, kStream, m_iAutomatons, 0);
+#endif
 	kStream >> m_iNumGreatPeople;
 	kStream >> m_iBaseGreatPeopleRate;
 	kStream >> m_iGreatPeopleRateModifier;
@@ -15741,6 +15836,9 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_iGameTurnAcquired;
 	kStream << m_iPopulation;
 	kStream << m_iHighestPopulation;
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	MOD_SERIALIZE_WRITE(kStream, m_iAutomatons);
+#endif
 	kStream << m_iNumGreatPeople;
 	kStream << m_iBaseGreatPeopleRate;
 	kStream << m_iGreatPeopleRateModifier;

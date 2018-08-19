@@ -210,6 +210,11 @@ public:
 	void changeCityWorkingChange(int iChange);
 #endif
 
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	int getCityAutomatonWorkers() const;
+	void changeCityAutomatonWorkers(int iChange);
+#endif
+
 	int getBridgeBuildingCount() const;
 	bool isBridgeBuilding() const;
 	void changeBridgeBuildingCount(int iChange);
@@ -523,6 +528,10 @@ protected:
 #if defined(MOD_TECHS_CITY_WORKING)
 	int m_iCityWorkingChange;
 #endif
+#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	int m_iCityAutomatonWorkers;
+#endif
+
 	int m_iBridgeBuildingCount;
 	int m_iWaterWorkCount;
 	int m_iRiverTradeCount;

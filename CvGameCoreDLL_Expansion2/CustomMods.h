@@ -33,7 +33,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 88)
+#define MOD_DLL_VERSION_NUMBER ((uint) 89)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -127,6 +127,8 @@
 #define MOD_GLOBAL_CITY_JUNGLE_BONUS                gCustomMods.isGLOBAL_CITY_JUNGLE_BONUS()
 // Permit cities to work tiles up to MAXIMUM_ACQUIRE_PLOT_DISTANCE - WARNING! Cities take 2.5 times as much memory/file space
 #define MOD_GLOBAL_CITY_WORKING                     gCustomMods.isGLOBAL_CITY_WORKING()
+// Permit cities to have automaton workers (v89)
+#define MOD_GLOBAL_CITY_AUTOMATON_WORKERS           gCustomMods.isGLOBAL_CITY_AUTOMATON_WORKERS()
 // Enables rebasing to and airlifting to/from improvements (v74)
 #define MOD_GLOBAL_RELOCATION                       gCustomMods.isGLOBAL_RELOCATION()
 // Mountain plots return their terrain as TERRAIN_MOUNTAIN and any land unit may enter a mountain that has a road/rail route
@@ -1153,6 +1155,7 @@ public:
 	MOD_OPT_DECL(GLOBAL_CITY_FOREST_BONUS);
 	MOD_OPT_DECL(GLOBAL_CITY_JUNGLE_BONUS);
 	MOD_OPT_DECL(GLOBAL_CITY_WORKING);
+	MOD_OPT_DECL(GLOBAL_CITY_AUTOMATON_WORKERS);
 	MOD_OPT_DECL(GLOBAL_RELOCATION);
 	MOD_OPT_DECL(GLOBAL_ALPINE_PASSES);
 	MOD_OPT_DECL(GLOBAL_CS_GIFT_SHIPS);

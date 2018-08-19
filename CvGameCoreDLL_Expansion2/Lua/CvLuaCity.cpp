@@ -221,6 +221,11 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(ChangePopulation);
 	Method(GetRealPopulation);
 
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+	Method(GetAutomatons);
+	Method(SetAutomatons);
+#endif
+
 	Method(GetHighestPopulation);
 	Method(SetHighestPopulation);
 	//Method(GetWorkingPopulation);
@@ -2169,6 +2174,20 @@ int CvLuaCity::lSetHighestPopulation(lua_State* L)
 //{
 //	return BasicLuaMethod(L, &CvCity::getSpecialistPopulation);
 //}
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+//------------------------------------------------------------------------------
+//int getAutomatons();
+int CvLuaCity::lGetAutomatons(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvCity::getAutomatons);
+}
+//------------------------------------------------------------------------------
+//void setAutomatons(int iNewValue, bool bReassignPop);
+int CvLuaCity::lSetAutomatons(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvCity::setAutomatons);
+}
+#endif
 //------------------------------------------------------------------------------
 //int getNumGreatPeople();
 int CvLuaCity::lGetNumGreatPeople(lua_State* L)
