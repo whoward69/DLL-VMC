@@ -42,6 +42,9 @@ CvTraitEntry::CvTraitEntry() :
 #if defined(MOD_TRAITS_CITY_WORKING)
 	m_iCityWorkingChange(0),
 #endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+	m_iCityAutomatonWorkersChange(0),
+#endif
 	m_iPlotCultureCostModifier(0),
 	m_iCultureFromKills(0),
 	m_iFaithFromKills(0),
@@ -319,6 +322,14 @@ int CvTraitEntry::GetPlotBuyCostModifier() const
 int CvTraitEntry::GetCityWorkingChange() const
 {
 	return m_iCityWorkingChange;
+}
+#endif
+
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+/// Accessor:: automaton workers
+int CvTraitEntry::GetCityAutomatonWorkersChange() const
+{
+	return m_iCityAutomatonWorkersChange;
 }
 #endif
 
@@ -1220,6 +1231,9 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 #if defined(MOD_TRAITS_CITY_WORKING)
 	m_iCityWorkingChange					= kResults.GetInt("CityWorkingChange");
 #endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+	m_iCityAutomatonWorkersChange			= kResults.GetInt("CityAutomatonWorkersChange");
+#endif
 	m_iPlotCultureCostModifier              = kResults.GetInt("PlotCultureCostModifier");
 	m_iCultureFromKills						= kResults.GetInt("CultureFromKills");
 	m_iFaithFromKills						= kResults.GetInt("FaithFromKills");
@@ -1948,6 +1962,9 @@ void CvPlayerTraits::InitPlayerTraits()
 #if defined(MOD_TRAITS_CITY_WORKING)
 			m_iCityWorkingChange += trait->GetCityWorkingChange();
 #endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+			m_iCityAutomatonWorkersChange += trait->GetCityAutomatonWorkersChange();
+#endif
 			m_iPlotCultureCostModifier += trait->GetPlotCultureCostModifier();
 			m_iCultureFromKills += trait->GetCultureFromKills();
 			m_iFaithFromKills += trait->GetFaithFromKills();
@@ -2356,6 +2373,9 @@ void CvPlayerTraits::Reset()
 	m_iPlotBuyCostModifier = 0;
 #if defined(MOD_TRAITS_CITY_WORKING)
 	m_iCityWorkingChange = 0;
+#endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+	m_iCityAutomatonWorkersChange = 0;
 #endif
 	m_iPlotCultureCostModifier = 0;
 	m_iCultureFromKills = 0;
@@ -3631,6 +3651,9 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 #if defined(MOD_TRAITS_CITY_WORKING)
     MOD_SERIALIZE_READ(23, kStream, m_iCityWorkingChange, 0);
 #endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+    MOD_SERIALIZE_READ(90, kStream, m_iCityAutomatonWorkersChange, 0);
+#endif
 	kStream >> m_iPlotCultureCostModifier;
 	kStream >> m_iCultureFromKills;
 	if (uiVersion >= 19)
@@ -4076,6 +4099,9 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_iPlotBuyCostModifier;
 #if defined(MOD_TRAITS_CITY_WORKING)
     MOD_SERIALIZE_WRITE(kStream, m_iCityWorkingChange);
+#endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+    MOD_SERIALIZE_WRITE(kStream, m_iCityAutomatonWorkersChange);
 #endif
 	kStream << m_iPlotCultureCostModifier;
 	kStream << m_iCultureFromKills;

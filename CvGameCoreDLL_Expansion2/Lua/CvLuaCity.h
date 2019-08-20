@@ -323,6 +323,11 @@ protected:
 	LUAAPIEXTN(ChangeCityWorkingChange, void, iChange);
 #endif
 
+#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	LUAAPIEXTN(GetCityAutomatonWorkersChange, int);
+	LUAAPIEXTN(ChangeCityAutomatonWorkersChange, void, iChange);
+#endif
+
 	static int lChangeHealRate(lua_State* L);
 
 	static int lIsNoOccupiedUnhappiness(lua_State* L);

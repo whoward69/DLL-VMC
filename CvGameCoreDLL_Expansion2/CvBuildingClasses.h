@@ -165,6 +165,10 @@ public:
 	int GetGlobalCityWorkingChange() const;
 	int GetCityWorkingChange() const;
 #endif
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	int GetGlobalCityAutomatonWorkersChange() const;
+	int GetCityAutomatonWorkersChange() const;
+#endif
 	int GetMinAreaSize() const;
 	int GetConquestProbability() const;
 	int GetHealRateChange() const;
@@ -410,6 +414,10 @@ private:
 #if defined(MOD_BUILDINGS_CITY_WORKING)
 	int m_iGlobalCityWorkingChange;
 	int m_iCityWorkingChange;
+#endif
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	int m_iGlobalCityAutomatonWorkersChange;
+	int m_iCityAutomatonWorkersChange;
 #endif
 	int m_iMinAreaSize;
 	int m_iConquestProbability;

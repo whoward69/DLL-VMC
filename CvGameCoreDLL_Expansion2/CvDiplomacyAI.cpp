@@ -11931,11 +11931,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 		// Active human
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_DEMAND, DIPLO_MESSAGE_DEMAND, LEADERHEAD_ANIM_DEMAND);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_DEMAND);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_DEMAND, DIPLO_MESSAGE_DEMAND, szText, LEADERHEAD_ANIM_DEMAND);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_DEMAND, szText, LEADERHEAD_ANIM_DEMAND);
+#endif
 #endif
 		}
 		// AI player
@@ -11964,11 +11968,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 		// Active human
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_REQUEST, DIPLO_MESSAGE_REQUEST, LEADERHEAD_ANIM_REQUEST);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_REQUEST);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_REQUEST, DIPLO_MESSAGE_REQUEST, szText, LEADERHEAD_ANIM_REQUEST);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_REQUEST, szText, LEADERHEAD_ANIM_REQUEST);
+#endif
 #endif
 		}
 		// AI player
@@ -11997,11 +12005,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 		// Active human
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_LUXURY_TRADE, LEADERHEAD_ANIM_REQUEST);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_LUXURY_TRADE);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_LUXURY_TRADE, szText, LEADERHEAD_ANIM_REQUEST);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
+#endif
 #endif
 		}
 		// Offer to an AI player
@@ -12028,11 +12040,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 	{
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_EMBASSY_EXCHANGE, LEADERHEAD_ANIM_REQUEST);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_EMBASSY_EXCHANGE);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_EMBASSY_EXCHANGE, szText, LEADERHEAD_ANIM_REQUEST);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
+#endif
 #endif
 		}
 		else if(!bHuman)
@@ -12058,11 +12074,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 	{
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_EMBASSY_OFFER, LEADERHEAD_ANIM_REQUEST);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_EMBASSY_OFFER);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_EMBASSY_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
+#endif
 #endif
 		}
 		else if(!bHuman)
@@ -12089,11 +12109,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 		// Active human
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_OPEN_BORDERS_EXCHANGE, LEADERHEAD_ANIM_REQUEST);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_OPEN_BORDERS_EXCHANGE);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_OPEN_BORDERS_EXCHANGE, szText, LEADERHEAD_ANIM_REQUEST);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
+#endif
 #endif
 		}
 		// Offer to an AI player
@@ -12121,11 +12145,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 		// Active human
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_OPEN_BORDERS_OFFER, LEADERHEAD_ANIM_REQUEST);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_OPEN_BORDERS_OFFER);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_OPEN_BORDERS_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
+#endif
 #endif
 		}
 		// Offer to an AI player
@@ -12178,11 +12206,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 		// Active human
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_RESEARCH_AGREEMENT_OFFER, LEADERHEAD_ANIM_REQUEST);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_RESEARCH_AGREEMENT_OFFER);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_RESEARCH_AGREEMENT_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
+#endif
 #endif
 		}
 		// Offer to an AI player
@@ -12250,11 +12282,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 				{
 					pRenewDeal->m_bCheckedForRenewal = true;
 				}
+#if defined(MOD_DIPLOMACY_STFU)
+				SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, eMessageType, LEADERHEAD_ANIM_REQUEST);
+#else
 				szText = GetDiploStringForMessage(eMessageType);
 #if defined(MOD_API_PLAYER_LOGS)
 				CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, eMessageType, szText, LEADERHEAD_ANIM_REQUEST);
 #else
 				CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
+#endif
 #endif
 			}
 		}
@@ -13150,11 +13186,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 	{
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_MAPS_OFFER, LEADERHEAD_ANIM_REQUEST);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_MAPS_OFFER);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_MAPS_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
+#endif
 #endif
 		}
 		else if(!bHuman)
@@ -13170,11 +13210,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 	{
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_TECH_OFFER, LEADERHEAD_ANIM_REQUEST);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_TECH_OFFER);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_TECH_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
+#endif
 #endif
 		}
 		else if(!bHuman)
@@ -13191,11 +13235,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 	{
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_GENEROUS_OFFER, DIPLO_MESSAGE_GENEROUS_OFFER, LEADERHEAD_ANIM_REQUEST);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_GENEROUS_OFFER);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_GENEROUS_OFFER, DIPLO_MESSAGE_GENEROUS_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_GENEROUS_OFFER, szText, LEADERHEAD_ANIM_REQUEST);
+#endif
 #endif
 		}
 		else if(!bHuman)
@@ -13267,11 +13315,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 	{
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_REVOKE_VASSAL_THIRD_OFFER, LEADERHEAD_ANIM_POSITIVE);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_REVOKE_VASSAL_THIRD_OFFER);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_REVOKE_VASSAL_THIRD_OFFER, szText, LEADERHEAD_ANIM_POSITIVE);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, szText, LEADERHEAD_ANIM_POSITIVE);
+#endif
 #endif
 		}
 		else if(!bHuman)
@@ -13303,11 +13355,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 	{
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_BLANK_DISCUSSION, DIPLO_MESSAGE_VASSALAGE_LIBERATE_VASSAL, LEADERHEAD_ANIM_POSITIVE);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_VASSALAGE_LIBERATE_VASSAL);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_BLANK_DISCUSSION, DIPLO_MESSAGE_VASSALAGE_LIBERATE_VASSAL, szText, LEADERHEAD_ANIM_POSITIVE);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_BLANK_DISCUSSION, szText, LEADERHEAD_ANIM_POSITIVE);
+#endif
 #endif
 		}
 
@@ -13407,11 +13463,15 @@ void CvDiplomacyAI::DoSendStatementToPlayer(PlayerTypes ePlayer, DiploStatementT
 		// Active human
 		if(bShouldShowLeaderScene)
 		{
+#if defined(MOD_DIPLOMACY_STFU)
+			SendAIDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_PEACE_OFFER, LEADERHEAD_ANIM_POSITIVE);
+#else
 			szText = GetDiploStringForMessage(DIPLO_MESSAGE_PEACE_OFFER);
 #if defined(MOD_API_PLAYER_LOGS)
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, DIPLO_MESSAGE_PEACE_OFFER, szText, LEADERHEAD_ANIM_POSITIVE);
 #else
 			CvDiplomacyRequests::SendDealRequest(GetPlayer()->GetID(), ePlayer, pDeal, DIPLO_UI_STATE_TRADE_AI_MAKES_OFFER, szText, LEADERHEAD_ANIM_POSITIVE);
+#endif
 #endif
 		}
 		// Offer to an AI player
@@ -30902,6 +30962,17 @@ void CvDiplomacyAI::SendAILeaderMessage(PlayerTypes eFromPlayer, PlayerTypes eTo
 		CvDiplomacyRequests::SendRequest(eFromPlayer, eToPlayer, eDiploUIState, eDiploMessage, GetDiploStringForMessage(eDiploMessage, eThirdParty, strOptionalKey1, strOptionalKey2), eAction, iExtraData);
 #else
 		CvDiplomacyRequests::SendRequest(eFromPlayer, eToPlayer, eDiploUIState, GetDiploStringForMessage(eDiploMessage, eThirdParty, strOptionalKey1, strOptionalKey2), eAction, iExtraData);
+#endif
+	}
+}
+
+void CvDiplomacyAI::SendAIDealRequest(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, CvDeal* pDeal, DiploUIStateTypes eDiploUIState, DiploMessageTypes eDiploMessage, LeaderheadAnimationTypes eAction)
+{
+	if (!MOD_DIPLOMACY_STFU || WantAILeaderMessage(eDiploMessage, eFromPlayer, eDiploUIState, eAction, -1)) {
+#if defined(MOD_API_PLAYER_LOGS)
+		CvDiplomacyRequests::SendDealRequest(eFromPlayer, eToPlayer, pDeal, eDiploUIState, eDiploMessage, GetDiploStringForMessage(eDiploMessage), eAction);
+#else
+		CvDiplomacyRequests::SendDealRequest(eFromPlayer, eToPlayer, pDeal, eDiploUIState, szText, eAction);
 #endif
 	}
 }

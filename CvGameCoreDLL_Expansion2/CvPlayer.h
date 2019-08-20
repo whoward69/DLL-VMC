@@ -1612,6 +1612,11 @@ public:
 	void ChangeCityWorkingChange(int iChange);
 #endif
 
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS) || defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS) || defined(MOD_POLICIES_CITY_AUTOMATON_WORKERS) || defined(MOD_TECHS_CITY_AUTOMATON_WORKERS)
+	int GetCityAutomatonWorkersChange() const;
+	void ChangeCityAutomatonWorkersChange(int iChange);
+#endif
+
 	int GetPlotCultureCostModifier() const;
 	void ChangePlotCultureCostModifier(int iChange);
 	int GetPlotCultureExponentModifier() const;
@@ -2189,6 +2194,9 @@ protected:
 	FAutoVariable<int, CvPlayer> m_iPlotGoldCostMod;
 #if defined(MOD_TRAITS_CITY_WORKING) || defined(MOD_BUILDINGS_CITY_WORKING) || defined(MOD_POLICIES_CITY_WORKING) || defined(MOD_TECHS_CITY_WORKING)
 	int m_iCityWorkingChange;
+#endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS) || defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS) || defined(MOD_POLICIES_CITY_AUTOMATON_WORKERS) || defined(MOD_TECHS_CITY_AUTOMATON_WORKERS)
+	int m_iCityAutomatonWorkersChange;
 #endif
 	FAutoVariable<int, CvPlayer> m_iPlotCultureCostModifier;
 	int m_iPlotCultureExponentModifier;

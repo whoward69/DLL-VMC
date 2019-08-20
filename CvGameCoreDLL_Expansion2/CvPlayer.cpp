@@ -338,6 +338,9 @@ CvPlayer::CvPlayer() :
 #if defined(MOD_TRAITS_CITY_WORKING) || defined(MOD_BUILDINGS_CITY_WORKING) || defined(MOD_POLICIES_CITY_WORKING) || defined(MOD_TECHS_CITY_WORKING)
 	, m_iCityWorkingChange(0)
 #endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS) || defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS) || defined(MOD_POLICIES_CITY_AUTOMATON_WORKERS) || defined(MOD_TECHS_CITY_AUTOMATON_WORKERS)
+	, m_iCityAutomatonWorkersChange(0)
+#endif
 	, m_iPlotCultureCostModifier("CvPlayer::m_iPlotCultureCostModifier", m_syncArchive)
 	, m_iPlotCultureExponentModifier(0)
 	, m_iNumCitiesPolicyCostDiscount(0)
@@ -672,6 +675,9 @@ void CvPlayer::init(PlayerTypes eID)
 		ChangePlotGoldCostMod(GetPlayerTraits()->GetPlotBuyCostModifier());
 #if defined(MOD_TRAITS_CITY_WORKING)
 		ChangeCityWorkingChange(GetPlayerTraits()->GetCityWorkingChange());
+#endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+		ChangeCityAutomatonWorkersChange(GetPlayerTraits()->GetCityAutomatonWorkersChange());
 #endif
 		ChangePlotCultureCostModifier(GetPlayerTraits()->GetPlotCultureCostModifier());
 		GetTreasury()->ChangeCityConnectionTradeRouteGoldChange(GetPlayerTraits()->GetCityConnectionTradeRouteChange());
@@ -1056,6 +1062,9 @@ void CvPlayer::uninit()
 	m_iPlotGoldCostMod = 0;
 #if defined(MOD_TRAITS_CITY_WORKING) || defined(MOD_BUILDINGS_CITY_WORKING) || defined(MOD_POLICIES_CITY_WORKING) || defined(MOD_TECHS_CITY_WORKING)
 	m_iCityWorkingChange = 0;
+#endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS) || defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS) || defined(MOD_POLICIES_CITY_AUTOMATON_WORKERS) || defined(MOD_TECHS_CITY_AUTOMATON_WORKERS)
+	m_iCityAutomatonWorkersChange = 0;
 #endif
 	m_iPlotCultureCostModifier = 0;
 	m_iPlotCultureExponentModifier = 0;
@@ -9386,6 +9395,10 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 	ChangePlotGoldCostMod(pBuildingInfo->GetGlobalPlotBuyCostModifier() * iChange);
 #if defined(MOD_BUILDINGS_CITY_WORKING)
 	ChangeCityWorkingChange(pBuildingInfo->GetGlobalCityWorkingChange() * iChange);
+#endif
+
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	ChangeCityAutomatonWorkersChange(pBuildingInfo->GetGlobalCityAutomatonWorkersChange() * iChange);
 #endif
 
 	// City Culture Mod
@@ -24639,8 +24652,11 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 	ChangeAlwaysSeeBarbCampsCount(pPolicy->IsAlwaysSeeBarbCamps() * iChange);
 	ChangeMaxNumBuilders(pPolicy->GetNumExtraBuilders() * iChange);
 	ChangePlotGoldCostMod(pPolicy->GetPlotGoldCostMod() * iChange);
-#if defined(MOD_TRAITS_CITY_WORKING) || defined(MOD_BUILDINGS_CITY_WORKING) || defined(MOD_POLICIES_CITY_WORKING) || defined(MOD_TECHS_CITY_WORKING)
+#if defined(MOD_POLICIES_CITY_WORKING)
 	ChangeCityWorkingChange(pPolicy->GetCityWorkingChange() * iChange);
+#endif
+#if defined(MOD_POLICIES_CITY_AUTOMATON_WORKERS)
+	ChangeCityAutomatonWorkersChange(pPolicy->GetCityAutomatonWorkersChange() * iChange);
 #endif
 	ChangePlotCultureCostModifier(pPolicy->GetPlotCultureCostModifier() * iChange);
 	ChangePlotCultureExponentModifier(pPolicy->GetPlotCultureExponentModifier() * iChange);
@@ -25979,6 +25995,9 @@ void CvPlayer::Read(FDataStream& kStream)
 #if defined(MOD_TRAITS_CITY_WORKING) || defined(MOD_BUILDINGS_CITY_WORKING) || defined(MOD_POLICIES_CITY_WORKING) || defined(MOD_TECHS_CITY_WORKING)
 	MOD_SERIALIZE_READ(23, kStream, m_iCityWorkingChange, 0);
 #endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS) || defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS) || defined(MOD_POLICIES_CITY_AUTOMATON_WORKERS) || defined(MOD_TECHS_CITY_AUTOMATON_WORKERS)
+	MOD_SERIALIZE_READ(90, kStream, m_iCityAutomatonWorkersChange, 0);
+#endif
 	kStream >> m_iPlotCultureCostModifier;
 	kStream >> m_iPlotCultureExponentModifier;
 	kStream >> m_iNumCitiesPolicyCostDiscount;
@@ -26572,6 +26591,9 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iPlotGoldCostMod;
 #if defined(MOD_TRAITS_CITY_WORKING) || defined(MOD_BUILDINGS_CITY_WORKING) || defined(MOD_POLICIES_CITY_WORKING) || defined(MOD_TECHS_CITY_WORKING)
 	MOD_SERIALIZE_WRITE(kStream, m_iCityWorkingChange);
+#endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS) || defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS) || defined(MOD_POLICIES_CITY_AUTOMATON_WORKERS) || defined(MOD_TECHS_CITY_AUTOMATON_WORKERS)
+	MOD_SERIALIZE_WRITE(kStream, m_iCityAutomatonWorkersChange);
 #endif
 	kStream << m_iPlotCultureCostModifier;
 	kStream << m_iPlotCultureExponentModifier;
@@ -27623,6 +27645,32 @@ void CvPlayer::ChangeCityWorkingChange(int iChange)
 		}
 
 		m_iCityWorkingChange += iChange;
+	}
+}
+#endif
+
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS) || defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS) || defined(MOD_POLICIES_CITY_AUTOMATON_WORKERS) || defined(MOD_TECHS_CITY_AUTOMATON_WORKERS)
+//	--------------------------------------------------------------------------------
+/// How many more automatons does each city have?
+int CvPlayer::GetCityAutomatonWorkersChange() const
+{
+	return m_iCityAutomatonWorkersChange;
+}
+
+//	--------------------------------------------------------------------------------
+/// Changes how many more automatons each city has
+void CvPlayer::ChangeCityAutomatonWorkersChange(int iChange)
+{
+	if(iChange != 0)
+	{
+		CvCity* pLoopCity;
+		int iLoop;
+		
+		for (pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop)) {
+			pLoopCity->changeCityAutomatonWorkersChange(iChange);
+		}
+
+		m_iCityAutomatonWorkersChange += iChange;
 	}
 }
 #endif

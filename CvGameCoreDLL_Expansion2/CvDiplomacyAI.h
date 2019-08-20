@@ -984,6 +984,7 @@ public:
 	void SendAILeaderMessage(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, DiploUIStateTypes eDiploUIState, DiploMessageTypes eDiploMessage, PlayerTypes eThirdParty, LeaderheadAnimationTypes eAction, int iExtraData = -1);
 	void SendAILeaderMessage(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, DiploUIStateTypes eDiploUIState, DiploMessageTypes eDiploMessage, PlayerTypes eThirdParty, const Localization::String& strOptionalKey1, LeaderheadAnimationTypes eAction, int iExtraData = -1);
 	void SendAILeaderMessage(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, DiploUIStateTypes eDiploUIState, DiploMessageTypes eDiploMessage, PlayerTypes eThirdParty, const Localization::String& strOptionalKey1, const Localization::String& strOptionalKey2, LeaderheadAnimationTypes eAction, int iExtraData = -1);
+	void SendAIDealRequest(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, CvDeal* pDeal, DiploUIStateTypes eDiploUIState, DiploMessageTypes eDiploMessage, LeaderheadAnimationTypes eAction);
 #endif
 
 	/////////////////////////////////////////////////////////

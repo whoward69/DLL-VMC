@@ -77,6 +77,9 @@ public:
 #if defined(MOD_TRAITS_CITY_WORKING)
 	int GetCityWorkingChange() const;
 #endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+	int GetCityAutomatonWorkersChange() const;
+#endif
 	int GetPlotCultureCostModifier() const;
 	int GetCultureFromKills() const;
 	int GetFaithFromKills() const;
@@ -253,6 +256,9 @@ protected:
 	int m_iPlotBuyCostModifier;
 #if defined(MOD_TRAITS_CITY_WORKING)
 	int m_iCityWorkingChange;
+#endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+	int m_iCityAutomatonWorkersChange;
 #endif
 	int m_iPlotCultureCostModifier;
 	int m_iCultureFromKills;
@@ -536,6 +542,12 @@ public:
 	int GetCityWorkingChange() const
 	{
 		return m_iCityWorkingChange;
+	};
+#endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+	int GetCityAutomatonWorkersChange() const
+	{
+		return m_iCityAutomatonWorkersChange;
 	};
 #endif
 	int GetPlotCultureCostModifier() const
@@ -1004,6 +1016,9 @@ private:
 	int m_iPlotBuyCostModifier;
 #if defined(MOD_TRAITS_CITY_WORKING)
 	int m_iCityWorkingChange;
+#endif
+#if defined(MOD_TRAITS_CITY_AUTOMATON_WORKERS)
+	int m_iCityAutomatonWorkersChange;
 #endif
 	int m_iPlotCultureCostModifier;
 	int m_iCultureFromKills;

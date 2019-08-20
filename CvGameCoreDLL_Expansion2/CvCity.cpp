@@ -150,6 +150,9 @@ CvCity::CvCity() :
 #if defined(MOD_BUILDINGS_CITY_WORKING)
 	, m_iCityWorkingChange(0)
 #endif
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	, m_iCityAutomatonWorkersChange(0)
+#endif
 	, m_iMaintenance("CvCity::m_iMaintenance", m_syncArchive)
 	, m_iHealRate("CvCity::m_iHealRate", m_syncArchive)
 	, m_iNoOccupiedUnhappinessCount("CvCity::m_iNoOccupiedUnhappinessCount", m_syncArchive)
@@ -886,6 +889,9 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 #if defined(MOD_BUILDINGS_CITY_WORKING)
 	m_iCityWorkingChange = 0;
 #endif
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	m_iCityAutomatonWorkersChange = 0;
+#endif
 	m_iMaintenance = 0;
 	m_iHealRate = 0;
 	m_iEspionageModifier = 0;
@@ -1215,7 +1221,8 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 
 #if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
 		if (m_eOwner != NO_PLAYER) {
-			setAutomatons(GET_TEAM(GET_PLAYER(getOwner()).getTeam()).getCityAutomatonWorkers());
+			setAutomatons(GET_TEAM(GET_PLAYER(getOwner()).getTeam()).GetCityAutomatonWorkersChange());
+			setAutomatons(GET_PLAYER(getOwner()).GetCityAutomatonWorkersChange());
 		}
 #endif
 	}
@@ -6628,6 +6635,10 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		changeCityWorkingChange(pBuildingInfo->GetCityWorkingChange() * iChange);
 #endif
 
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+		changeCityAutomatonWorkersChange(pBuildingInfo->GetCityAutomatonWorkersChange() * iChange);
+#endif
+
 		int iBuildingFaith = pBuildingInfo->GetYieldChange(YIELD_FAITH);
 		ChangeFaithPerTurnFromBuildings(iBuildingFaith * iChange);
 		m_pCityReligions->ChangeReligiousPressureModifier(pBuildingInfo->GetReligiousPressureModifier() * iChange);
@@ -9269,6 +9280,27 @@ void CvCity::changeCityWorkingChange(int iChange)
 				pLoopPlot->changePlayerCityRadiusCount(getOwner(), iChange);
 			}
 		}
+	}
+}
+#endif
+
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+//	--------------------------------------------------------------------------------
+int CvCity::GetCityAutomatonWorkersChange() const
+{
+	VALIDATE_OBJECT
+	return m_iCityAutomatonWorkersChange;
+}
+
+//	--------------------------------------------------------------------------------
+void CvCity::changeCityAutomatonWorkersChange(int iChange)
+{
+	VALIDATE_OBJECT
+	if(iChange != 0)
+	{
+		changeAutomatons(iChange);
+		
+		m_iCityAutomatonWorkersChange = (m_iCityAutomatonWorkersChange + iChange);
 	}
 }
 #endif
@@ -15463,6 +15495,9 @@ void CvCity::read(FDataStream& kStream)
 #if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
 	MOD_SERIALIZE_READ(89, kStream, m_iAutomatons, 0);
 #endif
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	MOD_SERIALIZE_READ(90, kStream, m_iCityAutomatonWorkersChange, 0);
+#endif
 	kStream >> m_iNumGreatPeople;
 	kStream >> m_iBaseGreatPeopleRate;
 	kStream >> m_iGreatPeopleRateModifier;
@@ -15486,6 +15521,9 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iPlotBuyCostModifier;
 #if defined(MOD_BUILDINGS_CITY_WORKING)
 	MOD_SERIALIZE_READ(23, kStream, m_iCityWorkingChange, 0);
+#endif
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	// SEE ABOVE - MOD_SERIALIZE_READ(90, kStream, m_iCityAutomatonWorkersChange, 0);
 #endif
 	kStream >> m_iMaintenance;
 	kStream >> m_iHealRate;
@@ -15839,6 +15877,9 @@ void CvCity::write(FDataStream& kStream) const
 #if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
 	MOD_SERIALIZE_WRITE(kStream, m_iAutomatons);
 #endif
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	MOD_SERIALIZE_WRITE(kStream, m_iCityAutomatonWorkersChange);
+#endif
 	kStream << m_iNumGreatPeople;
 	kStream << m_iBaseGreatPeopleRate;
 	kStream << m_iGreatPeopleRateModifier;
@@ -15861,6 +15902,9 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_iPlotBuyCostModifier; // Added for Version 12
 #if defined(MOD_BUILDINGS_CITY_WORKING)
 	MOD_SERIALIZE_WRITE(kStream, m_iCityWorkingChange);
+#endif
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	// SEE ABOVE - MOD_SERIALIZE_WRITE(kStream, m_iCityAutomatonWorkersChange);
 #endif
 	kStream << m_iMaintenance;
 	kStream << m_iHealRate;

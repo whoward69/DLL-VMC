@@ -60,7 +60,7 @@ CvTechEntry::CvTechEntry(void):
 #if defined(MOD_TECHS_CITY_WORKING)
 	m_iCityWorkingChange(0),
 #endif
-#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+#if defined(MOD_TECHS_CITY_AUTOMATON_WORKERS)
 	m_iCityAutomatonWorkersChange(0),
 #endif
 	m_bBridgeBuilding(false),
@@ -135,7 +135,7 @@ bool CvTechEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 #if defined(MOD_TECHS_CITY_WORKING)
 	m_iCityWorkingChange = kResults.GetInt("CityWorkingChange");
 #endif
-#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+#if defined(MOD_TECHS_CITY_AUTOMATON_WORKERS)
 	m_iCityAutomatonWorkersChange = kResults.GetInt("CityAutomatonWorkersChange");
 #endif
 	m_bBridgeBuilding = kResults.GetBool("BridgeBuilding");
@@ -473,7 +473,7 @@ int CvTechEntry::GetCityWorkingChange() const
 }
 #endif
 
-#if defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
+#if defined(MOD_TECHS_CITY_AUTOMATON_WORKERS)
 /// Change the number of automaton workers a city can have
 int CvTechEntry::GetCityAutomatonWorkersChange() const
 {
@@ -1517,7 +1517,12 @@ CvTechXMLEntries* CvPlayerTechs::GetTechs() const
 int CvPlayerTechs::GetResearchCost(TechTypes eTech) const
 {
 	// Get the research cost for the team
+#if defined(MOD_BUGFIX_RESEARCH_NAN)
+	// For late game eras with many cities, *10000 and *(100+iMod) in the code below can overflow a 32-bit int
+	long iResearchCost = GET_TEAM(m_pPlayer->getTeam()).GetTeamTechs()->GetResearchCost(eTech);
+#else
 	int iResearchCost = GET_TEAM(m_pPlayer->getTeam()).GetTeamTechs()->GetResearchCost(eTech);
+#endif
 	
 	// Adjust to the player's research modifier
 	int iResearchMod = std::max(1, m_pPlayer->calculateResearchModifier(eTech));
@@ -1535,7 +1540,11 @@ int CvPlayerTechs::GetResearchCost(TechTypes eTech) const
 	else
 		iResearchCost = (iResearchCost / 100);
 
+#if defined(MOD_BUGFIX_RESEARCH_NAN)
+	return (int) iResearchCost;
+#else
 	return iResearchCost;
+#endif
 }
 
 //	----------------------------------------------------------------------------

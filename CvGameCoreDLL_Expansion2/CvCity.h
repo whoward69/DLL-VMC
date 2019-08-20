@@ -470,6 +470,10 @@ public:
 	int GetCityWorkingChange() const;
 	void changeCityWorkingChange(int iChange);
 #endif
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	int GetCityAutomatonWorkersChange() const;
+	void changeCityAutomatonWorkersChange(int iChange);
+#endif
 
 #if defined(MOD_DIPLOMACY_CIV4_FEATURES)
 	bool IsVassalLevyEra() const;
@@ -1032,6 +1036,9 @@ protected:
 	int m_iPlotBuyCostModifier;
 #if defined(MOD_BUILDINGS_CITY_WORKING)
 	int m_iCityWorkingChange;
+#endif
+#if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
+	int m_iCityAutomatonWorkersChange;
 #endif
 	FAutoVariable<int, CvCity> m_iMaintenance;
 	FAutoVariable<int, CvCity> m_iHealRate;
