@@ -1434,7 +1434,11 @@ int CvPlayerTechs::GetResearchTurnsLeft(TechTypes eTech, bool bOverflow) const
 /// Accessor: How many turns of research left? (in hundredths)
 int CvPlayerTechs::GetResearchTurnsLeftTimes100(TechTypes eTech, bool bOverflow) const
 {
+#if defined(MOD_BUGFIX_RESEARCH_NAN)
+	long long iResearchRate;
+#else
 	int iResearchRate;
+#endif
 	int iOverflow;
 	int iTurnsLeft;
 	int iI;
@@ -1469,7 +1473,11 @@ int CvPlayerTechs::GetResearchTurnsLeftTimes100(TechTypes eTech, bool bOverflow)
 	// Get the team progress
 	int iResearchProgress = GET_TEAM(m_pPlayer->getTeam()).GetTeamTechs()->GetResearchProgress(eTech);
 	// Get the raw amount left
+#if defined(MOD_BUGFIX_RESEARCH_NAN)
+	long long iResearchLeft = std::max(0, (iResearchCost - iResearchProgress));
+#else
 	int iResearchLeft = std::max(0, (iResearchCost - iResearchProgress));
+#endif
 
 	// Removed any current overflow if requested.
 	if(bOverflow)
@@ -1479,7 +1487,11 @@ int CvPlayerTechs::GetResearchTurnsLeftTimes100(TechTypes eTech, bool bOverflow)
 
 	iResearchLeft *= 10000;
 
+#if defined(MOD_BUGFIX_RESEARCH_NAN)
+	iTurnsLeft = (int) (iResearchLeft / iResearchRate);
+#else
 	iTurnsLeft = (iResearchLeft / iResearchRate);
+#endif
 
 	if(iTurnsLeft * iResearchRate < iResearchLeft)
 	{
@@ -1519,7 +1531,7 @@ int CvPlayerTechs::GetResearchCost(TechTypes eTech) const
 	// Get the research cost for the team
 #if defined(MOD_BUGFIX_RESEARCH_NAN)
 	// For late game eras with many cities, *10000 and *(100+iMod) in the code below can overflow a 32-bit int
-	long iResearchCost = GET_TEAM(m_pPlayer->getTeam()).GetTeamTechs()->GetResearchCost(eTech);
+	long long iResearchCost = GET_TEAM(m_pPlayer->getTeam()).GetTeamTechs()->GetResearchCost(eTech);
 #else
 	int iResearchCost = GET_TEAM(m_pPlayer->getTeam()).GetTeamTechs()->GetResearchCost(eTech);
 #endif
