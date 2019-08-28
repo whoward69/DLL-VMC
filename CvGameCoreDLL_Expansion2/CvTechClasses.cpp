@@ -2087,8 +2087,13 @@ void CvTeamTechs::SetResearchProgressTimes100(TechTypes eIndex, int iNewValue, P
 			GC.GetEngineUserInterface()->setDirty(Score_DIRTY_BIT, true);
 		}
 
+#if defined(MOD_BUGFIX_RESEARCH_NAN)
+		long long iResearchProgress = GetResearchProgressTimes100(eIndex);
+		long long iResearchCost = GetResearchCost(eIndex) * 100;
+#else
 		int iResearchProgress = GetResearchProgressTimes100(eIndex);
 		int iResearchCost = GetResearchCost(eIndex) * 100;
+#endif
 
 		// Player modifiers to cost
 		int iResearchMod = std::max(1, GET_PLAYER(ePlayer).calculateResearchModifier(eIndex));
@@ -2097,7 +2102,11 @@ void CvTeamTechs::SetResearchProgressTimes100(TechTypes eIndex, int iNewValue, P
 		iNumCitiesMod = iNumCitiesMod * GET_PLAYER(ePlayer).GetMaxEffectiveCities(/*bIncludePuppets*/ true);
 		iResearchCost = iResearchCost * (100 + iNumCitiesMod) / 100;
 		
+#if defined(MOD_BUGFIX_RESEARCH_NAN)
+		int iOverflow = (int) (iResearchProgress - iResearchCost);
+#else
 		int iOverflow = iResearchProgress - iResearchCost;
+#endif
 
 #if defined(MOD_BUGFIX_RESEARCH_OVERFLOW)
 		if (!MOD_BUGFIX_RESEARCH_OVERFLOW) {
