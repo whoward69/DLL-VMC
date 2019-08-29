@@ -83,10 +83,6 @@ void CvLuaLeague::PushMethods(lua_State* L, int t)
 
 	Method(GetArtsyGreatPersonRateModifier);
 	Method(GetScienceyGreatPersonRateModifier);
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
-	Method(GetSpaceShipProductionMod);
-	Method(GetSpaceShipPurchaseMod);
-#endif
 	
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_API_EXTENSIONS)
 	Method(IsPlayerEmbargoed);
@@ -710,28 +706,6 @@ int CvLuaLeague::lGetScienceyGreatPersonRateModifier(lua_State* L)
 	lua_pushinteger(L, iValue);
 	return 1;
 }
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
-//------------------------------------------------------------------------------
-//int GetSpaceShipProductionMod();
-int CvLuaLeague::lGetSpaceShipProductionMod(lua_State* L)
-{
-	CvLeague* pLeague = GetInstance(L);
-
-	int iValue = pLeague->GetSpaceShipProductionMod();
-	lua_pushinteger(L, iValue);
-	return 1;
-}
-//------------------------------------------------------------------------------
-//int GetSpaceShipPurchaseMod();
-int CvLuaLeague::lGetSpaceShipPurchaseMod(lua_State* L)
-{
-	CvLeague* pLeague = GetInstance(L);
-
-	int iValue = pLeague->GetSpaceShipPurchaseMod();
-	lua_pushinteger(L, iValue);
-	return 1;
-}
-#endif
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_API_EXTENSIONS)
 //------------------------------------------------------------------------------
 //bool IsPlayerEmbargoed(PlayerTypes iPlayer);

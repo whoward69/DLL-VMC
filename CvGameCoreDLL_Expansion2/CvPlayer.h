@@ -400,10 +400,6 @@ public:
 
 	int GetJONSCultureCityModifier() const;
 	void ChangeJONSCultureCityModifier(int iChange);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int GetLeagueCultureCityModifier() const;
-	void ChangeLeagueCultureCityModifier(int iChange);
-#endif
 
 	int getJONSCulture() const;
 	void setJONSCulture(int iNewValue);
@@ -585,52 +581,6 @@ public:
 #endif
 
 	int GetExtraLeagueVotes() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int GetImprovementLeagueVotes() const;
-	void ChangeImprovementLeagueVotes(int iChange);
-	int GetFaithToVotes() const;
-	void ChangeFaithToVotes(int iChange);
-	int TestFaithToVotes(int iChange);
-	int GetCapitalsToVotes() const;
-	void ChangeCapitalsToVotes(int iChange);
-	int TestCapitalsToVotes(int iChange);
-	int GetDoFToVotes() const;
-	void ChangeDoFToVotes(int iChange);
-	int TestDoFToVotes(int iChange);
-	int GetRAToVotes() const;
-	void ChangeRAToVotes(int iChange);
-	int TestRAToVotes(int iChange);
-
-	int GetDefensePactsToVotes() const;
-	void ChangeDefensePactsToVotes(int iChange);
-	int TestDefensePactsToVotes(int iChange);
-
-	int GetGPExpendInfluence() const;
-	void ChangeGPExpendInfluence(int iChange);
-	
-	void SetLeagueArt(bool bValue);
-	bool IsLeagueArt() const;
-
-	void SetLeagueScholar(bool bValue);
-	bool IsLeagueScholar() const;
-
-	//Artsy/Sciencey Bonus
-	void SetLeagueAid(bool bValue);
-	bool IsLeagueAid() const;
-
-	void ProcessLeagueResolutions();
-	PlayerTypes AidRank();
-	int ScoreDifference();
-
-	int GetScienceRateFromMinorAllies() const;
-	void ChangeScienceRateFromMinorAllies(int iChange);
-	void SetScienceRateFromMinorAllies(int iValue);
-
-	int GetScienceRateFromLeagueAid() const;
-	void ChangeScienceRateFromLeagueAid(int iChange);
-	void SetScienceRateFromLeagueAid(int iValue);
-#endif
-
 	void ChangeExtraLeagueVotes(int iChange);
 
 	int GetWoundedUnitDamageMod() const;
@@ -698,10 +648,6 @@ public:
 
 	// Golden Age Stuff
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	void DoProcessVotes();
-#endif
-
 	void DoProcessGoldenAge();
 
 	int GetGoldenAgeProgressThreshold() const;
@@ -763,10 +709,6 @@ public:
 	void incrementGreatArtistsCreated(bool bIsFree);
 	int getGreatMusiciansCreated(bool bExcludeFree) const;
 	void incrementGreatMusiciansCreated(bool bIsFree);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int getGreatDiplomatsCreated(bool bExcludeFree) const;
-	void incrementGreatDiplomatsCreated(bool bIsFree);
-#endif
 #else
 	int getGreatPeopleCreated() const;
 	void incrementGreatPeopleCreated();
@@ -789,10 +731,6 @@ public:
 	void incrementGreatArtistsCreated();
 	int getGreatMusiciansCreated() const;
 	void incrementGreatMusiciansCreated();
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int getGreatDiplomatsCreated() const;
-	void incrementGreatDiplomatsCreated();
-#endif
 #endif
 
 	int getMerchantsFromFaith() const;
@@ -811,10 +749,6 @@ public:
 	void incrementAdmiralsFromFaith();
 	int getEngineersFromFaith() const;
 	void incrementEngineersFromFaith();
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int getDiplomatsFromFaith() const;
-	void incrementDiplomatsFromFaith();
-#endif
 
 	int getGreatPeopleThresholdModifier() const;
 	void changeGreatPeopleThresholdModifier(int iChange);
@@ -836,9 +770,6 @@ public:
 	int getGreatMerchantRateModifier() const;
 	int getGreatScientistRateModifier() const;
 	int getGreatEngineerRateModifier() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int getGreatDiplomatRateModifier() const;
-#endif
 	int getDomesticGreatGeneralRateModifier() const;
 	void changeGreatPeopleRateModFromBldgs(int ichange);
 	void changeGreatGeneralRateModFromBldgs(int ichange);
@@ -1638,9 +1569,6 @@ public:
 	CvCity* GetClosestFriendlyCity(CvPlot& plot, int iSearchRadius);
 
 	int GetNumPuppetCities() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int GetNumCapitalCities() const;
-#endif
 	int GetMaxEffectiveCities(bool bIncludePuppets = false);
 
 	int GetNumNaturalWondersDiscoveredInArea() const;
@@ -1895,23 +1823,6 @@ public:
 	CvPlayerAchievements& GetPlayerAchievements(){return m_kPlayerAchievements;}
 #endif
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	CvString GetVassalIndependenceTooltipAsMaster(PlayerTypes ePlayer) const;
-	CvString GetVassalIndependenceTooltipAsVassal() const;
-
-	int GetScoreFromVassals() const;
-	int GetScoreFromVassal(PlayerTypes ePlayer) const;
-
-	int GetYieldPerTurnFromVassals(YieldTypes eYield) const;
-
-	int GetHappinessFromVassals() const;
-	int GetHappinessFromVassal(PlayerTypes ePlayer) const;
-
-	int GetVassalGoldMaintenanceMod() const;
-	void SetVassalGoldMaintenanceMod(int iValue);
-	void ChangeVassalGoldMaintenanceMod(int iChange);
-#endif
-
 	bool hasTurnTimerExpired();
 
 protected:
@@ -2012,25 +1923,6 @@ protected:
 	int m_iConversionModifier;
 #endif
 	int m_iExtraLeagueVotes;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	FAutoVariable<int, CvPlayer> m_iImprovementLeagueVotes;
-	FAutoVariable<int, CvPlayer> m_iFaithToVotes;
-	FAutoVariable<int, CvPlayer> m_iCapitalsToVotes;
-	FAutoVariable<int, CvPlayer> m_iDoFToVotes;
-	FAutoVariable<int, CvPlayer> m_iRAToVotes;
-	FAutoVariable<int, CvPlayer> m_iDefensePactsToVotes;
-	FAutoVariable<int, CvPlayer> m_iGPExpendInfluence;
-	FAutoVariable<bool, CvPlayer> m_bIsLeagueAid;
-	FAutoVariable<bool, CvPlayer> m_bIsLeagueScholar;
-	FAutoVariable<bool, CvPlayer> m_bIsLeagueArt;
-	FAutoVariable<int, CvPlayer> m_iScienceRateFromLeague;
-	FAutoVariable<int, CvPlayer> m_iScienceRateFromLeagueAid;
-	FAutoVariable<int, CvPlayer> m_iLeagueCultureCityModifier;
-	FAutoVariable<int, CvPlayer> m_iFreeGreatDiplomatsCreated;
-	FAutoVariable<int, CvPlayer> m_iGreatDiplomatsCreated;
-	FAutoVariable<int, CvPlayer> m_iDiplomatsFromFaith;
-	FAutoVariable<int, CvPlayer> m_iGreatDiplomatRateModifier;
-#endif
 	FAutoVariable<int, CvPlayer> m_iAdvancedStartPoints;
 	FAutoVariable<int, CvPlayer> m_iAttackBonusTurns;
 	int m_iCultureBonusTurns;
@@ -2297,10 +2189,6 @@ protected:
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiProjectMaking;
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiHurryCount;
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiHurryModifier;
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	FAutoVariable<int, CvPlayer> m_iVassalGoldMaintenanceMod;
-#endif
 
 	FAutoVariable<std::vector<bool>, CvPlayer> m_pabLoyalMember;
 

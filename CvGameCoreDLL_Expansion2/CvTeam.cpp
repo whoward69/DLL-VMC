@@ -87,10 +87,6 @@ CvTeam::CvTeam()
 	m_ppaaiImprovementNoFreshWaterYieldChange = NULL;
 	m_ppaaiImprovementFreshWaterYieldChange = NULL;
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_pabTradeTech = NULL;
-#endif
-
 	reset((TeamTypes)0, true);
 }
 
@@ -130,9 +126,6 @@ void CvTeam::uninit()
 	m_abCanLaunch = NULL;
 	m_abVictoryAchieved = NULL;
 	m_abSmallAwardAchieved = NULL;
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_pabTradeTech = NULL;
-#endif
 
 	m_paiRouteChange = NULL;
 	m_paiBuildTimeChange = NULL;
@@ -204,10 +197,6 @@ void CvTeam::uninit()
 	m_bBrokenBorderPromise = false;
 	m_bBrokenCityStatePromise = false;
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_iVassalageTradingAllowedCount = 0;
-#endif
-
 	m_eCurrentEra = ((EraTypes) 0);
 
 	m_eLiberatedByTeam = NO_TEAM;
@@ -235,10 +224,6 @@ void CvTeam::uninit()
 		m_abResearchAgreement[i] = false;
 		m_abTradeAgreement[i] = false;
 		m_abForcePeace[i] = false;
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		m_aiNumTurnsSinceVassalEnded[i] = -1;
-#endif
 	}
 
 	for(int i = 0; i < MAX_PLAYERS; i++)
@@ -247,20 +232,6 @@ void CvTeam::uninit()
 	}
 
 	m_eID = NO_TEAM;
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_bIsVoluntaryVassal = false;
-	m_iNumTurnsIsVassal = -1;
-	m_iNumCitiesWhenVassalMade = 0;
-	m_iTotalPopulationWhenVassalMade = 0;
-	m_eMaster = NO_TEAM;
-
-	for(int i = 0; i < MAX_MAJOR_CIVS; i++)
-	{
-		m_aiNumTurnsSinceVassalTaxSet[i] = -1;
-		m_aiVassalTax[i] = 0;
-	}
-#endif
 }
 
 
@@ -292,9 +263,6 @@ void CvTeam::reset(TeamTypes eID, bool bConstructorCall)
 #endif
 		int numTerrainInfos = GC.getNumTerrainInfos();
 		int numImprovementInfos = GC.getNumImprovementInfos();
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		int numTechInfos = GC.getNumTechInfos();
-#endif
 
 		//Perform batch allocation
 		AllocData aData[] =
@@ -304,9 +272,6 @@ void CvTeam::reset(TeamTypes eID, bool bConstructorCall)
 			{&m_abCanLaunch,						numVictoryInfos, 0},
 			{&m_abVictoryAchieved,					numVictoryInfos, 0},
 			{&m_abSmallAwardAchieved,				numSmallAwardInfos, 0},
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-			{&m_pabTradeTech,						numTechInfos, 0},
-#endif
 
 			{&m_paiRouteChange,						numRouteInfos, 0},
 			{&m_paiBuildTimeChange,					numBuildInfos, 0},
@@ -378,12 +343,6 @@ void CvTeam::reset(TeamTypes eID, bool bConstructorCall)
 		{
 			m_paiTerrainTradeCount[i] = 0;
 		}
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		for(int i = 0; i < numTechInfos; i++)
-		{
-			m_pabTradeTech[i] = false;
-		}
-#endif
 
 		for(int i = 0; i < MAX_TEAMS; i++)
 		{
@@ -847,77 +806,6 @@ void CvTeam::doTurn()
 
 			if(GetNumTurnsLockedIntoWar(eTeam) > 0)
 				ChangeNumTurnsLockedIntoWar(eTeam, -1);
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-			if (MOD_DIPLOMACY_CIV4_FEATURES)
-			{
-				// We are their vassal
-				if(IsVassal(eTeam)) {
-					ChangeNumTurnsIsVassal(1);
-
-					// Get players in vassal team - I hate how inefficient this is
-					for(int iI = 0; iI < MAX_MAJOR_CIVS; iI++)
-					{
-						PlayerTypes eVassal = (PlayerTypes) iI;
-						if(GET_PLAYER(eVassal).getTeam() == GetID())
-						{
-							int iGrossGold = GET_PLAYER(eVassal).GetTreasury()->CalculateGrossGoldTimes100();
-							int iTaxedGold = GET_PLAYER(eVassal).GetTreasury()->GetExpensePerTurnFromVassalTaxesTimes100();
-
-							// also need master players
-							for(int jJ = 0; jJ < MAX_MAJOR_CIVS; jJ++)
-							{
-								PlayerTypes eMaster = (PlayerTypes) jJ;
-								if(GET_PLAYER(eMaster).getTeam() == eTeam)
-								{
-									GET_PLAYER(eVassal).GetDiplomacyAI()->ChangeVassalGoldPerTurnTaxedSinceVassalStarted(eMaster, iTaxedGold);
-									GET_PLAYER(eVassal).GetDiplomacyAI()->ChangeVassalGoldPerTurnCollectedSinceVassalStarted(eMaster, iGrossGold);
-								}
-							}
-						}
-					}
-				}
-
-				// We are their master
-				if(GET_TEAM(eTeam).GetMaster() == GetID()) {
-
-					// Push a notification to team members if we can liberate a vassal this turn
-					if(CanLiberateVassal(eTeam) && GET_TEAM(eTeam).GetNumTurnsIsVassal() == GC.getGame().getGameSpeedInfo().getMinimumVassalLiberateTurns())
-					{
-						Localization::String summaryString = Localization::Lookup("TXT_KEY_MISC_VASSAL_LIBERATION_POSSIBLE_SUMMARY");
-						Localization::String descString = Localization::Lookup("TXT_KEY_MISC_VASSAL_LIBERATION_POSSIBLE");
-						descString << GET_TEAM(eTeam).getName();
-						AddNotification(NOTIFICATION_PEACE_ACTIVE_PLAYER, descString.toUTF8(), summaryString.toUTF8(), -1, -1, GET_TEAM(eTeam).getLeaderID());
-					}
-
-					// Get players in vassal team - I hate how inefficient this is
-					for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-					{
-						PlayerTypes ePlayerLoop = (PlayerTypes) iPlayerLoop;
-						if(GET_PLAYER(ePlayerLoop).getTeam() == eTeam)
-						{
-							// We set a vassal tax sometime
-							if(GetNumTurnsSinceVassalTaxSet(ePlayerLoop) > -1)
-							{
-								ChangeNumTurnsSinceVassalTaxSet(ePlayerLoop, 1);
-
-								// Push a notification to team members if we can set vassal tax this turn
-								if(CanSetVassalTax(ePlayerLoop) && GetNumTurnsSinceVassalTaxSet(ePlayerLoop) == GC.getGame().getGameSpeedInfo().getMinimumVassalTaxTurns())
-								{
-									Localization::String locString = Localization::Lookup("TXT_KEY_MISC_VASSAL_TAXES_AVAILABLE");
-									locString << GET_PLAYER(ePlayerLoop).getName();
-									AddNotification(NOTIFICATION_PEACE_ACTIVE_PLAYER, locString.toUTF8(), locString.toUTF8(), -1, -1, GET_TEAM(eTeam).getLeaderID());
-								}
-							}
-						}
-					}
-				}
-				
-				// increment vassal ended if we're not a vassal of eTeam
-				if(GetNumTurnsSinceVassalEnded(eTeam) > -1)
-					ChangeNumTurnsSinceVassalEnded(eTeam, 1);
-			}
-#endif
 		}
 	}
 
@@ -1121,14 +1009,6 @@ bool CvTeam::canChangeWarPeace(TeamTypes eTeam) const
 		return false;
 	}
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	// Vassals have no control over war/peace
-	if(MOD_DIPLOMACY_CIV4_FEATURES && IsVassalOfSomeone())
-	{
-		return false;
-	}
-#endif
-
 	if(isPermanentWarPeace(eTeam) || GET_TEAM(eTeam).isPermanentWarPeace(GetID()))
 	{
 		return false;
@@ -1178,13 +1058,6 @@ bool CvTeam::canDeclareWar(TeamTypes eTeam) const
 	{
 		return false;
 	}
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if(MOD_DIPLOMACY_CIV4_FEATURES && GET_TEAM(eTeam).IsVassalOfSomeone() && (GET_TEAM(eTeam).GetMaster() != GetID()))
-	{
-		return false;
-	}
-#endif
 
 #if defined(MOD_EVENTS_WAR_AND_PEACE)
 	if (MOD_EVENTS_WAR_AND_PEACE) {
@@ -1241,17 +1114,9 @@ void CvTeam::declareWar(TeamTypes eTeam, bool bDefensivePact)
 
 //	-----------------------------------------------------------------------------------------------
 #if defined(MOD_EVENTS_WAR_AND_PEACE)
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-void CvTeam::DoDeclareWar(PlayerTypes eOriginatingPlayer, bool bAggressor, TeamTypes eTeam, bool bDefensivePact, bool bMinorAllyPact, bool bVassal)
-#else
 void CvTeam::DoDeclareWar(PlayerTypes eOriginatingPlayer, bool bAggressor, TeamTypes eTeam, bool bDefensivePact, bool bMinorAllyPact)
-#endif
-#else
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-void CvTeam::DoDeclareWar(TeamTypes eTeam, bool bDefensivePact, bool bMinorAllyPact, bool bVassal)
 #else
 void CvTeam::DoDeclareWar(TeamTypes eTeam, bool bDefensivePact, bool bMinorAllyPact)
-#endif
 #endif
 {
 	Localization::String locString;
@@ -1268,28 +1133,12 @@ void CvTeam::DoDeclareWar(TeamTypes eTeam, bool bDefensivePact, bool bMinorAllyP
 	CvAssertMsg(eTeam != GetID(), "eTeam is not expected to be equal with GetID()");
 	if(!isBarbarian())
 	{
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		if (MOD_DIPLOMACY_CIV4_FEATURES) 
-		{
-			// We declared war on our vassal!
-			if(GET_TEAM(eTeam).GetMaster() == GetID())
-			{
-				// this guy is no longer our vassal
-				GET_TEAM(eTeam).DoEndVassal(GetID(), true, false);
-			}
-		}
-#endif	
-
 		// Since we declared war, all of OUR Defensive Pacts are nullified
 		cancelDefensivePacts();
 		GC.getGame().GetGameTrade()->DoAutoWarPlundering(m_eID, eTeam);
 		GC.getGame().GetGameTrade()->CancelTradeBetweenTeams(m_eID, eTeam);
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		if (!bDefensivePact || (MOD_DIPLOMACY_CIV4_FEATURES && !bVassal))
-#else
 		if (!bDefensivePact)
-#endif
 		{
 			for(int iAttackingPlayer = 0; iAttackingPlayer < MAX_MAJOR_CIVS; iAttackingPlayer++)
 			{
@@ -1338,28 +1187,6 @@ void CvTeam::DoDeclareWar(TeamTypes eTeam, bool bDefensivePact, bool bMinorAllyP
 				}
 			}
 		}
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		// Auto War for Vassals
-		if (MOD_DIPLOMACY_CIV4_FEATURES && !bDefensivePact)
-		{
-			for(iI = 0; iI < MAX_TEAMS; iI++)
-			{
-				if(GET_TEAM((TeamTypes)iI).isAlive())
-				{
-					// is loop player a vassal of eTeam?
-					if(GET_TEAM((TeamTypes)iI).IsVassal(eTeam))
-					{
-#if defined(MOD_EVENTS_WAR_AND_PEACE)
-						GET_TEAM((TeamTypes)iI).DoDeclareWar(eOriginatingPlayer, !bAggressor, GetID(), /*bDefensivePact*/ true);
-#else
-						GET_TEAM((TeamTypes)iI).DoDeclareWar(GetID(), /*bDefensivePact*/ true);
-#endif
-					}
-				}
-			}
-		}
-#endif
 	}
 
 	// Cancel Trade Deals, RAs, diplomats
@@ -1777,41 +1604,6 @@ void CvTeam::DoMakePeace(TeamTypes eTeam, bool bBumpUnits, bool bSuppressNotific
 		GET_TEAM(eTeam).setAtWar(GetID(), false);
 #endif
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		if(MOD_DIPLOMACY_CIV4_FEATURES)
-		{
-			//Secondary major declarations
-			for(int iI = 0; iI < MAX_CIV_TEAMS; iI++) // Don't need the barbies
-			{
-				if (iI != m_eID && iI != eTeam) // Don't need ourselves, or those we're making peace with
-				{
-					CvTeam& kTeam = GET_TEAM((TeamTypes)iI);
-					if(kTeam.isAlive())
-					{
-						// Vassal of ours? They make peace with enemy, same as us
-						if(kTeam.IsVassal(GetID()))
-					{
-#if defined(MOD_EVENTS_WAR_AND_PEACE)
-							kTeam.DoMakePeace(kTeam.getLeaderID(), bPacifier, eTeam, true, false);
-#else
-							kTeam.DoMakePeace(eTeam, true, false);
-#endif
-						}
-						// Vassal of theirs? They make peace with us
-						else if (kTeam.IsVassal(eTeam))
-						{
-#if defined(MOD_EVENTS_WAR_AND_PEACE)
-							kTeam.DoMakePeace(kTeam.getLeaderID(), !bPacifier, GetID(), true, false);
-#else
-							kTeam.DoMakePeace(GetID(), true, false);
-#endif
-						}
-					}
-				}
-			}
-		}
-#endif
-
 #if defined(MOD_EVENTS_WAR_AND_PEACE)
 		if (MOD_EVENTS_WAR_AND_PEACE) {
 			GAMEEVENTINVOKE_HOOK(GAMEEVENT_MakePeace, eOriginatingPlayer, eTeam, bPacifier);
@@ -1834,13 +1626,6 @@ void CvTeam::DoMakePeace(TeamTypes eTeam, bool bBumpUnits, bool bSuppressNotific
 		// One shot things
 		DoNowAtWarOrPeace(eTeam, false);
 		GET_TEAM(eTeam).DoNowAtWarOrPeace(GetID(), false);
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		if(MOD_DIPLOMACY_CIV4_FEATURES)
-		{
-			DoUpdateVassalWarPeaceRelationships();
-		}
-#endif
 
 		// Move Units that shouldn't be in each others' territory any more
 		if(bBumpUnits)
@@ -4478,13 +4263,6 @@ bool CvTeam::IsAllowsOpenBordersToTeam(TeamTypes eIndex) const
 		return true;
 	}
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if(MOD_DIPLOMACY_CIV4_FEATURES && GetMaster() == eIndex)
-	{
-		return true;
-	}
-#endif
-
 	return m_abOpenBorders[eIndex];
 }
 
@@ -5964,111 +5742,6 @@ void CvTeam::setHasTech(TechTypes eIndex, bool bNewValue, PlayerTypes ePlayer, b
 				//AddNotification(NOTIFICATION_VICTORY, strBuffer, strSummary);
 
 				SetCurrentEra(eNewEra);
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-				if(MOD_DIPLOMACY_CIV4_FEATURES)
-				{
-					CvCity* pLoopCity;
-					int iLoop;
-					PlayerTypes eLoopPlayer;
-
-					// Check all players on this team
-					for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-					{
-						eLoopPlayer = (PlayerTypes) iPlayerLoop;
-
-						if(GET_PLAYER(eLoopPlayer).getTeam() == GetID())
-						{
-							// Look at all Cities
-							bool bMaster = false;
-							CvCity* pMasterCity = NULL;
-							int iSum = 0;
-							for(pLoopCity = GET_PLAYER(eLoopPlayer).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(eLoopPlayer).nextCity(&iLoop))
-							{
-								for(int iBuildingLoop = 0; iBuildingLoop < GC.getNumBuildingInfos(); iBuildingLoop++)
-								{
-									const BuildingTypes eBuilding = static_cast<BuildingTypes>(iBuildingLoop);
-									CvBuildingEntry* pkBuildingInfo = GC.getBuildingInfo(eBuilding);
-
-									if(pkBuildingInfo)
-									{
-										// Has this Building
-										if(pLoopCity->GetCityBuildings()->GetNumBuilding(eBuilding) > 0)
-										{
-											if(pkBuildingInfo->IsVassalLevyEra() && GetNumVassals() > 0)
-											{
-												bMaster = true;
-												pMasterCity = pLoopCity;
-												break;
-											}
-										}
-									}
-								}
-							}
-							if(bMaster && pMasterCity != NULL)
-							{
-								std::vector<UnitTypes> aExtraUnits;
-								std::vector<UnitAITypes> aExtraUnitAITypes;
-								CvUnit* pLoopUnit = NULL;
-								int iLoop = 0;
-								for(pLoopUnit = GET_PLAYER(eLoopPlayer).firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = GET_PLAYER(eLoopPlayer).nextUnit(&iLoop))
-								{
-									if (pLoopUnit->getDomainType() == DOMAIN_LAND && pLoopUnit->IsCombatUnit())
-									{
-										UnitTypes eCurrentUnitType = pLoopUnit->getUnitType();
-										UnitAITypes eCurrentUnitAIType = pLoopUnit->AI_getUnitAIType();
-
-										// check for duplicate unit
-										bool bAddUnit = true;
-										for (uint ui = 0; ui < aExtraUnits.size(); ui++)
-										{
-											if (aExtraUnits[ui] == eCurrentUnitType)
-											{
-												bAddUnit = false;
-											}
-										}
-
-										if (bAddUnit)
-										{
-											aExtraUnits.push_back(eCurrentUnitType);
-											aExtraUnitAITypes.push_back(eCurrentUnitAIType);
-										}
-									}
-								}
-								int iTotal = GetNumVassals() * 2;											
-								for (int iK = 0; iK < iTotal; iK++)
-								{											
-									int iUnit = GC.getGame().getJonRandNum(aExtraUnits.size(), "Random vassal levy");
-									CvUnit* pNewUnit = GET_PLAYER(eLoopPlayer).initUnit(aExtraUnits[iUnit], pMasterCity->getX(), pMasterCity->getY(), aExtraUnitAITypes[iUnit]);
-									bool bJumpSuccess = pNewUnit->jumpToNearestValidPlot();
-									if(bJumpSuccess)
-									{
-										pMasterCity->addProductionExperience(pNewUnit);
-										iSum++;
-									}
-									if (!bJumpSuccess)
-									{
-										pNewUnit->kill(false);
-										break;
-									}
-								}
-								if(iSum > 0)
-								{
-									CvNotifications* pNotifications = GET_PLAYER(eLoopPlayer).GetNotifications();
-									if(pNotifications && eLoopPlayer == GC.getGame().getActivePlayer())
-									{
-										Localization::String strText = Localization::Lookup("TXT_KEY_NOTIFICATION_VASSAL_LEVY");
-										strText << iSum;
-										Localization::String strSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_VASSAL_LEVY_SUMMARY");
-										strSummary << iSum;
-										pNotifications->Add(NOTIFICATION_GENERIC, strText.toUTF8(), strSummary.toUTF8(), pMasterCity->getX(), pMasterCity->getY(), -1);
-									}
-								}
-							}
-						}
-					}
-				}
-#endif
 			}
 			// DON'T enter a new era with this tech
 			else
@@ -6140,13 +5813,6 @@ void CvTeam::setHasTech(TechTypes eIndex, bool bNewValue, PlayerTypes ePlayer, b
 					kPlayer.invalidateYieldRankCache();
 				}
 			}
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-			if(MOD_DIPLOMACY_CIV4_FEATURES && GC.getGame().isOption(GAMEOPTION_NO_TECH_BROKERING))
-			{
-				SetTradeTech(eIndex, true);
-			}
-#endif
 
 			if(bFirst)
 			{
@@ -6749,10 +6415,6 @@ void CvTeam::testCircumnavigated()
 			{
 				if(eTeamID == kPlayer.getTeam())
 				{
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-					GC.getGame().SetTeamThatCircumnavigated(eTeamID);
-#endif
-
 #if !defined(NO_ACHIEVEMENTS)
 					if(!kGame.isGameMultiPlayer() && kPlayer.isHuman())
 					{
@@ -6858,13 +6520,6 @@ void CvTeam::processTech(TechTypes eTech, int iChange)
 	{
 		changeGoldTradingCount(iChange);
 	}
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if(MOD_DIPLOMACY_CIV4_FEATURES && pTech->IsVassalageTradingAllowed())
-	{
-		changeVassalageTradingAllowedCount(iChange);
-	}
-#endif
 
 	if(pTech->IsAllowEmbassyTradingAllowed())
 	{
@@ -7509,40 +7164,6 @@ void CvTeam::SetCurrentEra(EraTypes eNewValue)
 					}
 				}
 			}
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-			if(MOD_DIPLOMACY_CIV4_FEATURES && pEraInfo->getVassalageEnabled())
-			{
-				if(!GC.getGame().isOption(GAMEOPTION_NO_VASSALAGE))
-				{
-					changeVassalageTradingAllowedCount(1);
-
-					// Send notification to team
-					PlayerTypes ePlayer;
-					for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-					{
-						ePlayer = (PlayerTypes) iPlayerLoop;
-						if(GET_PLAYER(ePlayer).getTeam() != GetID())
-						{
-							continue;
-						}
-
-						if(GET_PLAYER(ePlayer).GetID() == GC.getGame().getActivePlayer())
-						{
-							CvNotifications* pNotifications = GET_PLAYER(ePlayer).GetNotifications();
-							if(pNotifications)
-							{
-								CvEraInfo* pkEraInfo = GC.getEraInfo(eNewValue) ;
-								const char* szEra = pkEraInfo->GetTextKey();
-								CvString strBuffer = GetLocalizedText("TXT_KEY_NOTIFICATION_VASSALAGE_ALLOWED", szEra);
-								CvString strSummary = GetLocalizedText("TXT_KEY_NOTIFICATION_SUMMARY_VASSALAGE_ALLOWED");
-								pNotifications->Add(NOTIFICATION_GENERIC, strBuffer, strSummary, -1, -1, 0);
-							}
-						}
-					}
-				}
-			}
-#endif
 		}
 
 		// Trait to provide free policies on era change?
@@ -7862,10 +7483,6 @@ void CvTeam::Read(FDataStream& kStream)
 	CvInfosSerializationHelper::ReadHashedDataArray(kStream, m_abVictoryAchieved, GC.getNumVictoryInfos());
 	CvInfosSerializationHelper::ReadHashedDataArray(kStream, m_abSmallAwardAchieved, GC.getNumSmallAwardInfos());
 	
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	CvInfosSerializationHelper::ReadHashedDataArray(kStream, m_pabTradeTech, GC.getNumTechInfos());
-#endif
-
 	CvInfosSerializationHelper::ReadHashedDataArray(kStream, m_paiRouteChange, GC.getNumRouteInfos());
 	CvInfosSerializationHelper::ReadHashedDataArray(kStream, m_paiBuildTimeChange, GC.getNumBuildInfos());
 	CvInfosSerializationHelper::ReadHashedDataArray(kStream, m_paiProjectCount, GC.getNumProjectInfos());
@@ -7923,24 +7540,6 @@ void CvTeam::Read(FDataStream& kStream)
 	ImprovementArrayHelpers::ReadYieldArray(kStream, m_ppaaiImprovementFreshWaterYieldChange, NUM_YIELD_TYPES);
 
 	CvInfosSerializationHelper::ReadHashedTypeArray(kStream, m_aeRevealedResources);
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	kStream >> m_iVassalageTradingAllowedCount;
-	kStream >> m_eMaster;
-	kStream >> m_bIsVoluntaryVassal;
-	kStream >> m_iNumTurnsIsVassal;
-	kStream >> m_iNumCitiesWhenVassalMade;
-	kStream >> m_iTotalPopulationWhenVassalMade;
-
-	ArrayWrapper<int> kNumTurnsSinceVassalEndedWrapper(MAX_TEAMS, &m_aiNumTurnsSinceVassalEnded[0]);
-	kStream >> kNumTurnsSinceVassalEndedWrapper;
-
-	ArrayWrapper<int> kNumTurnsSinceVassalTaxSetWrapper(MAX_MAJOR_CIVS, &m_aiNumTurnsSinceVassalTaxSet[0]);
-	kStream >> kNumTurnsSinceVassalTaxSetWrapper;
-
-	ArrayWrapper<int> kVassalTaxWrapper(MAX_MAJOR_CIVS, &m_aiVassalTax[0]);
-	kStream >> kVassalTaxWrapper;
-#endif
 
 	// Fix bad 'at war' flags where we are at war with ourselves.  Not a good thing.
 	if(m_eID >= 0 && m_eID < MAX_TEAMS)
@@ -8038,9 +7637,6 @@ void CvTeam::Write(FDataStream& kStream) const
 	CvInfosSerializationHelper::WriteHashedDataArray<VictoryTypes, bool>(kStream, m_abCanLaunch, GC.getNumVictoryInfos());
 	CvInfosSerializationHelper::WriteHashedDataArray<VictoryTypes, bool>(kStream, m_abVictoryAchieved, GC.getNumVictoryInfos());
 	CvInfosSerializationHelper::WriteHashedDataArray<SmallAwardTypes, bool>(kStream, m_abSmallAwardAchieved, GC.getNumSmallAwardInfos());
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	CvInfosSerializationHelper::WriteHashedDataArray<TechTypes, bool>(kStream, m_pabTradeTech, GC.getNumTechInfos());
-#endif
 	CvInfosSerializationHelper::WriteHashedDataArray<RouteTypes, int>(kStream, m_paiRouteChange, GC.getNumRouteInfos());
 	CvInfosSerializationHelper::WriteHashedDataArray<BuildTypes, int>(kStream, m_paiBuildTimeChange, GC.getNumBuildInfos());
 	CvInfosSerializationHelper::WriteHashedDataArray<ProjectTypes, int>(kStream, m_paiProjectCount, GC.getNumProjectInfos());
@@ -8081,19 +7677,6 @@ void CvTeam::Write(FDataStream& kStream) const
 	ImprovementArrayHelpers::WriteYieldArray(kStream, m_ppaaiImprovementFreshWaterYieldChange, iNumImprovements);
 
 	CvInfosSerializationHelper::WriteHashedTypeArray(kStream, m_aeRevealedResources);
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	kStream << m_iVassalageTradingAllowedCount;
-	kStream << m_eMaster;
-	kStream << m_bIsVoluntaryVassal;
-	kStream << m_iNumTurnsIsVassal;
-	kStream << m_iNumCitiesWhenVassalMade;
-	kStream << m_iTotalPopulationWhenVassalMade;
-
-	kStream << ArrayWrapperConst<int>(MAX_TEAMS, &m_aiNumTurnsSinceVassalEnded[0]);
-	kStream << ArrayWrapperConst<int>(MAX_MAJOR_CIVS, &m_aiNumTurnsSinceVassalTaxSet[0]);
-	kStream << ArrayWrapperConst<int>(MAX_MAJOR_CIVS, &m_aiVassalTax[0]);
-#endif
 }
 
 // CACHE: cache frequently used values
@@ -8122,1054 +7705,3 @@ void CvTeam::AddNotification(NotificationTypes eNotificationType, const char* st
 		loopPlayer.GetNotifications()->Add(eNotificationType, strMessage, strSummary, iX, iY, iGameDataIndex, iExtraGameData);
 	}
 }
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-//  Acquire the map (territory or world) of eTeam
-void CvTeam::AcquireMap(TeamTypes eTeam, bool bTerritoryOnly)
-{
-	CvAssertMsg(eTeam >= 0, "eIndex is expected to be non-negative (invalid Index)");
-	CvAssertMsg(eTeam < MAX_TEAMS, "eIndex is expected to be within maximum bounds (invalid Index)");
-
-	CvMap& kMap = GC.getMap();
-	CvPlot* pPlot;
-	int iI;
-
-	// Loop through every plot on the map
-	for(iI = 0; iI < GC.getMap().numPlots(); iI++)
-	{
-		pPlot = kMap.plotByIndexUnchecked(iI);
-
-		if(pPlot == NULL)
-		{
-			continue;
-		}
-
-		// Plot must be revealed by eTeam
-		if(!pPlot->isRevealed(eTeam))
-		{
-			continue;
-		}
-
-		// If this is a territory only map, the plot must be adjacent to or owned by a plot owned by eTeam
-		if(bTerritoryOnly)
-		{
-			if(pPlot->getTeam() != eTeam || !pPlot->isAdjacentTeam(eTeam))
-			{
-				continue;
-			}
-		}
-
-		pPlot->setRevealed(GetID(), true);
-	}
-
-	GC.getMap().updateDeferredFog();
-	GC.getMap().verifyUnitValidPlot();
-
-	if((GetID() == GC.getGame().getActiveTeam()) || (eTeam == GC.getGame().getActiveTeam()))
-	{
-		DLLUI->setDirty(Score_DIRTY_BIT, true);
-	}
-}
-
-//	--------------------------------------------------------------------------------
-int CvTeam::getVassalageTradingAllowedCount() const
-{
-	return m_iVassalageTradingAllowedCount;
-}
-//	--------------------------------------------------------------------------------
-bool CvTeam::IsVassalageTradingAllowed() const
-{
-	return (getVassalageTradingAllowedCount() > 0);
-}
-//	--------------------------------------------------------------------------------
-void CvTeam::changeVassalageTradingAllowedCount(int iChange)
-{
-	m_iVassalageTradingAllowedCount = (m_iVassalageTradingAllowedCount + iChange);
-	CvAssert(getVassalageTradingAllowedCount() >= 0);
-}
-//	--------------------------------------------------------------------------------
-// Find out who we're a vassal of
-TeamTypes CvTeam::GetMaster() const
-{
-	return m_eMaster;
-}
-//	--------------------------------------------------------------------------------
-// We're a vassal of somebody (doesn't matter who)
-bool CvTeam::IsVassalOfSomeone() const
-{
-	return m_eMaster!=NO_TEAM;
-}
-//	--------------------------------------------------------------------------------
-bool CvTeam::IsVoluntaryVassal(TeamTypes eIndex) const
-{
-	return m_bIsVoluntaryVassal && IsVassal(eIndex);
-}
-//	--------------------------------------------------------------------------------
-// Are we a vassal of eIndex?
-bool CvTeam::IsVassal(TeamTypes eIndex) const
-{
-	return eIndex!=NO_TEAM && eIndex==m_eMaster;
-}
-//	--------------------------------------------------------------------------------
-void CvTeam::setVassal(TeamTypes eIndex, bool bNewValue, bool bVoluntary)
-{
-	//can't be our own master
-	if(eIndex==GetID())
-		return;
-
-	m_eMaster = bNewValue ? (TeamTypes) eIndex : NO_TEAM;
-	m_bIsVoluntaryVassal = bNewValue ? bVoluntary : false;
-}
-
-//	-----------------------------------------------------------------------------------------------
-// Can we end our vassalage with eTeam?
-bool CvTeam::canEndAllVassal() const
-{
-	TeamTypes eLoopTeam;
-	
-	int iMinTurns;
-	bool bValid = true;
-	// Go through every major.
-	for(int iTeamLoop=0; iTeamLoop < MAX_TEAMS; iTeamLoop++)
-	{
-		eLoopTeam = (TeamTypes) iTeamLoop;
-
-		// Ignore minors.
-		if(!GET_TEAM(eLoopTeam).isMinorCiv())
-		{
-			// Is eLoopTeam the vassal of us?
-			if(GET_TEAM(eLoopTeam).IsVassal(GetID()))
-			{
-				if(GET_TEAM(eLoopTeam).isAlive())
-				{
-					// Too soon to end our vassalage with ePlayer
-					iMinTurns = GET_TEAM(eLoopTeam).IsVoluntaryVassal(GetID()) ? /*10*/ GC.getGame().getGameSpeedInfo().getMinimumVoluntaryVassalTurns() : /*50*/ GC.getGame().getGameSpeedInfo().getMinimumVassalTurns();
-
-					if(GetNumTurnsIsVassal() < iMinTurns)
-					{
-						bValid = false;
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	return bValid;
-}
-bool CvTeam::canEndVassal(TeamTypes eTeam) const
-{
-	if(eTeam == NO_TEAM) return false;
-	
-	// Can't end a vassalage if we're not the vassal of eTeam.
-	if(!IsVassal(eTeam))
-	{
-		return false;
-	}
-
-	// can't end vassalage with ourselves
-	if(eTeam == GetID())
-	{
-		return false;
-	}
-
-	if(!isAlive())
-		return false;
-
-	if(!GET_TEAM(eTeam).isAlive())
-		return true;
-
-	// Too soon to end our vassalage with ePlayer
-	int iMinTurns = IsVoluntaryVassal(eTeam) ? /*10*/ GC.getGame().getGameSpeedInfo().getMinimumVoluntaryVassalTurns() : /*50*/ GC.getGame().getGameSpeedInfo().getMinimumVassalTurns();
-
-	if(GetNumTurnsIsVassal() < iMinTurns)
-	{
-		return false;
-	}
-	
-	// After an ideology is unlocked, we don't care about 50% rules anymore.
-	//PlayerTypes ePlayer;
-	//PolicyBranchTypes eBranch;
-	//for(int iI=0; iI < MAX_MAJOR_CIVS; iI++)
-	//{
-	//	ePlayer = (PlayerTypes) iI;
-	//	// Find the ideology
-	//	for(int jJ=0; jJ < GC.getNumPolicyBranchInfos(); jJ++)
-	//	{
-	//		eBranch = (PolicyBranchTypes) jJ;
-	//		if(GC.getPolicyBranchInfo(eBranch)->IsPurchaseByLevel())
-	//		{
-	//			if(GET_PLAYER(ePlayer).GetPlayerPolicies()->GetNumPoliciesOwnedInBranch(eBranch) > 0)
-	//			{
-	//				return true;
-	//			}
-	//		}
-	//	}
-	//}
-
-	// We're the voluntary vassal of eTeam and it's not too early to end vassalage - we're not bound by the 50% rules
-	if(IsVoluntaryVassal(eTeam))
-	{
-		return true;
-	}
-
-	// Number of cities
-	bool bAbleToEndVassalage = false;
-
-	int iCityPercent = 0;
-	int iPopPercent = 0;
-
-	if(getNumCitiesWhenVassalMade() > 0 && getTotalPopulationWhenVassalMade() > 0)
-	{
-		iCityPercent = getNumCities() * 100 / getNumCitiesWhenVassalMade();
-		iPopPercent = getTotalPopulation() * 100 / getTotalPopulationWhenVassalMade();
-	}
-	// No cities when vassalage was made (what?) - can end vassalage if we have cities and population
-	else
-	{
-		return (getNumCities() > 0 && getTotalPopulation() > 0);
-	}
-
-	int iMasterCities = GET_TEAM(eTeam).getNumCities();
-	int iMasterPopulation = GET_TEAM(eTeam).getTotalPopulation();
-
-	// Master is dead???
-	if(iMasterCities == 0 || iMasterPopulation == 0)
-		return true;
-
-	// We have lost cities so that we are 75% less than what we started with (Master is not protecting us)
-	if(iCityPercent <= (/*75*/GC.getVASSALAGE_VASSAL_LOST_CITIES_THRESHOLD()))
-	{
-		bAbleToEndVassalage = true;
-	}
-	// We have more than 300% of our original population (We don't need his protection anymore)
-	else if(iPopPercent > (/*300*/GC.getVASSALAGE_VASSAL_POPULATION_THRESHOLD()))
-	{
-		bAbleToEndVassalage = true;
-	}
-	// We have 60% or more of the Master's population OR cities
-	else if(getNumCities() * 100 / iMasterCities >= /*60*/GC.getVASSALAGE_VASSAL_MASTER_CITY_PERCENT_THRESHOLD() &&
-			getTotalPopulation() * 100 / iMasterPopulation >= /*60*/GC.getVASSALAGE_VASSAL_MASTER_POP_PERCENT_THRESHOLD())
-	{
-		bAbleToEndVassalage = true;
-	}
-
-	return bAbleToEndVassalage;
-}
-//	-----------------------------------------------------------------------------------------------
-//  We are no longer the vassal of eTeam
-void CvTeam::DoEndVassal(TeamTypes eTeam, bool bPeaceful, bool bSuppressNotification)
-{
-	CvString strBuffer;
-	int iI;
-	
-	CvAssertMsg(eTeam != NO_TEAM, "eTeam is not assigned a valid value");
-	CvAssertMsg(eTeam != GetID(), "eTeam is not expected to be equal with GetID");
-	
-	if(!IsVassal(eTeam))
-		return;
-
-	// What does it mean when we break vassalage
-	CvPlayer* pOurPlayer;
-	PlayerTypes eOurPlayer;
-	for(int iOurPlayerLoop = 0; iOurPlayerLoop < MAX_CIV_PLAYERS; iOurPlayerLoop++)
-	{
-		eOurPlayer = (PlayerTypes) iOurPlayerLoop;
-		pOurPlayer = &GET_PLAYER(eOurPlayer);
-			
-		if(pOurPlayer->isAlive())
-		{
-			// Our Team
-			if(pOurPlayer->getTeam() == GetID())
-			{
-				pOurPlayer->GetDiplomacyAI()->DoWeEndedVassalageWithSomeone(eTeam);
-				GET_TEAM(eTeam).SetVassalTax(eOurPlayer, 0);
-				GET_TEAM(eTeam).SetNumTurnsSinceVassalTaxSet(eOurPlayer, -1);
-			}
-		}
-	}
-
-	//Break open borders
-	SetAllowsOpenBordersToTeam(eTeam, false);
-	GET_TEAM(eTeam).SetAllowsOpenBordersToTeam(GetID(), false);
-		
-	setVassal(eTeam, false);
-
-	// reset counters
-	SetNumTurnsSinceVassalEnded(eTeam, 0);
-	SetNumTurnsIsVassal(-1);
-
-	// Not peaceful end of vassalage? Declare war!
-	if(!bPeaceful)
-	{
-#if defined(MOD_EVENTS_WAR_AND_PEACE)
-		declareWar(eTeam, false, getLeaderID());
-#else
-		declareWar(eTeam);
-#endif
-	}
-
-	// Update war/peace relationships for all of eTeam's vassals
-	for(int iTeamLoop = 0; iTeamLoop < MAX_TEAMS; iTeamLoop++)
-	{
-		if(GET_TEAM((TeamTypes)iTeamLoop).GetMaster() == eTeam)
-		{
-			GET_TEAM((TeamTypes)iTeamLoop).DoUpdateVassalWarPeaceRelationships();
-		}
-	}
-
-	for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-	{
-		PlayerTypes eLoopPlayer = (PlayerTypes) iPlayerLoop;
-		// Update Happiness for all players
-		if(GET_PLAYER(eLoopPlayer).isAlive() && GET_PLAYER(eLoopPlayer).getTeam() == GetID())
-		{
-			GET_PLAYER(eLoopPlayer).DoUpdateHappiness();
-		}
-	}
-
-	Localization::String locString, summaryString;
-
-	// Text stuff
-	if(!bSuppressNotification)
-	{
-		PlayerTypes ePlayer;
-			
-		for(iI = 0; iI < MAX_PLAYERS; iI++)
-		{
-			ePlayer = (PlayerTypes) iI;
-
-			if(GET_PLAYER(ePlayer).isAlive())
-			{
-				// Player that is no longer the vassal
-				if(GET_PLAYER(ePlayer).getTeam() == GetID())
-				{
-					if(GET_PLAYER(ePlayer).GetNotifications())
-					{
-						if(bPeaceful) {
-							locString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_ENDED_FROM_YOU_PEACEFUL");
-							locString << GET_TEAM(eTeam).getName().GetCString();
-						}
-						else {
-							locString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_ENDED_FROM_YOU");
-							locString << GET_TEAM(eTeam).getName().GetCString();
-						}
-
-						summaryString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_ENDED_FROM_YOU_SUMMARY");
-						summaryString << GET_TEAM(eTeam).getName().GetCString();
-						GET_PLAYER(ePlayer).GetNotifications()->Add(NOTIFICATION_PEACE_ACTIVE_PLAYER, locString.toUTF8(), summaryString.toUTF8(), -1, -1, GET_TEAM(eTeam).getLeaderID());
-					}
-				}
-				// Player that is no longer the master
-				else if(GET_PLAYER(ePlayer).getTeam() == eTeam)
-				{
-					if(GET_PLAYER(ePlayer).GetNotifications())
-					{
-						if(bPeaceful) {
-							locString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_ENDED_WITH_YOU_PEACEFUL");
-							locString << getName().GetCString();
-						}
-						else {
-							locString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_ENDED_WITH_YOU");
-							locString << getName().GetCString();
-						}
-
-						summaryString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_ENDED_WITH_YOU_SUMMARY");
-						summaryString << getName().GetCString();
-						GET_PLAYER(ePlayer).GetNotifications()->Add(NOTIFICATION_PEACE_ACTIVE_PLAYER, locString.toUTF8(), summaryString.toUTF8(), -1, -1, this->getLeaderID());
-					}
-				}
-				// Unrelated players
-				else if(GET_TEAM(GET_PLAYER(ePlayer).getTeam()).isHasMet(GetID()) && GET_TEAM(GET_PLAYER(ePlayer).getTeam()).isHasMet(eTeam))
-				{
-					if(GET_PLAYER(ePlayer).GetNotifications())
-					{
-						locString = Localization::Lookup("TXT_KEY_MISC_SOMEONE_ENDED_VASSALAGE");
-						locString << getName().GetCString() << GET_TEAM(eTeam).getName().GetCString();
-						GET_PLAYER(ePlayer).GetNotifications()->Add(NOTIFICATION_PEACE, locString.toUTF8(), locString.toUTF8(), -1, -1, GET_TEAM(eTeam).getLeaderID(), eTeam);
-					}
-				}
-			}
-		}
-	}
-		
-	strBuffer = GetLocalizedText("TXT_KEY_MISC_SOMEONE_ENDED_VASSALAGE", getName().GetCString(), GET_TEAM(eTeam).getName().GetCString());
-	GC.getGame().addReplayMessage(REPLAY_MESSAGE_MAJOR_EVENT, getLeaderID(), strBuffer, -1, -1);
-}
-//	----------------------------------------------------------------------------------------------
-// We liberate eTeam, if we can
-void CvTeam::DoLiberateVassal(TeamTypes eTeam)
-{
-	if(!CanLiberateVassal(eTeam))
-		return;
-
-	// End our vassalage peacefully
-	GET_TEAM(eTeam).DoEndVassal(GetID(), true, false);
-
-	// Find our vassals
-	for(int iVassalPlayer = 0; iVassalPlayer < MAX_MAJOR_CIVS; iVassalPlayer++)
-	{
-		PlayerTypes eVassalPlayer = (PlayerTypes) iVassalPlayer;
-		if(GET_PLAYER(eVassalPlayer).getTeam() == eTeam)
-		{
-			GET_PLAYER(eVassalPlayer).GetDiplomacyAI()->DoLiberatedFromVassalage(GetID());
-		}
-	}
-}
-//	----------------------------------------------------------------------------------------------
-// Update vassal war/peace relationships for one team
-void CvTeam::DoUpdateVassalWarPeaceRelationships()
-{
-	TeamTypes eMaster = GetMaster();
-
-	// If I'm not alive I can't declare war!
-	if(!isAlive())
-	{
-		return;
-	}
-
-	// Have to be someone's vassal
-	if(eMaster == NO_TEAM)
-	{
-		return;
-	}
-
-	// Never at war with Master
-	if(isAtWar(eMaster))
-	{
-#if defined(MOD_EVENTS_WAR_AND_PEACE)
-		makePeace(eMaster, true, false, getLeaderID());
-#else
-		makePeace(eMaster);
-#endif
-	}
-
-	TeamTypes eTeam;
-	for(int iTeamLoop = 0; iTeamLoop < MAX_TEAMS; iTeamLoop++)
-	{
-		eTeam = (TeamTypes)iTeamLoop;
-
-		if(eTeam == NO_TEAM)
-		{
-			continue;
-		}
-		if(GET_TEAM(eTeam).isBarbarian())
-		{
-			continue;
-		}
-
-		if(eTeam == eMaster)
-		{
-			continue;
-		}
-
-		if(!GET_TEAM(eTeam).isAlive())
-		{
-			continue;
-		}
-
-		// Master at war with eTeam?
-		if(GET_TEAM(eMaster).isAtWar(eTeam))
-		{
-			if(!isAtWar(eTeam))
-#if defined(MOD_EVENTS_WAR_AND_PEACE)
-				DoDeclareWar(getLeaderID(), false, eTeam, true);
-#else
-				DoDeclareWar(eTeam, false, false, true);
-#endif
-		}
-		// Not at war
-		else
-		{
-			if(isAtWar(eTeam))
-#if defined(MOD_EVENTS_WAR_AND_PEACE)
-				DoMakePeace(getLeaderID(), GET_TEAM(eMaster).isPacifier(eTeam), eTeam, true);
-#else
-				DoMakePeace(eTeam, true);
-#endif
-		}
-	}
-}
-//	----------------------------------------------------------------------------------------------
-// Can we become eTeam's vassal?
-bool CvTeam::canBecomeVassal(TeamTypes eTeam, bool bIgnoreAlreadyVassal) const
-{
-	// Can't become a vassal of nobody
-	if(eTeam == NO_TEAM)
-	{
-		return false;
-	}
-
-	// Can't make ourselves a vassal.
-	if(eTeam == GetID())
-	{
-		return false;
-	}
-
-	// Vassalage is disabled...
-	if(GC.getGame().isOption(GAMEOPTION_NO_VASSALAGE))
-	{
-		return false;
-	}
-
-	// Human Vassalage isn't enabled...
-	if(!GC.getGame().isOption(GAMEOPTION_HUMAN_VASSALS) && isHuman())
-	{
-		return false;
-	}
-
-	// Have to have met eTeam
-	if(!isHasMet(eTeam))
-	{
-		return false;
-	}
-
-	// Someone's not alive.
-	if(!isAlive() || !(GET_TEAM(eTeam).isAlive()))
-	{
-		return false;
-	}
-
-	// Ignore minors
-	if(isMinorCiv() || isBarbarian())
-	{
-		return false;
-	}
-
-	// Master civ needs to be able to create vassals
-	if(!GET_TEAM(eTeam).IsVassalageTradingAllowed())
-		return false;
-
-	// We are a vassal, and not ignoring it
-	if(!bIgnoreAlreadyVassal && IsVassalOfSomeone())
-		return false;
-
-	// Master is a vassal, he can't get his own vassals
-	if(GET_TEAM(eTeam).IsVassalOfSomeone())
-		return false;
-
-	// Too early for us to become eTeam's vassal
-	if(IsTooSoonForVassal(eTeam))
-		return false;
-
-	// I don't have cities or population (prevents crash)
-	if(getNumCities() <= 0 || getTotalPopulation() <= 0)
-		return false;
-
-	// Check Lua to see if an event has been registered to prevent vassals
-	// Create an event like follows: GameEvents.CanMakeVassal.Add(function(eMasterTeam, eVassalTeam) ...)
-
-	// First, obtain the Lua script system.
-	ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
-	if(pkScriptSystem)
-	{
-		// Construct and push in some event arguments.
-		CvLuaArgsHandle args(2);
-		args->Push(eTeam);
-		args->Push(GetID());
-
-		// Attempt to execute the game events.
-		// Will return false if there are no registered listeners.
-		bool bResult = false;
-		if(LuaSupport::CallTestAll(pkScriptSystem, "CanMakeVassal", args.get(), bResult))
-		{
-			// Check the result.
-			if(bResult == false)
-			{
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-//	-----------------------------------------------------------------------------------------------
-// Can we liberate our vassal eTeam?
-bool CvTeam::CanLiberateVassal(TeamTypes eTeam) const
-{
-	// Must be a valid team
-	if(eTeam == NO_TEAM)
-		return false;
-
-	// nope, can't liberate ourselves
-	if(eTeam == GetID())
-		return false;
-
-	// must be alive
-	if(!GET_TEAM(eTeam).isAlive())
-		return false;
-
-	// Vassalage is disabled...
-	if(GC.getGame().isOption(GAMEOPTION_NO_VASSALAGE))
-		return false;
-
-	// Must be a vassal of ours
-	if(!GET_TEAM(eTeam).IsVassal(GetID()))
-		return false;
-
-	// Must have been our vassal for a certain time
-	if(GET_TEAM(eTeam).GetNumTurnsIsVassal() < GC.getGame().getGameSpeedInfo().getMinimumVassalLiberateTurns())
-		return false;
-
-	return true;
-}
-//	-----------------------------------------------------------------------------------------------
-bool CvTeam::CanMakeVassal(TeamTypes eTeam, bool bIgnoreAlreadyVassal) const
-{
-	return GET_TEAM(eTeam).canBecomeVassal(GetID(), bIgnoreAlreadyVassal);
-}
-//	-----------------------------------------------------------------------------------------------
-// We become the new Vassal of eTeam
-void CvTeam::DoBecomeVassal(TeamTypes eTeam, bool bVoluntary)
-{
-	Localization::String locString, summaryString;
-
-	CvAssertMsg(eTeam != NO_TEAM, "eTeam is not assigned a valid value");
-	CvAssertMsg(eTeam != GetID(), "eTeam is not expected to be equal with GetID()");
-
-	// we must be able to become their vassal
-	if(!canBecomeVassal(eTeam, /*bIgnoreAlreadyVassal*/ true))
-		return;
-
-	std::vector<PlayerTypes> aMasterTeam;
-	std::vector<PlayerTypes> aVassalTeam;
-
-	PlayerTypes eLoopPlayer;
-	for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-	{
-		eLoopPlayer = (PlayerTypes) iPlayerLoop;
-		if(GET_PLAYER(eLoopPlayer).isAlive())
-		{
-			if(GET_PLAYER(eLoopPlayer).getTeam() == GetID()) aVassalTeam.push_back(eLoopPlayer);
-			if(GET_PLAYER(eLoopPlayer).getTeam() == eTeam) aMasterTeam.push_back(eLoopPlayer);
-		}
-	}
-
-	// Let's check if we have a vassal already, if so they must become eTeam's vassals as well
-	TeamTypes eOtherTeam;
-	for(int iOtherTeamLoop = 0; iOtherTeamLoop < MAX_TEAMS; iOtherTeamLoop++)
-	{
-		eOtherTeam = (TeamTypes) iOtherTeamLoop;
-		
-		if(GET_TEAM(eOtherTeam).isAlive())
-		{
-			if(eOtherTeam != eTeam)
-			{
-				// eOtherPlayer is our vassal
-				if(GET_TEAM(eOtherTeam).IsVassal(GetID()))
-				{
-					GET_TEAM(eOtherTeam).DoEndVassal(GetID(), true, true);	// these guys no longer our vassal, they become vassal of eTeam now
-					GET_TEAM(eOtherTeam).DoBecomeVassal(eTeam);
-				}
-			}
-		}
-	}
-
-	setVassal(eTeam, true, bVoluntary);	// We become the vassal of eTeam
-	GET_TEAM(eTeam).AcquireMap(GetID(), /*bTerritoryOnly*/ true);	// eTeam acquires our territory map
-
-	// Let's save some stuff
-	setNumCitiesWhenVassalMade(getNumCities());
-	setTotalPopulationWhenVassalMade(getTotalPopulation());
-
-	// reset counters
-	SetNumTurnsSinceVassalEnded(eTeam,-1);
-	SetNumTurnsIsVassal(0);
-
-	// If we haven't met the guy, meet him
-	if(!isHasMet(eTeam))
-	{
-		meet(eTeam, true);
-	}
-
-	// Update war/peace relationships for all of eTeam's vassals
-	for(int iTeamLoop = 0; iTeamLoop < MAX_TEAMS; iTeamLoop++)
-	{
-		if(GET_TEAM((TeamTypes)iTeamLoop).GetMaster() == eTeam)
-		{
-			GET_TEAM((TeamTypes)iTeamLoop).DoUpdateVassalWarPeaceRelationships();
-		}
-
-		// Remove any defensive pacts with this team
-		for(int iOtherTeam = 0; iOtherTeam < MAX_MAJOR_CIVS; iOtherTeam++)
-		{
-			TeamTypes eOtherTeam = (TeamTypes) iOtherTeam;
-			if(GET_TEAM(eOtherTeam).isAlive())
-			{
-				if(eOtherTeam != GetID())
-				{
-					if(IsHasDefensivePact(eOtherTeam))
-					{
-						SetHasDefensivePact(eOtherTeam, false);
-						GET_TEAM(eOtherTeam).SetHasDefensivePact(GetID(), false);
-					}
-				}
-			}
-		}
-	}
-
-	for(std::vector<PlayerTypes>::iterator it = aVassalTeam.begin(); it != aVassalTeam.end(); it++)
-	{
-		// Notify DiploAI that we are now eTeam's vassal
-		GET_PLAYER(*it).GetDiplomacyAI()->DoWeMadeVassalageWithSomeone(eTeam, bVoluntary);
-		
-		// Update Happiness for all players
-		GET_PLAYER(*it).DoUpdateHappiness();
-
-		// Send notification to master to set taxes for player
-		Localization::String locString = Localization::Lookup("TXT_KEY_MISC_VASSAL_TAXES_AVAILABLE");
-		locString << GET_PLAYER(*it).getName();
-		GET_TEAM(eTeam).AddNotification(NOTIFICATION_PEACE_ACTIVE_PLAYER, locString.toUTF8(), locString.toUTF8(), -1, -1, *it);
-	}
-
-	if(GC.getGame().isFinalInitialized())
-	{
-		// Message everyone about what happened
-		if(!isBarbarian() && !(GET_TEAM(eTeam).isBarbarian()))
-		{
-			{
-				PlayerTypes ePlayer;
-				for(int iI = 0; iI < MAX_PLAYERS; iI++)
-				{
-					ePlayer = (PlayerTypes) iI;
-
-					if(GET_PLAYER(ePlayer).isAlive() && GET_PLAYER(ePlayer).GetNotifications())
-					{
-						// Players that now have the Vassal
-						if(GET_PLAYER(ePlayer).getTeam() == eTeam)
-						{
-							if(bVoluntary) {
-								summaryString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_NOW_VASSAL_YOU_VOLUNTARY_SUMMARY");
-								summaryString << getName().GetCString();
-
-								locString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_NOW_VASSAL_YOU_VOLUNTARY");
-								locString << getName().GetCString();
-							}
-							else {
-								summaryString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_NOW_VASSAL_YOU_SUMMARY");
-								summaryString << getName().GetCString();
-
-								locString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_NOW_VASSAL_YOU");
-								locString << getName().GetCString();
-							}
-							GET_PLAYER(ePlayer).GetNotifications()->Add(NOTIFICATION_PEACE_ACTIVE_PLAYER, locString.toUTF8(), summaryString.toUTF8(), -1, -1, this->getLeaderID());
-						}
-						// Players that are the vassal
-						else if(GET_PLAYER(ePlayer).getTeam() == GetID())
-						{
-							summaryString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_YOU_NOW_VASSAL_SUMMARY");
-							summaryString << GET_TEAM(eTeam).getName().GetCString();
-
-							locString = Localization::Lookup("TXT_KEY_MISC_VASSALAGE_YOU_NOW_VASSAL");
-							locString << GET_TEAM(eTeam).getName().GetCString();
-							GET_PLAYER(ePlayer).GetNotifications()->Add(NOTIFICATION_PEACE_ACTIVE_PLAYER, locString.toUTF8(), summaryString.toUTF8(), -1, -1, GET_TEAM(eTeam).getLeaderID());
-						}
-						// Players that are on neither team, but know both parties
-						else if(GET_TEAM(GET_PLAYER(ePlayer).getTeam()).isHasMet(GetID()) && GET_TEAM(GET_PLAYER(ePlayer).getTeam()).isHasMet(eTeam))
-						{
-							locString = Localization::Lookup("TXT_KEY_MISC_SOMEONE_NOW_VASSAL");
-							locString << getName().GetCString() << GET_TEAM(eTeam).getName().GetCString();
-							GET_PLAYER(ePlayer).GetNotifications()->Add(NOTIFICATION_PEACE, locString.toUTF8(), locString.toUTF8(), -1, -1, this->getLeaderID(), eTeam);
-						}
-						// Players that know the Master
-						else if(GET_TEAM(GET_PLAYER(ePlayer).getTeam()).isHasMet(eTeam))
-						{
-							summaryString = Localization::Lookup("TXT_KEY_MISC_SOMEONE_NOW_VASSAL_UNKNOWN_VASSAL_SUMMARY");
-							summaryString << getName().GetCString();
-
-							locString = Localization::Lookup("TXT_KEY_MISC_SOMEONE_NOW_VASSAL_UNKNOWN_VASSAL");
-							locString << GET_TEAM(eTeam).getName().GetCString() << Localization::Lookup("TXT_KEY_UNMET_PLAYER");
-							GET_PLAYER(ePlayer).GetNotifications()->Add(NOTIFICATION_PEACE_ACTIVE_PLAYER, locString.toUTF8(), summaryString.toUTF8(), -1, -1, -1, eTeam);
-						}
-						// Players that know the Vassal
-						else if(GET_TEAM(GET_PLAYER(ePlayer).getTeam()).isHasMet(GetID()))
-						{
-							locString = Localization::Lookup("TXT_KEY_MISC_SOMEONE_NOW_VASSAL_UNKNOWN_MASTER");
-							locString << GET_TEAM(GetID()).getName().GetCString() << Localization::Lookup("TXT_KEY_UNMET_PLAYER");
-							GET_PLAYER(ePlayer).GetNotifications()->Add(NOTIFICATION_PEACE_ACTIVE_PLAYER, locString.toUTF8(), locString.toUTF8(), -1, -1, this->getLeaderID(), -1);
-						}
-						// Players that know no one
-						else
-						{
-							locString = Localization::Lookup("TXT_KEY_MISC_SOMEONE_ACQUIRE_NEW_VASSAL");
-							locString << Localization::Lookup("TXT_KEY_UNMET_PLAYER");
-							GET_PLAYER(ePlayer).GetNotifications()->Add(NOTIFICATION_PEACE_ACTIVE_PLAYER, locString.toUTF8(), locString.toUTF8(), -1, -1, -1, -1);
-						}
-					}
-				}
-			}
-
-			locString = Localization::Lookup("TXT_KEY_MISC_SOMEONE_MAKES_VASSAL");
-			locString << getName().GetCString() << GET_TEAM(eTeam).getName().GetCString();
-			GC.getGame().addReplayMessage(REPLAY_MESSAGE_MAJOR_EVENT, getLeaderID(), locString.toUTF8(), -1, -1);
-		}
-	}
-}
-
-//	--------------------------------------------------------------------------------
-//	Are we locked into a war with eOtherTeam because our Master is at war with him?
-bool CvTeam::IsVassalLockedIntoWar(TeamTypes eOtherTeam) const
-{
-	CvAssertMsg(eTeam >= 0, "eIndex is expected to be non-negative (invalid Index)");
-	CvAssertMsg(eTeam < MAX_TEAMS, "eIndex is expected to be within maximum bounds (invalid Index)");
-	
-	TeamTypes eLoopTeam;
-	// Go through every major.
-	for(int iTeamLoop=0; iTeamLoop < MAX_TEAMS; iTeamLoop++)
-	{
-		eLoopTeam = (TeamTypes) iTeamLoop;
-
-		// Ignore minors.
-		if(!GET_TEAM(eLoopTeam).isMinorCiv())
-		{
-			// Are we the vassal of eLoopTeam?
-			if(IsVassal(eLoopTeam))
-			{
-				// eLoopTeam at war with eTeam?
-				if(GET_TEAM(eLoopTeam).isAtWar(eOtherTeam))
-				{
-					return true;
-				}
-			}
-		}
-	}
-
-	return false;
-}
-//	--------------------------------------------------------------------------------
-int CvTeam::getNumCitiesWhenVassalMade() const
-{
-	return m_iNumCitiesWhenVassalMade;
-}
-//	--------------------------------------------------------------------------------
-void CvTeam::setNumCitiesWhenVassalMade(int iValue)
-{
-	m_iNumCitiesWhenVassalMade = iValue;
-}
-//	--------------------------------------------------------------------------------
-int CvTeam::getTotalPopulationWhenVassalMade() const
-{
-	return m_iTotalPopulationWhenVassalMade;
-}
-//	--------------------------------------------------------------------------------
-void CvTeam::setTotalPopulationWhenVassalMade(int iValue)
-{
-	m_iTotalPopulationWhenVassalMade = iValue;
-}
-//	--------------------------------------------------------------------------------
-int CvTeam::GetNumTurnsIsVassal() const
-{
-	return m_iNumTurnsIsVassal;
-}
-
-//	--------------------------------------------------------------------------------
-void CvTeam::SetNumTurnsIsVassal(int iValue)
-{
-	m_iNumTurnsIsVassal = iValue;
-}
-
-//	--------------------------------------------------------------------------------
-void CvTeam::ChangeNumTurnsIsVassal(int iChange)
-{
-	SetNumTurnsIsVassal(GetNumTurnsIsVassal() + iChange);
-}
-//	--------------------------------------------------------------------------------
-int CvTeam::GetNumTurnsSinceVassalEnded(TeamTypes eTeam) const
-{
-	CvAssertMsg(eTeam >= 0, "eIndex is expected to be non-negative (invalid Index)");
-	CvAssertMsg(eTeam < MAX_TEAMS, "eIndex is expected to be within maximum bounds (invalid Index)");
-	return m_aiNumTurnsSinceVassalEnded[eTeam];
-}
-
-//	--------------------------------------------------------------------------------
-void CvTeam::SetNumTurnsSinceVassalEnded(TeamTypes eTeam, int iValue)
-{
-	CvAssertMsg(eTeam >= 0, "eIndex is expected to be non-negative (invalid Index)");
-	CvAssertMsg(eTeam < MAX_TEAMS, "eIndex is expected to be within maximum bounds (invalid Index)");
-	CvAssertMsg(eTeam != GetID(), "Team is setting vassal ended turns with itself!");
-	if(eTeam != GetID() || iValue == 0)
-		m_aiNumTurnsSinceVassalEnded[eTeam] = iValue;
-}
-
-//	--------------------------------------------------------------------------------
-void CvTeam::ChangeNumTurnsSinceVassalEnded(TeamTypes eTeam, int iChange)
-{
-	SetNumTurnsSinceVassalEnded(eTeam, GetNumTurnsSinceVassalEnded(eTeam) + iChange);
-}
-//	--------------------------------------------------------------------------------
-// Can we tax ePlayer right now?
-bool CvTeam::CanSetVassalTax(PlayerTypes ePlayer) const
-{
-	// can't tax ourselves
-	if(GET_PLAYER(ePlayer).getTeam() == GetID())
-		return false;
-
-	if(!isAlive())
-		return false;
-
-	// must be alive
-	if(!GET_PLAYER(ePlayer).isAlive())
-		return false;
-
-	if(GET_TEAM(GET_PLAYER(ePlayer).getTeam()).isMinorCiv() || GET_TEAM(GET_PLAYER(ePlayer).getTeam()).isBarbarian() || GET_TEAM(GET_PLAYER(ePlayer).getTeam()).isObserver())
-		return false;
-
-	// Vassalage cannot be disabled
-	if(GC.getGame().isOption(GAMEOPTION_NO_VASSALAGE))
-		return false;
-
-	// They must be our vassal
-	if(!GET_TEAM(GET_PLAYER(ePlayer).getTeam()).IsVassal(GetID()))
-		return false;
-
-	// Can't set tax too fast (if it was already set)
-	if(GetNumTurnsSinceVassalTaxSet(ePlayer) > -1 && 
-		GetNumTurnsSinceVassalTaxSet(ePlayer) < GC.getGame().getGameSpeedInfo().getMinimumVassalTaxTurns())
-		return false;
-
-	return true;
-}
-//	--------------------------------------------------------------------------------
-// We apply a vassal tax to ePlayer
-void CvTeam::DoApplyVassalTax(PlayerTypes ePlayer, int iPercent)
-{
-	if(!CanSetVassalTax(ePlayer))
-		return;
-
-	iPercent = std::max(iPercent, GC.getVASSALAGE_VASSAL_TAX_PERCENT_MINIMUM());
-	iPercent = std::min(iPercent, GC.getVASSALAGE_VASSAL_TAX_PERCENT_MAXIMUM());
-
-	int iCurrentTaxRate = GetVassalTax(ePlayer);
-	
-	SetNumTurnsSinceVassalTaxSet(ePlayer, 0);
-	SetVassalTax(ePlayer, iPercent);
-
-	// Note: using EspionageScreen dirty for this.
-	GC.GetEngineUserInterface()->setDirty(EspionageScreen_DIRTY_BIT, true);
-
-	// notify diplo AI if there was some change		
-	if(iPercent != iCurrentTaxRate)
-	{
-		GET_PLAYER(ePlayer).GetDiplomacyAI()->DoVassalTaxChanged(GetID(), (iPercent < iCurrentTaxRate));	
-
-		// send a notification if there was some change
-		Localization::String locString, summaryString;
-		if(iPercent > iCurrentTaxRate)
-		{
-			locString = Localization::Lookup("TXT_KEY_MISC_VASSAL_TAX_INCREASED");
-			summaryString = Localization::Lookup("TXT_KEY_MISC_VASSAL_TAX_INCREASED_SUMMARY");
-		}
-		else
-		{
-			locString = Localization::Lookup("TXT_KEY_MISC_VASSAL_TAX_DECREASED");
-			summaryString = Localization::Lookup("TXT_KEY_MISC_VASSAL_TAX_DECREASED_SUMMARY");
-		}
-
-		locString << getName().GetCString() << iCurrentTaxRate << iPercent;
-
-		GET_PLAYER(ePlayer).GetNotifications()->Add(NOTIFICATION_GENERIC, locString.toUTF8(), summaryString.toUTF8(), -1, -1, this->getLeaderID());
-	}
-}
-
-//	--------------------------------------------------------------------------------
-void CvTeam::SetVassalTax(PlayerTypes ePlayer, int iPercent)
-{
-	CvAssertMsg(ePlayer >= 0, "SET VASSAL TAX! Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
-	CvAssertMsg(ePlayer < MAX_MAJOR_CIVS, "SET VASSAL TAX! Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
-	
-	m_aiVassalTax[ePlayer] = iPercent;
-}
-//	--------------------------------------------------------------------------------
-int CvTeam::GetVassalTax(PlayerTypes ePlayer) const
-{
-	CvAssertMsg(ePlayer >= 0, "TEAM: VASSAL TAX! Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
-	CvAssertMsg(ePlayer < MAX_MAJOR_CIVS, "TEAM: VASSAL TAX! Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
-	
-	return m_aiVassalTax[ePlayer];
-}
-//	--------------------------------------------------------------------------------
-int CvTeam::GetNumTurnsSinceVassalTaxSet(PlayerTypes ePlayer) const
-{
-	CvAssertMsg(ePlayer >= 0, "SET VASSAL TAX! Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
-	CvAssertMsg(ePlayer < MAX_MAJOR_CIVS, "SET VASSAL TAX! Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
-
-	return m_aiNumTurnsSinceVassalTaxSet[ePlayer];
-}
-//	--------------------------------------------------------------------------------
-void CvTeam::ChangeNumTurnsSinceVassalTaxSet(PlayerTypes ePlayer, int iChange)
-{
-	CvAssertMsg(ePlayer >= 0, "SET VASSAL TAX! Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
-	CvAssertMsg(ePlayer < MAX_MAJOR_CIVS, "SET VASSAL TAX! Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
-
-	if(iChange != 0)
-		SetNumTurnsSinceVassalTaxSet(ePlayer, GetNumTurnsSinceVassalTaxSet(ePlayer) + iChange);
-}
-//	--------------------------------------------------------------------------------
-void CvTeam::SetNumTurnsSinceVassalTaxSet(PlayerTypes ePlayer, int iValue)
-{
-	CvAssertMsg(ePlayer >= 0, "SET VASSAL TAX! Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
-	CvAssertMsg(ePlayer < MAX_MAJOR_CIVS, "SET VASSAL TAX! Invalid Player Index.  Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
-
-	m_aiNumTurnsSinceVassalTaxSet[ePlayer] = iValue;
-}
-//	--------------------------------------------------------------------------------
-// Is it too soon for us to become eTeam's vassal?
-bool CvTeam::IsTooSoonForVassal(TeamTypes eTeam) const
-{
-	// a value of -1 means we haven't made a vassal yet
-	if(GetNumTurnsSinceVassalEnded(eTeam) < GC.getGame().getGameSpeedInfo().getNumTurnsBetweenVassals() &&
-		GetNumTurnsSinceVassalEnded(eTeam) > -1)
-	{
-		return true;
-	}
-
-	return false;
-}
-//	--------------------------------------------------------------------------------
-/// How many vassals do we have?
-int CvTeam::GetNumVassals()
-{
-	CvAssertMsg(eTeam >= 0, "eIndex is expected to be non-negative (invalid Index)");
-	CvAssertMsg(eTeam < MAX_TEAMS, "eIndex is expected to be within maximum bounds (invalid Index)");
-
-	if(GET_TEAM(GetID()).isMinorCiv() || GET_TEAM(GetID()).isBarbarian())
-		return 0;
-
-	int iVassals = 0;
-
-	TeamTypes eTeamLoop;
-	for(int iTeamLoop = 0; iTeamLoop < MAX_TEAMS; iTeamLoop++)
-	{
-		eTeamLoop = (TeamTypes) iTeamLoop;
-		if(eTeamLoop == GetID())
-			continue;
-
-		// eTeamLoop vassal of us?
-		if(GET_TEAM(eTeamLoop).IsVassal(GetID()))
-		{
-			iVassals++;
-		}
-	}
-
-	return iVassals;
-}
-
-//	--------------------------------------------------------------------------------
-/// Can we trade this tech?
-bool CvTeam::IsTradeTech(TechTypes eTech) const
-{
-	FAssert(eAward >= 0);
-	FAssert(eAward < GC.getNumTechInfos());
-
-	return m_pabTradeTech[eTech];
-}
-//	--------------------------------------------------------------------------------
-/// Sets if we can trade this tech
-void CvTeam::SetTradeTech(TechTypes eTech, bool bValue)
-{
-	FAssert(eAward >= 0);
-	FAssert(eAward < GC.getNumTechInfos());
-
-	m_pabTradeTech[eTech] = bValue;
-}
-#endif

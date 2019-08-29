@@ -228,33 +228,6 @@ protected:
 	static int lSetCurrentEra(lua_State* L);
 
 	static int lUpdateEmbarkGraphics(lua_State* L);
-
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	static int lIsVassal(lua_State* L);
-	static int lCanBecomeVassal(lua_State* L);
-	static int lCanMakeVassal(lua_State* L);
-	static int lCanEndVassal(lua_State* L);
-	static int lCanEndAllVassal(lua_State* L);
-	static int lIsVassalageTradingAllowed(lua_State* L);
-	static int lGetNumTurnsIsVassal(lua_State* L);
-	static int lGetNumTurnsSinceVassalEnded(lua_State* L);
-	static int lIsTooSoonForVassal(lua_State* L);
-	static int lIsVassalOfSomeone(lua_State* L);
-	static int lIsVassalLockedIntoWar(lua_State* L);
-	static int lGetMaster(lua_State* L);
-	static int lIsVoluntaryVassal(lua_State* L);
-	static int lDoBecomeVassal(lua_State* L);
-	static int lDoEndVassal(lua_State* L);
-	static int lGetNumCitiesWhenVassalMade(lua_State* L);
-	static int lGetTotalPopulationWhenVassalMade(lua_State* L);
-	static int lCanLiberateVassal(lua_State* L);
-	static int lDoLiberateVassal(lua_State* L);
-	static int lDoApplyVassalTax(lua_State* L);
-	static int lCanSetVassalTax(lua_State* L);
-	static int lGetVassalTax(lua_State* L);
-	static int lGetNumTurnsSinceVassalTaxSet(lua_State* L);
-	static int lGetNumVassals(lua_State* L);
-#endif
 };
 
 #endif //CVLUATEAM_H

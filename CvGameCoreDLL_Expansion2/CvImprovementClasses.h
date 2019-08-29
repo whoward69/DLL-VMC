@@ -77,9 +77,6 @@ public:
 	int GetPillageGold() const;
 	int GetResourceExtractionMod() const;
 	int GetLuxuryCopiesSiphonedFromMinor() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int GetCityStateExtraVote() const;
-#endif
 	int GetImprovementPillage() const;
 	void SetImprovementPillage(int i);
 	int GetImprovementUpgrade() const;
@@ -129,9 +126,6 @@ public:
 	bool IsInAdjacentFriendly() const;
 	bool IsIgnoreOwnership() const;
 	bool IsOnlyCityStateTerritory() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	bool IsEmbassy() const;
-#endif
 	bool IsNoTwoAdjacent() const;
 	bool IsAdjacentLuxury() const;
 	bool IsAllowsWalkWater() const;
@@ -221,9 +215,6 @@ protected:
 	int m_iPillageGold;
 	int m_iResourceExtractionMod;
 	int m_iLuxuryCopiesSiphonedFromMinor;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int m_iImprovementLeagueVotes;
-#endif
 	int m_iImprovementPillage;
 	int m_iImprovementUpgrade;
 	int m_iRequiresXAdjacentLand;
@@ -271,9 +262,6 @@ protected:
 	bool m_bInAdjacentFriendly;
 	bool m_bIgnoreOwnership;
 	bool m_bOnlyCityStateTerritory;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	bool m_bIsEmbassy;
-#endif
 	bool m_bNoTwoAdjacent;
     bool m_bAdjacentLuxury;
 	bool m_bAllowsWalkWater;

@@ -100,12 +100,6 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(IsBarbarian);
 	Method(IsRevealedBarbarian);
 	Method(HasBarbarianCamp);
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
-	Method(HasDig);
-#if !defined(MOD_API_LUA_EXTENSIONS)
-	Method(GetPlayerThatBuiltImprovement);
-#endif
-#endif
 	Method(IsVisible);
 	Method(IsActiveVisible);
 	Method(IsVisibleToWatchingHuman);
@@ -293,9 +287,6 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(GetActiveFogOfWarMode);
 
 	Method(IsImprovementPillaged);
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
-	Method(IsImprovementEmbassy);
-#endif
 
 	Method(CanSeePlot);
 
@@ -810,21 +801,6 @@ int CvLuaPlot::lHasBarbarianCamp(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::HasBarbarianCamp);
 }
-
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
-//------------------------------------------------------------------------------
-int CvLuaPlot::lHasDig(lua_State* L)
-{
-	return BasicLuaMethod(L, &CvPlot::HasDig);
-}
-//------------------------------------------------------------------------------
-#if !defined(MOD_API_LUA_EXTENSIONS)
-int CvLuaPlot::lGetPlayerThatBuiltImprovement(lua_State* L)
-{
-	return BasicLuaMethod(L, &CvPlot::GetPlayerThatBuiltImprovement);
-}
-#endif
-#endif
 
 //------------------------------------------------------------------------------
 //bool isVisible(TeamTypes eTeam, bool bDebug);
@@ -1981,14 +1957,6 @@ int CvLuaPlot::lIsImprovementPillaged(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::IsImprovementPillaged);
 }
-
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
-//------------------------------------------------------------------------------
-int CvLuaPlot::lIsImprovementEmbassy(lua_State* L)
-{
-	return BasicLuaMethod(L, &CvPlot::IsImprovementEmbassy);
-}
-#endif
 
 //------------------------------------------------------------------------------
 //bool CvPlot::canSeePlot(CvPlot *pPlot, TeamTypes eTeam, int iRange, DirectionTypes eFacingDirection)

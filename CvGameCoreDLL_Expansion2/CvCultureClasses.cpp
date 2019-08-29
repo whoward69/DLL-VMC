@@ -249,12 +249,6 @@ CvString CvGameCulture::GetGreatWorkTooltip(int iIndex, PlayerTypes eOwner) cons
 	int iCulturePerWork = GC.getBASE_CULTURE_PER_GREAT_WORK();
 	iCulturePerWork += GET_PLAYER(eOwner).GetGreatWorkYieldChange(YIELD_CULTURE);
 	int iTourismPerWork = GC.getBASE_TOURISM_PER_GREAT_WORK();
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int iSciencePerWork = MOD_DIPLOMACY_CITYSTATES ? GET_PLAYER(eOwner).GetGreatWorkYieldChange(YIELD_SCIENCE) : 0;
-	if (iSciencePerWork > 0)
-		cultureString.Format ("+%d [ICON_CULTURE], +%d [ICON_TOURISM], +%d [ICON_RESEARCH]", iCulturePerWork, iTourismPerWork, iSciencePerWork);
-	else
-#endif
 		cultureString.Format ("+%d [ICON_CULTURE], +%d [ICON_TOURISM]", iCulturePerWork, iTourismPerWork);
 #endif
 
@@ -2259,9 +2253,6 @@ void CvPlayerCulture::DoArchaeologyChoice (ArchaeologyChoiceType eChoice)
 					pPlot->SetImprovementPillaged(false);
 #endif
 #endif
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-					pPlot->SetPlayerThatClearedDigHere(m_pPlayer->GetID());
-#endif
 					pUnit->kill(true);
 
 					if (pPlot->getOwner() != NO_PLAYER)
@@ -2294,9 +2285,6 @@ void CvPlayerCulture::DoArchaeologyChoice (ArchaeologyChoiceType eChoice)
 				int iGWindex = 	pCulture->CreateGreatWork(eGreatArtifact, eClass, pPlot->GetArchaeologicalRecord().m_ePlayer1, pPlot->GetArchaeologicalRecord().m_eEra, "");
 				pHousingCity->GetCityBuildings()->SetBuildingGreatWork(eBuildingToHouse, iSlot, iGWindex);
 				pPlot->setImprovementType(NO_IMPROVEMENT);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-				pPlot->SetPlayerThatClearedDigHere(m_pPlayer->GetID());
-#endif
 				pUnit->kill(true);
 			}
 			break;
@@ -2310,9 +2298,6 @@ void CvPlayerCulture::DoArchaeologyChoice (ArchaeologyChoiceType eChoice)
 				int iGWindex = 	pCulture->CreateGreatWork(eGreatArtifact, eClass, pPlot->GetArchaeologicalRecord().m_ePlayer2, pPlot->GetArchaeologicalRecord().m_eEra, "");
 				pHousingCity->GetCityBuildings()->SetBuildingGreatWork(eBuildingToHouse, iSlot, iGWindex);
 				pPlot->setImprovementType(NO_IMPROVEMENT);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-				pPlot->SetPlayerThatClearedDigHere(m_pPlayer->GetID());
-#endif
 				pUnit->kill(true);
 			}
 			break;
@@ -2327,9 +2312,6 @@ void CvPlayerCulture::DoArchaeologyChoice (ArchaeologyChoiceType eChoice)
 				int iGWindex = 	pCulture->CreateGreatWork(eGreatArtifact, (GreatWorkClass)GC.getInfoTypeForString("GREAT_WORK_LITERATURE"), pPlot->GetArchaeologicalRecord().m_ePlayer1, pPlot->GetArchaeologicalRecord().m_eEra, "");
 				pHousingCity->GetCityBuildings()->SetBuildingGreatWork(eBuildingToHouse, iSlot, iGWindex);
 				pPlot->setImprovementType(NO_IMPROVEMENT);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-				pPlot->SetPlayerThatClearedDigHere(m_pPlayer->GetID());
-#endif
 				pUnit->kill(true);
 			}
 			break;
@@ -2351,9 +2333,6 @@ void CvPlayerCulture::DoArchaeologyChoice (ArchaeologyChoiceType eChoice)
 				m_pPlayer->changeJONSCulture(iValue);
 
 				pPlot->setImprovementType(NO_IMPROVEMENT);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-				pPlot->SetPlayerThatClearedDigHere(m_pPlayer->GetID());
-#endif
 				pUnit->kill(true);
 			}
 			break;
@@ -3227,14 +3206,6 @@ int CvPlayerCulture::GetTourismModifierWith(PlayerTypes ePlayer) const
 		iMultiplier += GetTourismModifierTradeRoute();
 	}
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	// My vassal
-	if (MOD_DIPLOMACY_CIV4_FEATURES && GET_TEAM(GET_PLAYER(ePlayer).getTeam()).GetMaster() == m_pPlayer->getTeam())
-	{
-		iMultiplier += GetTourismModifierVassal();
-	}
-#endif
-
 	if (eMyIdeology != NO_POLICY_BRANCH_TYPE && eTheirIdeology != NO_POLICY_BRANCH_TYPE && eMyIdeology != eTheirIdeology)
 	{
 		iMultiplier += GC.getTOURISM_MODIFIER_DIFFERENT_IDEOLOGIES();
@@ -3322,12 +3293,6 @@ CvString CvPlayerCulture::GetTourismModifierWithTooltip(PlayerTypes ePlayer) con
 	{
 		szRtnValue += "[COLOR_POSITIVE_TEXT]" + GetLocalizedText("TXT_KEY_CO_PLAYER_TOURISM_RELIGION_NOTE", GetTourismModifierSharedReligion()) + "[ENDCOLOR]";
 	}
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if(MOD_DIPLOMACY_CIV4_FEATURES && GET_TEAM(GET_PLAYER(ePlayer).getTeam()).GetMaster() == m_pPlayer->getTeam())
-	{
-		szRtnValue += "[COLOR_POSITIVE_TEXT]" + GetLocalizedText("TXT_KEY_CO_PLAYER_TOURISM_VASSAL", GetTourismModifierVassal()) + "[ENDCOLOR]";
-	}
-#endif
 	if (eMyIdeology != NO_POLICY_BRANCH_TYPE && eTheirIdeology != NO_POLICY_BRANCH_TYPE && eMyIdeology != eTheirIdeology)
 	{
 		if (m_pPlayer->GetEspionage()->IsMyDiplomatVisitingThem(ePlayer))
@@ -3425,14 +3390,6 @@ int CvPlayerCulture::GetTourismModifierOpenBorders() const
 {
 	return GC.getTOURISM_MODIFIER_SHARED_RELIGION() + m_pPlayer->GetPlayerPolicies()->GetNumericModifier(POLICYMOD_OPEN_BORDERS_TOURISM_MODIFIER);
 }
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-/// Tourism modifier - vassal
-int CvPlayerCulture::GetTourismModifierVassal() const
-{
-	return GC.getVASSAL_TOURISM_MODIFIER();
-}
-#endif
 
 /// Is the populace satisfied?
 PublicOpinionTypes CvPlayerCulture::GetPublicOpinionType() const
@@ -4014,36 +3971,18 @@ int CvPlayerCulture::ComputePublicOpinionUnhappiness(int iDissatisfaction, int &
 		iPerCityUnhappy = 1;
 		iUnhappyPerXPop = 10;
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-		if (MOD_DIPLOMACY_CITYSTATES) {
-			iPerCityUnhappy = GC.getIDEOLOGY_PER_CITY_UNHAPPY();
-			iUnhappyPerXPop = GC.getIDEOLOGY_POP_PER_UNHAPPY();
-		}
-#endif
 	}
 	else if (iDissatisfaction < 5)
 	{
 		iPerCityUnhappy = 2;
 		iUnhappyPerXPop = 5;
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-		if (MOD_DIPLOMACY_CITYSTATES) {
-			iPerCityUnhappy = GC.getIDEOLOGY_PER_CITY_UNHAPPY() * 2;
-			iUnhappyPerXPop = (int) ((GC.getIDEOLOGY_POP_PER_UNHAPPY() / 2.0) + 1.0);
-		}
-#endif
 	}
 	else
 	{
 		iPerCityUnhappy = 4;
 		iUnhappyPerXPop = 3;
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-		if (MOD_DIPLOMACY_CITYSTATES) {
-			iPerCityUnhappy = GC.getIDEOLOGY_PER_CITY_UNHAPPY() * 3;
-			iUnhappyPerXPop = (int) ((GC.getIDEOLOGY_POP_PER_UNHAPPY() / 4.0) + 1.0);
-		}
-#endif
 	}
 
 	CUSTOMLOG("ComputePublicOpinionUnhappiness: dissatisfaction=%i, perCity=%i, perPop=%i", iDissatisfaction, iPerCityUnhappy, iUnhappyPerXPop);

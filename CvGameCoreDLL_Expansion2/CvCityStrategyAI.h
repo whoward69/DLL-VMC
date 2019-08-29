@@ -185,9 +185,6 @@ public:
 
 	// City AI methods
 	void ChooseProduction(bool bUseAsyncRandom, BuildingTypes eIgnoreBldg = NO_BUILDING, UnitTypes eIgnoreUnit = NO_UNIT);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	CvCityBuildable ChooseHurry();
-#endif
 	void DoTurn();
 
 	// these functions must be called together. Reset clears the internal arrays, update evalutes the city, and GetBestYieldAverage... returns the value that the builder AI uses.
@@ -287,10 +284,6 @@ bool IsTestCityStrategy_IsInternationalTradeOrigin(CvCity* pCity);
 bool IsTestCityStrategy_NeedCultureBuilding(CvCity* pCity);
 bool IsTestCityStrategy_NeedTourismBuilding(CvCity *pCity);
 bool IsTestCityStrategy_GoodAirliftCity(CvCity *pCity);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-bool IsTestCityStrategy_NeedDiplomats(CvCity *pCity);
-bool IsTestCityStrategy_NeedDiplomatsCritical(CvCity *pCity);
-#endif
 }
 
 #endif // CIV5_CITY_STRATEGY_AI_H

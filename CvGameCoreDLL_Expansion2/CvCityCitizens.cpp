@@ -2235,12 +2235,6 @@ void CvCityCitizens::DoSpecialists()
 					{
 						iMod += GetPlayer()->getGreatEngineerRateModifier();
 					}
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-					else if(MOD_DIPLOMACY_CITYSTATES && (UnitClassTypes)pkSpecialistInfo->getGreatPeopleUnitClass() == GC.getInfoTypeForString("UNITCLASS_GREAT_DIPLOMAT"))
-					{
-						iMod += GetPlayer()->getGreatDiplomatRateModifier();
-					}
-#endif
 
 #if defined(MOD_API_UNIFIED_YIELDS)
 					if (GetPlayer()->isGoldenAge())
@@ -2713,16 +2707,6 @@ int CvCityCitizens::GetSpecialistUpgradeThreshold(UnitClassTypes eUnitClass)
 		iNumCreated = GET_PLAYER(GetCity()->getOwner()).getGreatMusiciansCreated();
 #endif
 	}
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	else if (MOD_DIPLOMACY_CITYSTATES && eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_DIPLOMAT", true))
-	{
-#if defined(MOD_GLOBAL_TRULY_FREE_GP)
-		iNumCreated = GET_PLAYER(GetCity()->getOwner()).getGreatDiplomatsCreated(MOD_GLOBAL_TRULY_FREE_GP);
-#else
-		iNumCreated = GET_PLAYER(GetCity()->getOwner()).getGreatDiplomatsCreated();
-#endif
-	}
-#endif
 	else
 	{
 #if defined(MOD_GLOBAL_SEPARATE_GP_COUNTERS)
@@ -2847,16 +2831,6 @@ void CvCityCitizens::DoSpawnGreatPerson(UnitTypes eUnit, bool bIncrementCount, b
 			kPlayer.incrementGreatMusiciansCreated();
 #endif
 		}		
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-		else if (MOD_DIPLOMACY_CITYSTATES && newUnit->getUnitInfo().GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_GREAT_DIPLOMAT"))
-		{
-#if defined(MOD_GLOBAL_TRULY_FREE_GP)
-			kPlayer.incrementGreatDiplomatsCreated(bIsFree);
-#else
-			kPlayer.incrementGreatDiplomatsCreated();
-#endif
-		}
-#endif
 		else
 		{
 #if defined(MOD_GLOBAL_SEPARATE_GP_COUNTERS)

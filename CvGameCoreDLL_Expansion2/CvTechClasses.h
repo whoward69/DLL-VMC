@@ -86,10 +86,6 @@ public:
 	bool IsTriggersArchaeologicalSites() const;
 	bool IsAllowsWorldCongress() const;
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	bool IsVassalageTradingAllowed() const;
-#endif
-
 	std::string pyGetQuote()
 	{
 		return GetQuote();
@@ -172,10 +168,6 @@ private:
 	int* m_piPrereqOrTechs;
 	int* m_piPrereqAndTechs;
 	bool* m_pabFreePromotion;
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	bool m_bVassalageTradingAllowed;
-#endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

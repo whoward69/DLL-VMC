@@ -1619,50 +1619,6 @@ void CvUnit::kill(bool bDelay, PlayerTypes ePlayer /*= NO_PLAYER*/)
 			GET_PLAYER(getOwner()).GetDiplomacyAI()->ChangeWarValueLost(ePlayer, iValue);
 			// Bad guy's viewpoint
 			GET_PLAYER(ePlayer).GetDiplomacyAI()->ChangeOtherPlayerWarValueLost(getOwner(), ePlayer, iValue);
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-			if (MOD_DIPLOMACY_CIV4_FEATURES) {
-				CvCity* pLoopCity;
-				int iCityLoop;
-				bool bNearLoserCity = false;
-				bool bInMyTerritory = false;
-				PlayerTypes eLoopPlayer;
-
-				TeamTypes eMaster =  GET_TEAM(getTeam()).GetMaster();
-
-				// Check to see if Master failed to protect one of our units...
-				if(eMaster != NO_TEAM) {
-					// Unit killed inside my territory
-					if(plot()->getOwner() == getOwner()) {
-						bInMyTerritory = true;
-					}
-					// Unit killed near one of my cities
-					else if(plot()->getOwner() != ePlayer) {
-						// Loop through loser's cities.
-						for(pLoopCity = GET_PLAYER(getOwner()).firstCity(&iCityLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(getOwner()).nextCity(&iCityLoop))
-						{
-							if(plotDistance(plot()->getX(), plot()->getY(), pLoopCity->getX(), pLoopCity->getY()) <= GC.getVASSALAGE_FAILED_PROTECT_CITY_DISTANCE())
-							{
-								bNearLoserCity = true;
-								break;
-							}
-						}
-					}
-
-					// Something actually happened to warrant this check
-					if(bInMyTerritory || bNearLoserCity) {
-						for(int iPlayerLoop = 0; iPlayerLoop < MAX_PLAYERS; iPlayerLoop++)
-						{
-							eLoopPlayer = (PlayerTypes) iPlayerLoop;
-
-							if(GET_PLAYER(eLoopPlayer).getTeam() == eMaster) {
-								GET_PLAYER(getOwner()).GetDiplomacyAI()->ChangeVassalFailedProtectValue(eLoopPlayer, iValue);
-							}
-						}
-					}
-				}
-			}
-#endif
 		}
 
 		if(NO_UNIT != getLeaderUnitType())
@@ -9390,11 +9346,6 @@ int CvUnit::getTradeInfluence(const CvPlot* pPlot) const
 		if (eMinor != NO_PLAYER)
 		{
 			iInf = /*30*/ GC.getMINOR_FRIENDSHIP_FROM_TRADE_MISSION();
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-			if (MOD_DIPLOMACY_CITYSTATES) {
-				iInf += (m_pUnitInfo->GetNumInfPerEra() * GET_TEAM(getTeam()).GetCurrentEra());
-			}
-#endif
 			int iInfTimes100 = iInf * (100 + GetTradeMissionInfluenceModifier());
 			iInf = iInfTimes100 / 100;
 		}
@@ -9454,48 +9405,6 @@ bool CvUnit::trade()
 	PlayerTypes eMinor = pPlot->getOwner();
 	CvAssertMsg(eMinor != NO_PLAYER, "Performing a trade mission and not in city state territory. This is bad. Please send Jon this with your last 5 autosaves and what changelist # you're playing.");
 	int iFriendship = getTradeInfluence(pPlot);
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if (MOD_DIPLOMACY_CITYSTATES) {
-		//Added Influence Quest Bonus
-		if(eMinor != NO_PLAYER && GET_PLAYER(eMinor).GetMinorCivAI()->IsActiveQuestForPlayer(getOwner(), MINOR_CIV_QUEST_INFLUENCE))
-		{	
-			int iBoostPercentage = GC.getINFLUENCE_MINOR_QUEST_BOOST();
-			iFriendship *= 100 + iBoostPercentage;
-			iFriendship /= 100;
-		}
-
-		if (eMinor != NO_PLAYER && (m_pUnitInfo->GetNumInfPerEra() > 0))
-		{
-			for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-			{
-				PlayerTypes eLoopPlayer = (PlayerTypes) iPlayerLoop;
-				if(eLoopPlayer != NO_PLAYER && !GET_PLAYER(eLoopPlayer).isObserver() && (GET_PLAYER(eLoopPlayer).getTeam() != getTeam()) && !GET_PLAYER(eLoopPlayer).isMinorCiv() && eLoopPlayer != getOwner() && GET_TEAM(GET_PLAYER(eLoopPlayer).getTeam()).isHasMet(GET_PLAYER(eMinor).getTeam()))
-				{
-					GET_PLAYER(eMinor).GetMinorCivAI()->ChangeFriendshipWithMajor(eLoopPlayer, -iFriendship);
-					CvNotifications* pNotifications = GET_PLAYER(eLoopPlayer).GetNotifications();
-					if(pNotifications)
-					{
-						Localization::String strText = Localization::Lookup("TXT_KEY_NOTIFICATION_GREAT_DIPLOMAT_OTHER");
-						strText <<  getNameKey() << iFriendship << GET_PLAYER(eMinor).getNameKey() << GET_PLAYER(getOwner()).getCivilizationAdjectiveKey();
-						Localization::String strSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_GREAT_DIPLOMAT_OTHER_SUMMARY");
-						strSummary << getNameKey() << GET_PLAYER(eMinor).getNameKey();
-						pNotifications->Add(NOTIFICATION_GREAT_PERSON_ACTIVE_PLAYER, strText.toUTF8(), strSummary.toUTF8(), getX(), getY(), getUnitType());
-					}
-				}
-			}
-			CvNotifications* pNotifications = GET_PLAYER(getOwner()).GetNotifications();
-			if(pNotifications)
-			{
-				Localization::String strText = Localization::Lookup("TXT_KEY_NOTIFICATION_GREAT_DIPLOMAT");
-				strText <<  getNameKey() << iFriendship << GET_PLAYER(eMinor).getNameKey();
-				Localization::String strSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_GREAT_DIPLOMAT_SUMMARY");
-				strSummary << getNameKey() << GET_PLAYER(eMinor).getNameKey();
-				pNotifications->Add(NOTIFICATION_GREAT_PERSON_ACTIVE_PLAYER, strText.toUTF8(), strSummary.toUTF8(), getX(), getY(), getUnitType());
-			}
-		}
-	}
-#endif
 
 	GET_PLAYER(eMinor).GetMinorCivAI()->ChangeFriendshipWithMajor(getOwner(), iFriendship);
 
@@ -22643,10 +22552,6 @@ bool CvUnit::IsDeclareWar() const
 		case UNITAI_ARCHAEOLOGIST:
 		case UNITAI_WRITER:
 		case UNITAI_MUSICIAN:
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-		case UNITAI_DIPLOMAT:
-		case UNITAI_MESSENGER:
-#endif
 			break;
 
 		case UNITAI_ATTACK_SEA:
@@ -22995,12 +22900,6 @@ bool CvUnit::UnitAttack(int iX, int iY, int iFlags, int iSteps)
 			{
 				CvBarbarians::DoCampAttacked(pDestPlot);
 			}
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-			if(MOD_DIPLOMACY_CITYSTATES && pDestPlot->isCity() && pDestPlot->isBarbarian())
-			{
-				CvBarbarians::DoCityAttacked(pDestPlot);
-			}
-#endif
 		}
 	}
 

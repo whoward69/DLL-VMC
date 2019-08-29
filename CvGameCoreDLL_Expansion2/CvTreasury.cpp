@@ -28,9 +28,6 @@ CvTreasury::CvTreasury():
 	m_iBaseBuildingGoldMaintenance(0),
 	m_iBaseImprovementGoldMaintenance(0),
 	m_iLifetimeGrossGoldIncome(0),
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_iExpensePerTurnFromVassalTax(0),
-#endif
 	m_pPlayer(NULL)
 {
 
@@ -56,10 +53,6 @@ void CvTreasury::Init(CvPlayer* pPlayer)
 	m_iBaseBuildingGoldMaintenance = 0;
 	m_iBaseImprovementGoldMaintenance = 0;
 	m_iLifetimeGrossGoldIncome = 0;
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_iExpensePerTurnFromVassalTax = 0;
-#endif
 
 	m_GoldBalanceForTurnTimes100.clear();
 	m_GoldBalanceForTurnTimes100.reserve(750);
@@ -486,16 +479,6 @@ int CvTreasury::CalculateGrossGoldTimes100()
 	// International trade
 	iNetGold += GetGoldPerTurnFromTraits() * 100;
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if (MOD_DIPLOMACY_CIV4_FEATURES) {
-		// We're a master of someone, we get x% of their gold
-		//iNetGold += (m_pPlayer->GetYieldPerTurnFromVassals(YIELD_GOLD) * 100);
-		
-		// We now get gold from taxes
-		iNetGold += GetMyShareOfVassalTaxes();
-	}
-#endif
-
 	return iNetGold;
 }
 
@@ -622,21 +605,6 @@ int CvTreasury::CalculateUnitCost(int& iFreeUnits, int& iPaidUnits, int& iBaseUn
 		dFinalCost /= 100;
 	}
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if (MOD_DIPLOMACY_CIV4_FEATURES) {
-		// Vassal bonus for unit maintenance costs
-		for(int iI = 0; iI < MAX_TEAMS; iI++)
-		{
-			// Are we the vassal of team?
-			if(GET_TEAM(m_pPlayer->getTeam()).IsVassal((TeamTypes)iI))
-			{
-				dFinalCost *= (100 - /*40*/GC.getVASSALAGE_VASSAL_UNIT_MAINT_COST_PERCENT());
-				dFinalCost /= 100;
-			}
-		}
-	}
-#endif
-
 	//iFinalCost /= 100;
 
 	return std::max(0, int(dFinalCost));
@@ -709,13 +677,6 @@ int CvTreasury::CalculatePreInflatedCosts()
 	iTotalCosts += m_iExpensePerTurnUnitSupply;
 	iTotalCosts += GetBuildingGoldMaintenance();
 	iTotalCosts += GetImprovementGoldMaintenance();
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if (MOD_DIPLOMACY_CIV4_FEATURES) {
-		iTotalCosts += GetVassalGoldMaintenance();
-		iTotalCosts += GetExpensePerTurnFromVassalTaxes();
-	}
-#endif
 
 	return iTotalCosts;
 }
@@ -1070,9 +1031,6 @@ void CvTreasury::Read(FDataStream& kStream)
 	kStream >> m_GoldBalanceForTurnTimes100;
 	kStream >> m_GoldChangeForTurnTimes100;
 	kStream >> m_iLifetimeGrossGoldIncome;
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	kStream >> m_iExpensePerTurnFromVassalTax;
-#endif
 }
 
 /// Serialization write
@@ -1095,9 +1053,6 @@ void CvTreasury::Write(FDataStream& kStream)
 	kStream << m_GoldBalanceForTurnTimes100;
 	kStream << m_GoldChangeForTurnTimes100;
 	kStream << m_iLifetimeGrossGoldIncome;
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	kStream << m_iExpensePerTurnFromVassalTax;
-#endif
 }
 
 void TreasuryHelpers::AppendToLog(CvString& strHeader, CvString& strLog, CvString strHeaderValue, CvString strValue)
@@ -1125,117 +1080,3 @@ void TreasuryHelpers::AppendToLog(CvString& strHeader, CvString& strLog, CvStrin
 	str.Format("%.2f,", fValue);
 	strLog += str;
 }
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-// What are our gold maintenance costs because of Vassals?
-int CvTreasury::GetVassalGoldMaintenance() const
-{
-	int iRtnValue = 0;
-	// We have a vassal
-	for(int iI = 0; iI < MAX_MAJOR_CIVS; iI++)
-	{
-		if(!GET_PLAYER((PlayerTypes)iI).isMinorCiv()
-			&& !GET_PLAYER((PlayerTypes)iI).isBarbarian()
-			&& GET_PLAYER((PlayerTypes)iI).isAlive())
-		{
-			int iLoop, iCityPop;
-			// This player is our vassal
-			if(GET_TEAM(GET_PLAYER((PlayerTypes)iI).getTeam()).IsVassal(m_pPlayer->getTeam()))
-			{
-				// Loop through our vassal's cities
-				for(CvCity* pLoopCity = GET_PLAYER((PlayerTypes)iI).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER((PlayerTypes)iI).nextCity(&iLoop))
-				{
-					iCityPop = pLoopCity->getPopulation();
-					iRtnValue += std::max(0, (int)(pow((double)iCityPop, (double)/*0.6*/ GC.getVASSALAGE_VASSAL_CITY_POP_EXPONENT())));
-				}
-
-				iRtnValue += std::max(0, (GET_PLAYER((PlayerTypes)iI).GetTreasury()->GetExpensePerTurnUnitMaintenance() * /*10*/GC.getVASSALAGE_VASSAL_UNIT_MAINT_COST_PERCENT() / 100));
-			}
-		}
-	}
-
-	// Modifier for vassal maintenance?
-	iRtnValue *= (100 + m_pPlayer->GetVassalGoldMaintenanceMod());
-	iRtnValue /= 100;
-
-	return iRtnValue;
-}
-
-// Calculate how much we owe this turn due to taxes
-void CvTreasury::CalculateExpensePerTurnFromVassalTaxes()
-{
-	TeamTypes eMaster = GET_TEAM(m_pPlayer->getTeam()).GetMaster();
-	if(eMaster == NO_TEAM) {
-		if(GetExpensePerTurnFromVassalTaxes() != 0)
-			SetExpensePerTurnFromVassalTaxesTimes100(0);
-		return;
-	}
-	int iNet = CalculateGrossGoldTimes100();
-	int iTax = iNet * GET_TEAM(eMaster).GetVassalTax(m_pPlayer->GetID()) / 100;
-
-	SetExpensePerTurnFromVassalTaxesTimes100(iTax);
-}
-
-// Set how much we owe this turn due to taxes
-void CvTreasury::SetExpensePerTurnFromVassalTaxesTimes100(int iValue)
-{
-	m_iExpensePerTurnFromVassalTax = iValue;
-}
-
-// Get how much we owe this turn due to taxes
-int CvTreasury::GetExpensePerTurnFromVassalTaxesTimes100() const
-{
-	return m_iExpensePerTurnFromVassalTax;
-}
-
-// Get how much we owe this turn due to taxes
-int CvTreasury::GetExpensePerTurnFromVassalTaxes() const
-{
-	return GetExpensePerTurnFromVassalTaxesTimes100() / 100;
-}
-
-// What percent of vassal taxes am I owed?
-int CvTreasury::GetMyShareOfVassalTaxes() const
-{
-	int iNumTeamMembers = GET_TEAM(m_pPlayer->getTeam()).getAliveCount();
-	if(iNumTeamMembers == 0)
-		return 0;
-
-	int iTotalTaxes = 0;
-	PlayerTypes eLoopPlayer;
-	for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-	{
-		eLoopPlayer = (PlayerTypes) iPlayerLoop;
-		if(GET_TEAM(GET_PLAYER(eLoopPlayer).getTeam()).GetMaster() == m_pPlayer->getTeam())
-		{
-			iTotalTaxes += GET_PLAYER(eLoopPlayer).GetTreasury()->GetExpensePerTurnFromVassalTaxesTimes100();
-		}
-	}
-
-	// What is my share of these taxes?
-	return (iTotalTaxes / iNumTeamMembers);
-}
-
-// How much is ePlayer contributing to my vassal tax revenue (note: this doesn't actually set anything, for pure UI purposes)
-int CvTreasury::GetVassalTaxContributionTimes100(PlayerTypes ePlayer) const
-{
-	int iNumTeamMembers = GET_TEAM(m_pPlayer->getTeam()).getAliveCount();
-	if(iNumTeamMembers == 0)
-		return 0;
-
-	int iAmount = 0;
-	
-	if(GET_TEAM(GET_PLAYER(ePlayer).getTeam()).GetMaster() == m_pPlayer->getTeam())
-	{
-		iAmount += GET_PLAYER(ePlayer).GetTreasury()->GetExpensePerTurnFromVassalTaxesTimes100();
-	}
-
-	return iAmount  / iNumTeamMembers;
-}
-
-int CvTreasury::GetVassalTaxContribution(PlayerTypes ePlayer) const
-{
-	return GetVassalTaxContributionTimes100(ePlayer) / 100;
-}
-
-#endif

@@ -3338,15 +3338,6 @@ void CvPlayerTraits::ChooseMayaBoost()
 	}
 	if(eDesiredGreatPerson == NO_UNIT)
 	{
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-		if (MOD_DIPLOMACY_CITYSTATES)
-#if defined(MOD_BUGFIX_UNITCLASS_NOT_UNIT)
-			ePossibleGreatPerson = m_pPlayer->GetSpecificUnitType("UNITCLASS_GREAT_DIPLOMAT");
-#else
-			ePossibleGreatPerson = (UnitTypes)GC.getInfoTypeForString("UNIT_GREAT_DIPLOMAT");
-#endif
-		else
-#endif
 #if defined(MOD_BUGFIX_UNITCLASS_NOT_UNIT)
 			ePossibleGreatPerson = m_pPlayer->GetSpecificUnitType("UNITCLASS_MERCHANT");
 #else
@@ -3375,23 +3366,6 @@ void CvPlayerTraits::ChooseMayaBoost()
 			}
 		}
 	}
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if(MOD_DIPLOMACY_CITYSTATES)
-	{
-#if defined(MOD_BUGFIX_UNITCLASS_NOT_UNIT)
-		ePossibleGreatPerson = m_pPlayer->GetSpecificUnitType("UNITCLASS_GREAT_DIPLOMAT");
-#else
-		ePossibleGreatPerson = (UnitTypes)GC.getInfoTypeForString("UNIT_GREAT_DIPLOMAT");
-#endif
-		if(GetUnitBaktun(ePossibleGreatPerson) == 0)
-		{
-			if(eVictoryStrategy == (AIGrandStrategyTypes) GC.getInfoTypeForString("AIGRANDSTRATEGY_UNITED_NATIONS"))
-			{
-				eDesiredGreatPerson = ePossibleGreatPerson;
-			}
-		}
-	}
-#endif
 
 	// No obvious strategic choice, just go for first one available in a reasonable order
 	if(eDesiredGreatPerson == NO_UNIT)
@@ -3493,20 +3467,6 @@ void CvPlayerTraits::ChooseMayaBoost()
 										{
 											eDesiredGreatPerson = ePossibleGreatPerson;
 										}
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-										else if(MOD_DIPLOMACY_CITYSTATES)
-										{
-#if defined(MOD_BUGFIX_UNITCLASS_NOT_UNIT)
-											ePossibleGreatPerson = m_pPlayer->GetSpecificUnitType("UNITCLASS_GREAT_DIPLOMAT");
-#else
-											ePossibleGreatPerson = (UnitTypes)GC.getInfoTypeForString("UNIT_GREAT_DIPLOMAT");
-#endif
-											if(GetUnitBaktun(ePossibleGreatPerson) == 0)
-											{
-												eDesiredGreatPerson = ePossibleGreatPerson;
-											}
-										}
-#endif
 									}
 								}
 							}

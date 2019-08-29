@@ -47,10 +47,6 @@
 #include "CvEnums.h"
 #endif
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-#include "CvBarbarians.h"
-#endif
-
 #include "ICvDLLUserInterface.h"
 #include "CvEnumSerialization.h"
 #include "FStlContainerSerialization.h"
@@ -457,28 +453,6 @@ CvPlayer::CvPlayer() :
 	, m_iFaithPurchaseIndex(0)
 	, m_bProcessedAutoMoves(false)
 	, m_kPlayerAchievements(*this)
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	, m_iImprovementLeagueVotes("CvPlayer::m_iImprovementLeagueVotes", m_syncArchive)
-	, m_iFaithToVotes("CvPlayer::m_iFaithToVotes", m_syncArchive)
-	, m_iCapitalsToVotes("CvPlayer::m_iCapitalsToVotes", m_syncArchive)
-	, m_iDoFToVotes("CvPlayer::m_iDoFToVotes", m_syncArchive)
-	, m_iRAToVotes("CvPlayer::m_iRAToVotes", m_syncArchive)
-	, m_iDefensePactsToVotes("CvPlayer::m_iDefensePactsToVotes", m_syncArchive)
-	, m_iGPExpendInfluence("CvPlayer::m_iGPExpendInfluence", m_syncArchive)
-	, m_bIsLeagueAid("CvPlayer::m_bIsLeagueAid", m_syncArchive)
-	, m_bIsLeagueScholar("CvPlayer::m_bIsLeagueScholar", m_syncArchive)
-	, m_bIsLeagueArt("CvPlayer::m_bIsLeagueArt", m_syncArchive)
-	, m_iScienceRateFromLeague("CvPlayer::m_iScienceRateFromLeague", m_syncArchive)
-	, m_iScienceRateFromLeagueAid("CvPlayer::m_iScienceRateFromLeagueAid", m_syncArchive)
-	, m_iLeagueCultureCityModifier("CvPlayer::m_iLeagueCultureCityModifier", m_syncArchive)
-	, m_iGreatDiplomatsCreated("CvPlayer::m_iGreatDiplomatsCreated", m_syncArchive)
-	, m_iDiplomatsFromFaith("CvPlayer::m_iDiplomatsFromFaith", m_syncArchive)
-	, m_iGreatDiplomatRateModifier("CvPlayer::m_iGreatDiplomatRateModifier", m_syncArchive)
-	, m_iFreeGreatDiplomatsCreated("CvPlayer::m_iFreeGreatDiplomatsCreated", m_syncArchive)
-#endif
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	, m_iVassalGoldMaintenanceMod("CvPlayer::m_iVassalGoldMaintenanceMod", m_syncArchive)
-#endif
 {
 	m_pPlayerPolicies = FNEW(CvPlayerPolicies, c_eCiv5GameplayDLL, 0);
 	m_pEconomicAI = FNEW(CvEconomicAI, c_eCiv5GameplayDLL, 0);
@@ -1121,29 +1095,6 @@ void CvPlayer::uninit()
 	m_bHasAdoptedStateReligion = false;
 	m_bAlliesGreatPersonBiasApplied = false;
 	m_lastGameTurnInitialAIProcessed = -1;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	m_iImprovementLeagueVotes = 0;
-	m_iFaithToVotes = 0;
-	m_iCapitalsToVotes = 0;
-	m_iDoFToVotes = 0;
-	m_iRAToVotes = 0;
-	m_iDefensePactsToVotes = 0;
-	m_iGPExpendInfluence = 0;
-	m_bIsLeagueAid = false;
-	m_bIsLeagueScholar = false;
-	m_bIsLeagueArt = false;
-	m_iScienceRateFromLeague = 0;
-	m_iScienceRateFromLeagueAid = 0;
-	m_iLeagueCultureCityModifier = 0;
-	m_iFreeGreatDiplomatsCreated = 0;
-	m_iGreatDiplomatsCreated = 0;
-	m_iDiplomatsFromFaith = 0;
-	m_iGreatDiplomatRateModifier = 0;
-#endif
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_iVassalGoldMaintenanceMod = 0;
-#endif
 
 	m_eID = NO_PLAYER;
 }
@@ -2064,12 +2015,6 @@ void CvPlayer::acquireCity(CvCity* pOldCity, bool bConquest, bool bGift)
 			locSummary << pOldCity->getNameKey();
 			pNotifications->Add(NOTIFICATION_CITY_LOST, locString.toUTF8(), locSummary.toUTF8(), pOldCity->getX(), pOldCity->getY(), -1);
 		}
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-		if(MOD_DIPLOMACY_CITYSTATES && pOldCity->isBarbarian())
-		{
-			CvBarbarians::DoBarbCityCleared(pOldCity->plot());
-		}
-#endif
 
 		if(!isBarbarian() && !pOldCity->isBarbarian())
 		{
@@ -2109,43 +2054,6 @@ void CvPlayer::acquireCity(CvCity* pOldCity, bool bConquest, bool bGift)
 					GET_PLAYER(ePlayer).GetDiplomacyAI()->ChangeOtherPlayerWarValueLost(pOldCity->getOwner(), GetID(), iValue);
 				}
 			}
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-			if (MOD_DIPLOMACY_CIV4_FEATURES) {
-				// Only on conquest
-				if(bConquest) {
-					// Vassalage stuff
-					TeamTypes eMaster = GET_TEAM(GET_PLAYER(pOldCity->getOwner()).getTeam()).GetMaster();
-					if(eMaster != NO_TEAM) {
-						for(int iPlayerLoop = 0; iPlayerLoop < MAX_CIV_PLAYERS; iPlayerLoop++)
-						{
-							ePlayer = (PlayerTypes) iPlayerLoop;
-						
-							if(GET_PLAYER(ePlayer).getTeam() == eMaster) {
-								// This team was the master of the loser's team
-								if(GET_PLAYER(pOldCity->getOwner()).getTeam() == eMaster)
-								{
-									// Master's failed protect score goes up for Vassal
-									GET_PLAYER(pOldCity->getOwner()).GetDiplomacyAI()->ChangeVassalFailedProtectValue(ePlayer, iValue);
-								}
-
-								// Notify Diplo AI that our master has killed a city in a civ near our empire
-								// Conquering team is the master
-								if(getTeam() == eMaster)
-								{
-									// Old city was neighbors to us
-									if(GET_PLAYER(ePlayer).GetProximityToPlayer(pOldCity->getOwner()) <= PLAYER_PROXIMITY_CLOSE)
-									{
-										// Master protected us against our enemy!
-										GET_PLAYER(ePlayer).GetDiplomacyAI()->ChangeVassalProtectValue(GetID(), iValue);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-#endif
 		}
 
 		GetMilitaryAI()->LogCityCaptured(pOldCity, pOldCity->getOwner());
@@ -2248,11 +2156,7 @@ void CvPlayer::acquireCity(CvCity* pOldCity, bool bConquest, bool bGift)
 	// slewis - warmonger calculations
 	if (bConquest)
 	{
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-		if(!isMinorCiv() && !isBarbarian())
-#else
 		if(!isMinorCiv())
-#endif
 		{
 			bool bDoWarmonger = true;
 
@@ -3037,63 +2941,9 @@ void CvPlayer::acquireCity(CvCity* pOldCity, bool bConquest, bool bGift)
 				}
 			}
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-			//Let's give the Embassies of the defeated player to the new player
-			if(MOD_DIPLOMACY_CITYSTATES && GET_PLAYER(eOldOwner).GetImprovementLeagueVotes() > 0)
-			{
-				int iEmbassyVotes = GET_PLAYER(eOldOwner).GetImprovementLeagueVotes();
-				ChangeImprovementLeagueVotes(iEmbassyVotes);
-			}
-#endif
 		}
 	}
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if(GET_PLAYER(eOldOwner).isMinorCiv() && GET_PLAYER(eOldOwner).getNumCities() == 0)
-	{
-		for(int iMajorLoop = 0; iMajorLoop < MAX_MAJOR_CIVS; iMajorLoop++)
-		{
-			PlayerTypes ePlayer = (PlayerTypes)iMajorLoop;
-			if(ePlayer != NO_PLAYER && !GET_PLAYER(ePlayer).isMinorCiv())
-			{
-				if(GET_PLAYER(eOldOwner).GetIncomingUnitCountdown(ePlayer) > 0)
-				{
-					// Must have capital to actually spawn unit
-					CvCity* pCapital = GET_PLAYER(ePlayer).getCapitalCity();
-					if(pCapital)
-					{
-						if(GET_PLAYER(eOldOwner).GetIncomingUnitType(ePlayer) != NO_UNIT)
-						{
-							CvUnit* pNewUnit = GET_PLAYER(ePlayer).initUnit(GET_PLAYER(eOldOwner).GetIncomingUnitType(ePlayer), pCapital->getX(), pCapital->getY());
-							CvAssert(pNewUnit);
-							if (pNewUnit)
-							{
-								if(pNewUnit->getDomainType() != DOMAIN_AIR)
-								{
-									if (!pNewUnit->jumpToNearestValidPlot())
-									{
-										pNewUnit->kill(false);
-									}
-								}
-								CvNotifications* pNotifications = GET_PLAYER(ePlayer).GetNotifications();
-								if(pNotifications && ePlayer == GC.getGame().getActivePlayer())
-								{
-									Localization::String strSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_CS_GIFT_RETURNED_SUMMARY");
-									strSummary <<  GET_PLAYER(eOldOwner).getCivilizationShortDescriptionKey();
-									Localization::String strNotification = Localization::Lookup("TXT_KEY_NOTIFICATION_CS_GIFT_RETURNED");
-									strNotification <<  GET_PLAYER(eOldOwner).getNameKey();
-									strNotification <<  pNewUnit->getNameKey();
-									pNotifications->Add(NOTIFICATION_GENERIC, strNotification.toUTF8(), strSummary.toUTF8(), pCapital->getX(), pCapital->getY(), -1);
-								}
-							}
-						}
-					}
-				}
-				GET_PLAYER(eOldOwner).GetMinorCivAI()->SetJerk(GET_PLAYER((PlayerTypes) iMajorLoop).getTeam(), 0);
-			}
-		}
-	}			
-#endif
 	// If not, old owner should look at city specializations
 	else
 	{
@@ -3798,21 +3648,6 @@ void CvPlayer::DoLiberatePlayer(PlayerTypes ePlayer, int iOldCityID)
 	}
 #endif
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	//Let's give the Embassies of the defeated player back to the liberated player
-	if(MOD_DIPLOMACY_CITYSTATES && GET_PLAYER(ePlayer).GetImprovementLeagueVotes() > 0)
-	{
-		for(int iPlayerLoop = 0; iPlayerLoop < MAX_CIV_PLAYERS; iPlayerLoop++)
-		{
-			ePlayer = (PlayerTypes) iPlayerLoop;
-			if(ePlayer != NO_PLAYER && GET_PLAYER(ePlayer).getTeam() == eConquerorTeam)
-			{
-				int iEmbassyVotes = GET_PLAYER(ePlayer).GetImprovementLeagueVotes();
-				GET_PLAYER(ePlayer).ChangeImprovementLeagueVotes(-iEmbassyVotes);
-			}
-		}
-	}
-#endif
 }
 
 //	--------------------------------------------------------------------------------
@@ -4000,10 +3835,6 @@ void CvPlayer::disbandUnit(bool)
 						case UNITAI_SCIENTIST:
 						case UNITAI_GENERAL:
 						case UNITAI_MERCHANT:
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-						case UNITAI_DIPLOMAT:
-						case UNITAI_MESSENGER:
-#endif
 						case UNITAI_ENGINEER:
 						case UNITAI_SPACESHIP_PART:
 						case UNITAI_TREASURE:
@@ -4915,14 +4746,6 @@ void CvPlayer::doTurnPostDiplomacy()
 		ChangeTourismBonusTurns(-1);
 	}
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if(MOD_DIPLOMACY_CITYSTATES && (!isMinorCiv() && !isBarbarian()))
-	{
-		DoProcessVotes();
-		ProcessLeagueResolutions();
-	}
-#endif
-
 	// Golden Age
 	DoProcessGoldenAge();
 
@@ -4944,14 +4767,6 @@ void CvPlayer::doTurnPostDiplomacy()
 
 	// Gold
 	GetTreasury()->DoGold();
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if (MOD_DIPLOMACY_CIV4_FEATURES)
-	{
-		// Tax out from after we've calculated our gold for this turn
-		GetTreasury()->CalculateExpensePerTurnFromVassalTaxes();
-	}
-#endif
 
 	// Culture
 
@@ -5682,11 +5497,6 @@ int CvPlayer::GetScore(bool bFinal, bool bWinner) const
 	iScore += GetScoreFromGreatWorks();
 	iScore += GetScoreFromReligion();
 	iScore += GetScoreFromTechs();
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if (MOD_DIPLOMACY_CIV4_FEATURES) {
-		iScore += GetScoreFromVassals();
-	}
-#endif
 	iScore += GetScoreFromFutureTech();
 	iScore += GetScoreFromScenario1();
 	iScore += GetScoreFromScenario2();
@@ -9321,16 +9131,6 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 			if(pEspionage)
 			{
 				int iNumSpies = pBuildingInfo->GetExtraSpies();
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-				if (MOD_DIPLOMACY_CITYSTATES) {
-					//Optional: Spies scaled for the number of City-States in the game.
-					int iNumMinor = ((GC.getGame().GetNumMinorCivsEver() * /*15*/ GC.getSPY_TO_MINOR_RATIO()) / 100);
-					if(iNumMinor > 1)
-					{
-						iNumSpies = iNumMinor;
-					}
-				}
-#endif
 				for(int i = 0; i < iNumSpies; i++)
 				{
 					pEspionage->CreateSpy();
@@ -9436,9 +9236,6 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 	changeGreatGeneralRateModFromBldgs(pBuildingInfo->GetGreatGeneralRateModifier() * iChange);
 	ChangeGreatScientistBeakerMod(pBuildingInfo->GetGreatScientistBeakerModifier() * iChange);
 	ChangeGreatPersonExpendGold(pBuildingInfo->GetGreatPersonExpendGold() * iChange);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if (MOD_DIPLOMACY_CITYSTATES) ChangeGPExpendInfluence(pBuildingInfo->GetGPExpendInfluence() * iChange);
-#endif
 	recomputeGreatPeopleModifiers();
 
 	changeGoldenAgeModifier(pBuildingInfo->GetGoldenAgeModifier() * iChange);
@@ -10040,34 +9837,6 @@ int CvPlayer::calculateResearchModifier(TechTypes eTech)
 	int iLeaguesMod = GC.getGame().GetGameLeagues()->GetResearchMod(GetID(), eTech);
 	if (iLeaguesMod != 0)
 	{
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-		if(MOD_DIPLOMACY_CITYSTATES && (!isMinorCiv() && !isBarbarian()))
-		{
-			//Research bonus for city-state alliances
-			PlayerTypes eMinor;
-			int iMinorAllies = 0;
-			int iLeaguesAidScience = 0;
-			for(int iMinorLoop = MAX_MAJOR_CIVS; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
-			{
-				eMinor = (PlayerTypes) iMinorLoop;
-				if(GET_PLAYER(eMinor).GetMinorCivAI()->IsAllies(GetID()))
-				{
-					iMinorAllies++;
-				}
-			}
-			if(iMinorAllies > 0)
-			{
-				//+5% Science per ally.
-				iLeaguesAidScience += min(50, (iMinorAllies * /*5*/ GC.getSCHOLAR_MINOR_ALLY_MULTIPLIER()));
-				SetScienceRateFromMinorAllies(iLeaguesAidScience);
-				iLeaguesMod += GetScienceRateFromMinorAllies();
-			}
-			else
-			{
-				SetScienceRateFromMinorAllies(0);
-			}
-		}
-#endif
 		iModifier *= (100 + iLeaguesMod);
 		iModifier /= 100;
 	}
@@ -10539,13 +10308,6 @@ int CvPlayer::GetTotalJONSCulturePerTurn() const
 	// Temporary boost from bonus turns
 	iCulturePerTurn += GetCulturePerTurnFromBonusTurns();
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if (MOD_DIPLOMACY_CIV4_FEATURES) {
-		// We're a vassal of someone, we get x% of his science
-		iCulturePerTurn += (GetYieldPerTurnFromVassals(YIELD_CULTURE));
-	}
-#endif
-
 	// Golden Age bonus
 	if (isGoldenAge() && !IsGoldenAgeCultureBonusDisabled())
 	{
@@ -10770,30 +10532,6 @@ void CvPlayer::ChangeJONSCultureCityModifier(int iChange)
 		}
 	}
 }
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-//	--------------------------------------------------------------------------------
-/// Modifier for all Cities' culture
-int CvPlayer::GetLeagueCultureCityModifier() const
-{
-	return m_iLeagueCultureCityModifier;
-}
-
-//	--------------------------------------------------------------------------------
-/// Modifier for all Cities' culture
-void CvPlayer::ChangeLeagueCultureCityModifier(int iChange)
-{
-	if(iChange != 0)
-	{
-		m_iLeagueCultureCityModifier += iChange;
-
-		if(GC.getGame().getActivePlayer() == GetID())
-		{
-			GC.GetEngineUserInterface()->setDirty(GameData_DIRTY_BIT, true);
-		}
-	}
-}
-#endif
 
 //	--------------------------------------------------------------------------------
 int CvPlayer::getJONSCulture() const
@@ -11512,13 +11250,6 @@ int CvPlayer::GetTotalFaithPerTurn() const
 	// Faith per turn from Religion (Founder beliefs)
 	iFaithPerTurn += GetFaithPerTurnFromReligion();
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if (MOD_DIPLOMACY_CIV4_FEATURES) {
-		// We're a vassal of someone, we get x% of his faith
-		iFaithPerTurn += (GetYieldPerTurnFromVassals(YIELD_FAITH));
-	}
-#endif
-
 	return iFaithPerTurn;
 }
 
@@ -11705,13 +11436,6 @@ void CvPlayer::DoUpdateHappiness()
 
 	// Increase from Leagues
 	m_iHappiness += GetHappinessFromLeagues();
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if (MOD_DIPLOMACY_CIV4_FEATURES) {
-		// Increase from Vassals
-		m_iHappiness += GetHappinessFromVassals();
-	}
-#endif
 
 	// Increase for each City connected to Capital with a Trade Route
 	DoUpdateCityConnectionHappiness();
@@ -13398,572 +13122,6 @@ int CvPlayer::GetExtraLeagueVotes() const
 	return m_iExtraLeagueVotes;
 }
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-//	--------------------------------------------------------------------------------
-/// Extra league votes from faith
-int CvPlayer::GetFaithToVotes() const
-{
-	return m_iFaithToVotes;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from faith
-void CvPlayer::ChangeFaithToVotes(int iChange)
-{
-	m_iFaithToVotes = iChange;
-	CvAssert(m_iFaithToVotes >= 0);
-	if (m_iFaithToVotes < 0)
-	{
-		m_iFaithToVotes = 0;
-	}
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from faith
-int CvPlayer::TestFaithToVotes(int iChange)
-{
-	int iFaithVotes = 0;
-	int iFollowers = 0;
-	int iTotalFaithVotes = 0;
-	CvGameReligions* pReligions = GC.getGame().GetGameReligions();
-
-	// Number of Cities Following Religion
-	ReligionTypes eFoundedReligion = pReligions->GetFounderBenefitsReligion(GetID());
-	if(eFoundedReligion != NO_RELIGION)
-	{
-		if(iChange > 0)
-		{
-			iFaithVotes = iChange;
-			iFollowers = pReligions->GetNumCitiesFollowing(eFoundedReligion);
-			int iMaxVotes = pReligions->GetNumReligionsFounded();
-			iTotalFaithVotes = (iFollowers / iFaithVotes);
-			//Never fewer than one vote.
-			if(iTotalFaithVotes < 1)
-			{
-				iTotalFaithVotes = 1;
-			}
-			//No more votes than religions in the game - this should scale votes much better.
-			else if(iTotalFaithVotes > iMaxVotes)
-			{
-				iTotalFaithVotes = iMaxVotes;
-			}
-		}
-	}
-	return iTotalFaithVotes;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from conquered capitals
-int CvPlayer::GetCapitalsToVotes() const
-{
-	return m_iCapitalsToVotes;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from conquered capitals
-void CvPlayer::ChangeCapitalsToVotes(int iChange)
-{
-	m_iCapitalsToVotes = iChange;
-	CvAssert(m_iCapitalsToVotes >= 0);
-	if (m_iCapitalsToVotes < 0)
-	{
-		m_iCapitalsToVotes = 0;
-	}
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from conquered capitals
-int CvPlayer::TestCapitalsToVotes(int iChange)
-{
-	int iCapitalVotes = 0;
-
-	if(iChange > 0)
-	{
-		iCapitalVotes = (GetNumCapitalCities() * iChange);
-	}
-	return iCapitalVotes;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from DoF
-int CvPlayer::GetDoFToVotes() const
-{
-	return m_iDoFToVotes;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from DoF
-void CvPlayer::ChangeDoFToVotes(int iChange)
-{
-	m_iDoFToVotes = iChange;
-	CvAssert(m_iDoFToVotes >= 0);
-	if (m_iDoFToVotes < 0)
-	{
-		m_iDoFToVotes = 0;
-	}
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from DoF
-int CvPlayer::TestDoFToVotes(int iChange)
-{
-	int iDoFToVotes = 0;
-	
-	if(iChange > 0)
-	{
-		iDoFToVotes = (GetDiplomacyAI()->GetNumDoF() * iChange);
-	}
-	
-	return iDoFToVotes;
-
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from RA
-int CvPlayer::GetRAToVotes() const
-{
-	return m_iRAToVotes;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from RA
-void CvPlayer::ChangeRAToVotes(int iChange)
-{
-	m_iRAToVotes = iChange;
-	CvAssert(m_iRAToVotes >= 0);
-	if (m_iRAToVotes < 0)
-	{
-		m_iRAToVotes = 0;
-	}
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from RA
-int CvPlayer::TestRAToVotes(int iChange)
-{
-	int iRAToVotes = 0;
-	
-	if(iChange > 0)
-	{
-		iRAToVotes = (GetDiplomacyAI()->GetNumRA() * iChange);
-	}
-	
-	return iRAToVotes;
-}
-//	--------------------------------------------------------------------------------
-/// Extra league votes from RA
-int CvPlayer::GetDefensePactsToVotes() const
-{
-	return m_iDefensePactsToVotes;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from RA
-void CvPlayer::ChangeDefensePactsToVotes(int iChange)
-{
-	m_iDefensePactsToVotes = iChange;
-	CvAssert(m_iDefensePactsToVotes >= 0);
-	if (m_iDefensePactsToVotes < 0)
-	{
-		m_iDefensePactsToVotes = 0;
-	}
-}
-//	--------------------------------------------------------------------------------
-/// Extra league votes from Defense Pacts
-int CvPlayer::TestDefensePactsToVotes(int iChange)
-{
-	int iDefensePactsToVotes = 0;
-	
-	if(iChange > 0)
-	{
-		iDefensePactsToVotes = (GetDiplomacyAI()->GetNumDefensePacts() * iChange);
-	}
-	
-	return iDefensePactsToVotes;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra influence from GPs
-int CvPlayer::GetGPExpendInfluence() const
-{
-	return m_iGPExpendInfluence;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra influence from GPs
-void CvPlayer::ChangeGPExpendInfluence(int iChange)
-{
-	m_iGPExpendInfluence += iChange;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from embassy
-int CvPlayer::GetImprovementLeagueVotes() const
-{
-	return m_iImprovementLeagueVotes;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra league votes from embassy
-void CvPlayer::ChangeImprovementLeagueVotes(int iChange)
-{
-	m_iImprovementLeagueVotes += iChange;
-	CvAssert(m_iImprovementLeagueVotes >= 0);
-	if (m_iImprovementLeagueVotes < 0)
-	{
-		m_iImprovementLeagueVotes = 0;
-	}
-}
-
-/// League Bonuses for Poor Players
-void CvPlayer::SetLeagueArt(bool bValue)
-{
-	if(m_bIsLeagueArt != bValue)
-	{
-		m_bIsLeagueArt = bValue;
-	}
-}
-
-bool CvPlayer::IsLeagueArt() const
-{
-	return m_bIsLeagueArt;
-}
-
-/// League Bonuses for Poor Players
-void CvPlayer::SetLeagueScholar(bool bValue)
-{
-	if(m_bIsLeagueScholar != bValue)
-	{
-		m_bIsLeagueScholar = bValue;
-	}
-}
-
-bool CvPlayer::IsLeagueScholar() const
-{
-	return m_bIsLeagueScholar;
-}
-
-
-/// League Bonuses for Poor Players
-void CvPlayer::SetLeagueAid(bool bValue)
-{
-	if(m_bIsLeagueAid != bValue)
-	{
-		m_bIsLeagueAid = bValue;
-	}
-}
-
-bool CvPlayer::IsLeagueAid() const
-{
-	return m_bIsLeagueAid;
-}
-
-/// Process League Bonuses for Poor Players
-void CvPlayer::ProcessLeagueResolutions()
-{
-	CvLeague* pLeague = GC.getGame().GetGameLeagues()->GetActiveLeague();
-	if(pLeague == NULL)
-	{
-		return;
-	}
-	if(IsLeagueAid())
-	{
-		if ( pLeague->GetArtsyGreatPersonRateModifier() > 0)
-		{
-			//Production and Culture
-			if(AidRank() == GetID())
-			{
-				CvCity* pLoopCity;
-				int iLoop;
-				int iAid = 0;
-				for(pLoopCity = GET_PLAYER(GetID()).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(GetID()).nextCity(&iLoop))
-				{
-					int iAid = (ScoreDifference() - pLoopCity->GetTotalArtsyAid());
-					if(iAid != 0)
-					{
-						pLoopCity->ChangeBaseYieldRateFromLeague(YIELD_PRODUCTION, iAid);
-
-						pLoopCity->ChangeTotalArtsyAid(iAid);
-					}
-
-				}
-				iAid = ScoreDifference() - GetLeagueCultureCityModifier();
-				if(iAid != 0)
-				{
-					ChangeLeagueCultureCityModifier(iAid);
-				}
-			}
-			//Remove bonuses from filty first-worlders.
-			if(AidRank() != GetID())
-			{
-				CvCity* pLoopCity;
-				int iLoop;
-				for(pLoopCity = GET_PLAYER(GetID()).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(GetID()).nextCity(&iLoop))
-				{
-					if(pLoopCity->GetTotalArtsyAid() != 0)
-					{
-
-						pLoopCity->ChangeBaseYieldRateFromLeague(YIELD_PRODUCTION, pLoopCity->GetTotalArtsyAid() * -1);
-
-						pLoopCity->SetTotalArtsyAid(0);
-					}
-				}
-				if(GetLeagueCultureCityModifier() != 0)
-				{
-					ChangeLeagueCultureCityModifier(GetLeagueCultureCityModifier() * -1);
-				}
-			}
-		}
-		else if (pLeague && pLeague->GetScienceyGreatPersonRateModifier() > 0)
-		{
-			//Food and Research
-			if(AidRank() == GetID())
-			{
-				CvCity* pLoopCity;
-				int iLoop;
-				int iAid = 0;
-				for(pLoopCity = GET_PLAYER(GetID()).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(GetID()).nextCity(&iLoop))
-				{
-					iAid = (ScoreDifference() - pLoopCity->GetTotalScienceyAid());
-					if(iAid != 0)
-					{
-						pLoopCity->ChangeBaseYieldRateFromLeague(YIELD_FOOD, iAid);
-
-						pLoopCity->ChangeTotalScienceyAid(iAid);
-					}
-				}
-				//Global
-				iAid = (ScoreDifference() - GetScienceRateFromLeagueAid());
-				if(iAid != 0)
-				{
-					ChangeScienceRateFromLeagueAid(iAid);
-				}
-			}
-			//Remove bonuses from filty first-worlders.
-			if(AidRank() != GetID())
-			{
-				CvCity* pLoopCity;
-				int iLoop;
-				for(pLoopCity = GET_PLAYER(GetID()).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(GetID()).nextCity(&iLoop))
-				{
-					if(pLoopCity->GetTotalScienceyAid() != 0)
-					{	
-						pLoopCity->ChangeBaseYieldRateFromLeague(YIELD_FOOD, (pLoopCity->GetTotalScienceyAid() * -1));
-
-						pLoopCity->SetTotalScienceyAid(0);
-					}
-				}
-				//Global
-				if(GetScienceRateFromLeagueAid() != 0)
-				{
-					ChangeScienceRateFromLeagueAid(GetScienceRateFromLeagueAid() * -1);
-				}
-			}
-		}
-	}
-	else if(!IsLeagueAid())
-	{
-		CvCity* pLoopCity;
-		int iLoop;
-		for(pLoopCity = GET_PLAYER(GetID()).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(GetID()).nextCity(&iLoop))
-		{
-			if(pLoopCity->GetTotalScienceyAid() != 0)
-			{	
-				pLoopCity->ChangeBaseYieldRateFromLeague(YIELD_FOOD, (pLoopCity->GetTotalScienceyAid() * -1));
-
-				pLoopCity->SetTotalScienceyAid(0);
-			}
-			if(pLoopCity->GetTotalArtsyAid() != 0)
-			{
-				pLoopCity->ChangeBaseYieldRateFromLeague(YIELD_PRODUCTION, pLoopCity->GetTotalArtsyAid() * -1);
-
-				pLoopCity->SetTotalArtsyAid(0);
-			}
-		}
-		//Global
-		if(GetScienceRateFromLeagueAid() != 0)
-		{
-			ChangeScienceRateFromLeagueAid(GetScienceRateFromLeagueAid() * -1);
-		}
-		if(GetLeagueCultureCityModifier() != 0)
-		{
-			ChangeLeagueCultureCityModifier(GetLeagueCultureCityModifier() * -1);
-		}
-	}
-	if(IsLeagueArt())
-	{
-		//Extra Science From League (Art)
-		if(pLeague->GetWorldWonderYieldChange(YIELD_CULTURE) > 0)
-		{
-			CvCity* pLoopCity;
-			int iLoop;
-			for(pLoopCity = GET_PLAYER(GetID()).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(GetID()).nextCity(&iLoop))
-			{
-				int iSciencePerWork = GET_PLAYER(GetID()).GetGreatWorkYieldChange(YIELD_SCIENCE);
-				int iTotalScienceFromArt = (pLoopCity->GetCityCulture()->GetNumGreatWorks() * iSciencePerWork);
-				int iAid = iTotalScienceFromArt - pLoopCity->GetBaseYieldRateFromLeague(YIELD_SCIENCE);
-				if(iAid != 0)
-				{
-					pLoopCity->ChangeBaseYieldRateFromLeague(YIELD_SCIENCE, iAid);
-				}
-			}
-		}
-	}
-	else if(!IsLeagueArt())
-	{
-		CvCity* pLoopCity;
-		int iLoop;
-		for(pLoopCity = GET_PLAYER(GetID()).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(GetID()).nextCity(&iLoop))
-		{
-			if(pLoopCity->GetBaseYieldRateFromLeague(YIELD_SCIENCE) != 0)
-			{
-				pLoopCity->ChangeBaseYieldRateFromLeague(YIELD_SCIENCE, (pLoopCity->GetBaseYieldRateFromLeague(YIELD_SCIENCE) * -1));
-			}
-		}
-	}
-}
-
-
-/// League Bonuses for Poor Players
-PlayerTypes CvPlayer::AidRank()
-{
-	int iRank = 0;
-	int iMajorCivs = 0;
-	CvWeightedVector<PlayerTypes, MAX_CIV_PLAYERS, true> veMajorRankings;
-	PlayerTypes eLoopPlayer;
-	for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-	{
-		eLoopPlayer = (PlayerTypes) iPlayerLoop;
-		CvPlayer* pMajorLoop = &GET_PLAYER(eLoopPlayer);
-	
-		if(pMajorLoop->isAlive() && !pMajorLoop->isMinorCiv())
-		{
-			iRank = pMajorLoop->GetScore();
-
-			if(iRank > 0)
-			{
-				veMajorRankings.push_back(eLoopPlayer, iRank);
-				iMajorCivs++;
-			}
-		}
-	}
-
-	//Find the median of the Civs.
-	int iTopTier = (iMajorCivs / 2);
-	if(iTopTier <= 0)
-	{
-		iTopTier = 1;
-	}
-
-	veMajorRankings.SortItems();
-	if(veMajorRankings.size() != 0)
-	{
-		for(int iRanking = 0; iRanking < veMajorRankings.size(); iRanking++)
-		{
-			if(veMajorRankings.GetElement(iRanking) == GetID())
-			{
-				//Are we in the bottom 50% of Civs? If so, we need aid!
-				if(iRanking >= iTopTier)
-				{
-					return GetID();
-				}
-			}
-		}
-	}
-	return NO_PLAYER;
-}
-
-/// League Bonuses for Poor Players
-int CvPlayer::ScoreDifference()
-{
-	int iScore = 0;
-	int iBestScore = 0;
-	int iMajors = 0;
-	int iPlayerScore = 0;
-	int iDifference = 0;
-	PlayerTypes eLoopPlayer;
-	for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-	{
-		eLoopPlayer = (PlayerTypes) iPlayerLoop;
-		CvPlayer* pMajorLoop = &GET_PLAYER(eLoopPlayer);
-
-		if(pMajorLoop->isAlive() && !pMajorLoop->isMinorCiv())
-		{
-			iScore = pMajorLoop->GetScore();
-			iMajors++;
-
-			if(iScore > iBestScore)
-			{
-				iBestScore = iScore;
-			}
-		}
-	}
-	if(iBestScore > 0)
-	{
-		iPlayerScore = GET_PLAYER(GetID()).GetScore();
-		iDifference = iBestScore - iPlayerScore;
-		int iMax = /*30*/ GC.getLEAGUE_AID_MAX();
-		int iMin = /*10*/ (GC.getLEAGUE_AID_MAX() / 3);
-
-		//Bring down to % value.
-		iDifference /= 50;
-		//Never lower than 10%
-		if(iDifference < iMin)
-		{
-			iDifference = iMin;
-		}
-		//Never higher than 30%
-		if(iDifference > iMax)
-		{
-			iDifference = iMax;
-		}
-	}
-	return iDifference;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra science from CS
-int CvPlayer::GetScienceRateFromMinorAllies() const
-{
-	return m_iScienceRateFromLeague;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra science from CS
-void CvPlayer::ChangeScienceRateFromMinorAllies(int iChange)
-{
-	SetScienceRateFromMinorAllies(GetScienceRateFromMinorAllies() + iChange);
-}
-
-/// Extra science from CS
-void CvPlayer::SetScienceRateFromMinorAllies(int iValue)
-{
-	if(GetScienceRateFromMinorAllies() != iValue)
-		m_iScienceRateFromLeague = iValue;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra science from aid
-int CvPlayer::GetScienceRateFromLeagueAid() const
-{
-	return m_iScienceRateFromLeagueAid;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra science from aid
-void CvPlayer::ChangeScienceRateFromLeagueAid(int iChange)
-{
-	SetScienceRateFromLeagueAid(GetScienceRateFromLeagueAid() + iChange);
-}
-//	--------------------------------------------------------------------------------
-/// Extra science from aid
-void CvPlayer::SetScienceRateFromLeagueAid(int iValue)
-{
-	if(GetScienceRateFromLeagueAid() != iValue)
-		m_iScienceRateFromLeagueAid = iValue;
-}
-#endif
-
 //	--------------------------------------------------------------------------------
 /// Extra league votes
 void CvPlayer::ChangeExtraLeagueVotes(int iChange)
@@ -14355,63 +13513,6 @@ void CvPlayer::ChangeTourismBonusTurns(int iChange)
 		m_iTourismBonusTurns += iChange;
 	}
 }
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-//	--------------------------------------------------------------------------------
-void CvPlayer::DoProcessVotes()
-{
-	if(GC.getGame().isOption(GAMEOPTION_NO_LEAGUES))
-	{
-		return;
-	}
-
-	// Minors and Barbs don't matter
-	if(!isMinorCiv() && !isBarbarian())
-	{
-		// Loop through Cities
-		int iLoop;
-		CvCity* pLoopCity;
-		for(pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
-		{
-			for(int iBuildingLoop = 0; iBuildingLoop < GC.getNumBuildingInfos(); iBuildingLoop++)
-			{
-				const BuildingTypes eBuilding = static_cast<BuildingTypes>(iBuildingLoop);
-				CvBuildingEntry* pkBuildingInfo = GC.getBuildingInfo(eBuilding);
-			
-				// Has this Building
-				if(pLoopCity->GetCityBuildings()->GetNumBuilding(eBuilding) > 0)
-				{
-					if(pkBuildingInfo->GetFaithToVotes() > 0)
-					{
-						int iTestFaith = TestFaithToVotes(pkBuildingInfo->GetFaithToVotes());
-						ChangeFaithToVotes(iTestFaith);
-					}
-					if(pkBuildingInfo->GetCapitalsToVotes() > 0)
-					{
-						int iTestCapital = TestCapitalsToVotes(pkBuildingInfo->GetCapitalsToVotes());
-						ChangeCapitalsToVotes(iTestCapital);	
-					}
-					if(pkBuildingInfo->GetDoFToVotes() > 0)
-					{
-						int iTestDoF = TestDoFToVotes(pkBuildingInfo->GetDoFToVotes());
-						ChangeDoFToVotes(iTestDoF);
-					}
-					if(pkBuildingInfo->GetRAToVotes() > 0)
-					{
-						int iTestRA = TestRAToVotes(pkBuildingInfo->GetRAToVotes());
-						ChangeRAToVotes(iTestRA);
-					}
-					if(pkBuildingInfo->GetDPToVotes() > 0)
-					{
-						int iTestDP = TestDefensePactsToVotes(pkBuildingInfo->GetDPToVotes());
-						ChangeDefensePactsToVotes(iTestDP);
-					}
-				}
-			}
-		}
-	}
-}
-#endif
 
 //	--------------------------------------------------------------------------------
 /// Update all Golden-Age related stuff
@@ -14885,22 +13986,6 @@ void CvPlayer::incrementGreatMusiciansCreated(bool bIsFree)
 	if (bIsFree) m_iFreeGreatMusiciansCreated++;
 }
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-//	--------------------------------------------------------------------------------
-int CvPlayer::getGreatDiplomatsCreated(bool bExcludeFree) const
-{
-	int iCount = m_iGreatDiplomatsCreated;
-	if (bExcludeFree) iCount -= m_iFreeGreatDiplomatsCreated;
-	return iCount;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementGreatDiplomatsCreated(bool bIsFree)
-{
-	m_iGreatDiplomatsCreated++;
-	if (bIsFree) m_iFreeGreatDiplomatsCreated++;
-}
-#endif
 #else
 //	--------------------------------------------------------------------------------
 int CvPlayer::getGreatPeopleCreated() const
@@ -15012,19 +14097,6 @@ void CvPlayer::incrementGreatMusiciansCreated()
 	m_iGreatMusiciansCreated++;
 }
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-//	--------------------------------------------------------------------------------
-int CvPlayer::getGreatDiplomatsCreated() const
-{
-	return m_iGreatDiplomatsCreated;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementGreatDiplomatsCreated()
-{
-	m_iGreatDiplomatsCreated++;
-}
-#endif
 #endif
 
 //	--------------------------------------------------------------------------------
@@ -15110,20 +14182,6 @@ void CvPlayer::incrementAdmiralsFromFaith()
 {
 	m_iAdmiralsFromFaith++;
 }
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-//	--------------------------------------------------------------------------------
-int CvPlayer::getDiplomatsFromFaith() const
-{
-	return m_iDiplomatsFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementDiplomatsFromFaith()
-{
-	m_iDiplomatsFromFaith++;
-}
-#endif
 
 //	--------------------------------------------------------------------------------
 int CvPlayer::getEngineersFromFaith() const
@@ -15247,14 +14305,6 @@ int CvPlayer::getGreatEngineerRateModifier() const
 {
 	return m_iGreatEngineerRateModifier;
 }
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-//	--------------------------------------------------------------------------------
-int CvPlayer::getGreatDiplomatRateModifier() const
-{
-	return m_iGreatDiplomatRateModifier;
-}
-#endif
 
 //	--------------------------------------------------------------------------------
 int CvPlayer::getDomesticGreatGeneralRateModifier() const
@@ -15436,31 +14486,6 @@ void CvPlayer::DoGreatPersonExpended(UnitTypes eGreatPersonUnit)
 	}
 #endif
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if (MOD_DIPLOMACY_CITYSTATES) {
-		//Influence Gained with all CS per expend
-		int iExpendInfluence = GetGPExpendInfluence(); 
-		if(iExpendInfluence > 0)
-		{
-			for (int iMinorLoop = MAX_MAJOR_CIVS; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
-			{
-				PlayerTypes eMinorLoop = (PlayerTypes) iMinorLoop;
-				if(eMinorLoop != NO_PLAYER)
-				{
-					CvPlayer* pMinorLoop = &GET_PLAYER(eMinorLoop);
-					if(pMinorLoop->isMinorCiv() && pMinorLoop->isAlive())
-					{
-						if(GET_TEAM(pMinorLoop->getTeam()).isHasMet(getTeam()))
-						{
-							pMinorLoop->GetMinorCivAI()->ChangeFriendshipWithMajor(GetID(), iExpendInfluence, false);
-						}
-					}
-				}
-			}
-		}
-	}
-#endif
-
 #if defined(MOD_EVENTS_GREAT_PEOPLE)
 	if (MOD_EVENTS_GREAT_PEOPLE) {
 		GAMEEVENTINVOKE_HOOK(GAMEEVENT_GreatPersonExpended, GetID(), pGreatPersonUnit->GetID(), eGreatPersonUnit, pGreatPersonUnit->getX(), pGreatPersonUnit->getY());
@@ -15506,9 +14531,6 @@ void CvPlayer::recomputeGreatPeopleModifiers()
 	m_iGreatArtistRateModifier = 0;
 	m_iGreatMusicianRateModifier = 0;
 	m_iGreatMerchantRateModifier = 0;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	m_iGreatDiplomatRateModifier = 0;
-#endif
 	m_iGreatScientistRateModifier = 0;
 	m_iGreatEngineerRateModifier = 0;
 	m_iDomesticGreatGeneralRateModifier = 0;
@@ -15526,11 +14548,6 @@ void CvPlayer::recomputeGreatPeopleModifiers()
 	m_iGreatArtistRateModifier += m_pPlayerPolicies->GetNumericModifier(POLICYMOD_GREAT_ARTIST_RATE);
 	m_iGreatMusicianRateModifier += m_pPlayerPolicies->GetNumericModifier(POLICYMOD_GREAT_MUSICIAN_RATE);
 	m_iGreatMerchantRateModifier += m_pPlayerPolicies->GetNumericModifier(POLICYMOD_GREAT_MERCHANT_RATE);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if (MOD_DIPLOMACY_CITYSTATES) {
-		m_iGreatDiplomatRateModifier += m_pPlayerPolicies->GetNumericModifier(POLICYMOD_GREAT_DIPLOMAT_RATE);
-	}
-#endif
 	m_iGreatScientistRateModifier += m_pPlayerPolicies->GetNumericModifier(POLICYMOD_GREAT_SCIENTIST_RATE);
 	m_iDomesticGreatGeneralRateModifier += m_pPlayerPolicies->GetNumericModifier(POLICYMOD_DOMESTIC_GREAT_GENERAL_RATE);
 
@@ -15836,16 +14853,6 @@ void CvPlayer::DoSpawnGreatPerson(PlayerTypes eMinor)
 				incrementGreatMusiciansCreated();
 #endif
 			}
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-			else if (MOD_DIPLOMACY_CITYSTATES && pNewGreatPeople->getUnitInfo().GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_GREAT_DIPLOMAT"))
-			{
-#if defined(MOD_GLOBAL_TRULY_FREE_GP)
-				incrementGreatDiplomatsCreated(bIsFree);
-#else
-				incrementGreatDiplomatsCreated();
-#endif
-			}
-#endif
 			else
 			{
 #if defined(MOD_GLOBAL_SEPARATE_GP_COUNTERS)
@@ -18644,13 +17651,6 @@ void CvPlayer::setAlive(bool bNewValue, bool bNotify)
 						// cancel any research agreements
 						GET_TEAM(getTeam()).CancelResearchAgreement(eTheirTeam);
 						GET_TEAM(eTheirTeam).CancelResearchAgreement(getTeam());
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-						if (MOD_DIPLOMACY_CIV4_FEATURES) {
-							GET_TEAM(getTeam()).DoEndVassal(eTheirTeam, true, true);
-							GET_TEAM(eTheirTeam).DoEndVassal(getTeam(), true, true);
-						}
-#endif
 					}
 				}
 			}
@@ -18932,24 +17932,6 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 
 		else
 		{
-#if defined(MOD_EVENTS_RED_TURN)
-			if (MOD_EVENTS_RED_TURN)
-			// RED <<<<<
-			{
-				ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
-				if(pkScriptSystem)
-				{	
-					CvLuaArgsHandle args;
-
-					args->Push(GetID());
-
-					bool bResult;
-					LuaSupport::CallHook(pkScriptSystem, "PlayerEndTurnInitiated", args.get(), bResult);
-				}
-			}
-			// RED >>>>>
-#endif
-
 			CvAssertFmt(GetEndTurnBlockingType() == NO_ENDTURN_BLOCKING_TYPE, "Expecting the end-turn blocking to be NO_ENDTURN_BLOCKING_TYPE, got %d", GetEndTurnBlockingType());
 			SetEndTurnBlocking(NO_ENDTURN_BLOCKING_TYPE, -1);	// Make sure this is clear so the UI doesn't block when it is not our turn.
 
@@ -18977,24 +17959,6 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 
 			if(!isHuman() || (isHuman() && !isAlive()) || (isHuman() && gDLL->HasReceivedTurnAllComplete(GetID())) || kGame.getAIAutoPlay())
 				kGame.changeNumGameTurnActive(-1, std::string("setTurnActive() for player ") + getName());
-
-#if defined(MOD_EVENTS_RED_TURN)
-			if (MOD_EVENTS_RED_TURN)
-			// RED <<<<<
-			{
-				ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
-				if(pkScriptSystem)
-				{	
-					CvLuaArgsHandle args;
-
-					args->Push(GetID());
-
-					bool bResult;
-					LuaSupport::CallHook(pkScriptSystem, "PlayerEndTurnCompleted", args.get(), bResult);
-				}
-			}
-			// RED >>>>>
-#endif
 
 			DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_END, GetID());
 		}
@@ -19775,26 +18739,6 @@ int CvPlayer::GetScienceTimes100() const
 
 	// If we have a negative Treasury + GPT then it gets removed from Science
 	iValue += GetScienceFromBudgetDeficitTimes100();
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if (MOD_DIPLOMACY_CITYSTATES) {
-		//Science Funding Rate Boost
-		if(IsLeagueAid())
-		{
-			int iFreeScience = GetScienceFromCitiesTimes100(false) * GetScienceRateFromLeagueAid();
-			iFreeScience /= 100;
-
-			iValue += iFreeScience;
-		}
-	}
-#endif
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if (MOD_DIPLOMACY_CIV4_FEATURES) {
-		// We're a vassal of someone, we get x% of his science
-		iValue += (GetYieldPerTurnFromVassals(YIELD_SCIENCE) * 100);
-	}
-#endif
 
 	return max(iValue, 0);
 }
@@ -25333,17 +24277,6 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 #endif
 										pNewUnit->jumpToNearestValidPlot();
 									}
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-									else if (MOD_DIPLOMACY_CITYSTATES && pNewUnit->getUnitInfo().GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_GREAT_DIPLOMAT"))
-									{
-#if defined(MOD_GLOBAL_TRULY_FREE_GP)
-										incrementGreatDiplomatsCreated(MOD_GLOBAL_TRULY_FREE_GP);
-#else
-										incrementGreatDiplomatsCreated();
-#endif
-										pNewUnit->jumpToNearestValidPlot();
-									}
-#endif
 									else if(pNewUnit->IsGreatPerson())
 									{
 #if defined(MOD_GLOBAL_SEPARATE_GP_COUNTERS)
@@ -26269,30 +25202,6 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_units;
 	kStream >> m_armyAIs;
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	kStream >> m_iImprovementLeagueVotes;
-	kStream >> m_iFaithToVotes;
-	kStream >> m_iCapitalsToVotes;
-	kStream >> m_iDoFToVotes;
-	kStream >> m_iRAToVotes;
-	kStream >> m_iDefensePactsToVotes;
-	kStream >> m_iGPExpendInfluence;
-	kStream >> m_bIsLeagueAid;
-	kStream >> m_bIsLeagueScholar;
-	kStream >> m_bIsLeagueArt;
-	kStream >> m_iScienceRateFromLeague;
-	kStream >> m_iScienceRateFromLeagueAid;
-	kStream >> m_iLeagueCultureCityModifier;
-	kStream >> m_iGreatDiplomatsCreated;
-	kStream >> m_iDiplomatsFromFaith;
-	kStream >> m_iGreatDiplomatRateModifier;
-	kStream >> m_iFreeGreatDiplomatsCreated;
-#endif
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	kStream >> m_iVassalGoldMaintenanceMod;
-#endif
-
 	{
 		m_AIOperations.clear();
 		uint iSize;
@@ -26804,30 +25713,6 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_cities;
 	kStream << m_units;
 	kStream << m_armyAIs;
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	kStream << m_iImprovementLeagueVotes;
-	kStream << m_iFaithToVotes;
-	kStream << m_iCapitalsToVotes;
-	kStream << m_iDoFToVotes;
-	kStream << m_iRAToVotes;
-	kStream << m_iDefensePactsToVotes;
-	kStream << m_iGPExpendInfluence;
-	kStream << m_bIsLeagueAid;
-	kStream << m_bIsLeagueScholar;
-	kStream << m_bIsLeagueArt;
-	kStream << m_iScienceRateFromLeague;
-	kStream << m_iScienceRateFromLeagueAid;
-	kStream << m_iLeagueCultureCityModifier;
-	kStream << m_iGreatDiplomatsCreated;
-	kStream << m_iDiplomatsFromFaith;
-	kStream << m_iGreatDiplomatRateModifier;
-	kStream << m_iFreeGreatDiplomatsCreated;
-#endif
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	kStream << m_iVassalGoldMaintenanceMod;
-#endif
 
 	{
 		uint iSize = m_AIOperations.size();
@@ -27829,26 +26714,6 @@ int CvPlayer::GetNumPuppetCities() const
 
 	return iNum;
 }
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-//	--------------------------------------------------------------------------------
-// How many other Capital Cities does this player own
-int CvPlayer::GetNumCapitalCities() const
-{
-	int iNum = 0;
-
-	const CvCity* pLoopCity;
-	int iLoop;
-	for(pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
-	{
-		if(pLoopCity->IsOriginalMajorCapital() && !pLoopCity->isCapital())
-		{
-			iNum++;
-		}
-	}
-
-	return iNum;
-}
-#endif
 //	--------------------------------------------------------------------------------
 // How many Cities does this player have for policy/tech cost purposes?
 int CvPlayer::GetMaxEffectiveCities(bool bIncludePuppets)
@@ -28371,12 +27236,6 @@ bool CvPlayer::IsAllowedToTradeWith(PlayerTypes eOtherPlayer)
 		return false;
 	}
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if (MOD_DIPLOMACY_CITYSTATES && GC.getGame().GetGameLeagues()->IsIdeologyEmbargoed(GetID(), eOtherPlayer) && eOtherPlayer != m_eID)
-	{
-		return false;
-	}
-#endif
 	return true;
 }
 
@@ -28985,9 +27844,6 @@ void CvPlayer::doArmySize()
 		        (UnitAITypes)iI == UNITAI_SCIENTIST || (UnitAITypes)iI == UNITAI_MERCHANT || (UnitAITypes)iI == UNITAI_WORKER_SEA ||
 		        (UnitAITypes)iI == UNITAI_SPACESHIP_PART || (UnitAITypes)iI == UNITAI_TREASURE || (UnitAITypes)iI == UNITAI_PROPHET ||
 		        (UnitAITypes)iI == UNITAI_MISSIONARY || (UnitAITypes)iI == UNITAI_INQUISITOR || (UnitAITypes)iI == UNITAI_ADMIRAL ||
-#if defined(MOD_DIPLOMACY_CITYSTATES) 
-				(MOD_DIPLOMACY_CITYSTATES && ((UnitAITypes)iI == UNITAI_DIPLOMAT || (UnitAITypes)iI == UNITAI_MESSENGER)) ||
-#endif
 				(UnitAITypes)iI == UNITAI_WRITER || (UnitAITypes)iI == UNITAI_MUSICIAN)
 		{
 			continue;
@@ -29717,284 +28573,5 @@ int CvPlayer::CountAllWorkedTerrain(TerrainTypes iTerrainType)
 	}
 	
 	return iCount;
-}
-#endif
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-//	--------------------------------------------------------------------------------
-///	Get the amount of Happiness we're getting from our vassals
-int CvPlayer::GetHappinessFromVassals() const
-{
-	int iHappiness = 0;
-
-	PlayerTypes ePlayer;
-	for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-	{
-		ePlayer = (PlayerTypes) iPlayerLoop;
-		if(GetID() != ePlayer && GET_PLAYER(ePlayer).isAlive())
-		{
-			iHappiness += GetHappinessFromVassal(ePlayer);
-		}
-	}
-
-	return iHappiness;
-}
-
-//	--------------------------------------------------------------------------------
-/// Happiness from a Vassal
-int CvPlayer::GetHappinessFromVassal(PlayerTypes ePlayer) const
-{
-	int iAmount = 0;
-
-	if(GET_TEAM(GET_PLAYER(ePlayer).getTeam()).IsVassal(getTeam()))
-	{
-		iAmount += GET_PLAYER(ePlayer).GetExcessHappiness() * GC.getVASSAL_HAPPINESS_PERCENT();
-		iAmount /= 100;
-	}
-	return iAmount;
-}
-
-//	--------------------------------------------------------------------------------
-/// Special bonus for having a vassal
-int CvPlayer::GetYieldPerTurnFromVassals(YieldTypes eYield) const
-{
-	int iFreeYield = 0;
-	int iYield = 0;
-	PlayerTypes ePlayer;
-	for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-	{
-		ePlayer = (PlayerTypes) iPlayerLoop;
-		
-		// ePlayer vassal of ours?
-		if(GET_TEAM(GET_PLAYER(ePlayer).getTeam()).IsVassal(getTeam()))
-		{
-			iFreeYield = 0;
-			switch(eYield)
-			{
-				// We now collect gold from taxes
-				case YIELD_GOLD:
-					//iFreeYield = GET_PLAYER(ePlayer).calculateGoldRate();
-					//iFreeYield *= /*33*/GC.getVASSALAGE_FREE_YIELD_FROM_VASSAL_PERCENT();
-					//iFreeYield /= 100;
-					break;
-
-				case YIELD_CULTURE:
-					if (eYield == YIELD_CULTURE && (GC.getGame().isOption(GAMEOPTION_NO_POLICIES)))
-					{
-						return 0;
-					}
-					iFreeYield = GET_PLAYER(ePlayer).GetTotalJONSCulturePerTurn();
-					iFreeYield *= /*33*/GC.getVASSALAGE_FREE_YIELD_FROM_VASSAL_PERCENT();
-					iFreeYield /= 100;
-
-					break;
-
-				case YIELD_FAITH:
-					if (eYield == YIELD_FAITH && (GC.getGame().isOption(GAMEOPTION_NO_RELIGION)))
-					{
-						return 0;
-					}
-					iFreeYield = GET_PLAYER(ePlayer).GetTotalFaithPerTurn();
-					iFreeYield *= /*33*/GC.getVASSALAGE_FREE_YIELD_FROM_VASSAL_PERCENT();
-					iFreeYield /= 100;
-					break;
-				case YIELD_SCIENCE:
-					if (eYield == YIELD_SCIENCE && (GC.getGame().isOption(GAMEOPTION_NO_SCIENCE)))
-					{
-						return 0;
-					}
-					iFreeYield = GET_PLAYER(ePlayer).GetScience();
-					iFreeYield *= /*33*/GC.getVASSALAGE_FREE_YIELD_FROM_VASSAL_PERCENT();
-					iFreeYield /= 100;
-					break;
-			}
-
-			iYield += iFreeYield;
-		}
-	}
-	return iYield;
-}
-
-//	--------------------------------------------------------------------------------
-// Score from Vassals: 50% percent
-int CvPlayer::GetScoreFromVassals() const
-{
-	int iScore = 0;
-	PlayerTypes ePlayer;
-	for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-	{
-		ePlayer = (PlayerTypes) iPlayerLoop;
-		iScore += GetScoreFromVassal(ePlayer);
-	}
-
-	return iScore;
-}
-
-//	--------------------------------------------------------------------------------
-// Score from vassal
-int CvPlayer::GetScoreFromVassal(PlayerTypes ePlayer) const
-{
-	int iScore = 0;
-
-	if(GET_TEAM(GET_PLAYER(ePlayer).getTeam()).IsVassal(getTeam()))
-	{
-		iScore = GET_PLAYER(ePlayer).GetScoreFromLand() + GET_PLAYER(ePlayer).GetScoreFromPopulation();
-		iScore *= /*20*/ GC.getVASSAL_SCORE_PERCENT();
-		iScore /= 100;
-	}
-
-	return iScore;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::GetVassalGoldMaintenanceMod() const
-{
-	return m_iVassalGoldMaintenanceMod;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::SetVassalGoldMaintenanceMod(int iValue)
-{
-	m_iVassalGoldMaintenanceMod = iValue;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::ChangeVassalGoldMaintenanceMod(int iChange)
-{
-	if(iChange != 0)
-	{
-		m_iVassalGoldMaintenanceMod = (m_iVassalGoldMaintenanceMod + iChange);
-	}
-}
-
-//	--------------------------------------------------------------------------------
-// Generate tooltip displayed for whether or not our vassal can declare independence from us
-CvString CvPlayer::GetVassalIndependenceTooltipAsMaster(PlayerTypes ePlayer) const
-{
-	CvTeam& kVassalTeam = GET_TEAM(GET_PLAYER(ePlayer).getTeam());
-
-	TeamTypes eMaster = kVassalTeam.GetMaster();
-	if(eMaster != getTeam())
-		return "";
-
-	CvTeam& kMasterTeam = GET_TEAM(eMaster);
-	
-	CvString szTooltip = "";
-	
-	szTooltip += GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_TT") + "[NEWLINE][NEWLINE]";
-
-	bool bVoluntary = kVassalTeam.IsVoluntaryVassal(getTeam());
-	bool bSatisfied = false;
-
-	int iMinimumVassalTurns = bVoluntary ? GC.getGame().getGameSpeedInfo().getMinimumVoluntaryVassalTurns() : GC.getGame().getGameSpeedInfo().getMinimumVassalTurns();
-
-	int iNumTurnsIsVassal = kVassalTeam.GetNumTurnsIsVassal();
-
-	bSatisfied = (iNumTurnsIsVassal >= iMinimumVassalTurns);
-	szTooltip += (bSatisfied ? "[COLOR_POSITIVE_TEXT]" : "[COLOR_GREY]") + GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_TURNS_TT", iMinimumVassalTurns) + "[ENDCOLOR][NEWLINE]";
-	
-	// Rules only for capitulated vassals
-	if(!bVoluntary)
-	{
-		CvString szTemp = "";
-		bool bAnySatisfied = false;
-
-		int iNumCitiesWhenVassalMade = kVassalTeam.getNumCitiesWhenVassalMade();
-		int iPopulationWhenVassalMade = kVassalTeam.getTotalPopulationWhenVassalMade();
-
-		int iCityPercent = 0;
-		int iPopPercent = 0;
-
-		iCityPercent = kVassalTeam.getNumCities() * 100 / std::max(1, iNumCitiesWhenVassalMade);
-		iPopPercent = kVassalTeam.getTotalPopulation() * 100 / std::max(1, iPopulationWhenVassalMade);
-
-		bSatisfied = iCityPercent <= GC.getVASSALAGE_VASSAL_LOST_CITIES_THRESHOLD();
-		bAnySatisfied = bAnySatisfied || bSatisfied;
-		szTemp += (bSatisfied ? "[COLOR_POSITIVE_TEXT]" : "[COLOR_GREY]") + GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_CITY_PERCENT_TT", GC.getVASSALAGE_VASSAL_LOST_CITIES_THRESHOLD(),iCityPercent) + "[ENDCOLOR][NEWLINE]";
-
-		bSatisfied = iPopPercent >= GC.getVASSALAGE_VASSAL_POPULATION_THRESHOLD();
-		bAnySatisfied = bAnySatisfied || bSatisfied;
-		szTemp += (bSatisfied ? "[COLOR_POSITIVE_TEXT]" : "[COLOR_GREY]") + GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_CITY_PERCENT_TT", GC.getVASSALAGE_VASSAL_POPULATION_THRESHOLD(), iPopPercent) + "[ENDCOLOR][NEWLINE]";
-		
-		int iMasterCityPercent = 0;
-		int iMasterPopPercent = 0;
-
-		iMasterCityPercent = kVassalTeam.getNumCities() * 100 / std::max(1, kMasterTeam.getNumCities());
-		iMasterPopPercent = kVassalTeam.getTotalPopulation() * 100 / std::max(1, kMasterTeam.getTotalPopulation());
-
-		bSatisfied = iMasterCityPercent >= GC.getVASSALAGE_VASSAL_MASTER_CITY_PERCENT_THRESHOLD() && iMasterPopPercent >= GC.getVASSALAGE_VASSAL_MASTER_POP_PERCENT_THRESHOLD();
-		bAnySatisfied = bAnySatisfied || bSatisfied;
-		szTemp += (bSatisfied ? "[COLOR_POSITIVE_TEXT]" : "[COLOR_GREY]") + GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_MASTER_PERCENT_TT", GC.getVASSALAGE_VASSAL_MASTER_CITY_PERCENT_THRESHOLD(), GC.getVASSALAGE_VASSAL_MASTER_POP_PERCENT_THRESHOLD(), iMasterCityPercent, iMasterPopPercent) + "[ENDCOLOR][NEWLINE]";
-
-		szTooltip += (bAnySatisfied ? "[COLOR_POSITIVE_TEXT]" : "[COLOR_GREY]") + GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_OR_HEADER_TT") + "[NEWLINE]";
-		szTooltip += szTemp;
-	}
-
-	return szTooltip;
-}
-
-// Generate tooltip displayed for whether or not we can declare independence from master
-CvString CvPlayer::GetVassalIndependenceTooltipAsVassal() const
-{
-	CvTeam& kVassalTeam = GET_TEAM(getTeam());
-
-	TeamTypes eMaster = kVassalTeam.GetMaster();
-	if(eMaster == NO_TEAM)
-		return "";
-
-	CvTeam& kMasterTeam = GET_TEAM(eMaster);
-	
-	CvString szTooltip = "";
-	
-	szTooltip += GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_MASTER_TT") + "[NEWLINE][NEWLINE]";
-
-	bool bVoluntary = kVassalTeam.IsVoluntaryVassal(getTeam());
-	bool bSatisfied = false;
-
-	int iMinimumVassalTurns = bVoluntary ? GC.getGame().getGameSpeedInfo().getMinimumVoluntaryVassalTurns() : GC.getGame().getGameSpeedInfo().getMinimumVassalTurns();
-
-	int iNumTurnsIsVassal = kVassalTeam.GetNumTurnsIsVassal();
-
-	bSatisfied = (iNumTurnsIsVassal >= iMinimumVassalTurns);
-	szTooltip += (bSatisfied ? "[COLOR_POSITIVE_TEXT]" : "[COLOR_GREY]") + GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_TURNS_TT", iMinimumVassalTurns) + "[ENDCOLOR][NEWLINE]";
-	
-	// Rules only for capitulated vassals
-	if(!bVoluntary)
-	{
-		CvString szTemp = "";
-		bool bAnySatisfied = false;
-
-		int iNumCitiesWhenVassalMade = kVassalTeam.getNumCitiesWhenVassalMade();
-		int iPopulationWhenVassalMade = kVassalTeam.getTotalPopulationWhenVassalMade();
-
-		int iCityPercent = 0;
-		int iPopPercent = 0;
-
-		iCityPercent = kVassalTeam.getNumCities() * 100 / std::max(1, iNumCitiesWhenVassalMade);
-		iPopPercent = kVassalTeam.getTotalPopulation() * 100 / std::max(1, iPopulationWhenVassalMade);
-
-		bSatisfied = iCityPercent <= GC.getVASSALAGE_VASSAL_LOST_CITIES_THRESHOLD();
-		bAnySatisfied = bAnySatisfied || bSatisfied;
-		szTemp += (bSatisfied ? "[COLOR_POSITIVE_TEXT]" : "[COLOR_GREY]") + GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_CITY_PERCENT_TT", GC.getVASSALAGE_VASSAL_LOST_CITIES_THRESHOLD(),iCityPercent) + "[ENDCOLOR][NEWLINE]";
-
-		bSatisfied = iPopPercent >= GC.getVASSALAGE_VASSAL_POPULATION_THRESHOLD();
-		bAnySatisfied = bAnySatisfied || bSatisfied;
-		szTemp += (bSatisfied ? "[COLOR_POSITIVE_TEXT]" : "[COLOR_GREY]") + GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_CITY_PERCENT_TT", GC.getVASSALAGE_VASSAL_POPULATION_THRESHOLD(), iPopPercent) + "[ENDCOLOR][NEWLINE]";
-		
-		int iMasterCityPercent = 0;
-		int iMasterPopPercent = 0;
-
-		iMasterCityPercent = kVassalTeam.getNumCities() * 100 / std::max(1, kMasterTeam.getNumCities());
-		iMasterPopPercent = kVassalTeam.getTotalPopulation() * 100 / std::max(1, kMasterTeam.getTotalPopulation());
-
-		bSatisfied = iMasterCityPercent >= GC.getVASSALAGE_VASSAL_MASTER_CITY_PERCENT_THRESHOLD() && iMasterPopPercent >= GC.getVASSALAGE_VASSAL_MASTER_POP_PERCENT_THRESHOLD();
-		bAnySatisfied = bAnySatisfied || bSatisfied;
-		szTemp += (bSatisfied ? "[COLOR_POSITIVE_TEXT]" : "[COLOR_GREY]") + GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_MASTER_PERCENT_TT", GC.getVASSALAGE_VASSAL_MASTER_CITY_PERCENT_THRESHOLD(), GC.getVASSALAGE_VASSAL_MASTER_POP_PERCENT_THRESHOLD(), iMasterCityPercent, iMasterPopPercent) + "[ENDCOLOR][NEWLINE]";
-
-		szTooltip += (bAnySatisfied ? "[COLOR_POSITIVE_TEXT]" : "[COLOR_GREY]") + GetLocalizedText("TXT_KEY_VO_INDEPENDENCE_POSSIBLE_OR_HEADER_TT") + "[NEWLINE]";
-		szTooltip += szTemp;
-	}
-
-	return szTooltip;
 }
 #endif

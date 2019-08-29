@@ -2445,12 +2445,6 @@ int CvGameReligions::GetAdjacentCityReligiousPressure (ReligionTypes eReligion, 
 			iPressure *= (100 + iModifier);
 			iPressure /= 100;
 		}
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		if(MOD_DIPLOMACY_CIV4_FEATURES && GET_TEAM(GET_PLAYER(pToCity->getOwner()).getTeam()).IsVassal(GET_PLAYER(pFromCity->getOwner()).getTeam()))
-		{
-			iPressure *= 2;
-		}
-#endif
 	}
 
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
@@ -7240,25 +7234,6 @@ UnitTypes CvReligionAI::GetDesiredFaithGreatPerson() const
 						iScore = 1000 / (m_pPlayer->GetNumUnitsWithUnitAI(UNITAI_INQUISITOR) + 1);
 					}
 				}
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-				else if (MOD_DIPLOMACY_CITYSTATES && eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_DIPLOMAT"))
-				{
-					EconomicAIStrategyTypes eStrategy = (EconomicAIStrategyTypes) GC.getInfoTypeForString("ECONOMICAISTRATEGY_NEED_DIPLOMATS_CRITICAL");
-					if (eStrategy != NO_ECONOMICAISTRATEGY && m_pPlayer->GetEconomicAI()->IsUsingStrategy(eStrategy))
-					{
-						iScore = 800;
-					}
-					if (eVictoryStrategy == (AIGrandStrategyTypes) GC.getInfoTypeForString("AIGRANDSTRATEGY_DIPLOMACY"))
-					{
-						iScore = 2000;
-					}
-					else
-					{
-						iScore = 400;
-					}
-					iScore /= (1+ m_pPlayer->getDiplomatsFromFaith() + m_pPlayer->GetNumUnitsWithUnitAI(UNITAI_DIPLOMAT));
-				}
-#endif
 
 				if (iScore > iBestScore)
 				{

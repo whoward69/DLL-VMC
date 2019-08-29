@@ -128,15 +128,6 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iXBuiltTriggersIdeologyChoice(0),
 	m_iGreatScientistBeakerModifier(0),
 	m_iExtraLeagueVotes(0),
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	m_iSingleLeagueVotes(0),
-	m_iFaithToVotesBase(0),
-	m_iCapitalsToVotesBase(0),
-	m_iDoFToVotesBase(0),
-	m_iRAToVotesBase(0),
-	m_iDPToVotesBase(0),
-	m_iGPExpendInfluenceBase(0),
-#endif
 	m_iPreferredDisplayPosition(0),
 	m_iPortraitIndex(-1),
 	m_bTeamShare(false),
@@ -182,9 +173,6 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_piRiverPlotYieldChange(NULL),
 	m_piLakePlotYieldChange(NULL),
 	m_piSeaResourceYieldChange(NULL),
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	m_piGrowthExtraYield(NULL),
-#endif
 	m_piYieldChange(NULL),
 	m_piYieldChangePerPop(NULL),
 	m_piYieldChangePerReligion(NULL),
@@ -219,10 +207,6 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_paiBuildingClassHappiness(NULL),
 	m_paThemingBonusInfo(NULL),
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_bVassalLevyEra(false),
-#endif
-
 	m_iNumThemingBonuses(0)
 {
 }
@@ -241,9 +225,6 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	SAFE_DELETE_ARRAY(m_piRiverPlotYieldChange);
 	SAFE_DELETE_ARRAY(m_piLakePlotYieldChange);
 	SAFE_DELETE_ARRAY(m_piSeaResourceYieldChange);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	SAFE_DELETE_ARRAY(m_piGrowthExtraYield);
-#endif
 	SAFE_DELETE_ARRAY(m_piYieldChange);
 	SAFE_DELETE_ARRAY(m_piYieldChangePerPop);
 	SAFE_DELETE_ARRAY(m_piYieldChangePerReligion);
@@ -412,26 +393,8 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iXBuiltTriggersIdeologyChoice = kResults.GetInt("XBuiltTriggersIdeologyChoice");
 	m_iGreatScientistBeakerModifier = kResults.GetInt("GreatScientistBeakerModifier");
 	m_iExtraLeagueVotes = kResults.GetInt("ExtraLeagueVotes");
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if (MOD_DIPLOMACY_CITYSTATES) {
-		m_iSingleLeagueVotes = kResults.GetInt("SingleLeagueVotes");
-		m_iFaithToVotesBase = kResults.GetInt("FaithToVotes");
-		m_iCapitalsToVotesBase = kResults.GetInt("CapitalsToVotes");
-		m_iDoFToVotesBase = kResults.GetInt("DoFToVotes");
-		m_iRAToVotesBase = kResults.GetInt("RAToVotes");
-		m_iDPToVotesBase = kResults.GetInt("DPToVotes");
-		m_iGPExpendInfluenceBase = kResults.GetInt("GPExpendInfluence");
-	}
-#endif
 	m_iPreferredDisplayPosition = kResults.GetInt("DisplayPosition");
 	m_iPortraitIndex = kResults.GetInt("PortraitIndex");
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if(MOD_DIPLOMACY_CIV4_FEATURES)
-	{
-		m_bVassalLevyEra = kResults.GetBool("VassalLevyEra");
-	}
-#endif
 
 	m_bArtInfoCulturalVariation = kResults.GetBool("ArtInfoCulturalVariation");
 	m_bArtInfoEraVariation = kResults.GetBool("ArtInfoEraVariation");
@@ -527,11 +490,6 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	kUtility.SetYields(m_piRiverPlotYieldChange, "Building_RiverPlotYieldChanges", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piLakePlotYieldChange, "Building_LakePlotYieldChanges", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piSeaResourceYieldChange, "Building_SeaResourceYieldChanges", "BuildingType", szBuildingType);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if (MOD_DIPLOMACY_CITYSTATES) {
-		kUtility.SetYields(m_piGrowthExtraYield, "Building_GrowthExtraYield", "BuildingType", szBuildingType);
-	}
-#endif
 	kUtility.SetYields(m_piYieldChange, "Building_YieldChanges", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldChangePerPop, "Building_YieldChangesPerPop", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldChangePerReligion, "Building_YieldChangesPerReligion", "BuildingType", szBuildingType);
@@ -964,13 +922,6 @@ int CvBuildingEntry::GetProductionCost() const
 {
 	return m_iProductionCost;
 }
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-bool CvBuildingEntry::IsVassalLevyEra() const
-{
-	return m_bVassalLevyEra;
-}
-#endif
 
 /// Faith to construct the unit (as a percentage of cost of next Great Prophet)
 int CvBuildingEntry::GetFaithCost() const
@@ -1466,43 +1417,6 @@ int CvBuildingEntry::GetExtraLeagueVotes() const
 {
 	return m_iExtraLeagueVotes;
 }
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-int CvBuildingEntry::GetSingleVotes() const
-{
-	return m_iSingleLeagueVotes;
-}
-/// Extra votes from faith generation
-int CvBuildingEntry::GetFaithToVotes() const
-{
-	return m_iFaithToVotesBase;
-}
-/// Extra votes from captured capitals
-int CvBuildingEntry::GetCapitalsToVotes() const
-{
-	return m_iCapitalsToVotesBase;
-}
-/// Extra votes from DoFs
-int CvBuildingEntry::GetDoFToVotes() const
-{
-	return m_iDoFToVotesBase;
-}
-
-/// Extra votes from Research Agreements
-int CvBuildingEntry::GetRAToVotes() const
-{
-	return m_iRAToVotesBase;
-}
-/// Extra votes from Defense Pacts
-int CvBuildingEntry::GetDPToVotes() const
-{
-	return m_iDPToVotesBase;
-}
-/// Extra votes from Research Agreements
-int CvBuildingEntry::GetGPExpendInfluence() const
-{
-	return m_iGPExpendInfluenceBase;
-}
-#endif
 
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 /// Modifier to chance of conversion against this city
@@ -1783,22 +1697,6 @@ CvString CvBuildingEntry::GetThemingBonusHelp() const
 }
 
 // ARRAYS
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-/// Change to yield by type
-int CvBuildingEntry::GetGrowthExtraYield(int i) const
-{
-	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piGrowthExtraYield ? m_piGrowthExtraYield[i] : -1;
-}
-
-/// Array of yield changes
-int* CvBuildingEntry::GetGrowthExtraYieldArray() const
-{
-	return m_piGrowthExtraYield;
-}
-#endif
 
 /// Change to yield by type
 int CvBuildingEntry::GetYieldChange(int i) const

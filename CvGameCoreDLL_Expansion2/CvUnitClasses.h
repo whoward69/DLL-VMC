@@ -61,9 +61,6 @@ public:
 	bool IsRushBuilding() const;
 	int GetBaseGold() const;
 	int GetNumGoldPerEra() const;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int GetNumInfPerEra() const;
-#endif
 	bool IsSpreadReligion() const;
 	int GetReligionSpreads() const;
 	int GetReligiousStrength() const;
@@ -224,9 +221,6 @@ private:
 	bool m_bRushBuilding;
 	int m_iBaseGold;
 	int m_iNumGoldPerEra;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int m_iNumInfPerEra;
-#endif
 	bool m_bSpreadReligion;
 	int m_iReligionSpreads;
 	int m_iReligiousStrength;

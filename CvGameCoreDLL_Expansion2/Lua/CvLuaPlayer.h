@@ -461,12 +461,6 @@ protected:
 	static int lGetGreatScientistRateModifier(lua_State* L);
 	static int lGetGreatMerchantRateModifier(lua_State* L);
 	static int lGetGreatEngineerRateModifier(lua_State* L);
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
-	LUAAPIEXTN(GetGreatDiplomatRateModifier, int);
-	LUAAPIEXTN(GetScienceRateFromMinorAllies, int);
-	LUAAPIEXTN(GetScienceRateFromLeagueAid, int);
-	LUAAPIEXTN(GetLeagueCultureCityModifier, int);
-#endif
 
 	static int lGetPolicyGreatPeopleRateModifier(lua_State* L);
 	static int lGetPolicyGreatWriterRateModifier(lua_State* L);
@@ -475,9 +469,6 @@ protected:
 	static int lGetPolicyGreatScientistRateModifier(lua_State* L);
 	static int lGetPolicyGreatMerchantRateModifier(lua_State* L);
 	static int lGetPolicyGreatEngineerRateModifier(lua_State* L);
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
-	LUAAPIEXTN(GetPolicyGreatDiplomatRateModifier, int);
-#endif
 
 	static int lGetProductionModifier(lua_State* L);
 	static int lGetUnitProductionModifier(lua_State* L);
@@ -1098,11 +1089,6 @@ protected:
 	static int lGetWarmongerPreviewString(lua_State* L);
 	static int lGetLiberationPreviewString(lua_State* L);
 
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CITYSTATES)
-	LUAAPIEXTN(GetJerk, int);
-	LUAAPIEXTN(IsNoAlly, bool);
-	LUAAPIEXTN(GetPermanentAlly, int);
-#endif
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(AddMessage, void, sMessage);
@@ -1176,31 +1162,6 @@ protected:
 	LUAAPIEXTN(IsActiveMilitaryStrategy, bool, iStrategy);
 	LUAAPIEXTN(ActivateMilitaryStrategy, void, iStrategy);
 	LUAAPIEXTN(DeactivateMilitaryStrategy, void, iStrategy);
-#endif
-
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	static int lGetVassalGoldMaintenance(lua_State* L);
-	static int lIsVassalageAcceptable(lua_State* L);
-	static int lGetYieldPerTurnFromVassals(lua_State* L);
-	static int lGetHappinessFromVassals(lua_State* L);
-	static int lGetScoreFromVassals(lua_State* L);
-	static int lGetMilitaryAggressivePosture(lua_State* L);
-	static int lMoveRequestTooSoon(lua_State* L);
-	static int lGetPlayerMoveTroopsRequestCounter(lua_State* L);
-	static int lGetExpensePerTurnFromVassalTaxes(lua_State* L);
-	static int lGetMyShareOfVassalTaxes(lua_State* L);
-	static int lGetVassalTaxContribution(lua_State* L);
-	static int lGetVassalScore(lua_State* L);
-	static int lGetVassalTreatedScore(lua_State* L);
-	static int lGetVassalDemandScore(lua_State* L);
-	static int lGetVassalTaxScore(lua_State* L);
-	static int lGetVassalProtectScore(lua_State* L);
-	static int lGetVassalFailedProtectScore(lua_State* L);
-	static int lGetVassalTreatmentLevel(lua_State* L);
-	static int lGetVassalTreatmentToolTip(lua_State* L);
-	static int lGetVassalIndependenceTooltipAsMaster(lua_State* L);
-	static int lGetVassalIndependenceTooltipAsVassal(lua_State* L);
-	static int lGetMajorityReligion(lua_State* L);	// from CPP
 #endif
 };
 

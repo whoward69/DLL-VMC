@@ -72,9 +72,6 @@ CvTechEntry::CvTechEntry(void):
 	m_piFlavorValue(NULL),
 	m_piPrereqOrTechs(NULL),
 	m_piPrereqAndTechs(NULL),
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	m_bVassalageTradingAllowed(false),
-#endif
 	m_pabFreePromotion(NULL)
 {
 }
@@ -142,12 +139,6 @@ bool CvTechEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	m_bWaterWork = kResults.GetBool("WaterWork");
 	m_iGridX = kResults.GetInt("GridX");
 	m_iGridY = kResults.GetInt("GridY");
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	if (MOD_DIPLOMACY_CIV4_FEATURES) {
-		m_bVassalageTradingAllowed = kResults.GetBool("VassalageTradingAllowed");
-	}
-#endif
 
 	//References
 	const char* szTextVal = NULL;
@@ -2307,11 +2298,3 @@ int CvTeamTechs::GetMaxResearchOverflow(TechTypes eTech, PlayerTypes ePlayer) co
 
 	return iReturnValue;
 }
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-/// Can you permit vassalage to be traded?
-bool CvTechEntry::IsVassalageTradingAllowed() const
-{
-	return m_bVassalageTradingAllowed;
-}
-#endif

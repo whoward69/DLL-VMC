@@ -38,11 +38,6 @@ enum TradeableItems
     TRADE_ITEM_ALLOW_EMBASSY,
 	TRADE_ITEM_DECLARATION_OF_FRIENDSHIP,	// Only "traded" between human players
 	TRADE_ITEM_VOTE_COMMITMENT,
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	TRADE_ITEM_TECHS,
-	TRADE_ITEM_VASSALAGE,
-	TRADE_ITEM_VASSALAGE_REVOKE,
-#endif
     NUM_TRADEABLE_ITEMS,
 };
 FDataStream& operator>>(FDataStream&, TradeableItems&);
@@ -197,18 +192,6 @@ public:
 	void AddThirdPartyEmbargo(PlayerTypes eFrom, PlayerTypes eThirdParty, int iDuration);
 	void AddDeclarationOfFriendship(PlayerTypes eFrom);
 	void AddVoteCommitment(PlayerTypes eFrom, int iResolutionID, int iVoteChoice, int iNumVotes, bool bRepeal);
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	void AddTechTrade(PlayerTypes eFrom, TechTypes eTech);
-	void AddVassalageTrade(PlayerTypes eFrom);
-	void AddRevokeVassalageTrade(PlayerTypes eFrom);
-
-	void RemoveTechTrade(TechTypes eTech);
-
-	bool IsMapTrade(PlayerTypes eFrom);
-	bool IsTechTrade(PlayerTypes eFrom, TechTypes eTech);
-	bool IsVassalageTrade(PlayerTypes eFrom);
-	bool IsRevokeVassalageTrade(PlayerTypes eFrom);
-#endif
 
 	int GetGoldTrade(PlayerTypes eFrom);
 	bool ChangeGoldTrade(PlayerTypes eFrom, int iNewAmount);

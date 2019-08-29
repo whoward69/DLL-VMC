@@ -207,10 +207,6 @@ public:
 
 	bool HasBarbarianCamp();
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	bool HasDig();
-#endif	
-
 	bool isVisible(TeamTypes eTeam, bool bDebug) const
 	{
 		if(bDebug && GC.getGame().isDebugMode())
@@ -585,10 +581,6 @@ public:
 	ImprovementTypes getImprovementType() const;
 	ImprovementTypes getImprovementTypeNeededToImproveResource(PlayerTypes ePlayer = NO_PLAYER, bool bTestPlotOwner = true);
 	void setImprovementType(ImprovementTypes eNewValue, PlayerTypes eBuilder = NO_PLAYER);
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	bool IsImprovementEmbassy() const;
-	void SetImprovementEmbassy(bool bEmbassy);
-#endif
 	bool IsImprovementPillaged() const;
 #if defined(MOD_EVENTS_TILE_IMPROVEMENTS)
 	void SetImprovementPillaged(bool bPillaged, bool bEvents = true);
@@ -632,11 +624,6 @@ public:
 
 	PlayerTypes GetPlayerThatClearedBarbCampHere() const;
 	void SetPlayerThatClearedBarbCampHere(PlayerTypes eNewValue);
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	PlayerTypes GetPlayerThatClearedDigHere() const;
-	void SetPlayerThatClearedDigHere(PlayerTypes eNewValue);
-#endif
 
 	CvCity* GetResourceLinkedCity() const;
 	void SetResourceLinkedCity(const CvCity* pNewValue);
@@ -1025,9 +1012,6 @@ protected:
 	char /*PlayerTypes*/ m_ePlayerResponsibleForImprovement;
 	char /*PlayerTypes*/ m_ePlayerResponsibleForRoute;
 	char /*PlayerTypes*/ m_ePlayerThatClearedBarbCampHere;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	char /*PlayerTypes*/ m_ePlayerThatClearedDigHere;
-#endif
 	char /*RouteTypes*/ m_eRouteType;
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	short m_eUnitIncrement;
@@ -1046,9 +1030,6 @@ protected:
 	char m_cContinentType;
 	char m_cRiverCrossing;	// bit field
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	bool m_bImprovementEmbassy:1;
-#endif
 	bool m_bImprovementPillaged:1;
 	bool m_bRoutePillaged:1;
 	bool m_bStartingPlot:1;

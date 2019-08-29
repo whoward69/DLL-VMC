@@ -193,9 +193,6 @@ public:
 	/////////////////////////////////////////////////////////
 
 	void DoMakePeaceWithMinors();
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	void DoMakePeaceWithVassals();
-#endif
 	void DoUpdatePeaceTreatyWillingness();
 
 	bool IsWillingToMakePeaceWithHuman(PlayerTypes ePlayer);
@@ -763,10 +760,6 @@ public:
 	void ChangeDoFCounter(PlayerTypes ePlayer, int iChange);
 
 	int GetNumDoF();
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	int GetNumRA();
-	int GetNumDefensePacts();
-#endif
 
 	bool IsDenounceFriendAcceptable(PlayerTypes ePlayer);
 
@@ -807,152 +800,6 @@ public:
 	bool IsFriendDeclaredWarOnUs(PlayerTypes ePlayer) const;	// They declared war on us while we were friends!
 	void SetFriendDeclaredWarOnUs(PlayerTypes ePlayer, bool bValue);
 	int GetWeDeclaredWarOnFriendCount();
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	// Contact Statements
-	void DoMapsOffer(PlayerTypes ePlayer, DiploStatementTypes& eStatement, CvDeal* pDeal);
-	void DoTechOffer(PlayerTypes ePlayer, DiploStatementTypes& eStatement, CvDeal* pDeal);
-	void DoGenerousOffer(PlayerTypes ePlayer, DiploStatementTypes& eStatement, CvDeal* pDeal);
-
-	bool IsOfferingGift(PlayerTypes ePlayer) const;	// We're offering a gift!
-	void SetOfferingGift(PlayerTypes ePlayer, bool bValue);
-
-	bool IsOfferedGift(PlayerTypes ePlayer) const;	// We offered a gift!
-	void SetOfferedGift(PlayerTypes ePlayer, bool bValue);
-
-	// Requests
-	bool IsTechRequest(PlayerTypes ePlayer, CvDeal* pDeal, int& iWeightBias);
-
-	bool WantsMapsFromPlayer(PlayerTypes ePlayer);
-
-	// Offers
-	bool IsMakeGenerousOffer(PlayerTypes ePlayer, CvDeal* pDeal, bool& bRandPassed);
-	bool IsGoldGenerousOffer(PlayerTypes ePlayer, CvDeal* pDeal);
-	bool IsLuxuryGenerousOffer(PlayerTypes ePlayer, CvDeal* pDeal);
-	bool IsTechGenerousOffer(PlayerTypes ePlayer, CvDeal* pDeal);
-
-	// Sharing Opinion
-	bool IsShareOpinionAcceptable(PlayerTypes ePlayer);
-	bool IsTooEarlyForShareOpinion(PlayerTypes ePlayer);
-	bool IsShareOpinionTooSoon(PlayerTypes ePlayer) const;
-	
-	bool IsShareOpinionAccepted(PlayerTypes ePlayer) const;
-	void SetShareOpinionAccepted(PlayerTypes ePlayer, bool bValue);
-
-	short GetShareOpinionCounter(PlayerTypes ePlayer) const;
-	void SetShareOpinionCounter(PlayerTypes ePlayer, int iValue);
-	void ChangeShareOpinionCounter(PlayerTypes ePlayer, int iChange);
-
-	// Help Request
-	void DoHelpRequestMade(PlayerTypes ePlayer);
-	bool IsHelpRequestTooSoon(PlayerTypes ePlayer) const;
-	short GetHelpRequestTooSoonNumTurns(PlayerTypes ePlayer) const;
-
-	bool IsHelpRequestEverMade(PlayerTypes ePlayer) const;
-
-	short GetHelpRequestCounter(PlayerTypes ePlayer) const;
-	void SetHelpRequestCounter(PlayerTypes ePlayer, int iValue);
-	void ChangeHelpRequestCounter(PlayerTypes ePlayer, int iChange);
-
-	// Vassals
-	void DoVassalTaxChanged(TeamTypes eTeam, bool bTaxesLowered);
-
-	bool IsVassalTaxRaised(PlayerTypes ePlayer) const;
-	void SetVassalTaxRaised(PlayerTypes ePlayer, bool bValue);
-
-	VassalTreatmentTypes GetVassalTreatmentLevel(PlayerTypes ePlayer) const;
-	CvString GetVassalTreatmentToolTip(PlayerTypes ePlayer) const;
-	
-	// How much gold has our vassal collected since we've known him?
-	int GetVassalGoldPerTurnCollectedSinceVassalStarted(PlayerTypes ePlayer) const;
-	void SetVassalGoldPerTurnCollectedSinceVassalStarted(PlayerTypes ePlayer, int iValue);
-	void ChangeVassalGoldPerTurnCollectedSinceVassalStarted(PlayerTypes ePlayer, int iChange);
-	
-	// How much gold have we taxed from him since we've known him?
-	int GetVassalGoldPerTurnTaxedSinceVassalStarted(PlayerTypes ePlayer) const;
-	void SetVassalGoldPerTurnTaxedSinceVassalStarted(PlayerTypes ePlayer, int iValue);
-	void ChangeVassalGoldPerTurnTaxedSinceVassalStarted(PlayerTypes ePlayer, int iChange);
-
-	bool IsVassalTaxLowered(PlayerTypes ePlayer) const;
-	void SetVassalTaxLowered(PlayerTypes ePlayer, bool bValue);
-
-	int GetVassalScore(PlayerTypes ePlayer) const;
-	int GetMasterScore(PlayerTypes ePlayer) const;
-
-	int GetVassalTreatedScore(PlayerTypes ePlayer) const;
-	int GetVassalDemandScore(PlayerTypes ePlayer) const;
-	int GetVassalTaxScore(PlayerTypes ePlayer) const;
-	int GetVassalTradeRouteScore(PlayerTypes ePlayer) const;
-	int GetVassalReligionScore(PlayerTypes ePlayer) const;
-
-	bool IsWantToLiberateVassal(PlayerTypes ePlayer) const;
-	int GetMasterLiberatedMeFromVassalageScore(PlayerTypes ePlayer) const;
-
-	int GetVassalProtectScore(PlayerTypes ePlayer) const;
-	int GetHappyAboutVassalagePeacefullyRevokedScore(PlayerTypes ePlayer) const;
-	int GetAngryAboutVassalageForcefullyRevokedScore(PlayerTypes ePlayer) const;
-
-	int GetVassalProtectValue(PlayerTypes ePlayer) const;
-	void ChangeVassalProtectValue(PlayerTypes ePlayer, int iChange);
-
-	int GetTooManyVassalsScore(PlayerTypes ePlayer) const;
-
-	int GetBrokenVassalAgreementScore(PlayerTypes ePlayer) const;
-	void SetBrokenVassalAgreement(PlayerTypes ePlayer, bool bValue);
-	bool IsPlayerBrokenVassalAgreement(PlayerTypes ePlayer) const;
-	
-	int GetVassalFailedProtectScore(PlayerTypes ePlayer) const;
-	int GetVassalFailedProtectValue(PlayerTypes ePlayer) const;
-	void ChangeVassalFailedProtectValue(PlayerTypes ePlayer, int iChange);
-
-	bool IsVassalageAcceptable(PlayerTypes ePlayer, bool bWar = false);
-
-	bool IsEndVassalageAcceptable(PlayerTypes ePlayer);
-	bool IsEndVassalageRequestAcceptable(PlayerTypes eHuman);
-	void DoMakeVassalageStatement(PlayerTypes ePlayer, DiploStatementTypes& eStatement, CvDeal* pDeal);
-	void DoEndVassalageStatement(PlayerTypes ePlayer, DiploStatementTypes& eStatement);
-	void DoRevokeVassalageStatement(PlayerTypes ePlayer, DiploStatementTypes& eStatement, CvDeal* pDeal);
-
-	void DoLiberateMyVassalStatement(PlayerTypes ePlayer, DiploStatementTypes& eStatement);
-	void DoDetermineTaxRateForVassals();
-	void DoDetermineTaxRateForVassalOnePlayer(PlayerTypes ePlayer);
-
-	void DoVassalTaxesRaisedStatement(PlayerTypes ePlayer, DiploStatementTypes& eStatement);
-	void DoVassalTaxesLoweredStatement(PlayerTypes ePlayer, DiploStatementTypes& eStatement);
-
-	int GetTurnsSinceVassalagePeacefullyRevoked(PlayerTypes ePlayer) const;
-	void SetTurnsSinceVassalagePeacefullyRevoked(PlayerTypes ePlayer, int iValue);
-	void ChangeTurnsSinceVassalagePeacefullyRevoked(PlayerTypes ePlayer, int iChange);
-
-	int GetTurnsSinceVassalageForcefullyRevoked(PlayerTypes ePlayer) const;
-	void SetTurnsSinceVassalageForcefullyRevoked(PlayerTypes ePlayer, int iValue);
-	void ChangeTurnsSinceVassalageForcefullyRevoked(PlayerTypes ePlayer, int iChange);
-
-	bool IsHappyAboutPlayerVassalagePeacefullyRevoked(PlayerTypes ePlayer) const;
-	bool IsAngryAboutPlayerVassalageForcefullyRevoked(PlayerTypes ePlayer) const;
-
-	int GetNumTimesDemandedWhileVassal(PlayerTypes ePlayer) const;
-	void SetNumTimesDemandedWhileVassal(PlayerTypes ePlayer, int iValue);
-	void ChangeNumTimesDemandedWhileVassal(PlayerTypes ePlayer, int iChange);
-
-	void DoWeMadeVassalageWithSomeone(TeamTypes eTeam, bool bVoluntary);
-	void DoWeEndedVassalageWithSomeone(TeamTypes eTeam);
-
-	int IsMoveTroopsRequestAcceptable(PlayerTypes ePlayer, bool bJustChecking = false);
-	
-	bool IsPlayerMoveTroopsRequestAccepted(PlayerTypes ePlayer) const;
-	void SetPlayerMoveTroopsRequestAccepted(PlayerTypes ePlayer, bool bValue);
-
-	int GetPlayerMoveTroopsRequestCounter(PlayerTypes ePlayer) const;
-	void SetPlayerMoveTroopsRequestCounter(PlayerTypes ePlayer, int iValue);
-	void ChangePlayerMoveTroopsRequestCounter(PlayerTypes ePlayer, int iChange);
-
-	bool IsTooSoonForMoveTroopsRequest(PlayerTypes ePlayer) const;
-
-	bool IsMasterLiberatedMeFromVassalage(PlayerTypes ePlayer) const;
-	void SetMasterLiberatedMeFromVassalage(PlayerTypes ePlayer, bool bValue);
-	void DoLiberatedFromVassalage(TeamTypes eTeam);
-#endif
 
 	// Working Against Player
 	//bool DoTestWorkingAgainstPlayersDesire(PlayerTypes ePlayer, PlayerTypes &eChosenAgainstPlayer);
@@ -1316,14 +1163,6 @@ private:
 
 	CvPlayer* m_pPlayer;
 
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	bool IsCapitulationAcceptable(PlayerTypes ePlayer);
-	bool IsVoluntaryVassalageAcceptable(PlayerTypes ePlayer);
-
-	bool IsVassal(PlayerTypes eOtherPlayer) const;
-	int GetNumVassals(PlayerTypes eOtherPlayer) const;
-#endif
-
 	// Need a string member so that it doesn't go out of scope after translation
 	Localization::String m_strDiploText;
 
@@ -1392,10 +1231,6 @@ private:
 
 		bool m_abDenouncedPlayer[MAX_MAJOR_CIVS];
 		bool m_abFriendDenouncedUs[MAX_MAJOR_CIVS];
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		bool m_abOfferingGift[MAX_MAJOR_CIVS];
-		bool m_abOfferedGift[MAX_MAJOR_CIVS];
-#endif
 		bool m_abFriendDeclaredWarOnUs[MAX_MAJOR_CIVS];
 		short m_aiDenouncedPlayerCounter[MAX_MAJOR_CIVS];
 
@@ -1537,68 +1372,8 @@ private:
 #if defined(MOD_AI_MP_DIPLOMACY)
 		float m_aTradePriority[MAX_MAJOR_CIVS]; // current ai to human trade priority
 #endif
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-		bool m_abShareOpinionAccepted[MAX_MAJOR_CIVS];
-		short m_aiShareOpinionCounter[MAX_MAJOR_CIVS];
-
-		short m_aiHelpRequestCounter[MAX_MAJOR_CIVS];
-		short m_aiHelpRequestTooSoonNumTurns[MAX_MAJOR_CIVS];
-
-		short m_aiNumTimesDemandedWhenVassal[MAX_MAJOR_CIVS];
-		bool m_abPlayerBrokenVassalAgreement[MAX_MAJOR_CIVS];
-
-		short m_aiPlayerVassalageFailedProtectValue[MAX_MAJOR_CIVS];
-		short m_aiPlayerVassalageProtectValue[MAX_MAJOR_CIVS];
-		bool m_abPlayerVassalagePeacefullyRevokedVassal[MAX_MAJOR_CIVS];
-		bool m_abPlayerVassalageForcefullyRevokedVassal[MAX_MAJOR_CIVS];
-		short m_aiPlayerVassalageTurnsSincePeacefullyRevokedVassalage[MAX_MAJOR_CIVS];
-		short m_aiPlayerVassalageTurnsSinceForcefullyRevokedVassalage[MAX_MAJOR_CIVS];
-
-		bool m_abMoveTroopsRequestAccepted[MAX_MAJOR_CIVS];
-		short m_aiMoveTroopsRequestCounter[MAX_MAJOR_CIVS];
-		
-		bool m_abMasterLiberatedMeFromVassalage[MAX_MAJOR_CIVS];
-
-		bool m_abVassalTaxRaised[MAX_MAJOR_CIVS];
-		bool m_abVassalTaxLowered[MAX_MAJOR_CIVS];
-
-		int m_aiVassalGoldPerTurnTaxedSinceVassalStarted[MAX_MAJOR_CIVS];
-		int m_aiVassalGoldPerTurnCollectedSinceVassalStarted[MAX_MAJOR_CIVS];
-#endif
 	};
 	DiplomacyAIData* m_pDiploData;
-
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	bool* m_pabShareOpinionAccepted;
-	short* m_paiShareOpinionCounter;
-
-	short* m_paiHelpRequestCounter;
-	short* m_paiHelpRequestTooSoonNumTurns;
-
-	short* m_paiPlayerVassalageFailedProtectValue;
-	short* m_paiPlayerVassalageProtectValue;
-
-	bool* m_pabPlayerVassalagePeacefullyRevokedVassal;
-	bool* m_pabPlayerVassalageForcefullyRevokedVassal;
-
-	short* m_paiPlayerVassalageTurnsSincePeacefullyRevokedVassalage;
-	short* m_paiPlayerVassalageTurnsSinceForcefullyRevokedVassalage;
-
-	short* m_paiNumTimesDemandedWhenVassal;
-	bool* m_pabPlayerBrokenVassalAgreement;
-
-	bool* m_pabMoveTroopsRequestAccepted;
-	short* m_paiMoveTroopsRequestCounter;
-
-	bool* m_pabMasterLiberatedMeFromVassalage;
-
-	bool* m_pabVassalTaxRaised;
-	bool* m_pabVassalTaxLowered;
-
-	int* m_paiVassalGoldPerTurnTaxedSinceVassalStarted;
-	int* m_paiVassalGoldPerTurnCollectedSinceVassalStarted;
-#endif
 
 #if defined(MOD_DIPLOMACY_STFU)
 	Database::Results* m_pStfuResponseQuery;
@@ -1685,10 +1460,6 @@ private:
 	bool* m_pabFriendDenouncedUs;
 	bool* m_pabFriendDeclaredWarOnUs;
 	short* m_paiDenouncedPlayerCounter;
-#if defined(MOD_DIPLOMACY_CIV4_FEATURES)
-	bool* m_pabOfferingGift;
-	bool* m_pabOfferedGift;
-#endif
 	short* m_paiNumRequestsRefused;
 
 	short* m_paiNumCiviliansReturnedToMe;

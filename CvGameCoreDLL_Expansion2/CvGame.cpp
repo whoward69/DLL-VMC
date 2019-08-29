@@ -385,12 +385,6 @@ void CvGame::init(HandicapTypes eHandicap)
 	CvGoodyHuts::Reset();
 
 	doUpdateCacheOnTurn();
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if(MOD_DIPLOMACY_CITYSTATES)
-	{
-		DoBarbCountdown();
-	}
-#endif
 }
 
 //	--------------------------------------------------------------------------------
@@ -425,68 +419,6 @@ bool CvGame::init2()
 
 	return true;
 }
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-void CvGame::DoBarbCountdown()
-{
-	int iOtherMinorLoop;
-	PlayerTypes eOtherMinor;
-	TeamTypes eLoopTeam;
-	for(int iTeamLoop = 0; iTeamLoop < MAX_CIV_TEAMS; iTeamLoop++)
-	{
-		eLoopTeam = (TeamTypes) iTeamLoop;
-
-		// Another Minor
-		if(!GET_TEAM(eLoopTeam).isMinorCiv())
-			continue;
-
-		// They not alive!
-		if(!GET_TEAM(eLoopTeam).isAlive())
-			continue;
-
-		for(iOtherMinorLoop = 0; iOtherMinorLoop < MAX_CIV_TEAMS; iOtherMinorLoop++)
-		{
-			eOtherMinor = (PlayerTypes) iOtherMinorLoop;
-
-			if(eOtherMinor == NO_PLAYER)
-				continue;
-
-			// Other minor is on this team
-			if(GET_PLAYER(eOtherMinor).getTeam() == eLoopTeam)
-			{
-				if(GET_PLAYER(eOtherMinor).GetMinorCivAI()->GetTurnsSinceRebellion() > 0)
-				{
-					int iRebellionSpawn = GET_PLAYER(eOtherMinor).GetMinorCivAI()->GetTurnsSinceRebellion();
-
-					GET_PLAYER(eOtherMinor).GetMinorCivAI()->ChangeTurnsSinceRebellion(-1);
-
-					//Rebel Spawn - once every 4 turns
-					if (iRebellionSpawn == /*20*/(GC.getMINOR_QUEST_REBELLION_TIMER() * 100) / 100)
-					{
-						GET_PLAYER(eOtherMinor).GetMinorCivAI()->DoRebellion();
-					}
-					else if(iRebellionSpawn == /*16*/(GC.getMINOR_QUEST_REBELLION_TIMER() * 80) / 100)
-					{
-						GET_PLAYER(eOtherMinor).GetMinorCivAI()->DoRebellion();
-					}
-					else if(iRebellionSpawn == /*12*/(GC.getMINOR_QUEST_REBELLION_TIMER() * 60) / 100)
-					{
-						GET_PLAYER(eOtherMinor).GetMinorCivAI()->DoRebellion();
-					}
-					else if(iRebellionSpawn == /*8*/ (GC.getMINOR_QUEST_REBELLION_TIMER() * 40) / 100)
-					{
-						GET_PLAYER(eOtherMinor).GetMinorCivAI()->DoRebellion();
-					}
-					else if(iRebellionSpawn == /*4*/ (GC.getMINOR_QUEST_REBELLION_TIMER() * 20) / 100)
-					{
-						GET_PLAYER(eOtherMinor).GetMinorCivAI()->DoRebellion();
-					}
-				}
-			}
-		}
-	}
-}
-#endif
 
 //------------------------------------------------------------------------------
 // Lua Hooks
@@ -1118,9 +1050,6 @@ void CvGame::uninit()
 	m_eBestGreatPeoplePlayer = NO_PLAYER;
 	m_eReligionTech = NO_TECH;
 	m_eIndustrialRoute = NO_ROUTE;
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	m_eTeamThatCircumnavigated = NO_TEAM;
-#endif
 
 	m_strScriptData = "";
 	m_iEarliestBarbarianReleaseTurn = 0;
@@ -2034,25 +1963,6 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 		else if(isLocalPlayer){
 			//hold the turn timer at 0 seconds with 0% completion
 			CvPreGame::setEndTurnTimerLength(0.0f);
-
-#if defined(MOD_EVENTS_RED_TURN)
-			if (MOD_EVENTS_RED_TURN)
-			// RED <<<<<
-			{
-				ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
-				if(pkScriptSystem)
-				{	
-					CvLuaArgsHandle args;
-
-					args->Push(getActivePlayer());
-
-					bool bResult;
-					LuaSupport::CallHook(pkScriptSystem, "TurnComplete", args.get(), bResult);
-				}
-			}
-			// RED >>>>>
-#endif
-
 			iface->updateEndTurnTimer(0.0f);
 		}
 	}
@@ -2106,25 +2016,6 @@ void CvGame::updateTestEndTurn()
 #if !defined(NO_ACHIEVEMENTS)
 						activePlayer.GetPlayerAchievements().EndTurn();
 #endif
-
-#if defined(MOD_EVENTS_RED_TURN)
-						if (MOD_EVENTS_RED_TURN)
-						// RED <<<<<
-						{
-							ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
-							if(pkScriptSystem)
-							{	
-								CvLuaArgsHandle args;
-
-								args->Push(getActivePlayer());
-
-								bool bResult;
-								LuaSupport::CallHook(pkScriptSystem, "TurnComplete", args.get(), bResult);
-							}
-						}
-						// RED >>>>>
-#endif
-
 						gDLL->sendTurnComplete();
 #if !defined(NO_ACHIEVEMENTS)
 						CvAchievementUnlocker::EndTurn();
@@ -2211,25 +2102,6 @@ void CvGame::updateTestEndTurn()
 #if !defined(NO_ACHIEVEMENTS)
 									activePlayer.GetPlayerAchievements().EndTurn();
 #endif
-
-#if defined(MOD_EVENTS_RED_TURN)
-									if (MOD_EVENTS_RED_TURN)
-									// RED <<<<<
-									{
-										ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
-										if(pkScriptSystem)
-										{	
-											CvLuaArgsHandle args;
-
-											args->Push(getActivePlayer());
-
-											bool bResult;
-											LuaSupport::CallHook(pkScriptSystem, "TurnComplete", args.get(), bResult);
-										}
-									}
-									// RED >>>>>
-#endif
-
 									gDLL->sendTurnComplete();
 #if !defined(NO_ACHIEVEMENTS)
 									CvAchievementUnlocker::EndTurn();
@@ -2705,28 +2577,6 @@ void CvGame::selectionListGameNetMessage(int eMessage, int iData2, int iData3, i
 					}
 					else
 					{
-#if defined(MOD_EVENTS_RED_COMBAT_MISSION)
-						if (MOD_EVENTS_RED_COMBAT_MISSION)
-						// RED <<<<<
-						{
-							ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
-							if(pkScriptSystem && pPlot)
-							{						
-								CvLuaArgsHandle args;
-
-								args->Push(pkSelectedUnit->getOwner());
-								args->Push(pkSelectedUnit->GetID());
-								args->Push(pPlot->getX());
-								args->Push(pPlot->getY());
-								args->Push(iData2);
-
-								bool bResult;
-								LuaSupport::CallHook(pkScriptSystem, "PushingMissionTo", args.get(), bResult);
-							}
-						}
-						// RED >>>>>
-#endif
-
 						gDLL->sendPushMission(pkSelectedUnit->GetID(), ((MissionTypes)iData2), iData3, iData4, iFlags, bShift);
 					}
 				}
@@ -3614,23 +3464,6 @@ void CvGame::doControl(ControlTypes eControl)
 			{
 				gDLL->AutoSave(false, true);
 			}
-#if defined(MOD_EVENTS_RED_TURN)
-			if (MOD_EVENTS_RED_TURN)
-			// RED <<<<<
-			{
-				ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
-				if(pkScriptSystem)
-				{	
-					CvLuaArgsHandle args;
-
-					args->Push(getActivePlayer());
-
-					bool bResult;
-					LuaSupport::CallHook(pkScriptSystem, "TurnComplete", args.get(), bResult);
-				}
-			}
-			// RED >>>>>
-#endif
 
 #if !defined(NO_ACHIEVEMENTS)
 			kActivePlayer.GetPlayerAchievements().EndTurn();
@@ -3652,25 +3485,6 @@ void CvGame::doControl(ControlTypes eControl)
 			CvPlayerAI& kActivePlayer = GET_PLAYER(getActivePlayer());
 			kActivePlayer.GetPlayerAchievements().EndTurn();
 #endif
-
-#if defined(MOD_EVENTS_RED_TURN)
-				if (MOD_EVENTS_RED_TURN)
-				// RED <<<<<
-				{
-					ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
-					if(pkScriptSystem)
-					{	
-						CvLuaArgsHandle args;
-
-						args->Push(getActivePlayer());
-
-						bool bResult;
-						LuaSupport::CallHook(pkScriptSystem, "TurnComplete", args.get(), bResult);
-					}
-				}
-				// RED >>>>>
-#endif
-
 			gDLL->sendTurnComplete();
 #if !defined(NO_ACHIEVEMENTS)
 			CvAchievementUnlocker::EndTurn();
@@ -7810,13 +7624,6 @@ void CvGame::doTurn()
 	GetGameLeagues()->DoTurn();
 	GetGameCulture()->DoTurn();
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	if(MOD_DIPLOMACY_CITYSTATES)
-	{
-		DoBarbCountdown();
-	}
-#endif
-
 	GC.GetEngineUserInterface()->setCanEndTurn(false);
 	GC.GetEngineUserInterface()->setHasMovedUnit(false);
 
@@ -9723,10 +9530,6 @@ void CvGame::Read(FDataStream& kStream)
 	kStream >> m_eReligionTech;
 	kStream >> m_eIndustrialRoute;
 
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	MOD_SERIALIZE_READ(82, kStream, m_eTeamThatCircumnavigated, NO_TEAM);
-#endif
-
 	kStream >> m_strScriptData;
 
 	ArrayWrapper<int> wrapm_aiEndTurnMessagesReceived(MAX_PLAYERS, m_aiEndTurnMessagesReceived);
@@ -9960,10 +9763,6 @@ void CvGame::Write(FDataStream& kStream) const
 	kStream << m_eBestGreatPeoplePlayer;
 	kStream << m_eReligionTech;
 	kStream << m_eIndustrialRoute;
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-	MOD_SERIALIZE_WRITE(kStream, m_eTeamThatCircumnavigated);
-#endif
 
 	kStream << m_strScriptData;
 
@@ -10432,20 +10231,6 @@ void CvGame::DoUpdateIndustrialRoute()
 
 	m_eIndustrialRoute = eIndustrialRoute;
 }
-
-#if defined(MOD_DIPLOMACY_CITYSTATES)
-//	--------------------------------------------------------------------------------
-TeamTypes CvGame::GetTeamThatCircumnavigated() const
-{
-	return (TeamTypes) m_eTeamThatCircumnavigated;
-}
-
-//	--------------------------------------------------------------------------------
-void CvGame::SetTeamThatCircumnavigated(TeamTypes eNewValue)
-{
-	m_eTeamThatCircumnavigated = eNewValue;
-}
-#endif
 
 //	--------------------------------------------------------------------------------
 CvSiteEvaluatorForSettler* CvGame::GetSettlerSiteEvaluator()
