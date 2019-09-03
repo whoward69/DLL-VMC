@@ -33,7 +33,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 93)
+#define MOD_DLL_VERSION_NUMBER ((uint) 94)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -561,7 +561,11 @@
 //   GameEvents.PlayerBuilt.Add(function(iPlayer, iUnit, iX, iY, iBuild) end) (v46)
 #define MOD_EVENTS_PLOT                             gCustomMods.isEVENTS_PLOT()
 
-// Events sent by golden ages (v52)
+// Event sent by ending turn (v94)
+//   GameEvents.PlayerDoneTurn.Add(function(iPlayer) end)
+#define MOD_EVENTS_PLAYER_TURN                      gCustomMods.isEVENTS_PLAYER_TURN()
+
+// Event sent by golden ages (v52)
 //   GameEvents.PlayerGoldenAge.Add(function(iPlayer, bStart, iTurns) end)
 #define MOD_EVENTS_GOLDEN_AGE                       gCustomMods.isEVENTS_GOLDEN_AGE()
 
@@ -1011,6 +1015,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_PlayerCanRevoke				"PlayerCanRevoke",				"ii"
 #define GAMEEVENT_PlayerCanSpreadReligion		"PlayerCanSpreadReligion",		"iiii"
 #define GAMEEVENT_PlayerCanTransitMinorCity		"PlayerCanTransitMinorCity",	"iiiii"
+#define GAMEEVENT_PlayerDoneTurn				"PlayerDoneTurn",				"i"
 #define GAMEEVENT_PlayerGifted					"PlayerGifted",					"iiiiii"
 #define GAMEEVENT_PlayerGoldenAge				"PlayerGoldenAge",				"ibi"
 #define GAMEEVENT_PlayerLiberated				"PlayerLiberated",				"iii"
@@ -1286,6 +1291,7 @@ public:
 	MOD_OPT_DECL(EVENTS_RELIGION);
 	MOD_OPT_DECL(EVENTS_ESPIONAGE);
 	MOD_OPT_DECL(EVENTS_PLOT);
+	MOD_OPT_DECL(EVENTS_PLAYER_TURN);
 	MOD_OPT_DECL(EVENTS_GOLDEN_AGE);
 	MOD_OPT_DECL(EVENTS_CITY);
 	MOD_OPT_DECL(EVENTS_CITY_CAPITAL);

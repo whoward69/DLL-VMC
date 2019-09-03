@@ -2191,7 +2191,7 @@ bool CvGameDeals::FinalizeDeal(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, b
 	return bFoundIt && bValid;
 }
 
-void CvGameDeals::FinalizeDealValidAndAccepted(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, CvDeal& kDeal, bool bAccepted, CvWeightedVector<TeamTypes, MAX_CIV_TEAMS, true>& veNowAtPeacePairs)
+void CvGameDeals::FinalizeDealValidAndAccepted(PlayerTypes eFromPlayer, PlayerTypes /* eToPlayer */, CvDeal& kDeal, bool bAccepted, CvWeightedVector<TeamTypes, MAX_CIV_TEAMS, true>& veNowAtPeacePairs)
 {
 	// Determine total duration of the Deal
 	int iLatestItemLastTurn = 0;
