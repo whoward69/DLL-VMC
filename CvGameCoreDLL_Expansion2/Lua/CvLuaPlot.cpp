@@ -1978,11 +1978,18 @@ int CvLuaPlot::lCanSeePlot(lua_State* L)
 	TeamTypes eTeam = (TeamTypes) lua_tointeger(L, 3);
 	int iRange = lua_tointeger(L, 4);
 	DirectionTypes eFacingDirection = (DirectionTypes) lua_tointeger(L, 5);
+#if defined MOD_BUGFIX_NAVAL_TARGETING
+	DomainTypes eUnitDomain = (DomainTypes) luaL_optinteger(L, 6, DOMAIN_LAND);
+#endif
 
 	bool bCanSee = false;
 	if(pkThisPlot)
 	{
+#if defined MOD_BUGFIX_NAVAL_TARGETING
+		bCanSee = pkThisPlot->canSeePlot(pkThatPlot, eTeam, iRange, eFacingDirection, eUnitDomain);
+#else
 		bCanSee = pkThisPlot->canSeePlot(pkThatPlot, eTeam, iRange, eFacingDirection);
+#endif
 	}
 
 	lua_pushboolean(L, bCanSee);

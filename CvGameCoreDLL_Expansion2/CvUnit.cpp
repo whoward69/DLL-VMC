@@ -3031,7 +3031,11 @@ bool CvUnit::willRevealByMove(const CvPlot& plot) const
 			CvPlot* pLoopPlot = ::plotXYWithRangeCheck(plot.getX(), plot.getY(), i, j, iRange);
 			if(NULL != pLoopPlot)
 			{
-				if(!pLoopPlot->isRevealed(eTeam) && plot.canSeePlot(pLoopPlot, eTeam, iVisRange, NO_DIRECTION))
+#if defined MOD_BUGFIX_NAVAL_TARGETING
+				if (!pLoopPlot->isRevealed(eTeam) && plot.canSeePlot(pLoopPlot, eTeam, iVisRange, NO_DIRECTION, getDomainType()))
+#else
+				if (!pLoopPlot->isRevealed(eTeam) && plot.canSeePlot(pLoopPlot, eTeam, iVisRange, NO_DIRECTION))
+#endif
 				{
 					return true;
 				}
@@ -21694,7 +21698,11 @@ bool CvUnit::canEverRangeStrikeAt(int iX, int iY) const
 	// Ignores LoS or can see the plot directly?
 	if(!IsRangeAttackIgnoreLOS() && getDomainType() != DOMAIN_AIR)
 	{
-		if(!pSourcePlot->canSeePlot(pTargetPlot, getTeam(), GetRange(), getFacingDirection(true)))
+#if defined MOD_BUGFIX_NAVAL_TARGETING
+		if (!pSourcePlot->canSeePlot(pTargetPlot, getTeam(), GetRange(), getFacingDirection(true), getDomainType()))
+#else
+		if (!pSourcePlot->canSeePlot(pTargetPlot, getTeam(), GetRange(), getFacingDirection(true)))
+#endif
 		{
 			return false;
 		}
@@ -22447,7 +22455,11 @@ bool CvUnit::SentryAlert() const
 				if(NULL != pPlot)
 				{
 					// because canSeePlot() adds one to the range internally
-					if(plot()->canSeePlot(pPlot, getTeam(), (iRange - 1), NO_DIRECTION))
+#if defined MOD_BUGFIX_NAVAL_TARGETING
+					if (plot()->canSeePlot(pPlot, getTeam(), (iRange - 1), NO_DIRECTION, getDomainType()))
+#else
+					if (plot()->canSeePlot(pPlot, getTeam(), (iRange - 1), NO_DIRECTION))
+#endif
 					{
 						if(pPlot->isVisibleEnemyUnit(this))
 						{

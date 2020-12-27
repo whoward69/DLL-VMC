@@ -15961,7 +15961,7 @@ int CvCity::getBombardRange(bool& bIndirectFireAllowed) const
 		int iValue = 0;
 		if (GAMEEVENTINVOKE_VALUE(iValue, GAMEEVENT_GetBombardRange, getOwner(), GetID()) == GAMEEVENTRETURN_VALUE) {
 			// Defend against modder stupidity!
-			if (iValue != 0 && ::abs(iValue) <= GC.getMAX_CITY_ATTACK_RANGE()) {
+			if (::abs(iValue) <= GC.getMAX_CITY_ATTACK_RANGE()) {
 				bIndirectFireAllowed = (iValue < 0);
 				return ::abs(iValue);
 			}
@@ -16008,6 +16008,8 @@ bool CvCity::CanRangeStrikeNow() const
 #if defined(MOD_EVENTS_CITY_BOMBARD)
 	bool bIndirectFireAllowed; // By reference, yuck!!!
 	int iRange = getBombardRange(bIndirectFireAllowed);
+	
+	if (iRange == 0) return false;
 #else
 	int iRange = GC.getCITY_ATTACK_RANGE();
 	bool bIndirectFireAllowed = GC.getCAN_CITY_USE_INDIRECT_FIRE();
@@ -16033,7 +16035,11 @@ bool CvCity::CanRangeStrikeNow() const
 
 			if(!bIndirectFireAllowed)
 			{
-				if(!pPlot->canSeePlot(pTargetPlot, eTeam, iRange, NO_DIRECTION))
+#if defined MOD_BUGFIX_NAVAL_TARGETING
+				if (!pPlot->canSeePlot(pTargetPlot, eTeam, iRange, NO_DIRECTION, DOMAIN_LAND))
+#else
+				if (!pPlot->canSeePlot(pTargetPlot, eTeam, iRange, NO_DIRECTION))
+#endif
 				{
 					bCanRangeStrike = false;
 				}
@@ -16124,6 +16130,8 @@ bool CvCity::canRangeStrikeAt(int iX, int iY) const
 #if defined(MOD_EVENTS_CITY_BOMBARD)
 	bool bIndirectFireAllowed; // By reference, yuck!!!
 	int iAttackRange = getBombardRange(bIndirectFireAllowed);
+	
+	if (iAttackRange == 0) return false;
 #else
 	int iAttackRange = GC.getCITY_ATTACK_RANGE();
 #endif
@@ -16139,7 +16147,11 @@ bool CvCity::canRangeStrikeAt(int iX, int iY) const
 	if(!GC.getCAN_CITY_USE_INDIRECT_FIRE())
 #endif
 	{
-		if(!plot()->canSeePlot(pTargetPlot, getTeam(), iAttackRange, NO_DIRECTION))
+#if defined MOD_BUGFIX_NAVAL_TARGETING
+		if (!plot()->canSeePlot(pTargetPlot, getTeam(), iAttackRange, NO_DIRECTION, DOMAIN_LAND))
+#else
+		if (!plot()->canSeePlot(pTargetPlot, getTeam(), iAttackRange, NO_DIRECTION))
+#endif
 		{
 			return false;
 		}
@@ -16427,6 +16439,8 @@ void CvCity::DoNearbyEnemy()
 
 #if defined(MOD_EVENTS_CITY_BOMBARD)
 	int iSearchRange = getBombardRange();
+	
+	if (iSearchRange == 0) return;
 #else
 	int iSearchRange = GC.getCITY_ATTACK_RANGE();
 #endif

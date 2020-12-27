@@ -33,7 +33,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 94)
+#define MOD_DLL_VERSION_NUMBER ((uint) 95)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -605,6 +605,8 @@
 #define MOD_EVENTS_CITY_AIRLIFT                     gCustomMods.isEVENTS_CITY_AIRLIFT()
 
 // Events sent to ascertain the bombard range for a city, and if indirect fire is allowed (v32)
+//   updated to permit a range of 0 for no bombardment possible (v95)
+// Return a negative range if indirect fire is permitted
 //   GameEvents.GetBombardRange.Add(function(iPlayer, iCity) return (-1 * GameDefines.CITY_ATTACK_RANGE) end)
 #define MOD_EVENTS_CITY_BOMBARD                     gCustomMods.isEVENTS_CITY_BOMBARD()
 
@@ -705,6 +707,8 @@
 #define MOD_BUGFIX_NAVAL_FREE_UNITS                 gCustomMods.isBUGFIX_NAVAL_FREE_UNITS()
 // Fixes the bug where the naval units jump to the nearest city and not the nearest available non-lake water plot
 #define MOD_BUGFIX_NAVAL_NEAREST_WATER              gCustomMods.isBUGFIX_NAVAL_NEAREST_WATER()
+// Fixes the bug where naval units in hill cities attack from the top of the hill, not the harbour (v95)
+#define MOD_BUGFIX_NAVAL_TARGETING					(true)
 // Fixes the bug where stacked ranged units may attack out of cities but melee units may not
 #define MOD_BUGFIX_CITY_STACKING                    gCustomMods.isBUGFIX_CITY_STACKING()
 // Fixes the bug in goody hut messages that have parameters (v38)

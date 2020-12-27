@@ -1830,7 +1830,11 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, I
 }
 
 //	--------------------------------------------------------------------------------
+#if defined MOD_BUGFIX_NAVAL_TARGETING
+bool CvPlot::canSeePlot(const CvPlot* pPlot, TeamTypes eTeam, int iRange, DirectionTypes eFacingDirection, DomainTypes eUnitDomain) const
+#else
 bool CvPlot::canSeePlot(const CvPlot* pPlot, TeamTypes eTeam, int iRange, DirectionTypes eFacingDirection) const
+#endif
 {
 	iRange++;
 
@@ -1873,7 +1877,27 @@ bool CvPlot::canSeePlot(const CvPlot* pPlot, TeamTypes eTeam, int iRange, Direct
 			}
 
 			//check if anything blocking the plot
+#if defined MOD_BUGFIX_NAVAL_TARGETING
+			int iLevel;
+
+			if (eUnitDomain == DOMAIN_SEA && !isWater()) {
+				iLevel = GC.getTerrainInfo(TERRAIN_COAST)->getSeeFromLevel();
+				iLevel += GC.getSEAWATER_SEE_FROM_CHANGE();
+
+				if (GET_TEAM(eTeam).isExtraWaterSeeFrom())
+				{
+					iLevel++;
+				}
+			}
+			else
+			{
+				iLevel = seeFromLevel(eTeam);
+			}
+
+			if (CvTargeting::CanSeeDisplacementPlot(startX, startY, dx, dy, iLevel))
+#else
 			if (CvTargeting::CanSeeDisplacementPlot(startX, startY, dx, dy, seeFromLevel(eTeam)))
+#endif
 			{
 				return true;
 			}
@@ -9196,7 +9220,6 @@ bool CvPlot::setRevealed(TeamTypes eTeam, bool bNewValue, bool bTerrainOnly, Tea
 						// Scale up or down based on difficulty
 						if(iFinderGold > 0)
 						{
-							// TODO - WH - scale this by game speed as well as difficulty
 							const int iStandardHandicap = GC.getInfoTypeForString("HANDICAP_PRINCE");
 							if(iStandardHandicap >= 0)
 							{
@@ -9207,6 +9230,11 @@ bool CvPlot::setRevealed(TeamTypes eTeam, bool bNewValue, bool bTerrainOnly, Tea
 									iFinderGold /= GC.getGame().getHandicapInfo().getBarbCampGold();
 								}
 							}
+
+							// TODO - WH - scale this by game speed as well as difficulty
+							// Game Speed Mod
+							// iFinderGold *= GC.getGameSpeedInfo(GC.getGame().getGameSpeedType())->getGoldPercent();
+							// iFinderGold /= 100;
 						}
 
 						if(iFinderGold > 0)
