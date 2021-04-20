@@ -7174,8 +7174,11 @@ void CvTeam::SetCurrentEra(EraTypes eNewValue)
 			CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 			if(kPlayer.isAlive() && kPlayer.getTeam() == GetID() && !kPlayer.isMinorCiv() && !kPlayer.isBarbarian())
 			{
-				// TODO - WH - BUGFIX - typo of > 0 at end of following line makes this a boolean, not an integer
+#if defined(MOD_BUGFIX_MINOR)
+				int iNumFreePolicies = kPlayer.GetPlayerTraits()->GetFreeSocialPoliciesPerEra();
+#else
 				int iNumFreePolicies = kPlayer.GetPlayerTraits()->GetFreeSocialPoliciesPerEra() > 0;
+#endif
 				if (iNumFreePolicies > 0)
 				{
 					kPlayer.ChangeNumFreePolicies(iNumFreePolicies);

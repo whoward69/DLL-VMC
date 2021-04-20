@@ -99,6 +99,10 @@ public:
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	bool IsMakesPassable() const;
 #endif
+#if defined(MOD_API_PLOT_BASED_DAMAGE)
+	bool IsNegatesTerrainDamage() const;
+	bool IsNegatesFeatureDamage() const;
+#endif
 #if defined(MOD_GLOBAL_NO_FOLLOWUP)
 	bool IsNoFollowup() const;
 #endif
@@ -234,6 +238,10 @@ protected:
 #endif
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	bool m_bMakesPassable;
+#endif
+#if defined(MOD_API_PLOT_BASED_DAMAGE)
+	bool m_bNegatesTerrainDamage;
+	bool m_bNegatesFeatureDamage;
 #endif
 #if defined(MOD_GLOBAL_NO_FOLLOWUP)
 	bool m_bNoFollowup;

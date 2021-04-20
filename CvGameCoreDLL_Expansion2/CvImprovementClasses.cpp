@@ -101,6 +101,10 @@ CvImprovementEntry::CvImprovementEntry(void):
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	m_bMakesPassable(false),
 #endif
+#if defined(MOD_API_PLOT_BASED_DAMAGE)
+	m_bNegatesTerrainDamage(false),
+	m_bNegatesFeatureDamage(false),
+#endif
 #if defined(MOD_GLOBAL_NO_FOLLOWUP)
 	m_bNoFollowup(false),
 #endif
@@ -240,6 +244,12 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	if (MOD_GLOBAL_PASSABLE_FORTS) {
 		m_bMakesPassable = kResults.GetBool("MakesPassable");
+	}
+#endif
+#if defined(MOD_API_PLOT_BASED_DAMAGE)
+	if (MOD_API_PLOT_BASED_DAMAGE) {
+		m_bNegatesTerrainDamage = kResults.GetBool("NegatesTerrainDamage");
+		m_bNegatesFeatureDamage = kResults.GetBool("NegatesFeatureDamage");
 	}
 #endif
 #if defined(MOD_GLOBAL_NO_FOLLOWUP)
@@ -728,6 +738,18 @@ bool CvImprovementEntry::IsMountainsMakesValid() const
 bool CvImprovementEntry::IsMakesPassable() const
 {
 	return m_bMakesPassable;
+}
+#endif
+
+#if defined(MOD_API_PLOT_BASED_DAMAGE)
+bool CvImprovementEntry::IsNegatesTerrainDamage() const
+{
+	return m_bNegatesTerrainDamage;
+}
+
+bool CvImprovementEntry::IsNegatesFeatureDamage() const
+{
+	return m_bNegatesFeatureDamage;
 }
 #endif
 
