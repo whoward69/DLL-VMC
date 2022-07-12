@@ -5883,7 +5883,11 @@ void CvPlayer::findNewCapital()
 	BuildingTypes eCapitalBuilding;
 	int iValue;
 	int iBestValue;
+#if defined(MOD_BUGFIX_NO_PUPPET_CAPITALS)
+	int iLoop = 0;
+#else
 	int iLoop;
+#endif
 
 	eCapitalBuilding = ((BuildingTypes)(getCivilizationInfo().getCivilizationBuildings(GC.getCAPITAL_BUILDINGCLASS())));
 
@@ -5896,6 +5900,9 @@ void CvPlayer::findNewCapital()
 
 	iBestValue = 0;
 	pBestCity = NULL;
+
+	CUSTOMLOG("Hunting for a new capital city ...");
+	CUSTOMLOG("  ... 1st pass");
 
 	for(pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
 	{
@@ -5921,8 +5928,13 @@ void CvPlayer::findNewCapital()
 					{
 						iBestValue = iValue;
 						pBestCity = pLoopCity;
+						CUSTOMLOG("  ... considering %s", pBestCity->getName().c_str());
 					}
 #if defined(MOD_BUGFIX_NO_PUPPET_CAPITALS)
+				}
+				else
+				{
+					CUSTOMLOG("  ... ignoring %s", pLoopCity->getName().c_str());
 				}
 #endif
 			}
@@ -5930,8 +5942,11 @@ void CvPlayer::findNewCapital()
 	}
 
 #if defined(MOD_BUGFIX_NO_PUPPET_CAPITALS)
-	if (pBestCity != NULL)
+	if (pBestCity == NULL)
 	{
+		CUSTOMLOG("  ... 2nd pass");
+		iLoop = 0;
+
 		for (pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
 		{
 			if (pLoopCity != pOldCapital)
@@ -5939,18 +5954,21 @@ void CvPlayer::findNewCapital()
 				if (0 == pLoopCity->GetCityBuildings()->GetNumRealBuilding(eCapitalBuilding))
 				{
 					// Second pass, consider only those we ignored first time
-					if (pLoopCity->IsResistance())
+					if (pLoopCity->IsResistance() && !pLoopCity->IsPuppet())
 					{
+						CUSTOMLOG("  ... resisting %s", pLoopCity->getName().c_str());
 						// We'll take a city in resistance (ie one we have decided to assimilate) over all others
 						iValue = pLoopCity->getPopulation() + 500;
 					}
 					else if (pLoopCity->IsPuppet())
 					{
+						CUSTOMLOG("  ... puppet %s", pLoopCity->getName().c_str());
 						// We'll take a puppet city next, at least we're not burning it to the ground!
 						iValue = pLoopCity->getPopulation() + 250;
 					}
 					else if (pLoopCity->IsRazing())
 					{
+						CUSTOMLOG("  ... burning %s", pLoopCity->getName().c_str());
 						// Might be an idea to stop the burning!
 						iValue = pLoopCity->getPopulation();
 					}
@@ -5963,6 +5981,7 @@ void CvPlayer::findNewCapital()
 					{
 						iBestValue = iValue;
 						pBestCity = pLoopCity;
+						CUSTOMLOG("  ... considering %s", pBestCity->getName().c_str());
 					}
 				}
 			}
@@ -5972,6 +5991,8 @@ void CvPlayer::findNewCapital()
 
 	if (pBestCity != NULL)
 	{
+		CUSTOMLOG("  ... new capital will be %s", pBestCity->getName().c_str());
+
 		if (pOldCapital != NULL)
 		{
 			pOldCapital->GetCityBuildings()->SetNumRealBuilding(eCapitalBuilding, 0);
@@ -6012,6 +6033,12 @@ void CvPlayer::findNewCapital()
 		}
 #endif
 	}
+#if defined(MOD_BUGFIX_NO_PUPPET_CAPITALS)
+	else
+	{
+		CUSTOMLOG("  ... new capital NOT found");
+	}
+#endif
 }
 
 //	--------------------------------------------------------------------------------
