@@ -2441,9 +2441,6 @@ bool CvUnit::canDoCommand(CommandTypes eCommand, int iData1, int iData2, bool bT
 		return true;
 		break;
 
-	case COMMAND_KILL:
-		return true;
-		break;
 
 
 	default:
@@ -2517,16 +2514,6 @@ void CvUnit::doCommand(CommandTypes eCommand, int iData1, int iData2)
 		case COMMAND_HOTKEY:
 			setHotKeyNumber(iData1);
 			break;
-
-
-		case COMMAND_KILL:
-			kill(true);
-			break;
-		case COMMAND_TELEPORT:
-			//Todo: 
-			//setXY(iData1, iData2);
-			break;
-
 
 		default:
 			CvAssert(false);

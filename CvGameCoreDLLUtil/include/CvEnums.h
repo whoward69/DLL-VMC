@@ -9,6 +9,15 @@
 #ifndef CVENUMS_H
 #define CVENUMS_H
 
+
+static class CustomOperationTypes
+{
+public:
+	static const int CUSTOM_OPERATION_UNIT_KILL = 1;
+	static const int CUSTOM_OPERATION_UNIT_TELEPORT = 2;
+	static const int CUSTOM_OPERATION_PLAYER_INIT_UNIT = 3;
+};
+
 // Mem Allocation Tags
 enum eCiv5GameCoreMPoolType
 {
@@ -1327,7 +1336,6 @@ enum TraitTypes
 
 enum ReligionTypes
 {
-	EXECUTING_CUSTOMIZED_UNIT_COMMAND = -2,
 	NO_RELIGION = -1,
 	RELIGION_PANTHEON = 0,
 };
@@ -1663,8 +1671,8 @@ enum CommandTypes
 	COMMAND_HOTKEY,
 
 
-	COMMAND_KILL,
-	COMMAND_TELEPORT,
+	//COMMAND_KILL,
+	//COMMAND_TELEPORT,
 
 	NUM_COMMAND_TYPES
 };

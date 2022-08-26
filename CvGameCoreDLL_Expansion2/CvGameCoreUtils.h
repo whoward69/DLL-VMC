@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -15,6 +15,26 @@
 #include <CvLocalization.h>
 
 #undef min
+
+
+class ReturnPointerRecorder {
+public:
+	ReturnPointerRecorder() {
+		returnValues = std::list<pair<int, int>>();
+		m_Locker = FCriticalSection();
+	}
+	~ReturnPointerRecorder() {
+		returnValues.clear();
+	}
+	std::list<pair<int, int>> returnValues;
+	FCriticalSection m_Locker;
+	void pushReturnValue(int id, int type);
+	bool getReturnValueExist(int id, int type);
+};
+namespace ReturnValueUtil {
+	extern ReturnPointerRecorder container;
+}
+
 
 inline int range(int iNum, int iLow, int iHigh)
 {

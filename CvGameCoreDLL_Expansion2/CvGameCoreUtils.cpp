@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -25,6 +25,38 @@
 
 // must be included after all other headers
 #include "LintFree.h"
+
+void ReturnPointerRecorder::pushReturnValue(int id, int type) {
+	while (!m_Locker.Try()) {
+		Sleep(1);
+	}
+	m_Locker.Enter();
+	if (returnValues.size() >= 50) returnValues.pop_front();
+	returnValues.push_back(pair<int, int>(id, type));
+	m_Locker.Leave();
+}
+
+bool ReturnPointerRecorder::getReturnValueExist(int id, int type) {
+	while (!m_Locker.Try()) {
+		Sleep(1);
+	}
+	m_Locker.Enter();
+	list<pair<int, int>>::iterator iter;
+	for (iter = returnValues.begin(); iter != returnValues.end(); iter++) {
+		if ((*iter).first == id) {
+			int rtn = (*iter).second;
+			returnValues.erase(iter);
+			m_Locker.Leave();
+			return true;
+		}
+	}
+	m_Locker.Leave();
+	return false;
+}
+
+namespace ReturnValueUtil {
+	ReturnPointerRecorder container;
+}
 
 /// This function will return the CvPlot associated with the Index (0 to 36) of a City at iX,iY.  The lower the Index the closer the Plot is to the City (roughly)
 CvPlot* plotCity(int iX, int iY, int iIndex)

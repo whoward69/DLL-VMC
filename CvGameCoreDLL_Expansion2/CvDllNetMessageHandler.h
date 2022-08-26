@@ -8,12 +8,19 @@
 #pragma once
 
 #include "CvDllInterfaces.h"
+#include <list>
+#include <yvals.h>
 
 class CvDllNetMessageHandler : public ICvNetMessageHandler3
 {
 public:
 	CvDllNetMessageHandler();
 	~CvDllNetMessageHandler();
+
+	//Receiving customized commands.
+	void TransmissCustomizedOperationFromResponseFoundReligion(PlayerTypes ePlayer, int customCommandType, 
+		int iData1, int iData2, int iData3, int iData4, int iData5, int iData6, 
+		const char* szCustomName);
 
 	void* DLLCALL QueryInterface(GUID guidInterface);
 
@@ -40,7 +47,7 @@ public:
 	void DLLCALL ResponseExtendedGame(PlayerTypes ePlayer);
 	void DLLCALL ResponseFoundPantheon(PlayerTypes ePlayer, BeliefTypes eBelief);
 	void DLLCALL ResponseFoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion, const char* szCustomName, BeliefTypes eBelief1, BeliefTypes eBelief2, BeliefTypes eBelief3, BeliefTypes eBelief4, int iCityX, int iCityY);
-	void TransmissCustomizedOperationFromResponseFoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion, const char* szCustomName, BeliefTypes eBelief1, BeliefTypes eBelief2, BeliefTypes eBelief3, BeliefTypes eBelief4, int iCityX, int iCityY);
+	
 	void DLLCALL ResponseEnhanceReligion(PlayerTypes ePlayer, ReligionTypes eReligion, const char* szCustomName, BeliefTypes eBelief1, BeliefTypes eBelief2, int iCityX, int iCityY);
 	void DLLCALL ResponseMoveSpy(PlayerTypes ePlayer, int iSpyIndex, int iTargetPlayer, int iTargetCity, bool bAsDiplomat);
 	void DLLCALL ResponseStageCoup(PlayerTypes eSpyPlayer, int iSpyIndex);

@@ -691,10 +691,15 @@ int CvLuaUnit::lKill(lua_State* L)
 int CvLuaUnit::lKillSync(lua_State* L) {
 	CvUnit* pkUnit = GetInstance(L);
 	const bool bDelay = lua_toboolean(L, 2);
-	/*const PlayerTypes ePlayer
-		= (lua_isnil(L, 3)) ? NO_PLAYER : (PlayerTypes)lua_tointeger(L, 3);*/
+	const PlayerTypes ePlayer
+		= (lua_isnil(L, 3)) ? NO_PLAYER : (PlayerTypes)lua_tointeger(L, 3);
+	const PlayerTypes owner = pkUnit->getOwner();
+	const int ID = pkUnit->GetID();
 	
-	gDLL->sendDoCommand(pkUnit->GetID(), COMMAND_KILL, bDelay, pkUnit->getOwner(), false);
+	//gDLL->sendDoCommand(pkUnit->GetID(), COMMAND_KILL, bDelay, pkUnit->getOwner(), false);
+	const char* emptyMsg = "e";
+	gDLL->SendFoundReligion(owner, ReligionTypes(CustomOperationTypes::CUSTOM_OPERATION_UNIT_KILL << 16), emptyMsg,
+		(BeliefTypes)ID, (BeliefTypes)ePlayer, (BeliefTypes)bDelay, (BeliefTypes)-1, -1, -1);
 	return 0;
 }
 

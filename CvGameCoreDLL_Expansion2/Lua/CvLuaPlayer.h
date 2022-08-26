@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -49,6 +49,7 @@ protected:
 #endif
 
 	static int lInitUnit(lua_State* L);
+	static int lInitUnitSync(lua_State* L);
 	static int lInitUnitWithNameOffset(lua_State* L);
 	static int lDisbandUnit(lua_State* L);
 	static int lAddFreeUnit(lua_State* L);

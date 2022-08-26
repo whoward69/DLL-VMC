@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -35,6 +35,7 @@
 
 // include this last to turn warnings into errors for code analysis
 #include "LintFree.h"
+#include <ctime>
 
 //Utility macro for registering methods
 #define Method(Name)			\
@@ -59,6 +60,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 #endif
 
 	Method(InitUnit);
+	Method(InitUnitSync);
 	Method(InitUnitWithNameOffset);
 	Method(DisbandUnit);
 	Method(AddFreeUnit);
@@ -1273,6 +1275,26 @@ int CvLuaPlayer::lInitUnit(lua_State* L)
 	const DirectionTypes eFacingDirection = (DirectionTypes)luaL_optint(L, 6, NO_DIRECTION);
 
 	CvUnit* pkUnit = pkPlayer->initUnit(eUnit, x, y, eUnitAI, eFacingDirection);
+	CvLuaUnit::Push(L, pkUnit);
+	return 1;
+}
+
+
+int CvLuaPlayer::lInitUnitSync(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	PlayerTypes playerID = pkPlayer->GetID();
+	const UnitTypes eUnit = (UnitTypes)lua_tointeger(L, 2);
+	const int x = lua_tointeger(L, 3);
+	const int y = lua_tointeger(L, 4);
+	const UnitAITypes eUnitAI = (UnitAITypes)luaL_optint(L, 5, NO_UNITAI);
+	const DirectionTypes eFacingDirection = (DirectionTypes)luaL_optint(L, 6, NO_DIRECTION);
+	int time = GetTickCount();
+	CvUnit* pkUnit = pkPlayer->initUnit(eUnit, x, y, eUnitAI, eFacingDirection);
+	gDLL->SendFoundReligion(playerID, ReligionTypes(CustomOperationTypes::CUSTOM_OPERATION_PLAYER_INIT_UNIT << 16), "e",
+		(BeliefTypes)eUnit, (BeliefTypes)x, (BeliefTypes)y, (BeliefTypes)eUnitAI, eFacingDirection, time);
+
+	ReturnValueUtil::container.pushReturnValue(time, CustomOperationTypes::CUSTOM_OPERATION_PLAYER_INIT_UNIT);
 	CvLuaUnit::Push(L, pkUnit);
 	return 1;
 }
@@ -7288,7 +7310,7 @@ int CvLuaPlayer::lGetCurrentEra(lua_State* L)
 //int getTeam();
 int CvLuaPlayer::lGetTeam(lua_State* L)
 {
-	return BasicLuaMethod(L, &CvPlayerAI::getTeam);
+	return CvLuaMethodWrapper<CvLuaPlayer, CvPlayerAI>::BasicLuaMethod<TeamTypes>(L, &CvPlayerAI::getTeam);
 }
 //------------------------------------------------------------------------------
 //ColorTypes GetPlayerColor();

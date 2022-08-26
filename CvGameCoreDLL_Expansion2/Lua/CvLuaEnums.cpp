@@ -521,8 +521,8 @@ int CvLuaEnums::pRegister(lua_State* L)
 	RegisterEnum(COMMAND_HOTKEY);
 
 
-	RegisterEnum(COMMAND_KILL);
-	RegisterEnum(COMMAND_TELEPORT);
+	//RegisterEnum(COMMAND_KILL);
+	//RegisterEnum(COMMAND_TELEPORT);
 
 
 	RegisterEnum(NUM_COMMAND_TYPES);
@@ -938,7 +938,6 @@ int CvLuaEnums::pRegister(lua_State* L)
 	EnumEnd(L);
 
 	EnumStart(L, "ReligionTypes");
-	RegisterEnum(EXECUTING_CUSTOMIZED_UNIT_COMMAND);
 	RegisterEnum(NO_RELIGION);
 	RegisterEnum(RELIGION_PANTHEON);
 	EnumEnd(L);
