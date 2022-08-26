@@ -1325,8 +1325,9 @@ enum TraitTypes
 	NO_TRAIT = -1,
 };
 
-enum ReligionTypes					
+enum ReligionTypes
 {
+	EXECUTING_CUSTOMIZED_UNIT_COMMAND = -2,
 	NO_RELIGION = -1,
 	RELIGION_PANTHEON = 0,
 };
@@ -1660,6 +1661,10 @@ enum CommandTypes
 	COMMAND_DELETE,
 	COMMAND_GIFT,
 	COMMAND_HOTKEY,
+
+
+	COMMAND_KILL,
+	COMMAND_TELEPORT,
 
 	NUM_COMMAND_TYPES
 };

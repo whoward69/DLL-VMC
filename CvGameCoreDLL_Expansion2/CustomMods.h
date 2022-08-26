@@ -88,6 +88,10 @@
 #define MOD_API_EXTENSIONS                          gCustomMods.isAPI_EXTENSIONS()
 // Enables the LUA Extensions API
 #define MOD_API_LUA_EXTENSIONS                      gCustomMods.isAPI_LUA_EXTENSIONS()
+
+// Provides syncronized unit operations
+//#define MOD_API_SYNCRONIZED_UNIT_OPERATION          gCustomMods.isAPI_SYNCRONIZED_UNIT_OPERATION()
+
 // Enables the Unified Yields extensions - thanks to bane_, JFD and Ulixes for extensive testing (v54)
 #define MOD_API_UNIFIED_YIELDS                      (true)
 // Enables the Unified Yields (YIELD_TOURISM) extensions (v56)
@@ -1339,6 +1343,8 @@ public:
 	MOD_OPT_DECL(API_ACHIEVEMENTS);
 	MOD_OPT_DECL(API_EXTENSIONS);
 	MOD_OPT_DECL(API_LUA_EXTENSIONS);
+
+	//MOD_OPT_DECL(API_SYNCRONIZED_UNIT_OPERATION);
 
 	MOD_OPT_DECL(CONFIG_GAME_IN_XML);
 	MOD_OPT_DECL(CONFIG_AI_IN_XML);

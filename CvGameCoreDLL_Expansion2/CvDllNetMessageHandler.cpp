@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -246,8 +246,15 @@ void CvDllNetMessageHandler::ResponseDiploVote(PlayerTypes ePlayer, PlayerTypes 
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseDoCommand(PlayerTypes ePlayer, int iUnitID, CommandTypes eCommand, int iData1, int iData2, bool bAlt)
 {
+	PlayerTypes player = ePlayer;
+
+	if (eCommand == COMMAND_KILL) {
+		player = (PlayerTypes)iData2;
+	}
+
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvUnit* pkUnit = kPlayer.getUnit(iUnitID);
+
 
 	if(pkUnit != NULL)
 	{
@@ -322,9 +329,24 @@ void CvDllNetMessageHandler::ResponseFoundPantheon(PlayerTypes ePlayer, BeliefTy
 		}
 	}
 }
+
+void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligion(
+	PlayerTypes ePlayer, ReligionTypes eReligion, const char* szCustomName, 
+	BeliefTypes eBelief1, BeliefTypes eBelief2, BeliefTypes eBelief3, BeliefTypes eBelief4, 
+	int iCityX, int iCityY) {
+
+}
+
 //------------------------------------------------------------------------------
+// Use this method for customized unit operations.
 void CvDllNetMessageHandler::ResponseFoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion, const char* szCustomName, BeliefTypes eBelief1, BeliefTypes eBelief2, BeliefTypes eBelief3, BeliefTypes eBelief4, int iCityX, int iCityY)
 {
+	if (eReligion == EXECUTING_CUSTOMIZED_UNIT_COMMAND) {
+		TransmissCustomizedOperationFromResponseFoundReligion(ePlayer, eReligion, szCustomName, eBelief1, eBelief2, eBelief3, eBelief4, iCityX, iCityY);
+		return;
+	}
+
+
 	CvGame& kGame(GC.getGame());
 	CvGameReligions* pkGameReligions(kGame.GetGameReligions());
 

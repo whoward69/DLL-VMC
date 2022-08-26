@@ -11,6 +11,7 @@
     <ProjectGuid>{F58F230D-EE4A-40E0-91D5-93626E790055}</ProjectGuid>
     <RootNamespace>CvGameCoreDLL_Expansion2</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'" Label="Configuration">
@@ -28,8 +29,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">$(SolutionDir)\BuildOutput\VS2010_$(Configuration)$(Platform)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">$(SolutionDir)\BuildTemp\VS2010_$(ProjectName)$(Configuration)$(Platform)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">$(SolutionDir)\BuildOutput\VS2022_$(Configuration)$(Platform)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">$(SolutionDir)\BuildTemp\VS2022_$(ProjectName)$(Configuration)$(Platform)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">false</LinkIncremental>
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'" />
@@ -37,9 +38,9 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">$(ProjectName)$(Platform)$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">
-    <ExecutablePath>C:\Program Files %28x86%29\Microsoft Visual Studio 9.0\VC\bin;C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin;$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);$(MSBuild_ExecutablePath);$(VS_ExecutablePath);C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE</ExecutablePath>
+    <ExecutablePath>C:\Program Files %28x86%29\Microsoft Visual Studio 9.0\VC\bin;C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin;$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);$(MSBuild_ExecutablePath);$(VS_ExecutablePath);C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE;$(ExecutablePath)</ExecutablePath>
     <IncludePath>C:\Program Files %28x86%29\Microsoft Visual Studio 9.0\VC\include;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Include</IncludePath>
-    <ExternalIncludePath>$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)CvGameCoreDLL_Expansion2;$(ExternalIncludePath)</ExternalIncludePath>
     <ReferencePath>C:\Program Files %28x86%29\Microsoft Visual Studio 9.0\VC\lib;$(ReferencePath)</ReferencePath>
     <LibraryPath>C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib;C:\Program Files %28x86%29\Microsoft Visual Studio 9.0\VC\lib</LibraryPath>
     <GenerateManifest>false</GenerateManifest>
@@ -52,7 +53,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)CvWorldBuilderMap\include\;$(SolutionDir)CvGameCoreDLLUtil\include\;$(SolutionDir)CvLocalization\include\;$(SolutionDir)CvGameDatabase\include\;$(SolutionDir)FirePlace\include\;$(SolutionDir)FirePlace\include\FireWorks\;$(SolutionDir)ThirdPartyLibs\Lua51\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)CvGameCoreDLL_Expansion2;$(SolutionDir)CvWorldBuilderMap\include\;$(SolutionDir)CvGameCoreDLLUtil\include\;$(SolutionDir)CvLocalization\include\;$(SolutionDir)CvGameDatabase\include\;$(SolutionDir)FirePlace\include\;$(SolutionDir)FirePlace\include\FireWorks\;$(SolutionDir)ThirdPartyLibs\Lua51\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;FXS_IS_DLL;WIN32;NDEBUG;_WINDOWS;_USRDLL;CVGAMECOREDLL_EXPORTS;FINAL_RELEASE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>
       </ExceptionHandling>

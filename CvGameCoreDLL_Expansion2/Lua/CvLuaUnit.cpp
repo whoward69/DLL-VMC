@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -607,6 +607,11 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(IsAdjacentToTerrain);
 	Method(IsWithinDistanceOfTerrain);
 #endif
+
+
+
+	Method(KillSync);
+
 }
 //------------------------------------------------------------------------------
 const char* CvLuaUnit::GetTypeName()
@@ -679,6 +684,22 @@ int CvLuaUnit::lKill(lua_State* L)
 	pkUnit->kill(bDelay, ePlayer);
 	return 0;
 }
+
+
+//------------------------------------------------------------------------------
+
+int CvLuaUnit::lKillSync(lua_State* L) {
+	CvUnit* pkUnit = GetInstance(L);
+	const bool bDelay = lua_toboolean(L, 2);
+	/*const PlayerTypes ePlayer
+		= (lua_isnil(L, 3)) ? NO_PLAYER : (PlayerTypes)lua_tointeger(L, 3);*/
+	
+	gDLL->sendDoCommand(pkUnit->GetID(), COMMAND_KILL, bDelay, pkUnit->getOwner(), false);
+	return 0;
+}
+
+
+
 //------------------------------------------------------------------------------
 //bool isActionRecommended(int i);
 int CvLuaUnit::lIsActionRecommended(lua_State* L)
