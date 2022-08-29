@@ -400,6 +400,9 @@ protected:
 	LUAAPIEXTN(GetXY, int); // Returns int X, int Y
 #endif
 	static int lSetXY(lua_State* L);
+	static int lSetXYSync(lua_State* L);
+
+
 	static int lAt(lua_State* L);
 	static int lAtPlot(lua_State* L);
 	static int lGetPlot(lua_State* L);
@@ -415,13 +418,19 @@ protected:
 	static int lChangeDamage(lua_State* L);
 
 	static int lGetMoves(lua_State* L);
+
 	static int lSetMoves(lua_State* L);
+	static int lSetMovesSync(lua_State* L);
+
 	static int lChangeMoves(lua_State* L);
 	static int lFinishMoves(lua_State* L);
 	static int lIsImmobile(lua_State* L);
 
 	static int lGetExperience(lua_State* L);
+
 	static int lSetExperience(lua_State* L);
+	static int lSetExperienceSync(lua_State* L);
+
 	static int lChangeExperience(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_UNITS_XP_TIMES_100)
 	LUAAPIEXTN(GetExperienceTimes100, int);
@@ -430,6 +439,7 @@ protected:
 #endif
 	static int lGetLevel(lua_State* L);
 	static int lSetLevel(lua_State* L);
+	static int lSetLevelSync(lua_State* L);
 	static int lChangeLevel(lua_State* L);
 	static int lGetFacingDirection(lua_State* L);
 	static int lRotateFacingDirectionClockwise(lua_State* L);
@@ -556,7 +566,9 @@ protected:
 	static int lCanAcquirePromotionAny(lua_State* L);
 	static int lIsPromotionValid(lua_State* L);
 	static int lIsHasPromotion(lua_State* L);
+
 	static int lSetHasPromotion(lua_State* L);
+	static int lSetHasPromotionSync(lua_State* L);
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(SetActivityType, void, iActivityType, bClearFortify);

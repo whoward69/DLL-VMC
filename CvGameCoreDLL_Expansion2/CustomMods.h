@@ -88,6 +88,8 @@
 #define MOD_API_EXTENSIONS                          gCustomMods.isAPI_EXTENSIONS()
 // Enables the LUA Extensions API
 #define MOD_API_LUA_EXTENSIONS                      gCustomMods.isAPI_LUA_EXTENSIONS()
+// Force to use network sync API.
+#define MOD_API_FORCE_SYNC_VER                      gCustomMods.isAPI_FORCE_SYNC_VER()
 
 // Provides syncronized unit operations
 //#define MOD_API_SYNCRONIZED_UNIT_OPERATION          gCustomMods.isAPI_SYNCRONIZED_UNIT_OPERATION()
@@ -1343,6 +1345,7 @@ public:
 	MOD_OPT_DECL(API_ACHIEVEMENTS);
 	MOD_OPT_DECL(API_EXTENSIONS);
 	MOD_OPT_DECL(API_LUA_EXTENSIONS);
+	MOD_OPT_DECL(API_FORCE_SYNC_VER);
 
 	//MOD_OPT_DECL(API_SYNCRONIZED_UNIT_OPERATION);
 

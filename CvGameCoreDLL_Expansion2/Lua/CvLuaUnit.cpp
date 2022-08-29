@@ -384,6 +384,7 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(GetXY);
 #endif
 	Method(SetXY);
+	Method(SetXYSync);
 	Method(At);
 	Method(AtPlot);
 	Method(GetPlot);
@@ -398,13 +399,18 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(SetDamage);
 	Method(ChangeDamage);
 	Method(GetMoves);
+
 	Method(SetMoves);
+	Method(SetMovesSync);
+
 	Method(ChangeMoves);
 	Method(FinishMoves);
 	Method(IsImmobile);
 
 	Method(GetExperience);
 	Method(SetExperience);
+	Method(SetExperienceSync);
+
 	Method(ChangeExperience);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_UNITS_XP_TIMES_100)
 	Method(GetExperienceTimes100);
@@ -413,6 +419,8 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 #endif
 	Method(GetLevel);
 	Method(SetLevel);
+	Method(SetLevelSync);
+
 	Method(ChangeLevel);
 	Method(GetFacingDirection);
 	Method(RotateFacingDirectionClockwise);
@@ -543,6 +551,7 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(IsPromotionValid);
 	Method(IsHasPromotion);
 	Method(SetHasPromotion);
+	Method(SetHasPromotionSync);
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 	Method(SetActivityType);
@@ -676,6 +685,7 @@ int CvLuaUnit::lUpgradeTo(lua_State* L)
 //void kill(bool bDelay, PlayerTypes ePlayer = NO_PLAYER);
 int CvLuaUnit::lKill(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaUnit::lKillSync(L);
 	CvUnit* pkUnit = GetInstance(L);
 	const bool bDelay = lua_toboolean(L, 2);
 	const PlayerTypes ePlayer
@@ -696,9 +706,7 @@ int CvLuaUnit::lKillSync(lua_State* L) {
 	const PlayerTypes owner = pkUnit->getOwner();
 	const int ID = pkUnit->GetID();
 	
-	//gDLL->sendDoCommand(pkUnit->GetID(), COMMAND_KILL, bDelay, pkUnit->getOwner(), false);
-	const char* emptyMsg = "e";
-	gDLL->SendFoundReligion(owner, ReligionTypes(CustomOperationTypes::CUSTOM_OPERATION_UNIT_KILL << 16), emptyMsg,
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_KILL), "e",
 		(BeliefTypes)ID, (BeliefTypes)ePlayer, (BeliefTypes)bDelay, (BeliefTypes)-1, -1, -1);
 	return 0;
 }
@@ -3672,6 +3680,7 @@ int CvLuaUnit::lGetXY(lua_State* L)
 //void setXY(int iX, int iY, bool bGroup = false, bool bUpdate = true, bool bShow = false, bCheckPlotVisible = false);
 int CvLuaUnit::lSetXY(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaUnit::lSetXYSync(L);
 	CvUnit* pkUnit = GetInstance(L);
 	const int x = lua_tointeger(L, 2);
 	const int y = lua_tointeger(L, 3);
@@ -3681,6 +3690,30 @@ int CvLuaUnit::lSetXY(lua_State* L)
 	const bool bCheckPlotVisible = luaL_optint(L, 7, 0);
 
 	pkUnit->setXY(x, y, bGroup, bUpdate, bShow, bCheckPlotVisible);
+	return 0;
+}
+
+
+int CvLuaUnit::lSetXYSync(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int x = lua_tointeger(L, 2);
+	const int y = lua_tointeger(L, 3);
+	const bool bGroup = luaL_optint(L, 4, 0);
+	const bool bUpdate = luaL_optint(L, 5, 1);
+	const bool bShow = luaL_optint(L, 6, 0);
+	const bool bCheckPlotVisible = luaL_optint(L, 7, 0);
+
+	int boolOption = 0;
+	boolOption |= bGroup ? 1 : 0;
+	boolOption |= bUpdate ? 1 << 1 : 0;
+	boolOption |= bShow ? 1 << 2 : 0;
+	boolOption |= bCheckPlotVisible ? 1 << 3 : 0;
+
+	const PlayerTypes owner = pkUnit->getOwner();
+	const int ID = pkUnit->GetID();
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_TELEPORT), "e", BeliefTypes(ID), BeliefTypes(x), BeliefTypes(y), BeliefTypes(boolOption), -1, -1);
+	//pkUnit->setXY(x, y, bGroup, bUpdate, bShow, bCheckPlotVisible);
 	return 0;
 }
 //------------------------------------------------------------------------------
@@ -3833,10 +3866,24 @@ int CvLuaUnit::lGetMoves(lua_State* L)
 //void setMoves(int iNewValue);
 int CvLuaUnit::lSetMoves(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaUnit::lSetMovesSync(L);
 	CvUnit* pkUnit = GetInstance(L);
 	const int iNewValue = lua_tointeger(L, 2);
 
 	pkUnit->setMoves(iNewValue);
+	return 0;
+}
+
+int CvLuaUnit::lSetMovesSync(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iNewValue = lua_tointeger(L, 2);
+	const PlayerTypes owner = pkUnit->getOwner();
+	const int ID = pkUnit->GetID();
+	//iData1: Unit ID. iData2: New value.
+	gDLL->SendFoundReligion(owner, (ReligionTypes)CUSTOM_OPERATION_UNIT_SET_MOVE, "e",
+		(BeliefTypes)ID, (BeliefTypes)iNewValue, (BeliefTypes)-1, (BeliefTypes)-1, -1, -1);
+	//pkUnit->setMoves(iNewValue);
 	return 0;
 }
 //------------------------------------------------------------------------------
@@ -3886,6 +3933,7 @@ int CvLuaUnit::lGetExperience(lua_State* L)
 //void setExperience(int iNewValue, int iMax = -1);
 int CvLuaUnit::lSetExperience(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaUnit::lSetExperienceSync(L);
 	CvUnit* pkUnit = GetInstance(L);
 	const int iNewValue = lua_tointeger(L, 2);
 	const int iMax = luaL_optint(L, 3, -1);
@@ -3897,6 +3945,22 @@ int CvLuaUnit::lSetExperience(lua_State* L)
 #endif
 	return 0;
 }
+
+int CvLuaUnit::lSetExperienceSync(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iNewValue = lua_tointeger(L, 2);
+	const int iMax = luaL_optint(L, 3, -1);
+	const PlayerTypes owner = pkUnit->getOwner();
+	const int ID = pkUnit->GetID();
+
+	//iData1: Unit ID. iData2: New value. iData3: iMax
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_SET_EXPERIENCE), "e",
+		(BeliefTypes)ID, (BeliefTypes)iNewValue, (BeliefTypes)iMax, (BeliefTypes)-1, -1, -1);
+	//pkUnit->setExperienceTimes100(iNewValue * 100, iMax);
+	return 0;
+}
+
 //------------------------------------------------------------------------------
 //void changeExperience(int iChange, int iMax = -1, bool bFromCombat = false, bool bInBorders = false, bool bUpdateGlobal = false);
 int CvLuaUnit::lChangeExperience(lua_State* L)
@@ -3966,10 +4030,24 @@ int CvLuaUnit::lGetLevel(lua_State* L)
 //void setLevel(int iNewLevel);
 int CvLuaUnit::lSetLevel(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaUnit::lSetLevelSync(L);
+
 	CvUnit* pkUnit = GetInstance(L);
 	const int iNewLevel = lua_tointeger(L, 2);
 
 	pkUnit->setLevel(iNewLevel);
+	return 0;
+}
+
+int CvLuaUnit::lSetLevelSync(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iNewLevel = lua_tointeger(L, 2);
+	const PlayerTypes owner = pkUnit->getOwner();
+	const int ID = pkUnit->GetID();
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_SET_LEVEL), "e", BeliefTypes(ID), BeliefTypes(iNewLevel), BeliefTypes(-1), BeliefTypes(-1), -1, -1);
+	//pkUnit->setXY(x, y, bGroup, bUpdate, bShow, bCheckPlotVisible);
+	//pkUnit->setLevel(iNewLevel);
 	return 0;
 }
 //------------------------------------------------------------------------------
@@ -5048,11 +5126,28 @@ int CvLuaUnit::lIsHasPromotion(lua_State* L)
 //void setHasPromotion(int /*PromotionTypes*/ eIndex, bool bNewValue);
 int CvLuaUnit::lSetHasPromotion(lua_State* L)
 {
+
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaUnit::lSetHasPromotionSync(L);
+
 	CvUnit* pkUnit = GetInstance(L);
 	const PromotionTypes eIndex = (PromotionTypes)lua_tointeger(L, 2);
 	const bool bNewValue = lua_toboolean(L, 3);
 
 	pkUnit->setHasPromotion(eIndex, bNewValue);
+	return 0;
+}
+
+int CvLuaUnit::lSetHasPromotionSync(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const PromotionTypes eIndex = (PromotionTypes)lua_tointeger(L, 2);
+	const bool bNewValue = lua_toboolean(L, 3);
+	const PlayerTypes owner = pkUnit->getOwner();
+	const int ID = pkUnit->GetID();
+	//pkUnit->setHasPromotion(eIndex, bNewValue);
+	//iData1: Unit ID. iData2: promotion. iData3: new value
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_GIVE_PROMOTION), "e", 
+		BeliefTypes(ID), BeliefTypes(eIndex), BeliefTypes(bNewValue), BeliefTypes(-1), -1, -1);
 	return 0;
 }
 //------------------------------------------------------------------------------

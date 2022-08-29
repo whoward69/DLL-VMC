@@ -331,7 +331,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 	int customCommandType, 
 	int iData1, int iData2, int iData3, int iData4, int iData5, int iData6,
 	const char* customMsg) {
-	int realCommandType = customCommandType >> 16;
+	int realCommandType = customCommandType;
 	if (realCommandType == CustomOperationTypes::CUSTOM_OPERATION_UNIT_KILL) {
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: Executer of the command. iData3: bDelay
@@ -342,22 +342,74 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		return;
 	}
 
-	if (realCommandType == CustomOperationTypes::CUSTOM_OPERATION_PLAYER_INIT_UNIT) {
+	if (realCommandType == CUSTOM_OPERATION_PLAYER_INIT_UNIT) {
 		//ePlayer: The player to give unit
 		//iData1: Unit type. iData2: X. iData3: Y. iData4: Unit AI. iData5: Direction. iData6: ID of return value.
-		if (ReturnValueUtil::container.getReturnValueExist(iData6, CustomOperationTypes::CUSTOM_OPERATION_PLAYER_INIT_UNIT)) return;
+
+		//if the message is sent from local player, execute initUnit before sending network message.
+		if (ReturnValueUtil::container.getReturnValueExist(iData6, CUSTOM_OPERATION_PLAYER_INIT_UNIT, ePlayer)) return;
 		CvUnit* unit = GET_PLAYER(ePlayer).initUnit((UnitTypes)iData1, iData2, iData3, (UnitAITypes)iData4, (DirectionTypes)iData5);
 		//ReturnValueUtil::container.pushReturnValue(iData6, unit);
 		return;
 	}
 
-	if (realCommandType == CustomOperationTypes::CUSTOM_OPERATION_UNIT_TELEPORT) {
+	if (realCommandType == CUSTOM_OPERATION_UNIT_TELEPORT) {
+		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: X. iData3: Y, iData4: boolean flags
-		//CvUnit* unit = GET_PLAYER((PlayerTypes)iData1).getUnit(iData2);
-		/*if (unit != NULL) {
-			unit->setXY(iData3, iData4, 
-				iData5 & (1 << 0), iData5 & (1 << 1), iData5 & (1 << 2), iData5 & (1 << 3), iData5 & (1 << 4));
-		}*/
+		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		if (unit != NULL) {
+			unit->setXY(iData2, iData3, 
+				iData4 & (1 << 0), iData4 & (1 << 1), iData4 & (1 << 2), iData4 & (1 << 3));
+		}
+		return;
+	}
+	
+	if (realCommandType == CUSTOM_OPERATION_UNIT_GIVE_PROMOTION) {
+		//ePlayer: Owner of the unit
+		//iData1: Unit ID. iData2: promotion. iData3: new value
+		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		if (unit != NULL) {
+			unit->setHasPromotion(PromotionTypes(iData2), iData3 > 0);
+		}
+		return;
+	}
+
+	if (realCommandType == CUSTOM_OPERATION_UNIT_SET_LEVEL) {
+		//ePlayer: Owner of the unit
+		//iData1: Unit ID. iData2: level.
+		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		if (unit != NULL) {
+			unit->setLevel(iData2);
+		}
+		return;
+	}
+
+	if (realCommandType == CUSTOM_OPERATION_CITY_SET_NUM_BUILDING) {
+		//ePlayer: Owner of the city
+		//iData1: City ID. iData2: Building type. iData3: New value.
+		CvCity* city = GET_PLAYER(ePlayer).getCity(iData1);
+		if (city != NULL) {
+			city->GetCityBuildings()->SetNumRealBuilding((BuildingTypes)iData2, iData3);
+		}
+		return;
+	}
+	
+	if (realCommandType == CUSTOM_OPERATION_UNIT_SET_MOVE) {
+		//ePlayer: Owner of the unit
+		//iData1: Unit ID. iData2: New value.
+		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		if (unit != NULL) {
+			unit->setMoves(iData2);
+		}
+		return;
+	}
+	if (realCommandType == CUSTOM_OPERATION_UNIT_SET_EXPERIENCE) {
+		//ePlayer: Owner of the unit
+		//iData1: Unit ID. iData2: New value. iData3: iMax
+		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		if (unit != NULL) {
+			unit->setExperienceTimes100(iData2 * 100, iData3);
+		}
 		return;
 	}
 }
@@ -366,12 +418,10 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 // Use this method for customized operations.
 void CvDllNetMessageHandler::ResponseFoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion, const char* szCustomName, BeliefTypes eBelief1, BeliefTypes eBelief2, BeliefTypes eBelief3, BeliefTypes eBelief4, int iCityX, int iCityY)
 {
-	//ReligionTypes religion = ReligionTypes(eReligion & (1 << 16 - 1));
 	if ((UINT16(eReligion >> 16) > 0)) {
 		TransmissCustomizedOperationFromResponseFoundReligion(ePlayer, eReligion, eBelief1, eBelief2, eBelief3, eBelief4, iCityX, iCityY, szCustomName);
 		return;
 	}
-	//ReligionTypes religion = ReligionTypes(eReligion << 16 >> 16);
 
 	CvGame& kGame(GC.getGame());
 	CvGameReligions* pkGameReligions(kGame.GetGameReligions());

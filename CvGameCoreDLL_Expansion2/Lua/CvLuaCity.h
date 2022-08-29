@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -364,7 +364,9 @@ protected:
 	static int lSetOccupied(lua_State* L);
 
 	static int lIsPuppet(lua_State* L);
+
 	static int lSetPuppet(lua_State* L);
+	static int lSetPuppetSync(lua_State* L);
 
 	static int lGetHappinessFromBuildings(lua_State* L);
 	static int lGetHappiness(lua_State* L);
@@ -497,6 +499,7 @@ protected:
 	static int lGetNumForcedWorkingPlots(lua_State* L);
 	static int lGetNumRealBuilding(lua_State* L);
 	static int lSetNumRealBuilding(lua_State* L);
+	static int lSetNumRealBuildingSync(lua_State* L);
 	static int lGetNumFreeBuilding(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(SetNumFreeBuilding, void, iBuildingType, iCount);

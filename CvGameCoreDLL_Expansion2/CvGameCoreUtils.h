@@ -16,20 +16,22 @@
 
 #undef min
 
-
 class ReturnPointerRecorder {
 public:
+	static const int MaxSize = 256;
+	
 	ReturnPointerRecorder() {
-		returnValues = std::list<pair<int, int>>();
+		returnValueRecord = std::list<int>();
 		m_Locker = FCriticalSection();
 	}
 	~ReturnPointerRecorder() {
-		returnValues.clear();
+		returnValueRecord.clear();
 	}
-	std::list<pair<int, int>> returnValues;
+	std::list<int> returnValueRecord;
+	std::map<int, list<int>::iterator> valueMap;
 	FCriticalSection m_Locker;
-	void pushReturnValue(int id, int type);
-	bool getReturnValueExist(int id, int type);
+	void pushReturnValue(int time, int operation, int id);
+	bool getReturnValueExist(int time, int operation, int id);
 };
 namespace ReturnValueUtil {
 	extern ReturnPointerRecorder container;

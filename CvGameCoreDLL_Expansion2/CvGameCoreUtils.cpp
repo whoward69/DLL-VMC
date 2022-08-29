@@ -26,32 +26,37 @@
 // must be included after all other headers
 #include "LintFree.h"
 
-void ReturnPointerRecorder::pushReturnValue(int id, int type) {
+void ReturnPointerRecorder::pushReturnValue(int time, int operation, int id) {
 	while (!m_Locker.Try()) {
 		Sleep(1);
 	}
 	m_Locker.Enter();
-	if (returnValues.size() >= 50) returnValues.pop_front();
-	returnValues.push_back(pair<int, int>(id, type));
+	if (returnValueRecord.size() >= MaxSize) {
+		valueMap.erase(returnValueRecord.front());
+		returnValueRecord.pop_front();
+	}
+	int res = (time * 10000019 + (operation << 16) * 509796 + id * 6032777) % 10000733;
+	returnValueRecord.push_back(res);
+	;
+	valueMap.insert(std::pair<int, list<int>::iterator>(res, --returnValueRecord.end()));
 	m_Locker.Leave();
 }
 
-bool ReturnPointerRecorder::getReturnValueExist(int id, int type) {
+bool ReturnPointerRecorder::getReturnValueExist(int time, int operation, int id) {
 	while (!m_Locker.Try()) {
 		Sleep(1);
 	}
 	m_Locker.Enter();
-	list<pair<int, int>>::iterator iter;
-	for (iter = returnValues.begin(); iter != returnValues.end(); iter++) {
-		if ((*iter).first == id) {
-			int rtn = (*iter).second;
-			returnValues.erase(iter);
-			m_Locker.Leave();
-			return true;
-		}
+	int res = (time * 10000019 + (operation << 16) * 509796 + id * 6032777) % 10000733;
+	std::map<int, list<int>::iterator>::iterator iter = valueMap.find(res);
+	bool rtn = false;
+	if (iter != valueMap.end()) {
+		rtn = true;
+		returnValueRecord.erase((*iter).second);
+		valueMap.erase(iter);
 	}
 	m_Locker.Leave();
-	return false;
+	return rtn;
 }
 
 namespace ReturnValueUtil {

@@ -1267,6 +1267,7 @@ int CvLuaPlayer::lIsCityNameValid(lua_State* L)
 //CvUnit* initUnit(UnitTypes eUnit, int iX, int iY, UnitAITypes eUnitAI = NO_UNITAI, DirectionTypes eFacingDirection = NO_DIRECTION);
 int CvLuaPlayer::lInitUnit(lua_State* L)
 {
+	if(MOD_API_FORCE_SYNC_VER) return CvLuaPlayer::lInitUnitSync(L);
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	const UnitTypes eUnit = (UnitTypes)lua_tointeger(L, 2);
 	const int x = lua_tointeger(L, 3);
@@ -1291,10 +1292,11 @@ int CvLuaPlayer::lInitUnitSync(lua_State* L)
 	const DirectionTypes eFacingDirection = (DirectionTypes)luaL_optint(L, 6, NO_DIRECTION);
 	int time = GetTickCount();
 	CvUnit* pkUnit = pkPlayer->initUnit(eUnit, x, y, eUnitAI, eFacingDirection);
-	gDLL->SendFoundReligion(playerID, ReligionTypes(CustomOperationTypes::CUSTOM_OPERATION_PLAYER_INIT_UNIT << 16), "e",
+	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLAYER_INIT_UNIT, playerID);
+	gDLL->SendFoundReligion(playerID, ReligionTypes(CUSTOM_OPERATION_PLAYER_INIT_UNIT), "e",
 		(BeliefTypes)eUnit, (BeliefTypes)x, (BeliefTypes)y, (BeliefTypes)eUnitAI, eFacingDirection, time);
 
-	ReturnValueUtil::container.pushReturnValue(time, CustomOperationTypes::CUSTOM_OPERATION_PLAYER_INIT_UNIT);
+	
 	CvLuaUnit::Push(L, pkUnit);
 	return 1;
 }

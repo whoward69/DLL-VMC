@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -370,7 +370,9 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(SetOccupied);
 
 	Method(IsPuppet);
+
 	Method(SetPuppet);
+	Method(SetPuppetSync);
 
 	Method(GetHappinessFromBuildings);
 	Method(GetHappiness);
@@ -498,7 +500,11 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(AlterWorkingPlot);
 	Method(IsForcedWorkingPlot);
 	Method(GetNumRealBuilding);
+
 	Method(SetNumRealBuilding);
+	Method(SetNumRealBuildingSync);
+
+
 	Method(GetNumFreeBuilding);
 #if defined(MOD_API_LUA_EXTENSIONS)
 	Method(SetNumFreeBuilding);
@@ -3042,6 +3048,14 @@ int CvLuaCity::lSetPuppet(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvCity::SetPuppet);
 }
+int CvLuaCity::lSetPuppetSync(lua_State* L)
+{
+	CvCity* pkCity = GetInstance(L);
+	const bool iIndex = toValue<bool>(L, 2);
+	const PlayerTypes owner = pkCity->getOwner();
+	return BasicLuaMethod(L, &CvCity::SetPuppet);
+}
+
 //------------------------------------------------------------------------------
 int CvLuaCity::lGetHappinessFromBuildings(lua_State* L)
 {
@@ -3965,12 +3979,32 @@ int CvLuaCity::lGetNumRealBuilding(lua_State* L)
 //void setNumRealBuilding(BuildingTypes iIndex, int iNewValue);
 int CvLuaCity::lSetNumRealBuilding(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaCity::lSetNumRealBuildingSync(L);
 	CvCity* pkCity = GetInstance(L);
 	const BuildingTypes iIndex = toValue<BuildingTypes>(L, 2);
 	if(iIndex != NO_BUILDING)
 	{
 		const int iNewValue = lua_tointeger(L, 3);
 		pkCity->GetCityBuildings()->SetNumRealBuilding(iIndex, iNewValue);
+	}
+
+	return 1;
+}
+
+int CvLuaCity::lSetNumRealBuildingSync(lua_State* L)
+{
+	CvCity* pkCity = GetInstance(L);
+	const BuildingTypes iIndex = toValue<BuildingTypes>(L, 2);
+	const PlayerTypes owner = pkCity->getOwner();
+	const int ID = pkCity->GetID();
+
+	if (iIndex != NO_BUILDING)
+	{
+		const int iNewValue = lua_tointeger(L, 3);
+		//iData1: City ID. iData2: building type. iData3: new value.
+		gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITY_SET_NUM_BUILDING), "e",
+			(BeliefTypes)ID, (BeliefTypes)iIndex, (BeliefTypes)iNewValue, (BeliefTypes)-1, -1, -1);
+		//pkCity->GetCityBuildings()->SetNumRealBuilding(iIndex, iNewValue);
 	}
 
 	return 1;
