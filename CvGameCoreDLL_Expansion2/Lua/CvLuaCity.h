@@ -361,7 +361,9 @@ protected:
 	static int lChangeRazingTurns(lua_State* L);
 
 	static int lIsOccupied(lua_State* L);
+
 	static int lSetOccupied(lua_State* L);
+	static int lSetOccupiedSync(lua_State* L);
 
 	static int lIsPuppet(lua_State* L);
 
@@ -479,6 +481,7 @@ protected:
 
 	static int lGetDamage(lua_State* L);
 	static int lSetDamage(lua_State* L);
+	static int lSetDamageSync(lua_State* L);
 	static int lChangeDamage(lua_State* L);
 	static int lGetMaxHitPoints(lua_State* L);
 

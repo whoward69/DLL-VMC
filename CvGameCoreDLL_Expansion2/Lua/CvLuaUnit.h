@@ -415,6 +415,7 @@ protected:
 
 	static int lGetDamage(lua_State* L);
 	static int lSetDamage(lua_State* L);
+	static int lSetDamageSync(lua_State* L);
 	static int lChangeDamage(lua_State* L);
 
 	static int lGetMoves(lua_State* L);
@@ -500,6 +501,7 @@ protected:
 
 	static int lIsOutOfAttacks(lua_State* L);
 	static int lSetMadeAttack(lua_State* L);
+	static int lSetMadeAttackSync(lua_State* L);
 	static int lisOutOfInterceptions(lua_State* L);
 	static int lSetMadeInterception(lua_State* L);
 

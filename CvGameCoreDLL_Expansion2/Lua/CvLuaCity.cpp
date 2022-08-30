@@ -367,7 +367,9 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(ChangeRazingTurns);
 
 	Method(IsOccupied);
+
 	Method(SetOccupied);
+	Method(SetOccupiedSync);
 
 	Method(IsPuppet);
 
@@ -483,6 +485,7 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 
 	Method(GetDamage);
 	Method(SetDamage);
+	Method(SetDamageSync);
 	Method(ChangeDamage);
 	Method(GetMaxHitPoints);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_EVENTS_CITY_BOMBARD)
@@ -3034,7 +3037,19 @@ int CvLuaCity::lIsOccupied(lua_State* L)
 //void SetOccupied(bool bValue);
 int CvLuaCity::lSetOccupied(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaCity::lSetOccupiedSync(L);
 	return BasicLuaMethod(L, &CvCity::SetOccupied);
+}
+
+int CvLuaCity::lSetOccupiedSync(lua_State* L)
+{
+	CvCity* pkCity = GetInstance(L);
+	bool bNewValue = lua_toboolean(L, 2);
+	const PlayerTypes owner = pkCity->getOwner();
+	const int ID = pkCity->GetID();
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITY_SET_OCCUPIED), "e",
+		(BeliefTypes)ID, (BeliefTypes)bNewValue, (BeliefTypes)-1, (BeliefTypes)-1, -1, -1);
+	return 0;
 }
 //------------------------------------------------------------------------------
 //int IsPuppet();
@@ -3046,14 +3061,19 @@ int CvLuaCity::lIsPuppet(lua_State* L)
 //void SetPuppet(bool bValue);
 int CvLuaCity::lSetPuppet(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaCity::lSetPuppetSync(L);
 	return BasicLuaMethod(L, &CvCity::SetPuppet);
 }
 int CvLuaCity::lSetPuppetSync(lua_State* L)
 {
 	CvCity* pkCity = GetInstance(L);
-	const bool iIndex = toValue<bool>(L, 2);
+	bool bNewValue = lua_toboolean(L, 2);
 	const PlayerTypes owner = pkCity->getOwner();
-	return BasicLuaMethod(L, &CvCity::SetPuppet);
+	const int ID = pkCity->GetID();
+
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITY_SET_PUPPET), "e",
+		(BeliefTypes)ID, (BeliefTypes)bNewValue, (BeliefTypes)-1, (BeliefTypes)-1, -1, -1);
+	return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -3829,8 +3849,21 @@ int CvLuaCity::lGetDamage(lua_State* L)
 //void setDamage(int iValue);
 int CvLuaCity::lSetDamage(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaCity::lSetDamageSync(L);
 	return BasicLuaMethod(L, &CvCity::setDamage);
 }
+int CvLuaCity::lSetDamageSync(lua_State* L)
+{
+	CvCity* pkCity = GetInstance(L);
+	const PlayerTypes owner = pkCity->getOwner();
+	const int iNewValue = lua_tointeger(L, 2);
+	const bool bNoMessage = luaL_optbool(L, 3, false);
+	const int ID = pkCity->GetID();
+	gDLL->SendFoundReligion(owner,
+		ReligionTypes(CUSTOM_OPERATION_CITY_SET_DAMAGE), "e", BeliefTypes(ID), BeliefTypes(iNewValue), BeliefTypes(bNoMessage), BeliefTypes(-1), -1, -1);
+	return 0;
+}
+
 //------------------------------------------------------------------------------
 //void changeDamage(int iChange);
 int CvLuaCity::lChangeDamage(lua_State* L)

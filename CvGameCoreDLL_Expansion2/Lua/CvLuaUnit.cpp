@@ -397,6 +397,7 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 
 	Method(GetDamage);
 	Method(SetDamage);
+	Method(SetDamageSync);
 	Method(ChangeDamage);
 	Method(GetMoves);
 
@@ -483,7 +484,10 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 
 
 	Method(IsOutOfAttacks);
+
 	Method(SetMadeAttack);
+	Method(SetMadeAttackSync);
+
 	Method(isOutOfInterceptions);
 	Method(SetMadeInterception);
 
@@ -3824,6 +3828,7 @@ int CvLuaUnit::lGetDamage(lua_State* L)
 //void setDamage(int iNewValue, int /*PlayerTypes*/ ePlayer, bNotifyEntity = true);
 int CvLuaUnit::lSetDamage(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaUnit::lSetDamageSync(L);
 	CvUnit* pkUnit = GetInstance(L);
 	const int iNewValue = lua_tointeger(L, 2);
 	const PlayerTypes ePlayer = (lua_isnil(L, 3))? NO_PLAYER : (PlayerTypes)lua_tointeger(L, 3);
@@ -3836,6 +3841,23 @@ int CvLuaUnit::lSetDamage(lua_State* L)
 #endif
 	return 0;
 }
+
+int CvLuaUnit::lSetDamageSync(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const PlayerTypes owner = pkUnit->getOwner();
+	const int iNewValue = lua_tointeger(L, 2);
+	const PlayerTypes ePlayer = (lua_isnil(L, 3)) ? NO_PLAYER : (PlayerTypes)lua_tointeger(L, 3);
+	const bool bNotifyEntity = luaL_optint(L, 4, 1);
+	const int ID = pkUnit->GetID();
+
+	//iData1: Unit ID. iData2: iNewValue. iData3: ePlayer. iData4: bNotifyEntity
+	//pkUnit->setDamage(iNewValue, ePlayer, -1, bNotifyEntity);
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_SET_DAMAGE), "e", 
+		BeliefTypes(ID), BeliefTypes(iNewValue), BeliefTypes(ePlayer), BeliefTypes(bNotifyEntity), -1, -1);
+	return 0;
+}
+
 //------------------------------------------------------------------------------
 //void changeDamage(int iChange, int /*PlayerTypes*/ ePlayer);
 int CvLuaUnit::lChangeDamage(lua_State* L)
@@ -4584,10 +4606,24 @@ int CvLuaUnit::lIsOutOfAttacks(lua_State* L)
 //void setMadeAttack(bool bNewValue);
 int CvLuaUnit::lSetMadeAttack(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaUnit::lSetMadeAttackSync(L);
 	CvUnit* pkUnit = GetInstance(L);
 	const bool bNewValue = lua_toboolean(L, 2);
 
 	pkUnit->setMadeAttack(bNewValue);
+	return 0;
+}
+
+int CvLuaUnit::lSetMadeAttackSync(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const PlayerTypes owner = pkUnit->getOwner();
+	const bool bNewValue = lua_toboolean(L, 2);
+	const int ID = pkUnit->GetID();
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_SET_MADEATK), "e",
+		(BeliefTypes)ID, (BeliefTypes)bNewValue, (BeliefTypes)-1, (BeliefTypes)-1, -1, -1);
+	//pkUnit->setMadeAttack(bNewValue);
+	
 	return 0;
 }
 //------------------------------------------------------------------------------

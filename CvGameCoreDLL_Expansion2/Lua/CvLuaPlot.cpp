@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -217,6 +217,7 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 
 	Method(GetImprovementType);
 	Method(SetImprovementType);
+	Method(SetImprovementTypeSync);
 	Method(SetImprovementPillaged);
 	Method(GetRouteType);
 	Method(SetRouteType);
@@ -269,6 +270,7 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 
 	Method(IsRevealed);
 	Method(SetRevealed);
+	Method(SetRevealedSync);
 	Method(GetRevealedImprovementType);
 	Method(GetRevealedRouteType);
 	Method(GetBuildProgress);
@@ -469,7 +471,6 @@ int CvLuaPlot::lSetFeatureType(lua_State* L)
 
 	const int featureType = lua_tointeger(L, 2);
 	const int variety = luaL_optinteger(L, 3, -1);
-
 
 	pkPlot->setFeatureType((FeatureTypes)featureType, variety);
 
@@ -1485,8 +1486,22 @@ int CvLuaPlot::lGetImprovementType(lua_State* L)
 //void setImprovementType(ImprovementTypes eNewValue);
 int CvLuaPlot::lSetImprovementType(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER)return CvLuaPlot::lSetImprovementTypeSync(L);
 	return BasicLuaMethod(L, &CvPlot::setImprovementType);
 }
+
+int CvLuaPlot::lSetImprovementTypeSync(lua_State* L)
+{
+	//iData1: Improvement ID. iData3: Plot X. iData4: Plot Y.
+	CvPlot* pkPlot = GetInstance(L);
+	const ImprovementTypes iType = (ImprovementTypes)lua_tointeger(L, 2);
+	const PlayerTypes player = (PlayerTypes)luaL_optinteger(L, 3, NO_PLAYER);
+	
+	gDLL->SendFoundReligion(player, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE), "e",
+		(BeliefTypes)iType, (BeliefTypes)pkPlot->getX(), (BeliefTypes)pkPlot->getY(), (BeliefTypes)-1, -1, -1);
+	return 0;
+}
+
 //------------------------------------------------------------------------------
 //void setImprovementType(bool b);
 int CvLuaPlot::lSetImprovementPillaged(lua_State* L)
@@ -1802,13 +1817,14 @@ int CvLuaPlot::lIsRevealed(lua_State* L)
 //void setRevealed(TeamTypes eTeam, bool bNewValue, bool bTerrainOnly, TeamTypes eFromTeam);
 int CvLuaPlot::lSetRevealed(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaPlot::lSetRevealedSync(L);
 	CvPlot* pkPlot = GetInstance(L);
 	const TeamTypes eTeam = (TeamTypes)lua_tointeger(L, 2);
 	const bool bNewValue = lua_toboolean(L, 3);
 	const bool bTerrainOnly = luaL_optint(L, 4, 0);
 	const TeamTypes eFromTeam = (TeamTypes)luaL_optint(L, 5, NO_TEAM);
 #if defined(MOD_API_EXTENSIONS)
-	if(lua_gettop(L) >= 6)
+	if (lua_gettop(L) >= 6)
 	{
 		CvUnit* pkUnit = CvLuaUnit::GetInstance(L, 6);
 		pkPlot->setRevealed(eTeam, bNewValue, pkUnit, bTerrainOnly, eFromTeam);
@@ -1820,6 +1836,38 @@ int CvLuaPlot::lSetRevealed(lua_State* L)
 #else
 	pkPlot->setRevealed(eTeam, bNewValue, bTerrainOnly, eFromTeam);
 #endif
+	return 0;
+}
+
+int CvLuaPlot::lSetRevealedSync(lua_State* L)
+{
+	CvPlot* pkPlot = GetInstance(L);
+	const int X = pkPlot->getX(), Y = pkPlot->getY();
+	const TeamTypes eTeam = (TeamTypes)lua_tointeger(L, 2);
+	const bool bNewValue = lua_toboolean(L, 3);
+	const bool bTerrainOnly = luaL_optint(L, 4, 0);
+	const TeamTypes eFromTeam = (TeamTypes)luaL_optint(L, 5, NO_TEAM);
+	//ePlayer: Owner of the unit(if exists)
+	//iData1: Teamtype ID. iData2: bNewValue (<<0) and bTerrainOnly (<<1), iData3: UnitID, iData4:eFromTeam, iData5: X, iData6: Y
+	int optInt = 0;
+	optInt |= bNewValue ? 1 : 0;
+	optInt |= bTerrainOnly ? 1 << 1 : 0;
+
+	if (lua_gettop(L) >= 6)
+	{
+		CvUnit* pkUnit = CvLuaUnit::GetInstance(L, 6);
+		const int ID = pkUnit->GetID();
+		const PlayerTypes ePlayer = pkUnit->getOwner();
+		gDLL->SendFoundReligion(ePlayer, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_REVEALED), "e",
+			(BeliefTypes)eTeam, (BeliefTypes)optInt, (BeliefTypes)ID, (BeliefTypes)eFromTeam, X, Y);
+		//pkPlot->setRevealed(eTeam, bNewValue, pkUnit, bTerrainOnly, eFromTeam);
+	}
+	else
+	{
+		//pkPlot->setRevealed(eTeam, bNewValue, NULL, bTerrainOnly, eFromTeam);
+		gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_REVEALED), "e",
+			(BeliefTypes)eTeam, (BeliefTypes)optInt, (BeliefTypes)-1, (BeliefTypes)eFromTeam, X, Y);
+	}
 
 	return 0;
 }

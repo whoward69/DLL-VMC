@@ -398,7 +398,10 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetNumPolicies);
 	Method(GetNumPoliciesInBranch);
 	Method(HasPolicy);
+
 	Method(SetHasPolicy);
+	Method(SetHasPolicySync);
+
 	Method(GetNextPolicyCost);
 	Method(CanAdoptPolicy);
 	Method(DoAdoptPolicy);
@@ -5236,6 +5239,7 @@ int CvLuaPlayer::lHasPolicy(lua_State* L)
 int CvLuaPlayer::lSetHasPolicy(lua_State* L)
 {
 #if defined(MOD_API_EXTENSIONS)
+	if (MOD_API_FORCE_SYNC_VER) return CvLuaPlayer::lSetHasPolicySync(L);
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	const PolicyTypes iIndex = (PolicyTypes)lua_tointeger(L, 2);
 	bool bValue = lua_toboolean(L, 3);
@@ -5246,6 +5250,21 @@ int CvLuaPlayer::lSetHasPolicy(lua_State* L)
 #else
 	return BasicLuaMethod(L, &CvPlayerAI::setHasPolicy);
 #endif
+}
+
+int CvLuaPlayer::lSetHasPolicySync(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const PolicyTypes iIndex = (PolicyTypes)lua_tointeger(L, 2);
+	bool bValue = lua_toboolean(L, 3);
+	bool bFree = luaL_optbool(L, 4, false);
+	const PlayerTypes ePlayer = pkPlayer->GetID();
+	//iData1: Policy index. iData2: bValue. iData3: bFree.
+	gDLL->SendFoundReligion(ePlayer, ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_HAS_POLICY), "e", 
+		(BeliefTypes)iIndex, (BeliefTypes)bValue, (BeliefTypes)bFree, (BeliefTypes)-1, -1, -1);
+	//pkPlayer->setHasPolicy(iIndex, bValue, bFree);
+	return 0;
+
 }
 //------------------------------------------------------------------------------
 //int getNextPolicyCost();

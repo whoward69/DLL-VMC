@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -235,6 +235,7 @@ protected:
 
 	static int lGetImprovementType(lua_State* L);
 	static int lSetImprovementType(lua_State* L);
+	static int lSetImprovementTypeSync(lua_State* L);
 	static int lSetImprovementPillaged(lua_State* L);
 	static int lGetRouteType(lua_State* L);
 	static int lSetRouteType(lua_State* L);
@@ -287,6 +288,7 @@ protected:
 
 	static int lIsRevealed(lua_State* L);
 	static int lSetRevealed(lua_State* L);
+	static int lSetRevealedSync(lua_State* L);
 	static int lGetRevealedImprovementType(lua_State* L);
 	static int lGetRevealedRouteType(lua_State* L);
 	static int lGetBuildProgress(lua_State* L);
