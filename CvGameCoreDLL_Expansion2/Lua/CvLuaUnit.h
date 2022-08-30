@@ -545,6 +545,7 @@ protected:
 	static int lHasName(lua_State* L);
 	static int lGetNameKey(lua_State* L);
 	static int lSetName(lua_State* L);
+	static int lSetNameSync(lua_State* L);
 	static int lIsTerrainDoubleMove(lua_State* L);
 	static int lIsFeatureDoubleMove(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_PROMOTIONS_HALF_MOVE)

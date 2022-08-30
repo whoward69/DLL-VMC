@@ -531,6 +531,7 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(HasName);
 	Method(GetNameKey);
 	Method(SetName);
+	Method(SetNameSync);
 	Method(IsTerrainDoubleMove);
 	Method(IsFeatureDoubleMove);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_PROMOTIONS_HALF_MOVE)
@@ -4957,9 +4958,23 @@ int CvLuaUnit::lGetNameKey(lua_State* L)
 //void setName(std::string szNewValue);
 int CvLuaUnit::lSetName(lua_State* L)
 {
+	if (MOD_API_FORCE_SYNC_VER) return  CvLuaUnit::lSetNameSync(L);
 	CvUnit* pkUnit = GetInstance(L);
 	CvString strName = lua_tostring(L, 2);
 
+	pkUnit->setName(strName);
+	return 0;
+}
+
+int CvLuaUnit::lSetNameSync(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	CvString strName = lua_tostring(L, 2);
+	const char* cName = strName.GetCString();
+	const PlayerTypes owner = pkUnit->getOwner();
+	const int ID = pkUnit->GetID();
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_SET_NAME),
+		cName, BeliefTypes(ID), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, -1);
 	pkUnit->setName(strName);
 	return 0;
 }

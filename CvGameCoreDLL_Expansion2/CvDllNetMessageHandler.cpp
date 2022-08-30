@@ -412,6 +412,15 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		}
 		return;
 	}
+	if (realCommandType == CUSTOM_OPERATION_UNIT_SET_EXPERIENCE) {
+		//ePlayer: Owner of the unit
+		//iData1: Unit ID.
+		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		if (unit != NULL) {
+			unit->setName(customMsg);
+		}
+		return;
+	}
 
 	if (realCommandType == CUSTOM_OPERATION_PLAYER_INIT_UNIT) {
 		//ePlayer: The player to give unit
