@@ -248,6 +248,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 	Method(GetJONSCulture);
 	Method(SetJONSCulture);
+	Method(SetJONSCultureSync);
 	Method(ChangeJONSCulture);
 
 	Method(GetJONSCultureEverGenerated);
@@ -729,6 +730,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetNumResourceUsed);
 	Method(GetNumResourceTotal);
 	Method(ChangeNumResourceTotal);
+	Method(ChangeNumResourceTotalSync);
 	Method(GetNumResourceAvailable);
 
 	Method(GetResourceExport);
@@ -1270,7 +1272,6 @@ int CvLuaPlayer::lIsCityNameValid(lua_State* L)
 //CvUnit* initUnit(UnitTypes eUnit, int iX, int iY, UnitAITypes eUnitAI = NO_UNITAI, DirectionTypes eFacingDirection = NO_DIRECTION);
 int CvLuaPlayer::lInitUnit(lua_State* L)
 {
-	if(MOD_API_FORCE_SYNC_VER) return CvLuaPlayer::lInitUnitSync(L);
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	const UnitTypes eUnit = (UnitTypes)lua_tointeger(L, 2);
 	const int x = lua_tointeger(L, 3);
@@ -1298,8 +1299,6 @@ int CvLuaPlayer::lInitUnitSync(lua_State* L)
 	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLAYER_INIT_UNIT, playerID);
 	gDLL->SendFoundReligion(playerID, ReligionTypes(CUSTOM_OPERATION_PLAYER_INIT_UNIT), "e",
 		(BeliefTypes)eUnit, (BeliefTypes)x, (BeliefTypes)y, (BeliefTypes)eUnitAI, eFacingDirection, time);
-
-	
 	CvLuaUnit::Push(L, pkUnit);
 	return 1;
 }
@@ -2545,6 +2544,15 @@ int CvLuaPlayer::lGetJONSCulture(lua_State* L)
 int CvLuaPlayer::lSetJONSCulture(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlayerAI::setJONSCulture);
+}
+
+int CvLuaPlayer::lSetJONSCultureSync(lua_State* L)
+{
+	CvPlayerAI* player = GetInstance(L);
+	int iNewValue = lua_tointeger(L, 2);
+	gDLL->SendFoundReligion(player->GetID(), ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_JONSCULTURE), "e",
+		BeliefTypes(iNewValue), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, -1);
+	return 0;
 }
 //------------------------------------------------------------------------------
 //void changeJONSCulture(int iChange);
@@ -5239,7 +5247,6 @@ int CvLuaPlayer::lHasPolicy(lua_State* L)
 int CvLuaPlayer::lSetHasPolicy(lua_State* L)
 {
 #if defined(MOD_API_EXTENSIONS)
-	if (MOD_API_FORCE_SYNC_VER) return CvLuaPlayer::lSetHasPolicySync(L);
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	const PolicyTypes iIndex = (PolicyTypes)lua_tointeger(L, 2);
 	bool bValue = lua_toboolean(L, 3);
@@ -7524,6 +7531,18 @@ int CvLuaPlayer::lGetNumResourceTotal(lua_State* L)
 //void changeNumResourceTotal(ResourceTypes  iIndex, int iChange);
 int CvLuaPlayer::lChangeNumResourceTotal(lua_State* L)
 {
+	return BasicLuaMethod(L, &CvPlayerAI::changeNumResourceTotal);
+}
+
+int CvLuaPlayer::lChangeNumResourceTotalSync(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	ResourceTypes iRes = (ResourceTypes)lua_tointeger(L, 2);
+	int iChange = lua_tointeger(L, 3);
+	bool bIgnoreWarning = luaL_optinteger(L, 4, false);
+	int oldValue = pkPlayer->getNumResourceTotal(iRes);
+	gDLL->SendFoundReligion(pkPlayer->GetID(), ReligionTypes(CUSTOM_OPERATION_PLAYER_CHANGE_NUM_RES), "e",
+		BeliefTypes(iRes), BeliefTypes(iChange), BeliefTypes(bIgnoreWarning), BeliefTypes(oldValue), BeliefTypes(-1), BeliefTypes(-1));
 	return BasicLuaMethod(L, &CvPlayerAI::changeNumResourceTotal);
 }
 //------------------------------------------------------------------------------

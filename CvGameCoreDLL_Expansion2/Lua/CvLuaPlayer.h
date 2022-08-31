@@ -233,6 +233,7 @@ protected:
 
 	static int lGetJONSCulture(lua_State* L);
 	static int lSetJONSCulture(lua_State* L);
+	static int lSetJONSCultureSync(lua_State* L);
 	static int lChangeJONSCulture(lua_State* L);
 
 	static int lGetJONSCultureEverGenerated(lua_State* L);
@@ -711,6 +712,7 @@ protected:
 	static int lGetNumResourceUsed(lua_State* L);
 	static int lGetNumResourceTotal(lua_State* L);
 	static int lChangeNumResourceTotal(lua_State* L);
+	static int lChangeNumResourceTotalSync(lua_State* L);
 	static int lGetNumResourceAvailable(lua_State* L);
 
 	static int lGetResourceExport(lua_State* L);

@@ -332,179 +332,243 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 	int iData1, int iData2, int iData3, int iData4, int iData5, int iData6,
 	const char* customMsg) {
 	int realCommandType = customCommandType;
-	if (realCommandType == CUSTOM_OPERATION_UNIT_KILL) {
+	CvUnit* unit;
+	CvCity* city;
+	CvPlot* plot;
+
+	switch (realCommandType) {
+	case CUSTOM_OPERATION_UNIT_KILL:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: Executer of the command. iData3: bDelay
-		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
 			unit->kill(iData3 > 0, (PlayerTypes)iData2);
 		}
 		return;
-	}
-	
-	if (realCommandType == CUSTOM_OPERATION_UNIT_TELEPORT) {
+	case CUSTOM_OPERATION_UNIT_TELEPORT:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: X. iData3: Y, iData4: boolean flags
-		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
-			unit->setXY(iData2, iData3, 
+			unit->setXY(iData2, iData3,
 				iData4 & (1 << 0), iData4 & (1 << 1), iData4 & (1 << 2), iData4 & (1 << 3));
 		}
 		return;
-	}
-
-	if (realCommandType == CUSTOM_OPERATION_UNIT_SET_DAMAGE) {
+	case CUSTOM_OPERATION_UNIT_SET_DAMAGE:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: iNewValue. iData3: ePlayer. iData4: bNotifyEntity
-		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
 			unit->setDamage(iData2, (PlayerTypes)iData3, -1, iData4 > 0);
 		}
 		return;
-	}
-	
-	if (realCommandType == CUSTOM_OPERATION_UNIT_GIVE_PROMOTION) {
+	case CUSTOM_OPERATION_UNIT_GIVE_PROMOTION:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: promotion. iData3: new value
-		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
 			unit->setHasPromotion(PromotionTypes(iData2), iData3 > 0);
 		}
 		return;
-	}
-
-	if (realCommandType == CUSTOM_OPERATION_UNIT_SET_LEVEL) {
+	case CUSTOM_OPERATION_UNIT_SET_LEVEL:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: level.
-		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
 			unit->setLevel(iData2);
 		}
 		return;
-	}
-	
-	if (realCommandType == CUSTOM_OPERATION_UNIT_SET_MOVE) {
+	case CUSTOM_OPERATION_UNIT_SET_MOVE:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: New value.
-		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
 			unit->setMoves(iData2);
 		}
 		return;
-	}
-
-	if (realCommandType == CUSTOM_OPERATION_UNIT_SET_MADEATK) {
+	case CUSTOM_OPERATION_UNIT_SET_MADEATK:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: New value.
-		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
 			unit->setMadeAttack(iData2 > 0);
 		}
 		return;
-	}
-
-	if (realCommandType == CUSTOM_OPERATION_UNIT_SET_EXPERIENCE) {
+	case CUSTOM_OPERATION_UNIT_SET_EXPERIENCE:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: New value. iData3: iMax
-		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
 			unit->setExperienceTimes100(iData2 * 100, iData3);
 		}
 		return;
-	}
-	if (realCommandType == CUSTOM_OPERATION_UNIT_SET_EXPERIENCE) {
+	case CUSTOM_OPERATION_UNIT_SET_NAME:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID.
-		CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
 			unit->setName(customMsg);
 		}
 		return;
-	}
+	case CUSTOM_OPERATION_UNIT_SET_EMBARKED:
+		//ePlayer: Owner of the unit
+		//iData1: Unit ID. iData2: New value.
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		if (unit != NULL) {
+			unit->setEmbarked(iData2);
+		}
+		return;
+	case CUSTOM_OPERATION_UNIT_CHANGE_DAMAGE:
+		//ePlayer: Owner of the unit
+		//iData1: Unit ID. iData2: Change value. iData3: operater. iData4: iUnit. iData5: old value
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		if (unit != NULL && unit->getDamage() == iData5) {
+			unit->changeDamage(iData2, PlayerTypes(iData3), iData4);
+		}
+		return;
+	case CUSTOM_OPERATION_UNIT_CHANGE_EXP:
+		//ePlayer: Owner of the unit
+		//iData1: Unit ID. iData2: Change value. iData3: iMax. iData4: option integers. iData5: old value.
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		if (unit != NULL && unit->getExperienceTimes100() == iData5) {
+			unit->changeExperienceTimes100(iData2 * 100, iData3, iData4 & 1, iData4 & (1 << 1), iData4 & (1 << 2));
+		}
+		return;
 
-	if (realCommandType == CUSTOM_OPERATION_PLAYER_INIT_UNIT) {
+	case CUSTOM_OPERATION_PLAYER_INIT_UNIT:
 		//ePlayer: The player to give unit
 		//iData1: Unit type. iData2: X. iData3: Y. iData4: Unit AI. iData5: Direction. iData6: ID of return value.
-		//if the message is sent from local player, execute initUnit before sending network message.
+		//if the message is sent from local player, execute before sending network message.
 		if (ReturnValueUtil::container.getReturnValueExist(iData6, CUSTOM_OPERATION_PLAYER_INIT_UNIT, ePlayer)) return;
-		CvUnit* unit = GET_PLAYER(ePlayer).initUnit((UnitTypes)iData1, iData2, iData3, (UnitAITypes)iData4, (DirectionTypes)iData5);
-		//ReturnValueUtil::container.pushReturnValue(iData6, unit);
+		unit = GET_PLAYER(ePlayer).initUnit((UnitTypes)iData1, iData2, iData3, (UnitAITypes)iData4, (DirectionTypes)iData5);
 		return;
-	}
-
-	if (realCommandType == CUSTOM_OPERATION_PLAYER_SET_HAS_POLICY) {
-		//ePlayer: The player to give unit
+	case CUSTOM_OPERATION_PLAYER_SET_HAS_POLICY:
+		//ePlayer: The player to give policy
 		//iData1: Policy index. iData2: bValue. iData3: bFree.
 		GET_PLAYER(ePlayer).setHasPolicy(PolicyTypes(iData1), iData2 > 0, iData3 > 0);
-		//ReturnValueUtil::container.pushReturnValue(iData6, unit);
 		return;
-	}
+	case CUSTOM_OPERATION_PLAYER_SET_JONSCULTURE:
+		//ePlayer: The player to set culture
+		//iData1: New value.
+		GET_PLAYER(ePlayer).setJONSCulture(iData1);
+		return;
+	case CUSTOM_OPERATION_PLAYER_CHANGE_NUM_RES:
+		//ePlayer: The player to change res
+		//iData1: Resourse ID. iData2: change value. iData3: include import. iData4: old value
+		
+		if (GET_PLAYER(ePlayer).getNumResourceTotal((ResourceTypes)iData1) == iData4) {
+			GET_PLAYER(ePlayer).changeNumResourceTotal((ResourceTypes)iData1, iData2, iData3);
+		}
+		return;
 
-	if (realCommandType == CUSTOM_OPERATION_CITY_SET_NUM_BUILDING) {
+	case CUSTOM_OPERATION_CITY_SET_NUM_BUILDING:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: Building type. iData3: New value.
-		CvCity* city = GET_PLAYER(ePlayer).getCity(iData1);
+		city = GET_PLAYER(ePlayer).getCity(iData1);
 		if (city != NULL) {
 			city->GetCityBuildings()->SetNumRealBuilding((BuildingTypes)iData2, iData3);
 		}
 		return;
-	}
-
-	if (realCommandType == CUSTOM_OPERATION_CITY_SET_DAMAGE) {
+	case CUSTOM_OPERATION_CITY_SET_DAMAGE:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: New value. iData3: No message.
-		CvCity* city = GET_PLAYER(ePlayer).getCity(iData1);
+		city = GET_PLAYER(ePlayer).getCity(iData1);
 		if (city != NULL) {
 			city->setDamage(iData2, iData3 > 0);
 		}
 		return;
-	}
-
-	if (realCommandType == CUSTOM_OPERATION_CITY_SET_PUPPET) {
+	case CUSTOM_OPERATION_CITY_SET_PUPPET:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: New value
-		CvCity* city = GET_PLAYER(ePlayer).getCity(iData1);
+		city = GET_PLAYER(ePlayer).getCity(iData1);
 		if (city != NULL) {
 			city->SetPuppet(iData2 > 0);
 		}
 		return;
-	}
-
-	if (realCommandType == CUSTOM_OPERATION_CITY_SET_OCCUPIED) {
+	case CUSTOM_OPERATION_CITY_SET_OCCUPIED:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: New value
-		CvCity* city = GET_PLAYER(ePlayer).getCity(iData1);
+		city = GET_PLAYER(ePlayer).getCity(iData1);
 		if (city != NULL) {
 			city->SetOccupied(iData2 > 0);
 		}
 		return;
-	}
+	case CUSTOM_OPERATION_CITY_SET_POPULATION:
+		//ePlayer: Owner of the city
+		//iData1: City ID. iData2: New value. iData3: bReassignPop.
+		city = GET_PLAYER(ePlayer).getCity(iData1);
+		if (city != NULL) {
+			city->setPopulation(iData2, iData3);
+		}
+		return;
+	case CUSTOM_OPERATION_CITY_SET_FOOD:
+		//ePlayer: Owner of the city
+		//iData1: City ID. iData2: New value.
+		city = GET_PLAYER(ePlayer).getCity(iData1);
+		if (city != NULL) {
+			city->setFood(iData2);
+		}
+		return;
+	case CUSTOM_OPERATION_CITY_CHANGE_RESIST:
+		//ePlayer: Owner of the city
+		//iData1: City ID. iData2: New value. iData3: Old value
+		city = GET_PLAYER(ePlayer).getCity(iData1);
+		if (city != NULL && city->GetResistanceTurns() == iData3) {
+			city->ChangeResistanceTurns(iData2);
+		}
+		return;
 
-	if (realCommandType == CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE) {
+	case CUSTOM_OPERATION_CITY_CHANGE_POPULATION:
+		//ePlayer: Owner of the city
+		//iData1: City ID. iData2: Change value. iData3:Reassign pop iData4: Old value
+		city = GET_PLAYER(ePlayer).getCity(iData1);
+		if (city != NULL && city->getPopulation() == iData4) {
+			city->changePopulation(iData2, iData3);
+		}
+		return;
+
+	case CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE:
 		//ePlayer: Player done the improvement
 		//iData1: Improvement ID. iData2: Plot X. iData3: Plot Y.
-		CvPlot* plot = GC.getMap().plot(iData2, iData3);
+		plot = GC.getMap().plot(iData2, iData3);
 		if (plot != NULL) {
 			plot->setImprovementType((ImprovementTypes)iData1, ePlayer);
 		}
 		return;
-	}
-
-	if (realCommandType == CUSTOM_OPERATION_PLOT_SET_REVEALED) {
+	case CUSTOM_OPERATION_PLOT_SET_REVEALED:
 		//ePlayer: Owner of the unit(if exists)
 		//iData1: Teamtype ID. iData2: bNewValue (<<0) and bTerrainOnly (<<1), iData3: UnitID, iData4:eFromTeam, iData5: X, iData6: Y
-		CvPlot* plot = GC.getMap().plot(iData5, iData6);
+		plot = GC.getMap().plot(iData5, iData6);
 		if (plot != NULL) {
 			if (ePlayer == NO_PLAYER) {
-				plot->setRevealed(TeamTypes(iData1), iData2 & 1, NULL, iData2& (1 << 1), TeamTypes(iData4));
+				plot->setRevealed(TeamTypes(iData1), iData2 & 1, NULL, iData2 & (1 << 1), TeamTypes(iData4));
 			}
 			else {
-				CvUnit* unit = GET_PLAYER(ePlayer).getUnit(iData3);
-				plot->setRevealed(TeamTypes(iData1), iData2 & 1, unit, iData2& (1 << 1), TeamTypes(iData4));
+				unit = GET_PLAYER(ePlayer).getUnit(iData3);
+				plot->setRevealed(TeamTypes(iData1), iData2 & 1, unit, iData2 & (1 << 1), TeamTypes(iData4));
 			}
 		}
 		return;
+	case CUSTOM_OPERATION_PLOT_SET_RESOURCE:
+		//ePlayer: None
+		//iData1: Resource ID. iData2: Num. iData3:For minor CIV iData4: Plot X. iData5: Plot Y.
+		plot = GC.getMap().plot(iData4, iData5);
+		if (plot != NULL) {
+			plot->setResourceType(ResourceTypes(iData1), iData2, iData3);
+		}
+		return;
+	case CUSTOM_OPERATION_PLOT_SET_ROUTE:
+		//ePlayer: None
+		//iData1: New value. iData2: X. iData3: Y.
+		plot = GC.getMap().plot(iData2, iData3);
+		if (plot != NULL) {
+			plot->setRouteType((RouteTypes)iData1);
+		}
+		return;
+	default:
+		break;
 	}
+	
 }
 
 //------------------------------------------------------------------------------

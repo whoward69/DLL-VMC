@@ -217,7 +217,9 @@ protected:
 	static int lGetGameTurnLastExpanded(lua_State* L);
 	static int lGetPopulation(lua_State* L);
 	static int lSetPopulation(lua_State* L);
+	static int lSetPopulationSync(lua_State* L);
 	static int lChangePopulation(lua_State* L);
+	static int lChangePopulationSync(lua_State* L);
 	static int lGetRealPopulation(lua_State* L);
 
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
@@ -335,6 +337,7 @@ protected:
 	static int lGetFood(lua_State* L);
 	static int lGetFoodTimes100(lua_State* L);
 	static int lSetFood(lua_State* L);
+	static int lSetFoodSync(lua_State* L);
 	static int lChangeFood(lua_State* L);
 	static int lGetFoodKept(lua_State* L);
 	static int lGetMaxFoodKeptPercent(lua_State* L);
@@ -355,6 +358,7 @@ protected:
 	static int lIsResistance(lua_State* L);
 	static int lGetResistanceTurns(lua_State* L);
 	static int lChangeResistanceTurns(lua_State* L);
+	static int lChangeResistanceTurnsSync(lua_State* L);
 
 	static int lIsRazing(lua_State* L);
 	static int lGetRazingTurns(lua_State* L);

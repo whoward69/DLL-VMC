@@ -76,6 +76,7 @@ protected:
 	static int lCanAirPatrol(lua_State* L);
 	static int lIsEmbarked(lua_State* L);
 	static int lSetEmbarked(lua_State* L);
+	static int lSetEmbarkedSync(lua_State* L);
 	static int lCanSeaPatrol(lua_State* L);
 	static int lCanHeal(lua_State* L);
 	static int lCanSentry(lua_State* L);
@@ -417,6 +418,7 @@ protected:
 	static int lSetDamage(lua_State* L);
 	static int lSetDamageSync(lua_State* L);
 	static int lChangeDamage(lua_State* L);
+	static int lChangeDamageSync(lua_State* L);
 
 	static int lGetMoves(lua_State* L);
 
@@ -433,6 +435,7 @@ protected:
 	static int lSetExperienceSync(lua_State* L);
 
 	static int lChangeExperience(lua_State* L);
+	static int lChangeExperienceSync(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_UNITS_XP_TIMES_100)
 	LUAAPIEXTN(GetExperienceTimes100, int);
 	LUAAPIEXTN(SetExperienceTimes100, void, iExpTimes100, iMax);

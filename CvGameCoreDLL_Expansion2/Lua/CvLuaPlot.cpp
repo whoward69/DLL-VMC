@@ -211,6 +211,7 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(GetResourceType);
 	Method(GetNonObsoleteResourceType);
 	Method(SetResourceType);
+	Method(SetResourceTypeSync);
 	Method(GetNumResource);
 	Method(SetNumResource);
 	Method(ChangeNumResource);
@@ -221,6 +222,7 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(SetImprovementPillaged);
 	Method(GetRouteType);
 	Method(SetRouteType);
+	Method(SetRouteTypeSync);
 	Method(IsRoutePillaged);
 #if defined(MOD_API_LUA_EXTENSIONS)
 	Method(SetRoutePillaged);
@@ -1457,6 +1459,18 @@ int CvLuaPlot::lSetResourceType(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::setResourceType);
 }
+
+int CvLuaPlot::lSetResourceTypeSync(lua_State* L)
+{
+	//iData1: Resource ID. iData2: Num. iData3:For minor CIV iData4: Plot X. iData5: Plot Y.
+	CvPlot* pkPlot = GetInstance(L);
+	ResourceTypes res = ResourceTypes(lua_tointeger(L, 2));
+	int iResNum = ResourceTypes(lua_tointeger(L, 3));
+	bool bForMinorCivPlot = luaL_optbool(L, 4, false);
+	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_RESOURCE), "e", 
+		BeliefTypes(res), BeliefTypes(iResNum), BeliefTypes(bForMinorCivPlot), BeliefTypes(pkPlot->getX()), pkPlot->getY(), -1);
+	return 0;
+}
 //------------------------------------------------------------------------------
 //int getNumResource();
 int CvLuaPlot::lGetNumResource(lua_State* L)
@@ -1486,7 +1500,6 @@ int CvLuaPlot::lGetImprovementType(lua_State* L)
 //void setImprovementType(ImprovementTypes eNewValue);
 int CvLuaPlot::lSetImprovementType(lua_State* L)
 {
-	if (MOD_API_FORCE_SYNC_VER)return CvLuaPlot::lSetImprovementTypeSync(L);
 	return BasicLuaMethod(L, &CvPlot::setImprovementType);
 }
 
@@ -1519,6 +1532,15 @@ int CvLuaPlot::lGetRouteType(lua_State* L)
 int CvLuaPlot::lSetRouteType(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::setRouteType);
+}
+
+int CvLuaPlot::lSetRouteTypeSync(lua_State* L)
+{
+	CvPlot* pkPlot = GetInstance(L);
+	const int iRouteType = lua_tointeger(L, 2);
+	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_ROUTE), "e",
+		BeliefTypes(iRouteType), BeliefTypes(pkPlot->getX()), BeliefTypes(pkPlot->getY()), BeliefTypes(-1), -1, -1);
+	return 0;
 }
 //------------------------------------------------------------------------------
 int CvLuaPlot::lIsRoutePillaged(lua_State* L)
@@ -1817,7 +1839,6 @@ int CvLuaPlot::lIsRevealed(lua_State* L)
 //void setRevealed(TeamTypes eTeam, bool bNewValue, bool bTerrainOnly, TeamTypes eFromTeam);
 int CvLuaPlot::lSetRevealed(lua_State* L)
 {
-	if (MOD_API_FORCE_SYNC_VER) return CvLuaPlot::lSetRevealedSync(L);
 	CvPlot* pkPlot = GetInstance(L);
 	const TeamTypes eTeam = (TeamTypes)lua_tointeger(L, 2);
 	const bool bNewValue = lua_toboolean(L, 3);
@@ -1865,6 +1886,7 @@ int CvLuaPlot::lSetRevealedSync(lua_State* L)
 	else
 	{
 		//pkPlot->setRevealed(eTeam, bNewValue, NULL, bTerrainOnly, eFromTeam);
+		
 		gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_REVEALED), "e",
 			(BeliefTypes)eTeam, (BeliefTypes)optInt, (BeliefTypes)-1, (BeliefTypes)eFromTeam, X, Y);
 	}

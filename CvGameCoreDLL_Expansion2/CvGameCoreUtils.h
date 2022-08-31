@@ -16,15 +16,15 @@
 
 #undef min
 
-class ReturnPointerRecorder {
+class InvokeRecorder {
 public:
 	static const int MaxSize = 256;
 	
-	ReturnPointerRecorder() {
+	InvokeRecorder() {
 		returnValueRecord = std::list<int>();
 		m_Locker = FCriticalSection();
 	}
-	~ReturnPointerRecorder() {
+	~InvokeRecorder() {
 		returnValueRecord.clear();
 	}
 	std::list<int> returnValueRecord;
@@ -32,9 +32,10 @@ public:
 	FCriticalSection m_Locker;
 	void pushReturnValue(int time, int operation, int id);
 	bool getReturnValueExist(int time, int operation, int id);
+	
 };
 namespace ReturnValueUtil {
-	extern ReturnPointerRecorder container;
+	extern InvokeRecorder container;
 }
 
 

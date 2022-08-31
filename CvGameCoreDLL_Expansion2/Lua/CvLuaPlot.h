@@ -229,6 +229,7 @@ protected:
 	static int lGetResourceType(lua_State* L);
 	static int lGetNonObsoleteResourceType(lua_State* L);
 	static int lSetResourceType(lua_State* L);
+	static int lSetResourceTypeSync(lua_State* L);
 	static int lGetNumResource(lua_State* L);
 	static int lSetNumResource(lua_State* L);
 	static int lChangeNumResource(lua_State* L);
@@ -239,6 +240,7 @@ protected:
 	static int lSetImprovementPillaged(lua_State* L);
 	static int lGetRouteType(lua_State* L);
 	static int lSetRouteType(lua_State* L);
+	static int lSetRouteTypeSync(lua_State* L);
 	static int lIsRoutePillaged(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(SetRoutePillaged, void, bPillage);

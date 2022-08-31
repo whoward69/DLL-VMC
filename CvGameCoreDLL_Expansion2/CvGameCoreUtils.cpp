@@ -26,7 +26,11 @@
 // must be included after all other headers
 #include "LintFree.h"
 
-void ReturnPointerRecorder::pushReturnValue(int time, int operation, int id) {
+inline int hsRes(int time, int operation, int id) {
+	return (time * 10000019 + (operation) * 509796 + id * 6032777) % 10000733;
+}
+
+void InvokeRecorder::pushReturnValue(int time, int operation, int id) {
 	while (!m_Locker.Try()) {
 		Sleep(1);
 	}
@@ -35,19 +39,18 @@ void ReturnPointerRecorder::pushReturnValue(int time, int operation, int id) {
 		valueMap.erase(returnValueRecord.front());
 		returnValueRecord.pop_front();
 	}
-	int res = (time * 10000019 + (operation << 16) * 509796 + id * 6032777) % 10000733;
+	int res = hsRes(time, operation, id);
 	returnValueRecord.push_back(res);
-	;
 	valueMap.insert(std::pair<int, list<int>::iterator>(res, --returnValueRecord.end()));
 	m_Locker.Leave();
 }
 
-bool ReturnPointerRecorder::getReturnValueExist(int time, int operation, int id) {
+bool InvokeRecorder::getReturnValueExist(int time, int operation, int id) {
 	while (!m_Locker.Try()) {
 		Sleep(1);
 	}
 	m_Locker.Enter();
-	int res = (time * 10000019 + (operation << 16) * 509796 + id * 6032777) % 10000733;
+	int res = hsRes(time, operation, id);
 	std::map<int, list<int>::iterator>::iterator iter = valueMap.find(res);
 	bool rtn = false;
 	if (iter != valueMap.end()) {
@@ -60,7 +63,7 @@ bool ReturnPointerRecorder::getReturnValueExist(int time, int operation, int id)
 }
 
 namespace ReturnValueUtil {
-	ReturnPointerRecorder container;
+	InvokeRecorder container;
 }
 
 /// This function will return the CvPlot associated with the Index (0 to 36) of a City at iX,iY.  The lower the Index the closer the Plot is to the City (roughly)
