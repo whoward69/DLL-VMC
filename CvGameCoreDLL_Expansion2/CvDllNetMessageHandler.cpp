@@ -335,7 +335,6 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 	CvUnit* unit;
 	CvCity* city;
 	CvPlot* plot;
-
 	switch (realCommandType) {
 	case CUSTOM_OPERATION_UNIT_KILL:
 		//ePlayer: Owner of the unit

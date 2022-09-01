@@ -939,7 +939,10 @@ int CvLuaUnit::lJumpToNearestValidPlotSync(lua_State* L)
 	PlayerTypes owner = pkUnit->getOwner();
 	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT, owner);
 	bool bResult = pkUnit->jumpToNearestValidPlot();
+	int ID = pkUnit->GetID();
 	lua_pushboolean(L, bResult);
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT), "e", 
+		BeliefTypes(ID), BeliefTypes(time), BeliefTypes(-1), BeliefTypes(-1), -1, -1);
 	return 1;
 }
 //------------------------------------------------------------------------------
