@@ -197,6 +197,7 @@ protected:
 	static int lGetGold(lua_State* L);
 	static int lSetGold(lua_State* L);
 	static int lChangeGold(lua_State* L);
+	static int lChangeGoldSync(lua_State* L);
 	static int lCalculateGrossGold(lua_State* L);
 	static int lGetLifetimeGrossGold(lua_State* L);
 	static int lGetGoldFromCitiesTimes100(lua_State* L);
@@ -411,6 +412,7 @@ protected:
 	static int lIsAnarchy(lua_State* L);
 	static int lGetAnarchyNumTurns(lua_State* L);
 	static int lSetAnarchyNumTurns(lua_State* L);
+	static int lSetAnarchyNumTurnsSync(lua_State* L);
 	static int lChangeAnarchyNumTurns(lua_State* L);
 
 	static int lGetAdvancedStartPoints(lua_State* L);

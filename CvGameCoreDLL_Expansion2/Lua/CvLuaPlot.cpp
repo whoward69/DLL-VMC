@@ -277,6 +277,7 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(GetRevealedRouteType);
 	Method(GetBuildProgress);
 	Method(ChangeBuildProgress);
+	Method(ChangeBuildProgressSync);
 
 	Method(GetInvisibleVisibilityCount);
 	Method(IsInvisibleVisible);
@@ -1465,7 +1466,7 @@ int CvLuaPlot::lSetResourceTypeSync(lua_State* L)
 	//iData1: Resource ID. iData2: Num. iData3:For minor CIV iData4: Plot X. iData5: Plot Y.
 	CvPlot* pkPlot = GetInstance(L);
 	ResourceTypes res = ResourceTypes(lua_tointeger(L, 2));
-	int iResNum = ResourceTypes(lua_tointeger(L, 3));
+	int iResNum = luaL_optint(L, 3, 0);
 	bool bForMinorCivPlot = luaL_optbool(L, 4, false);
 	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_RESOURCE), "e", 
 		BeliefTypes(res), BeliefTypes(iResNum), BeliefTypes(bForMinorCivPlot), BeliefTypes(pkPlot->getX()), pkPlot->getY(), -1);
@@ -1934,6 +1935,21 @@ int CvLuaPlot::lGetBuildProgress(lua_State* L)
 int CvLuaPlot::lChangeBuildProgress(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::changeBuildProgress);
+}
+
+int CvLuaPlot::lChangeBuildProgressSync(lua_State* L)
+{
+	CvPlot* pkPlot = GetInstance(L);
+	int iType = lua_tointeger(L, 2);
+	int iChange = lua_tointeger(L, 3);
+	int donePlayer = luaL_optinteger(L, 4, NO_PLAYER);
+	int time = GetTickCount();
+	bool res = pkPlot->changeBuildProgress(BuildTypes(iType), iChange, PlayerTypes(donePlayer));
+	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS, iType);
+	CvLuaArgs::pushValue<bool>(L, res);
+	gDLL->SendFoundReligion((PlayerTypes)donePlayer, (ReligionTypes)CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS, "e",
+		BeliefTypes(iType), BeliefTypes(iChange), BeliefTypes(pkPlot->getX()), BeliefTypes(pkPlot->getY()), time, -1);
+	return 1;
 }
 //------------------------------------------------------------------------------
 //int getInvisibleVisibilityCount(TeamTypes eTeam, InvisibleTypes eInvisible);

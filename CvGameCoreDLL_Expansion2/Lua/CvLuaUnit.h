@@ -44,6 +44,7 @@ protected:
 
 	static int lCanDoCommand(lua_State* L);
 	static int lDoCommand(lua_State* L);
+	static int lDoCommandSync(lua_State* L);
 
 	static int lGetPathEndTurnPlot(lua_State* L);
 	static int lGeneratePath(lua_State* L);
@@ -57,6 +58,7 @@ protected:
 	static int lCanMoveOrAttackInto(lua_State* L);
 	static int lCanMoveThrough(lua_State* L);
 	static int lJumpToNearestValidPlot(lua_State* L);
+	static int lJumpToNearestValidPlotSync(lua_State* L);
 
 	static int lGetCombatDamage(lua_State* L);
 	static int lGetFireSupportUnit(lua_State* L);

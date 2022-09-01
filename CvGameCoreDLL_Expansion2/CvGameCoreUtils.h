@@ -18,7 +18,7 @@
 
 class InvokeRecorder {
 public:
-	static const int MaxSize = 256;
+	static const int MaxSize = 1024;
 	
 	InvokeRecorder() {
 		returnValueRecord = std::list<int>();

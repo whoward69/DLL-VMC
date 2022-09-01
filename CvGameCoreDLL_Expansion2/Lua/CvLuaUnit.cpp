@@ -14,6 +14,7 @@
 #include "CvLuaUnit.h"
 #include "../CvMinorCivAI.h"
 #include "../CvUnitCombat.h"
+#include <CvGameCoreUtils.h>
 
 //Utility macro for registering methods
 #define Method(Name)			\
@@ -41,6 +42,7 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 
 	Method(CanDoCommand);
 	Method(DoCommand);
+	Method(DoCommandSync);
 
 	Method(GetPathEndTurnPlot);
 	Method(GeneratePath);
@@ -53,6 +55,7 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(CanMoveOrAttackInto);
 	Method(CanMoveThrough);
 	Method(JumpToNearestValidPlot);
+	Method(JumpToNearestValidPlotSync);
 
 	Method(GetCombatDamage);
 	Method(GetFireSupportUnit);
@@ -761,6 +764,19 @@ int CvLuaUnit::lDoCommand(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvUnit::doCommand);
 }
+
+int CvLuaUnit::lDoCommandSync(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	int commandType = lua_tointeger(L, 2);
+	int iData1 = luaL_optint(L, 3, 0);
+	int iData2 = luaL_optint(L, 4, 0);
+	PlayerTypes owner = pkUnit->getOwner();
+	int ID = pkUnit->GetID();
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_DO_COMMAND), "e", 
+		BeliefTypes(ID), BeliefTypes(commandType), BeliefTypes(iData1), BeliefTypes(iData2), -1, -1);
+	return 0;
+}
 //------------------------------------------------------------------------------
 //CyPlot* getPathEndTurnPlot();
 int CvLuaUnit::lGetPathEndTurnPlot(lua_State* L)
@@ -910,6 +926,18 @@ int CvLuaUnit::lCanMoveThrough(lua_State* L)
 int CvLuaUnit::lJumpToNearestValidPlot(lua_State* L)
 {
 	CvUnit* pkUnit = GetInstance(L);
+	bool bResult = pkUnit->jumpToNearestValidPlot();
+	lua_pushboolean(L, bResult);
+	return 1;
+}
+
+int CvLuaUnit::lJumpToNearestValidPlotSync(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	
+	int time = GetTickCount();
+	PlayerTypes owner = pkUnit->getOwner();
+	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT, owner);
 	bool bResult = pkUnit->jumpToNearestValidPlot();
 	lua_pushboolean(L, bResult);
 	return 1;
@@ -3727,8 +3755,11 @@ int CvLuaUnit::lSetXYSync(lua_State* L)
 
 	const PlayerTypes owner = pkUnit->getOwner();
 	const int ID = pkUnit->GetID();
-	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_TELEPORT), "e", BeliefTypes(ID), BeliefTypes(x), BeliefTypes(y), BeliefTypes(boolOption), -1, -1);
-	//pkUnit->setXY(x, y, bGroup, bUpdate, bShow, bCheckPlotVisible);
+	pkUnit->setXY(x, y, bGroup, bUpdate, bShow, bCheckPlotVisible);
+	int time = GetTickCount();
+	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_UNIT_TELEPORT, owner);
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_TELEPORT), "e", BeliefTypes(ID), BeliefTypes(x), BeliefTypes(y), BeliefTypes(boolOption), time, -1);
+	
 	return 0;
 }
 //------------------------------------------------------------------------------
@@ -3894,10 +3925,9 @@ int CvLuaUnit::lChangeDamageSync(lua_State* L)
 	const int iUnit = (lua_isnil(L, 4)) ? -1 : lua_tointeger(L, 4);
 	const PlayerTypes owner = pkUnit->getOwner();
 	int ID = pkUnit->GetID();
-	int oldValue = pkUnit->getDamage();
 	//iData1: Unit ID. iData2: Change value. iData3: operater. iData4: iUnit. iData5: old value
 	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_CHANGE_DAMAGE), "e", 
-		BeliefTypes(ID), BeliefTypes(iChange), BeliefTypes(ePlayer), BeliefTypes(iUnit), oldValue, -1);
+		BeliefTypes(ID), BeliefTypes(iChange), BeliefTypes(ePlayer), BeliefTypes(iUnit), -1, -1);
 	//pkUnit->changeDamage(iChange, ePlayer, iUnit);
 	return 0;
 }
@@ -4041,9 +4071,8 @@ int CvLuaUnit::lChangeExperienceSync(lua_State* L)
 	optInt |= bUpdateGlobal ? 1 << 2 : 0;
 	PlayerTypes owner = pkUnit->getOwner();
 	int ID = pkUnit->GetID();
-	int oldValue = pkUnit->getExperienceTimes100();
 	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_CHANGE_EXP), "e", 
-		BeliefTypes(ID), BeliefTypes(iChange), BeliefTypes(iMax), BeliefTypes(optInt), oldValue, -1);
+		BeliefTypes(ID), BeliefTypes(iChange), BeliefTypes(iMax), BeliefTypes(optInt), -1, -1);
 	return 0;
 }
 

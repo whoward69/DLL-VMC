@@ -210,6 +210,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetGold);
 	Method(SetGold);
 	Method(ChangeGold);
+	Method(ChangeGoldSync);
 	Method(CalculateGrossGold);
 	Method(GetLifetimeGrossGold);
 	Method(GetGoldFromCitiesTimes100);
@@ -431,6 +432,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(IsAnarchy);
 	Method(GetAnarchyNumTurns);
 	Method(SetAnarchyNumTurns);
+	Method(SetAnarchyNumTurnsSync);
 	Method(ChangeAnarchyNumTurns);
 
 	Method(GetAdvancedStartPoints);
@@ -2346,6 +2348,17 @@ int CvLuaPlayer::lChangeGold(lua_State* L)
 	int iValue = lua_tointeger(L, 2);
 	pkPlayer->GetTreasury()->ChangeGold(iValue);
 
+	return 1;
+}
+
+int CvLuaPlayer::lChangeGoldSync(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	PlayerTypes player = pkPlayer->GetID();
+	int iValue = lua_tointeger(L, 2);
+	//pkPlayer->GetTreasury()->ChangeGold(iValue);
+	gDLL->SendFoundReligion(player, ReligionTypes(CUSTOM_OPERATION_PLAYER_CHANGE_GOLD), "e", 
+		BeliefTypes(iValue), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, -1);
 	return 1;
 }
 //------------------------------------------------------------------------------
@@ -5537,6 +5550,17 @@ int CvLuaPlayer::lSetAnarchyNumTurns(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlayerAI::SetAnarchyNumTurns);
 }
+
+int CvLuaPlayer::lSetAnarchyNumTurnsSync(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	int numTurns = lua_tointeger(L, 2);
+	PlayerTypes player = pkPlayer->GetID();
+	gDLL->SendFoundReligion(player, ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_ANARCHY), "e", 
+		BeliefTypes(numTurns), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, -1);
+	return 0;
+}
+
 //------------------------------------------------------------------------------
 //int ChangeAnarchyNumTurns();
 int CvLuaPlayer::lChangeAnarchyNumTurns(lua_State* L)
@@ -7540,9 +7564,8 @@ int CvLuaPlayer::lChangeNumResourceTotalSync(lua_State* L)
 	ResourceTypes iRes = (ResourceTypes)lua_tointeger(L, 2);
 	int iChange = lua_tointeger(L, 3);
 	bool bIgnoreWarning = luaL_optinteger(L, 4, false);
-	int oldValue = pkPlayer->getNumResourceTotal(iRes);
 	gDLL->SendFoundReligion(pkPlayer->GetID(), ReligionTypes(CUSTOM_OPERATION_PLAYER_CHANGE_NUM_RES), "e",
-		BeliefTypes(iRes), BeliefTypes(iChange), BeliefTypes(bIgnoreWarning), BeliefTypes(oldValue), BeliefTypes(-1), BeliefTypes(-1));
+		BeliefTypes(iRes), BeliefTypes(iChange), BeliefTypes(bIgnoreWarning), BeliefTypes(-1), -1, -1);
 	return BasicLuaMethod(L, &CvPlayerAI::changeNumResourceTotal);
 }
 //------------------------------------------------------------------------------

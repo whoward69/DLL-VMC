@@ -347,9 +347,10 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		return;
 	case CUSTOM_OPERATION_UNIT_TELEPORT:
 		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: X. iData3: Y, iData4: boolean flags
+		//iData1: Unit ID. iData2: X. iData3: Y, iData4: boolean flags. iData5: Mark executed
 		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
+			if (ReturnValueUtil::container.getReturnValueExist(iData5, CUSTOM_OPERATION_UNIT_TELEPORT, ePlayer)) return;
 			unit->setXY(iData2, iData3,
 				iData4 & (1 << 0), iData4 & (1 << 1), iData4 & (1 << 2), iData4 & (1 << 3));
 		}
@@ -420,18 +421,35 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		return;
 	case CUSTOM_OPERATION_UNIT_CHANGE_DAMAGE:
 		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: Change value. iData3: operater. iData4: iUnit. iData5: old value
+		//iData1: Unit ID. iData2: Change value. iData3: operater. iData4: iUnit.
 		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL && unit->getDamage() == iData5) {
+		if (unit != NULL) {
 			unit->changeDamage(iData2, PlayerTypes(iData3), iData4);
 		}
 		return;
 	case CUSTOM_OPERATION_UNIT_CHANGE_EXP:
 		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: Change value. iData3: iMax. iData4: option integers. iData5: old value.
+		//iData1: Unit ID. iData2: Change value. iData3: iMax. iData4: option integers.
 		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL && unit->getExperienceTimes100() == iData5) {
+		if (unit != NULL) {
 			unit->changeExperienceTimes100(iData2 * 100, iData3, iData4 & 1, iData4 & (1 << 1), iData4 & (1 << 2));
+		}
+		return;
+	case CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT:
+		//ePlayer: Owner of the unit
+		//iData1: Unit ID. iData2: time.
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		if (unit != NULL) {
+			if (ReturnValueUtil::container.getReturnValueExist(iData2, CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT, ePlayer)) return;
+			unit->jumpToNearestValidPlot();
+		}
+		return;
+	case CUSTOM_OPERATION_UNIT_DO_COMMAND:
+		//ePlayer: Owner of the unit
+		//iData1: Unit ID. iData2: command type. iData3: data1. iData4: data2
+		unit = GET_PLAYER(ePlayer).getUnit(iData1);
+		if (unit != NULL) {
+			unit->doCommand((CommandTypes)iData2, iData3, iData4);
 		}
 		return;
 
@@ -440,7 +458,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		//iData1: Unit type. iData2: X. iData3: Y. iData4: Unit AI. iData5: Direction. iData6: ID of return value.
 		//if the message is sent from local player, execute before sending network message.
 		if (ReturnValueUtil::container.getReturnValueExist(iData6, CUSTOM_OPERATION_PLAYER_INIT_UNIT, ePlayer)) return;
-		unit = GET_PLAYER(ePlayer).initUnit((UnitTypes)iData1, iData2, iData3, (UnitAITypes)iData4, (DirectionTypes)iData5);
+		GET_PLAYER(ePlayer).initUnit((UnitTypes)iData1, iData2, iData3, (UnitAITypes)iData4, (DirectionTypes)iData5);
 		return;
 	case CUSTOM_OPERATION_PLAYER_SET_HAS_POLICY:
 		//ePlayer: The player to give policy
@@ -452,13 +470,20 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		//iData1: New value.
 		GET_PLAYER(ePlayer).setJONSCulture(iData1);
 		return;
+	case CUSTOM_OPERATION_PLAYER_SET_ANARCHY:
+		//ePlayer: The player to set culture
+		//iData1: Anarchy turns.
+		GET_PLAYER(ePlayer).SetAnarchyNumTurns(iData1);
+		return;
 	case CUSTOM_OPERATION_PLAYER_CHANGE_NUM_RES:
 		//ePlayer: The player to change res
-		//iData1: Resourse ID. iData2: change value. iData3: include import. iData4: old value
-		
-		if (GET_PLAYER(ePlayer).getNumResourceTotal((ResourceTypes)iData1) == iData4) {
-			GET_PLAYER(ePlayer).changeNumResourceTotal((ResourceTypes)iData1, iData2, iData3);
-		}
+		//iData1: Resourse ID. iData2: change value. iData3: include import.
+		GET_PLAYER(ePlayer).changeNumResourceTotal((ResourceTypes)iData1, iData2, iData3);
+		return;
+	case CUSTOM_OPERATION_PLAYER_CHANGE_GOLD:
+		//ePlayer: The player to change res
+		//iData1: Change num.
+		GET_PLAYER(ePlayer).GetTreasury()->ChangeGold(iData1);
 		return;
 
 	case CUSTOM_OPERATION_CITY_SET_NUM_BUILDING:
@@ -511,18 +536,18 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		return;
 	case CUSTOM_OPERATION_CITY_CHANGE_RESIST:
 		//ePlayer: Owner of the city
-		//iData1: City ID. iData2: New value. iData3: Old value
+		//iData1: City ID. iData2: New value.
 		city = GET_PLAYER(ePlayer).getCity(iData1);
-		if (city != NULL && city->GetResistanceTurns() == iData3) {
+		if (city != NULL) {
 			city->ChangeResistanceTurns(iData2);
 		}
 		return;
 
 	case CUSTOM_OPERATION_CITY_CHANGE_POPULATION:
 		//ePlayer: Owner of the city
-		//iData1: City ID. iData2: Change value. iData3:Reassign pop iData4: Old value
+		//iData1: City ID. iData2: Change value. iData3: Reassign pop.
 		city = GET_PLAYER(ePlayer).getCity(iData1);
-		if (city != NULL && city->getPopulation() == iData4) {
+		if (city != NULL) {
 			city->changePopulation(iData2, iData3);
 		}
 		return;
@@ -563,6 +588,15 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		plot = GC.getMap().plot(iData2, iData3);
 		if (plot != NULL) {
 			plot->setRouteType((RouteTypes)iData1);
+		}
+		return;
+	case CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS:
+		//ePlayer: Done player
+		//iData1: Type. iData2: New value. iData3: X. iData4: Y
+		plot = GC.getMap().plot(iData3, iData4);
+		if (plot != NULL) {
+			if (ReturnValueUtil::container.getReturnValueExist(iData6, CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS, iData1)) return;
+			plot->changeBuildProgress((BuildTypes)iData1, iData2, ePlayer);
 		}
 		return;
 	default:

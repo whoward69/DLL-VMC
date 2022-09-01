@@ -2179,8 +2179,11 @@ int CvLuaCity::lChangePopulationSync(lua_State* L)
 	int iChange = lua_tointeger(L, 2);
 	int bReassignPop = lua_toboolean(L, 3);
 	CvAssertMsg(bReassignPop != 0, "It is super dangerous to set this to false.  Ken would love to see why you are doing this.");
-	pkCity->changePopulation(iChange, bReassignPop);
-
+	//pkCity->changePopulation(iChange, bReassignPop);
+	PlayerTypes owner = pkCity->getOwner();
+	int ID = pkCity->GetID();
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITY_CHANGE_POPULATION), "e", 
+		BeliefTypes(ID), BeliefTypes(iChange), BeliefTypes(bReassignPop), BeliefTypes(-1), -1, -1);
 	return 1;
 	//	return BasicLuaMethod(L, &CvCity::changePopulation);
 }
@@ -3060,9 +3063,8 @@ int CvLuaCity::lChangeResistanceTurnsSync(lua_State* L)
 	int iChangeValue = lua_tointeger(L, 2);
 	PlayerTypes owner = pkCity->getOwner();
 	int ID = pkCity->GetID();
-	int oldValue = pkCity->GetResistanceTurns();
 	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITY_CHANGE_RESIST), "e",
-		BeliefTypes(ID), BeliefTypes(iChangeValue), BeliefTypes(oldValue), BeliefTypes(-1), -1, -1);
+		BeliefTypes(ID), BeliefTypes(iChangeValue), BeliefTypes(-1), BeliefTypes(-1), -1, -1);
 	return 0;
 }
 

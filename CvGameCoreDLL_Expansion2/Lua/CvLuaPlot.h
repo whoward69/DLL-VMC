@@ -295,6 +295,7 @@ protected:
 	static int lGetRevealedRouteType(lua_State* L);
 	static int lGetBuildProgress(lua_State* L);
 	static int lChangeBuildProgress(lua_State* L);
+	static int lChangeBuildProgressSync(lua_State* L);
 
 	static int lGetCultureRangeCities(lua_State* L);
 	static int lIsCultureRangeCity(lua_State* L);
