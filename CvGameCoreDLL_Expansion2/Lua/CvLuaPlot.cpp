@@ -1510,9 +1510,11 @@ int CvLuaPlot::lSetImprovementTypeSync(lua_State* L)
 	CvPlot* pkPlot = GetInstance(L);
 	const ImprovementTypes iType = (ImprovementTypes)lua_tointeger(L, 2);
 	const PlayerTypes player = (PlayerTypes)luaL_optinteger(L, 3, NO_PLAYER);
-	
+	pkPlot->setImprovementType(iType, player);
+	int time = GetTickCount();
+	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE, iType);
 	gDLL->SendFoundReligion(player, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE), "e",
-		(BeliefTypes)iType, (BeliefTypes)pkPlot->getX(), (BeliefTypes)pkPlot->getY(), (BeliefTypes)-1, -1, -1);
+		(BeliefTypes)iType, (BeliefTypes)pkPlot->getX(), (BeliefTypes)pkPlot->getY(), (BeliefTypes)time, -1, -1);
 	return 0;
 }
 

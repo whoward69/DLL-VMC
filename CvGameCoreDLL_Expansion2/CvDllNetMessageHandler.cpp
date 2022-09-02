@@ -343,7 +343,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->kill(iData3 > 0, (PlayerTypes)iData2);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_TELEPORT:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: X. iData3: Y, iData4: boolean flags. iData5: Mark executed
@@ -353,7 +353,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 			unit->setXY(iData2, iData3,
 				iData4 & (1 << 0), iData4 & (1 << 1), iData4 & (1 << 2), iData4 & (1 << 3));
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_SET_DAMAGE:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: iNewValue. iData3: ePlayer. iData4: bNotifyEntity
@@ -361,7 +361,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->setDamage(iData2, (PlayerTypes)iData3, -1, iData4 > 0);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_GIVE_PROMOTION:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: promotion. iData3: new value
@@ -369,7 +369,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->setHasPromotion(PromotionTypes(iData2), iData3 > 0);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_SET_LEVEL:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: level.
@@ -377,7 +377,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->setLevel(iData2);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_SET_MOVE:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: New value.
@@ -385,7 +385,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->setMoves(iData2);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_SET_MADEATK:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: New value.
@@ -393,7 +393,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->setMadeAttack(iData2 > 0);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_SET_EXPERIENCE:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: New value. iData3: iMax
@@ -401,7 +401,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->setExperienceTimes100(iData2 * 100, iData3);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_SET_NAME:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID.
@@ -409,7 +409,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->setName(customMsg);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_SET_EMBARKED:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: New value.
@@ -417,7 +417,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->setEmbarked(iData2);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_CHANGE_DAMAGE:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: Change value. iData3: operater. iData4: iUnit.
@@ -425,7 +425,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->changeDamage(iData2, PlayerTypes(iData3), iData4);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_CHANGE_EXP:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: Change value. iData3: iMax. iData4: option integers.
@@ -433,7 +433,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->changeExperienceTimes100(iData2 * 100, iData3, iData4 & 1, iData4 & (1 << 1), iData4 & (1 << 2));
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: time.
@@ -442,7 +442,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 			if (ReturnValueUtil::container.getReturnValueExist(iData2, CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT, ePlayer)) return;
 			unit->jumpToNearestValidPlot();
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_UNIT_DO_COMMAND:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: command type. iData3: data1. iData4: data2
@@ -450,7 +450,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (unit != NULL) {
 			unit->doCommand((CommandTypes)iData2, iData3, iData4);
 		}
-		return;
+		break;
 
 	case CUSTOM_OPERATION_PLAYER_INIT_UNIT:
 		//ePlayer: The player to give unit
@@ -458,32 +458,32 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		//if the message is sent from local player, execute before sending network message.
 		if (ReturnValueUtil::container.getReturnValueExist(iData6, CUSTOM_OPERATION_PLAYER_INIT_UNIT, ePlayer)) return;
 		GET_PLAYER(ePlayer).initUnit((UnitTypes)iData1, iData2, iData3, (UnitAITypes)iData4, (DirectionTypes)iData5);
-		return;
+		break;
 	case CUSTOM_OPERATION_PLAYER_SET_HAS_POLICY:
 		//ePlayer: The player to give policy
 		//iData1: Policy index. iData2: bValue. iData3: bFree.
 		GET_PLAYER(ePlayer).setHasPolicy(PolicyTypes(iData1), iData2 > 0, iData3 > 0);
-		return;
+		break;
 	case CUSTOM_OPERATION_PLAYER_SET_JONSCULTURE:
 		//ePlayer: The player to set culture
 		//iData1: New value.
 		GET_PLAYER(ePlayer).setJONSCulture(iData1);
-		return;
+		break;
 	case CUSTOM_OPERATION_PLAYER_SET_ANARCHY:
 		//ePlayer: The player to set culture
 		//iData1: Anarchy turns.
 		GET_PLAYER(ePlayer).SetAnarchyNumTurns(iData1);
-		return;
+		break;
 	case CUSTOM_OPERATION_PLAYER_CHANGE_NUM_RES:
 		//ePlayer: The player to change res
 		//iData1: Resourse ID. iData2: change value. iData3: include import.
 		GET_PLAYER(ePlayer).changeNumResourceTotal((ResourceTypes)iData1, iData2, iData3);
-		return;
+		break;
 	case CUSTOM_OPERATION_PLAYER_CHANGE_GOLD:
 		//ePlayer: The player to change res
 		//iData1: Change num.
 		GET_PLAYER(ePlayer).GetTreasury()->ChangeGold(iData1);
-		return;
+		break;
 
 	case CUSTOM_OPERATION_CITY_SET_NUM_BUILDING:
 		//ePlayer: Owner of the city
@@ -492,7 +492,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (city != NULL) {
 			city->GetCityBuildings()->SetNumRealBuilding((BuildingTypes)iData2, iData3);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_CITY_SET_DAMAGE:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: New value. iData3: No message.
@@ -500,7 +500,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (city != NULL) {
 			city->setDamage(iData2, iData3 > 0);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_CITY_SET_PUPPET:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: New value
@@ -508,7 +508,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (city != NULL) {
 			city->SetPuppet(iData2 > 0);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_CITY_SET_OCCUPIED:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: New value
@@ -516,7 +516,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (city != NULL) {
 			city->SetOccupied(iData2 > 0);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_CITY_SET_POPULATION:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: New value. iData3: bReassignPop.
@@ -524,7 +524,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (city != NULL) {
 			city->setPopulation(iData2, iData3);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_CITY_SET_FOOD:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: New value.
@@ -532,7 +532,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (city != NULL) {
 			city->setFood(iData2);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_CITY_CHANGE_RESIST:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: New value.
@@ -540,7 +540,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (city != NULL) {
 			city->ChangeResistanceTurns(iData2);
 		}
-		return;
+		break;
 
 	case CUSTOM_OPERATION_CITY_CHANGE_POPULATION:
 		//ePlayer: Owner of the city
@@ -549,30 +549,26 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (city != NULL) {
 			city->changePopulation(iData2, iData3);
 		}
-		return;
+		break;
 
 	case CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE:
 		//ePlayer: Player done the improvement
 		//iData1: Improvement ID. iData2: Plot X. iData3: Plot Y.
 		plot = GC.getMap().plot(iData2, iData3);
 		if (plot != NULL) {
+			if (ReturnValueUtil::container.getReturnValueExist(iData4, CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE, iData1))return;
 			plot->setImprovementType((ImprovementTypes)iData1, ePlayer);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_PLOT_SET_REVEALED:
 		//ePlayer: Owner of the unit(if exists)
 		//iData1: Teamtype ID. iData2: bNewValue (<<0) and bTerrainOnly (<<1), iData3: UnitID, iData4:eFromTeam, iData5: X, iData6: Y
 		plot = GC.getMap().plot(iData5, iData6);
 		if (plot != NULL) {
-			if (ePlayer == NO_PLAYER) {
-				plot->setRevealed(TeamTypes(iData1), iData2 & 1, NULL, iData2 & (1 << 1), TeamTypes(iData4));
-			}
-			else {
-				unit = GET_PLAYER(ePlayer).getUnit(iData3);
-				plot->setRevealed(TeamTypes(iData1), iData2 & 1, unit, iData2 & (1 << 1), TeamTypes(iData4));
-			}
+			unit = ePlayer == NO_PLAYER ? NULL : GET_PLAYER(ePlayer).getUnit(iData3);
+			plot->setRevealed(TeamTypes(iData1), iData2 & 1, unit, iData2 & (1 << 1), TeamTypes(iData4));
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_PLOT_SET_RESOURCE:
 		//ePlayer: None
 		//iData1: Resource ID. iData2: Num. iData3:For minor CIV iData4: Plot X. iData5: Plot Y.
@@ -580,7 +576,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (plot != NULL) {
 			plot->setResourceType(ResourceTypes(iData1), iData2, iData3);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_PLOT_SET_ROUTE:
 		//ePlayer: None
 		//iData1: New value. iData2: X. iData3: Y.
@@ -588,16 +584,16 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (plot != NULL) {
 			plot->setRouteType((RouteTypes)iData1);
 		}
-		return;
+		break;
 	case CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS:
 		//ePlayer: Done player
 		//iData1: Type. iData2: New value. iData3: X. iData4: Y
 		plot = GC.getMap().plot(iData3, iData4);
 		if (plot != NULL) {
-			if (ReturnValueUtil::container.getReturnValueExist(iData6, CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS, iData1)) return;
+			if (ReturnValueUtil::container.getReturnValueExist(iData5, CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS, iData1)) return;
 			plot->changeBuildProgress((BuildTypes)iData1, iData2, ePlayer);
 		}
-		return;
+		break;
 	default:
 		break;
 	}
