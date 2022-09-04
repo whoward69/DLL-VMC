@@ -146,7 +146,7 @@ void CvDllGameContext::InitializeSingleton()
 
 	}
 	s_pSingleton = FNEW(CvDllGameContext(), c_eCiv5GameplayDLL, 0);
-
+	//container = FNEW(InvokeRecorder(), c_eCiv5GameplayDLL, 0);
 #if defined(CUSTOM_MODS_H)
 	CUSTOMLOG("%s - Startup (Version %u%s - Build %s %s%s)", MOD_DLL_NAME, MOD_DLL_VERSION_NUMBER, MOD_DLL_VERSION_STATUS, __DATE__, __TIME__, MOD_DLL_CUSTOM_BUILD_NAME);
 #if defined(MOD_GLOBAL_MAX_MAJOR_CIVS)

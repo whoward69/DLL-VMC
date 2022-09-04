@@ -8,6 +8,7 @@
 #pragma once
 #include "CvDllInterfaces.h"
 #include "CvDllVersion.h"
+#include "CvGameCoreUtils.h"
 
 class CvDllNetworkSyncronization;
 class CvDllNetInitInfo;
@@ -28,7 +29,7 @@ public:
 	static void InitializeSingleton();
 	static void DestroySingleton();
 	static CvDllGameContext* GetSingleton();
-
+	//static InvokeRecorder* container;
 	//Memory management functions used by adapters.
 	_Check_return_ static void* Allocate(size_t bytes);
 	static void Free(_In_ void* p);

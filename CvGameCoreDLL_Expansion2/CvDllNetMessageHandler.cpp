@@ -335,6 +335,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 	CvUnit* unit;
 	CvCity* city;
 	CvPlot* plot;
+	if (ReturnValueUtil::container.getReturnValueExist(iData6, realCommandType, iData1)) return;
 	switch (realCommandType) {
 	case CUSTOM_OPERATION_UNIT_KILL:
 		//ePlayer: Owner of the unit
@@ -349,7 +350,6 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		//iData1: Unit ID. iData2: X. iData3: Y, iData4: boolean flags. iData5: Mark executed
 		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
-			if (ReturnValueUtil::container.getReturnValueExist(iData5, CUSTOM_OPERATION_UNIT_TELEPORT, ePlayer)) return;
 			unit->setXY(iData2, iData3,
 				iData4 & (1 << 0), iData4 & (1 << 1), iData4 & (1 << 2), iData4 & (1 << 3));
 		}
@@ -439,7 +439,6 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		//iData1: Unit ID. iData2: time.
 		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
-			if (ReturnValueUtil::container.getReturnValueExist(iData2, CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT, ePlayer)) return;
 			unit->jumpToNearestValidPlot();
 		}
 		break;
@@ -456,7 +455,6 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		//ePlayer: The player to give unit
 		//iData1: Unit type. iData2: X. iData3: Y. iData4: Unit AI. iData5: Direction. iData6: ID of return value.
 		//if the message is sent from local player, execute before sending network message.
-		if (ReturnValueUtil::container.getReturnValueExist(iData6, CUSTOM_OPERATION_PLAYER_INIT_UNIT, ePlayer)) return;
 		GET_PLAYER(ePlayer).initUnit((UnitTypes)iData1, iData2, iData3, (UnitAITypes)iData4, (DirectionTypes)iData5);
 		break;
 	case CUSTOM_OPERATION_PLAYER_SET_HAS_POLICY:
@@ -541,7 +539,6 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 			city->ChangeResistanceTurns(iData2);
 		}
 		break;
-
 	case CUSTOM_OPERATION_CITY_CHANGE_POPULATION:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: Change value. iData3: Reassign pop.
@@ -556,7 +553,6 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		//iData1: Improvement ID. iData2: Plot X. iData3: Plot Y.
 		plot = GC.getMap().plot(iData2, iData3);
 		if (plot != NULL) {
-			if (ReturnValueUtil::container.getReturnValueExist(iData4, CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE, iData1))return;
 			plot->setImprovementType((ImprovementTypes)iData1, ePlayer);
 		}
 		break;
@@ -590,12 +586,12 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		//iData1: Type. iData2: New value. iData3: X. iData4: Y
 		plot = GC.getMap().plot(iData3, iData4);
 		if (plot != NULL) {
-			if (ReturnValueUtil::container.getReturnValueExist(iData5, CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS, iData1)) return;
 			plot->changeBuildProgress((BuildTypes)iData1, iData2, ePlayer);
 		}
 		break;
 	default:
 		break;
+	
 	}
 	
 }

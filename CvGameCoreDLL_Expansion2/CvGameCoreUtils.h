@@ -21,18 +21,16 @@ public:
 	static const int MaxSize = 1024;
 	
 	InvokeRecorder() {
-		returnValueRecord = std::list<int>();
-		m_Locker = FCriticalSection();
 	}
 	~InvokeRecorder() {
-		returnValueRecord.clear();
+		//returnValueRecord.clear();
+		//valueMap.clear();
 	}
-	std::list<int> returnValueRecord;
-	std::map<int, list<int>::iterator> valueMap;
-	FCriticalSection m_Locker;
-	void pushReturnValue(int time, int operation, int id);
-	bool getReturnValueExist(int time, int operation, int id);
-	
+	static std::list<int> returnValueRecord;
+	static std::map<int, list<int>::iterator> valueMap;
+	static FCriticalSection m_Locker;
+	static void pushReturnValue(int time, int operation, int id);
+	static bool getReturnValueExist(int time, int operation, int id);
 };
 namespace ReturnValueUtil {
 	extern InvokeRecorder container;

@@ -30,6 +30,9 @@ inline int hsRes(int time, int operation, int id) {
 	return (time * 10000019 + (operation) * 509796 + id * 6032777) % 10000733;
 }
 
+std::list<int> InvokeRecorder::returnValueRecord;
+std::map<int, list<int>::iterator> InvokeRecorder::valueMap;
+FCriticalSection InvokeRecorder::m_Locker;
 void InvokeRecorder::pushReturnValue(int time, int operation, int id) {
 	while (!m_Locker.Try()) {
 		Sleep(1);
