@@ -1060,6 +1060,9 @@
     <ClInclude Include="CvEventLog.h">
       <Filter>CustomMods</Filter>
     </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CustomModsGlobal.h">
+      <Filter>CustomMods</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CvGameCoreDLL.rc" />
