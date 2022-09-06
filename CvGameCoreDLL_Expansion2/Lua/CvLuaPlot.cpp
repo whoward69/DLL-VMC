@@ -1869,7 +1869,7 @@ int CvLuaPlot::lSetRevealed(lua_State* L)
 
 int CvLuaPlot::lSetRevealedSync(lua_State* L)
 {
-	CvPlot* pkPlot = GetInstance(L);
+	/*CvPlot* pkPlot = GetInstance(L);
 	const int X = pkPlot->getX(), Y = pkPlot->getY();
 	const TeamTypes eTeam = (TeamTypes)lua_tointeger(L, 2);
 	const bool bNewValue = lua_toboolean(L, 3);
@@ -1896,7 +1896,7 @@ int CvLuaPlot::lSetRevealedSync(lua_State* L)
 		
 		gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_REVEALED), "e",
 			(BeliefTypes)eTeam, (BeliefTypes)optInt, (BeliefTypes)-1, (BeliefTypes)eFromTeam, X, Y);
-	}
+	}*/
 
 	return 0;
 }

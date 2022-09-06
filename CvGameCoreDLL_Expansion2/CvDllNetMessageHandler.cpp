@@ -549,20 +549,11 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		break;
 
 	case CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE:
-		//ePlayer: Player done the improvement
+		//ePlayer: Player built the improvement
 		//iData1: Improvement ID. iData2: Plot X. iData3: Plot Y.
 		plot = GC.getMap().plot(iData2, iData3);
 		if (plot != NULL) {
 			plot->setImprovementType((ImprovementTypes)iData1, ePlayer);
-		}
-		break;
-	case CUSTOM_OPERATION_PLOT_SET_REVEALED:
-		//ePlayer: Owner of the unit(if exists)
-		//iData1: Teamtype ID. iData2: bNewValue (<<0) and bTerrainOnly (<<1), iData3: UnitID, iData4:eFromTeam, iData5: X, iData6: Y
-		plot = GC.getMap().plot(iData5, iData6);
-		if (plot != NULL) {
-			unit = ePlayer == NO_PLAYER ? NULL : GET_PLAYER(ePlayer).getUnit(iData3);
-			plot->setRevealed(TeamTypes(iData1), iData2 & 1, unit, iData2 & (1 << 1), TeamTypes(iData4));
 		}
 		break;
 	case CUSTOM_OPERATION_PLOT_SET_RESOURCE:
