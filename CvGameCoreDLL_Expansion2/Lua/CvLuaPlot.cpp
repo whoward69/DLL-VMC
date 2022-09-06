@@ -487,7 +487,7 @@ int CvLuaPlot::lSetFeatureTypeSync(lua_State* L)
 	const int featureType = lua_tointeger(L, 2);
 	const int variety = luaL_optinteger(L, 3, -1);
 	pkPlot->setFeatureType((FeatureTypes)featureType, variety);
-	int time = GetTickCount();
+	int time = GetTickCount() + getLuaLine(L);
 	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_SET_FEATURE, featureType);
 	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_FEATURE), "e",
 		(BeliefTypes)featureType, (BeliefTypes)variety, (BeliefTypes)pkPlot->getX(), (BeliefTypes)pkPlot->getY(), -1, time);
@@ -1482,7 +1482,7 @@ int CvLuaPlot::lSetResourceTypeSync(lua_State* L)
 	ResourceTypes res = ResourceTypes(lua_tointeger(L, 2));
 	int iResNum = luaL_optint(L, 3, 0);
 	bool bForMinorCivPlot = luaL_optbool(L, 4, false);
-	int time = GetTickCount();
+	int time = GetTickCount() + getLuaLine(L);
 	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_SET_RESOURCE, res);
 	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_RESOURCE), "e", 
 		BeliefTypes(res), BeliefTypes(iResNum), BeliefTypes(bForMinorCivPlot), BeliefTypes(pkPlot->getX()), pkPlot->getY(), time);
@@ -1512,7 +1512,7 @@ int CvLuaPlot::lChangeNumResourceSync(lua_State* L)
 	CvPlot* pkPlot = GetInstance(L);
 	int iNewValue = (lua_tointeger(L, 2));
 	pkPlot->changeNumResource(iNewValue);
-	int time = GetTickCount();
+	int time = GetTickCount() + getLuaLine(L);
 	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_CHANGE_NUM_RESOURCE, iNewValue);
 	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_CHANGE_NUM_RESOURCE), "e",
 		BeliefTypes(iNewValue), BeliefTypes(pkPlot->getX()), BeliefTypes(pkPlot->getY()), BeliefTypes(-1), -1, time);
@@ -1539,7 +1539,7 @@ int CvLuaPlot::lSetImprovementTypeSync(lua_State* L)
 	const ImprovementTypes iType = (ImprovementTypes)lua_tointeger(L, 2);
 	const PlayerTypes player = (PlayerTypes)luaL_optinteger(L, 3, NO_PLAYER);
 	pkPlot->setImprovementType(iType, player);
-	int time = GetTickCount();
+	int time = GetTickCount() + getLuaLine(L);
 	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE, iType);
 	gDLL->SendFoundReligion(player, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE), "e",
 		(BeliefTypes)iType, (BeliefTypes)pkPlot->getX(), (BeliefTypes)pkPlot->getY(), (BeliefTypes)-1, -1, time);
@@ -1569,7 +1569,7 @@ int CvLuaPlot::lSetRouteTypeSync(lua_State* L)
 {
 	CvPlot* pkPlot = GetInstance(L);
 	const int iRouteType = lua_tointeger(L, 2);
-	int time = GetTickCount();
+	int time = GetTickCount() + getLuaLine(L);
 	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_SET_ROUTE, iRouteType);
 	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_ROUTE), "e",
 		BeliefTypes(iRouteType), BeliefTypes(pkPlot->getX()), BeliefTypes(pkPlot->getY()), BeliefTypes(-1), -1, time);
@@ -1975,7 +1975,7 @@ int CvLuaPlot::lChangeBuildProgressSync(lua_State* L)
 	int iType = lua_tointeger(L, 2);
 	int iChange = lua_tointeger(L, 3);
 	int donePlayer = luaL_optinteger(L, 4, NO_PLAYER);
-	int time = GetTickCount();
+	int time = GetTickCount() + getLuaLine(L);
 	bool res = pkPlot->changeBuildProgress(BuildTypes(iType), iChange, PlayerTypes(donePlayer));
 	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS, iType);
 	CvLuaArgs::pushValue<bool>(L, res);

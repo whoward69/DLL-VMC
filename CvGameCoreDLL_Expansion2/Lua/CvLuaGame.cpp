@@ -1778,7 +1778,7 @@ int CvLuaGame::lSetPlotExtraYieldSync(lua_State* L)
 	YieldTypes eYield = (YieldTypes)lua_tointeger(L, 4);
 	int iCost = lua_tointeger(L, 5);
 	pkGame->setPlotExtraYield(iX, iY, eYield, iCost);
-	int time = GetTickCount();
+	int time = GetTickCount() + getLuaLine(L);
 	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_GAME_PLOT_EXTRA_YIELD, iX);
 	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_GAME_PLOT_EXTRA_YIELD), "e",
 		(BeliefTypes)iX, (BeliefTypes)iY, (BeliefTypes)eYield, (BeliefTypes)iCost, -1, time);
