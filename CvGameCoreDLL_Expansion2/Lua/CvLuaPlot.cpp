@@ -40,6 +40,7 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(IsBlockaded);
 #endif
 	Method(SetFeatureType);
+	Method(SetFeatureTypeSync);
 	Method(SetTerrainType);
 
 	Method(IsNone);
@@ -215,6 +216,7 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(GetNumResource);
 	Method(SetNumResource);
 	Method(ChangeNumResource);
+	Method(ChangeNumResourceSync);
 
 	Method(GetImprovementType);
 	Method(SetImprovementType);
@@ -476,7 +478,19 @@ int CvLuaPlot::lSetFeatureType(lua_State* L)
 	const int variety = luaL_optinteger(L, 3, -1);
 
 	pkPlot->setFeatureType((FeatureTypes)featureType, variety);
+	return 0;
+}
 
+int CvLuaPlot::lSetFeatureTypeSync(lua_State* L)
+{
+	CvPlot* pkPlot = GetInstance(L);
+	const int featureType = lua_tointeger(L, 2);
+	const int variety = luaL_optinteger(L, 3, -1);
+	pkPlot->setFeatureType((FeatureTypes)featureType, variety);
+	int time = GetTickCount();
+	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_SET_FEATURE, featureType);
+	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_FEATURE), "e",
+		(BeliefTypes)featureType, (BeliefTypes)variety, (BeliefTypes)pkPlot->getX(), (BeliefTypes)pkPlot->getY(), -1, time);
 	return 0;
 }
 //------------------------------------------------------------------------------
@@ -1491,6 +1505,18 @@ int CvLuaPlot::lSetNumResource(lua_State* L)
 int CvLuaPlot::lChangeNumResource(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::changeNumResource);
+}
+
+int CvLuaPlot::lChangeNumResourceSync(lua_State* L)
+{
+	CvPlot* pkPlot = GetInstance(L);
+	int iNewValue = (lua_tointeger(L, 2));
+	pkPlot->changeNumResource(iNewValue);
+	int time = GetTickCount();
+	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_CHANGE_NUM_RESOURCE, iNewValue);
+	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_CHANGE_NUM_RESOURCE), "e",
+		BeliefTypes(iNewValue), BeliefTypes(pkPlot->getX()), BeliefTypes(pkPlot->getY()), BeliefTypes(-1), -1, time);
+	return 0;
 }
 
 //------------------------------------------------------------------------------

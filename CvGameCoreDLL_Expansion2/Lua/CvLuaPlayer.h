@@ -937,6 +937,7 @@ protected:
 
 	static int lGetNumFreeTechs(lua_State* L);
 	static int lSetNumFreeTechs(lua_State* L);
+	static int lSetNumFreeTechsSync(lua_State* L);
 	static int lGetNumFreePolicies(lua_State* L);
 	static int lSetNumFreePolicies(lua_State* L);
 	static int lChangeNumFreePolicies(lua_State* L);

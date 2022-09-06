@@ -18,7 +18,7 @@
 
 class InvokeRecorder {
 public:
-	static const int MaxSize = 1024;
+	static const int MaxSize = 65536;
 	
 	InvokeRecorder() {
 	}

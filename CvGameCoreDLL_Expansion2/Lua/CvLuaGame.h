@@ -249,6 +249,7 @@ protected:
 	static int lAddPlayer(lua_State* L);
 
 	static int lSetPlotExtraYield(lua_State* L);
+	static int lSetPlotExtraYieldSync(lua_State* L);
 	static int lChangePlotExtraCost(lua_State* L);
 
 	static int lIsCivEverActive(lua_State* L);

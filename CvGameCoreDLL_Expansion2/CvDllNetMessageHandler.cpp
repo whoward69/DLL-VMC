@@ -482,6 +482,11 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		//iData1: Change num.
 		GET_PLAYER(ePlayer).GetTreasury()->ChangeGold(iData1);
 		break;
+	case CUSTOM_OPERATION_PLAYER_SET_NUM_FREETECH:
+		//ePlayer: The player to change res
+		//iData1: Change num.
+		GET_PLAYER(ePlayer).SetNumFreeTechs(iData1);
+		break;
 
 	case CUSTOM_OPERATION_CITY_SET_NUM_BUILDING:
 		//ePlayer: Owner of the city
@@ -572,6 +577,14 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 			plot->setRouteType((RouteTypes)iData1);
 		}
 		break;
+	case CUSTOM_OPERATION_PLOT_SET_FEATURE:
+		//ePlayer: None
+		//iData1: Type. iData2: New value. iData3: X. iData4: Y.
+		plot = GC.getMap().plot(iData3, iData4);
+		if (plot != NULL) {
+			plot->setFeatureType(FeatureTypes(iData1), iData2);
+		}
+		break;
 	case CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS:
 		//ePlayer: Done player
 		//iData1: Type. iData2: New value. iData3: X. iData4: Y
@@ -579,6 +592,18 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		if (plot != NULL) {
 			plot->changeBuildProgress((BuildTypes)iData1, iData2, ePlayer);
 		}
+		break;
+	case CUSTOM_OPERATION_PLOT_CHANGE_NUM_RESOURCE:
+		//ePlayer: Done player
+		//iData1: newValue. iData2: X. iData3: Y
+		plot = GC.getMap().plot(iData2, iData3);
+		if (plot != NULL) {
+			plot->changeNumResource(iData1);
+		}
+		break;
+
+	case CUSTOM_OPERATION_GAME_PLOT_EXTRA_YIELD:
+		GC.getGame().setPlotExtraYield(iData1, iData2, YieldTypes(iData3), iData4);
 		break;
 	default:
 		break;

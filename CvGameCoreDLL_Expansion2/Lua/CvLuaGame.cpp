@@ -259,6 +259,7 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 	Method(AddPlayer);
 
 	Method(SetPlotExtraYield);
+	Method(SetPlotExtraYieldSync);
 	Method(ChangePlotExtraCost);
 
 	Method(IsCivEverActive);
@@ -1768,6 +1769,20 @@ int CvLuaGame::lAddPlayer(lua_State* L)
 int CvLuaGame::lSetPlotExtraYield(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvGame::setPlotExtraYield);
+}
+int CvLuaGame::lSetPlotExtraYieldSync(lua_State* L)
+{
+	CvGame* pkGame = GetInstance(L);
+	int iX = lua_tointeger(L, 2);
+	int iY = lua_tointeger(L, 3);
+	YieldTypes eYield = (YieldTypes)lua_tointeger(L, 4);
+	int iCost = lua_tointeger(L, 5);
+	pkGame->setPlotExtraYield(iX, iY, eYield, iCost);
+	int time = GetTickCount();
+	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_GAME_PLOT_EXTRA_YIELD, iX);
+	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_GAME_PLOT_EXTRA_YIELD), "e",
+		(BeliefTypes)iX, (BeliefTypes)iY, (BeliefTypes)eYield, (BeliefTypes)iCost, -1, time);
+	return 0;
 }
 //------------------------------------------------------------------------------
 //void changePlotExtraCost(int iX, int iY, int iExtraCost);

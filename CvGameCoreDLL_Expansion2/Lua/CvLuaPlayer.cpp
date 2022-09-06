@@ -948,6 +948,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 	Method(GetNumFreeTechs);
 	Method(SetNumFreeTechs);
+	Method(SetNumFreeTechsSync);
 	Method(GetNumFreePolicies);
 	Method(SetNumFreePolicies);
 	Method(ChangeNumFreePolicies);
@@ -9836,6 +9837,18 @@ int CvLuaPlayer::lSetNumFreeTechs(lua_State* L)
 	const int iNumTechs = lua_tointeger(L, 2);
 
 	pkPlayer->SetNumFreeTechs(iNumTechs);
+	return 1;
+}
+
+int CvLuaPlayer::lSetNumFreeTechsSync(lua_State* L)
+{
+	CvPlayer* pkPlayer = GetInstance(L);
+	const int iNumTechs = lua_tointeger(L, 2);
+	pkPlayer->SetNumFreeTechs(iNumTechs);
+	int time = GetTickCount();
+	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLAYER_SET_NUM_FREETECH, iNumTechs);
+	gDLL->SendFoundReligion(pkPlayer->GetID(), ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_NUM_FREETECH), "e",
+		(BeliefTypes)iNumTechs, (BeliefTypes)-1, (BeliefTypes)-1, (BeliefTypes)-1, -1, time);
 	return 1;
 }
 //------------------------------------------------------------------------------
