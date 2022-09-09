@@ -521,6 +521,15 @@
     <ClCompile Include="CvEventLog.cpp">
       <Filter>CustomMods</Filter>
     </ClCompile>
+    <ClCompile Include="FunctionsRef.cpp">
+      <Filter>CustomMods</Filter>
+    </ClCompile>
+    <ClCompile Include="ArgContainer.pb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkMessageAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="banned.h">
@@ -1062,6 +1071,15 @@
     </ClInclude>
     <ClInclude Include="..\CvGameCoreDLLUtil\include\CustomModsGlobal.h">
       <Filter>CustomMods</Filter>
+    </ClInclude>
+    <ClInclude Include="FunctionsRef.h">
+      <Filter>CustomMods</Filter>
+    </ClInclude>
+    <ClInclude Include="ArgContainer.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkMessageAdapter.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

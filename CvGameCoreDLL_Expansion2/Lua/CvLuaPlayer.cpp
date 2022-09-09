@@ -1297,9 +1297,9 @@ int CvLuaPlayer::lInitUnitSync(lua_State* L)
 	const int y = lua_tointeger(L, 4);
 	const UnitAITypes eUnitAI = (UnitAITypes)luaL_optint(L, 5, NO_UNITAI);
 	const DirectionTypes eFacingDirection = (DirectionTypes)luaL_optint(L, 6, NO_DIRECTION);
-	int time = GetTickCount() + getLuaLine(L);
+	int time = GetTickCount() + getLuaLine(L) + rand();
 	CvUnit* pkUnit = pkPlayer->initUnit(eUnit, x, y, eUnitAI, eFacingDirection);
-	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLAYER_INIT_UNIT, eUnit);
+	ReturnValueUtil::container.pushReturnValue(time);
 	gDLL->SendFoundReligion(playerID, ReligionTypes(CUSTOM_OPERATION_PLAYER_INIT_UNIT), "e",
 		(BeliefTypes)eUnit, (BeliefTypes)x, (BeliefTypes)y, (BeliefTypes)eUnitAI, eFacingDirection, time);
 	CvLuaUnit::Push(L, pkUnit);
@@ -2358,9 +2358,9 @@ int CvLuaPlayer::lChangeGoldSync(lua_State* L)
 	PlayerTypes player = pkPlayer->GetID();
 	int iValue = lua_tointeger(L, 2);
 	pkPlayer->GetTreasury()->ChangeGold(iValue);
-	int time = GetTickCount() + getLuaLine(L);
-	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLAYER_CHANGE_GOLD, iValue);
-	gDLL->SendFoundReligion(player, ReligionTypes(CUSTOM_OPERATION_PLAYER_CHANGE_GOLD), "e", 
+	int time = GetTickCount() + getLuaLine(L) + rand();
+	ReturnValueUtil::container.pushReturnValue(time);
+	gDLL->SendFoundReligion(player, ReligionTypes(CUSTOM_OPERATION_PLAYER_TREASURY_CHANGE_GOLD), "e",
 		BeliefTypes(iValue), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, time);
 	return 1;
 }
@@ -2566,8 +2566,8 @@ int CvLuaPlayer::lSetJONSCultureSync(lua_State* L)
 {
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	int iNewValue = lua_tointeger(L, 2);
-	int time = GetTickCount() + getLuaLine(L);
-	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLAYER_SET_JONSCULTURE, iNewValue);
+	int time = GetTickCount() + getLuaLine(L) + rand();
+	ReturnValueUtil::container.pushReturnValue(time);
 	gDLL->SendFoundReligion(pkPlayer->GetID(), ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_JONSCULTURE), "e",
 		BeliefTypes(iNewValue), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, time);
 	pkPlayer->setJONSCulture(iNewValue);
@@ -5286,8 +5286,8 @@ int CvLuaPlayer::lSetHasPolicySync(lua_State* L)
 	bool bFree = luaL_optbool(L, 4, false);
 	const PlayerTypes ePlayer = pkPlayer->GetID();
 	//iData1: Policy index. iData2: bValue. iData3: bFree.
-	int time = GetTickCount() + getLuaLine(L);
-	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLAYER_SET_HAS_POLICY, iIndex);
+	int time = GetTickCount() + getLuaLine(L) + rand();
+	ReturnValueUtil::container.pushReturnValue(time);
 	gDLL->SendFoundReligion(ePlayer, ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_HAS_POLICY), "e", 
 		(BeliefTypes)iIndex, (BeliefTypes)bValue, (BeliefTypes)bFree, (BeliefTypes)-1, -1, time);
 	pkPlayer->setHasPolicy(iIndex, bValue, bFree);
@@ -5564,8 +5564,8 @@ int CvLuaPlayer::lSetAnarchyNumTurnsSync(lua_State* L)
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	int numTurns = lua_tointeger(L, 2);
 	PlayerTypes player = pkPlayer->GetID();
-	int time = GetTickCount() + getLuaLine(L);
-	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLAYER_SET_ANARCHY, numTurns);
+	int time = GetTickCount() + getLuaLine(L) + rand();
+	ReturnValueUtil::container.pushReturnValue(time);
 	gDLL->SendFoundReligion(player, ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_ANARCHY), "e", 
 		BeliefTypes(numTurns), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, time);
 	pkPlayer->SetAnarchyNumTurns(numTurns);
@@ -7575,8 +7575,8 @@ int CvLuaPlayer::lChangeNumResourceTotalSync(lua_State* L)
 	ResourceTypes iRes = (ResourceTypes)lua_tointeger(L, 2);
 	int iChange = lua_tointeger(L, 3);
 	bool bIgnoreWarning = luaL_optinteger(L, 4, false);
-	int time = GetTickCount() + getLuaLine(L);
-	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLAYER_CHANGE_NUM_RES, iRes);
+	int time = GetTickCount() + getLuaLine(L) + rand();
+	ReturnValueUtil::container.pushReturnValue(time);
 	gDLL->SendFoundReligion(pkPlayer->GetID(), ReligionTypes(CUSTOM_OPERATION_PLAYER_CHANGE_NUM_RES), "e",
 		BeliefTypes(iRes), BeliefTypes(iChange), BeliefTypes(bIgnoreWarning), BeliefTypes(-1), -1, time);
 	pkPlayer->changeNumResourceTotal(iRes, iChange, bIgnoreWarning);
@@ -9845,8 +9845,8 @@ int CvLuaPlayer::lSetNumFreeTechsSync(lua_State* L)
 	CvPlayer* pkPlayer = GetInstance(L);
 	const int iNumTechs = lua_tointeger(L, 2);
 	pkPlayer->SetNumFreeTechs(iNumTechs);
-	int time = GetTickCount() + getLuaLine(L);
-	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLAYER_SET_NUM_FREETECH, iNumTechs);
+	int time = GetTickCount() + getLuaLine(L) + rand();
+	ReturnValueUtil::container.pushReturnValue(time);
 	gDLL->SendFoundReligion(pkPlayer->GetID(), ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_NUM_FREETECH), "e",
 		(BeliefTypes)iNumTechs, (BeliefTypes)-1, (BeliefTypes)-1, (BeliefTypes)-1, -1, time);
 	return 1;

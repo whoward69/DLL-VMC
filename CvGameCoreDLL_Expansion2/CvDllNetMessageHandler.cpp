@@ -12,6 +12,7 @@
 #include "CvDiplomacyAI.h"
 #include "CvTypes.h"
 #include "CvGameCoreUtils.h"
+#include "ArgContainer.pb.h"
 
 CvDllNetMessageHandler::CvDllNetMessageHandler()
 {
@@ -328,21 +329,21 @@ void CvDllNetMessageHandler::ResponseFoundPantheon(PlayerTypes ePlayer, BeliefTy
 
 void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligion(
 	PlayerTypes ePlayer, 
-	int customCommandType, 
 	int iData1, int iData2, int iData3, int iData4, int iData5, int iData6,
+	int customCommandType,
 	const char* customMsg) {
 	int realCommandType = customCommandType;
 	CvUnit* unit;
 	CvCity* city;
 	CvPlot* plot;
-	if (ReturnValueUtil::container.getReturnValueExist(iData6, realCommandType, iData1)) return;
+	if (ReturnValueUtil::container.getReturnValueExist(iData6)) return;
 	switch (realCommandType) {
 	case CUSTOM_OPERATION_UNIT_KILL:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: Executer of the command. iData3: bDelay
 		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
-			unit->kill(iData3 > 0, (PlayerTypes)iData2);
+			unit->kill(iData2 > 0, (PlayerTypes)iData3);
 		}
 		break;
 	case CUSTOM_OPERATION_UNIT_TELEPORT:
@@ -356,10 +357,10 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		break;
 	case CUSTOM_OPERATION_UNIT_SET_DAMAGE:
 		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: iNewValue. iData3: ePlayer. iData4: bNotifyEntity
+		//iData1: Unit ID. iData2: iNewValue. iData3: ePlayer. iData4: -1. iData5: bNotifyEntity
 		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
-			unit->setDamage(iData2, (PlayerTypes)iData3, -1, iData4 > 0);
+			unit->setDamage(iData2, (PlayerTypes)iData3, iData4, iData5 > 0);
 		}
 		break;
 	case CUSTOM_OPERATION_UNIT_GIVE_PROMOTION:
@@ -399,7 +400,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		//iData1: Unit ID. iData2: New value. iData3: iMax
 		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
-			unit->setExperienceTimes100(iData2 * 100, iData3);
+			unit->setExperienceTimes100(iData2, iData3);
 		}
 		break;
 	case CUSTOM_OPERATION_UNIT_SET_NAME:
@@ -431,7 +432,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		//iData1: Unit ID. iData2: Change value. iData3: iMax. iData4: option integers.
 		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
-			unit->changeExperienceTimes100(iData2 * 100, iData3, iData4 & 1, iData4 & (1 << 1), iData4 & (1 << 2));
+			unit->changeExperienceTimes100(iData2, iData3, iData4 & 1, iData4 & (1 << 1), iData4 & (1 << 2));
 		}
 		break;
 	case CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT:
@@ -475,12 +476,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 	case CUSTOM_OPERATION_PLAYER_CHANGE_NUM_RES:
 		//ePlayer: The player to change res
 		//iData1: Resourse ID. iData2: change value. iData3: include import.
-		GET_PLAYER(ePlayer).changeNumResourceTotal((ResourceTypes)iData1, iData2, iData3);
-		break;
-	case CUSTOM_OPERATION_PLAYER_CHANGE_GOLD:
-		//ePlayer: The player to change res
-		//iData1: Change num.
-		GET_PLAYER(ePlayer).GetTreasury()->ChangeGold(iData1);
+		GET_PLAYER(ePlayer).changeNumResourceTotal((ResourceTypes)iData1, iData2, iData3 > 0);
 		break;
 	case CUSTOM_OPERATION_PLAYER_SET_NUM_FREETECH:
 		//ePlayer: The player to change res
@@ -488,14 +484,12 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		GET_PLAYER(ePlayer).SetNumFreeTechs(iData1);
 		break;
 
-	case CUSTOM_OPERATION_CITY_SET_NUM_BUILDING:
-		//ePlayer: Owner of the city
-		//iData1: City ID. iData2: Building type. iData3: New value.
-		city = GET_PLAYER(ePlayer).getCity(iData1);
-		if (city != NULL) {
-			city->GetCityBuildings()->SetNumRealBuilding((BuildingTypes)iData2, iData3);
-		}
+	case CUSTOM_OPERATION_PLAYER_TREASURY_CHANGE_GOLD:
+		//ePlayer: The player to change res
+		//iData1: Change num.
+		GET_PLAYER(ePlayer).GetTreasury()->ChangeGold(iData1);
 		break;
+
 	case CUSTOM_OPERATION_CITY_SET_DAMAGE:
 		//ePlayer: Owner of the city
 		//iData1: City ID. iData2: New value. iData3: No message.
@@ -553,12 +547,21 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		}
 		break;
 
+	case CUSTOM_OPERATION_CITYBUILDING_SET_NUM_BUILDING:
+		//ePlayer: Owner of the city
+		//iData1: City ID. iData2: Building type. iData3: New value.
+		city = GET_PLAYER(ePlayer).getCity(iData1);
+		if (city != NULL) {
+			city->GetCityBuildings()->SetNumRealBuilding((BuildingTypes)iData2, iData3);
+		}
+		break;
+
 	case CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE:
 		//ePlayer: Player built the improvement
-		//iData1: Improvement ID. iData2: Plot X. iData3: Plot Y.
-		plot = GC.getMap().plot(iData2, iData3);
+		//iData1: Plot X. iData2: Plot Y. iData1: Improvement ID. 
+		plot = GC.getMap().plot(iData1, iData2);
 		if (plot != NULL) {
-			plot->setImprovementType((ImprovementTypes)iData1, ePlayer);
+			plot->setImprovementType((ImprovementTypes)iData3, ePlayer);
 		}
 		break;
 	case CUSTOM_OPERATION_PLOT_SET_RESOURCE:
@@ -617,7 +620,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 void CvDllNetMessageHandler::ResponseFoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion, const char* szCustomName, BeliefTypes eBelief1, BeliefTypes eBelief2, BeliefTypes eBelief3, BeliefTypes eBelief4, int iCityX, int iCityY)
 {
 	if ((UINT16(eReligion >> 16) > 0)) {
-		TransmissCustomizedOperationFromResponseFoundReligion(ePlayer, eReligion, eBelief1, eBelief2, eBelief3, eBelief4, iCityX, iCityY, szCustomName);
+		TransmissCustomizedOperationFromResponseFoundReligion(ePlayer, eBelief1, eBelief2, eBelief3, eBelief4, iCityX, iCityY, eReligion, szCustomName);
 		return;
 	}
 
@@ -1109,6 +1112,8 @@ void CvDllNetMessageHandler::ResponseIdeologyChoice(PlayerTypes ePlayer, PolicyB
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID, const char* szName)
 {
+	ArgContainer a;
+	a.ParseFromString(szName);
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
 	if(pkCity)

@@ -26,14 +26,27 @@
 // must be included after all other headers
 #include "LintFree.h"
 
-inline int hsRes(int time, int operation, int id) {
-	return (time * 10000019 + (operation) * 509796 + id * 6032777) % 10000733;
+int hsRes(int num, ...) {
+	va_list vl;
+	va_start(vl, num);
+	long long base = 1, dv = 10000733, mul = 10000019;
+	int res = 0;
+	for (int i = 0; i < num; ++i) {
+		int cur = va_arg(vl, int);
+		res += (base * cur) % dv;
+		res %= dv;
+		base *= mul;
+		base %= dv;
+	}
+	va_end(vl);
+	
+	return res;
 }
 
 std::list<int> InvokeRecorder::returnValueRecord;
 std::map<int, list<int>::iterator> InvokeRecorder::valueMap;
 FCriticalSection InvokeRecorder::m_Locker;
-void InvokeRecorder::pushReturnValue(int time, int operation, int id) {
+void InvokeRecorder::pushReturnValue(int time) {
 	while (!m_Locker.Try()) {
 		Sleep(1);
 	}
@@ -42,19 +55,17 @@ void InvokeRecorder::pushReturnValue(int time, int operation, int id) {
 		valueMap.erase(returnValueRecord.front());
 		returnValueRecord.pop_front();
 	}
-	int res = hsRes(time, operation, id);
-	returnValueRecord.push_back(res);
-	valueMap.insert(std::pair<int, list<int>::iterator>(res, --returnValueRecord.end()));
+	returnValueRecord.push_back(time);
+	valueMap.insert(std::pair<int, list<int>::iterator>(time, --returnValueRecord.end()));
 	m_Locker.Leave();
 }
 
-bool InvokeRecorder::getReturnValueExist(int time, int operation, int id) {
+bool InvokeRecorder::getReturnValueExist(int time) {
 	while (!m_Locker.Try()) {
 		Sleep(1);
 	}
 	m_Locker.Enter();
-	int res = hsRes(time, operation, id);
-	std::map<int, list<int>::iterator>::iterator iter = valueMap.find(res);
+	std::map<int, list<int>::iterator>::iterator iter = valueMap.find(time);
 	bool rtn = false;
 	if (iter != valueMap.end()) {
 		rtn = true;

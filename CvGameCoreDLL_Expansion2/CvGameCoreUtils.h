@@ -16,6 +16,12 @@
 
 #undef min
 
+/*inline int hsRes(int time, int operation, int id) {
+	return (time * 10000019 + (operation) * 509796 + id * 6032777) % 10000733;
+}*/
+
+int hsRes(int num, ...);
+
 class InvokeRecorder {
 public:
 	static const int MaxSize = 65536;
@@ -29,8 +35,8 @@ public:
 	static std::list<int> returnValueRecord;
 	static std::map<int, list<int>::iterator> valueMap;
 	static FCriticalSection m_Locker;
-	static void pushReturnValue(int time, int operation, int id);
-	static bool getReturnValueExist(int time, int operation, int id);
+	static void pushReturnValue(int time);
+	static bool getReturnValueExist(int time);
 };
 namespace ReturnValueUtil {
 	extern InvokeRecorder container;

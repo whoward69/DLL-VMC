@@ -11,6 +11,7 @@
 #include "Win32/FDebugHelper.h"
 #include "CvDllContext.h"
 
+
 // must be included after all other headers
 #include "LintFree.h"
 
@@ -24,6 +25,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
                       DWORD  ul_reason_for_call,
                       LPVOID)
 {
+	
 	switch(ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:
