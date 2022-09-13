@@ -17,6 +17,7 @@
 #include "../CvUnitCombat.h"
 #include <CvGameCoreUtils.h>
 #include <ArgContainer.pb.h>
+#include <NetworkMessageAdapter.h>
 
 
 
@@ -642,15 +643,14 @@ const char* CvLuaUnit::GetTypeName()
 	return "Unit";
 }
 char CvLuaUnit::networkBuffer[1024] = "";
-void CvLuaUnit::PackNetMessageAndSend(CvUnit* unit, ArgContainer args) {
+void CvLuaUnit::PackNetMessageAndSend(CvUnit* unit, int op, ArgContainer args) {
 	PlayerTypes owner = unit->getOwner();
 	int unitID = unit->GetID();
 	string target = args.SerializeAsString();
-	int size = target.size();
-	memcpy(networkBuffer, target.c_str(), size);
-	for (int i = 0; i < size; i++) {
-
-	}
+	NetworkMessageAdapter::StringShift(networkBuffer, target);
+	gDLL->SendFoundReligion(owner, ReligionTypes(op), 
+		networkBuffer, 
+		BeliefTypes(unitID), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, -1);
 }
 
 //------------------------------------------------------------------------------
@@ -733,11 +733,17 @@ int CvLuaUnit::lKillSync(lua_State* L) {
 	//void(CvUnit::*func)(bool, PlayerTypes) = (void(CvUnit::*)(bool, PlayerTypes))(ReflectionLtwt::functionPointerUtil.methods->find("CvUnit::kill")->second);
 	//(pkUnit->*func)(bDelay, ePlayer);
 	//ReflectionLtwt::functionPointerUtil.ExecuteFunction<void>(pkUnit, "CvUnit::kill", bDelay, ePlayer);
-	FunctionPointers::functionPointerUtil.ExecuteFunctionWrap<void>(pkUnit, "CvUnit::kill", bDelay, ePlayer, -1, -1, -1, -1);
+	FunctionPointers::functionPointerUtil.ExecuteFunctionWrap<void>(pkUnit, "CvUnit::kill", bDelay, ePlayer, -1, -1, -1, -1, -1, -1, -1);
+	ArgContainer args;
+	args.set_functiontocall("CvUnit::kill");
+	args.set_args1(bDelay);
+	args.set_args2(ePlayer);
+	string target = args.SerializeAsString();
+	NetworkMessageAdapter::StringShift(networkBuffer, args.SerializeAsString());
 	int time = GetTickCount() + getLuaLine(L) + rand();
 	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_KILL), "",
-		(BeliefTypes)ID, (BeliefTypes)bDelay, (BeliefTypes)ePlayer, (BeliefTypes)-1, -1, time);
+	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_KILL), networkBuffer,
+		(BeliefTypes)ID, (BeliefTypes)bDelay, (BeliefTypes)ePlayer, (BeliefTypes)-1, target.length(), time);
 	return 0;
 }
 
@@ -5082,7 +5088,7 @@ int CvLuaUnit::lSetName(lua_State* L)
 
 int CvLuaUnit::lSetNameSync(lua_State* L)
 {
-	CvUnit* pkUnit = GetInstance(L);
+	/*CvUnit* pkUnit = GetInstance(L);
 	CvString strName = lua_tostring(L, 2);
 	const char* cName = strName.GetCString();
 	const PlayerTypes owner = pkUnit->getOwner();
@@ -5091,7 +5097,7 @@ int CvLuaUnit::lSetNameSync(lua_State* L)
 	ReturnValueUtil::container.pushReturnValue(time);
 	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_SET_NAME),
 		cName, BeliefTypes(ID), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, time);
-	pkUnit->setName(strName);
+	pkUnit->setName(strName);*/
 	return 0;
 }
 //------------------------------------------------------------------------------

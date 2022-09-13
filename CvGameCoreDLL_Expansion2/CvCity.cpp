@@ -44,6 +44,7 @@
 
 // include after all other headers
 #include "LintFree.h"
+#include "FunctionsRef.h"
 
 OBJECT_VALIDATE_DEFINITION(CvCity)
 
@@ -296,6 +297,17 @@ CvCity::~CvCity()
 	OBJECT_DESTROYED
 }
 
+void CvCity::RegistReflectableFunctions() {
+	REGIST_INSTANCE_FUNCTION(CvCity::setDamage);
+	
+}
+
+void CvCity::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int cityID) {
+	auto city = GET_PLAYER(playerID).getCity(cityID);
+	
+	if (city == NULL) return;
+	EXECUTE_FUNC_WITH_ARGS(city, args);
+}
 
 //	--------------------------------------------------------------------------------
 #if defined(MOD_API_EXTENSIONS)

@@ -13,8 +13,6 @@
 #include "CvLuaScopedInstance.h"
 #include <ArgContainer.pb.h>
 
-#define SERIALIZED_SHIFT_NUM = 14;
-
 class CvLuaUnit : public CvLuaScopedInstance<CvLuaUnit, CvUnit>
 {
 public:
@@ -29,7 +27,7 @@ public:
 
 protected:
 	static char networkBuffer[1024];
-	static void PackNetMessageAndSend(CvUnit* unit, ArgContainer args);
+	static void PackNetMessageAndSend(CvUnit* unit, int op, ArgContainer args);
 
 	static int lIsNone(lua_State* L);
 	static int lConvert(lua_State* L);

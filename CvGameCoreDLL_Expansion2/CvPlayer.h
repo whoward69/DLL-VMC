@@ -76,6 +76,9 @@ public:
 	CvPlayer();
 	virtual ~CvPlayer();
 
+	static void RegistReflectableFunctions();
+	static void GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID);
+
 	void init(PlayerTypes eID);
 	void setupGraphical();
 	void reset(PlayerTypes eID = NO_PLAYER, bool bConstructorCall = false);

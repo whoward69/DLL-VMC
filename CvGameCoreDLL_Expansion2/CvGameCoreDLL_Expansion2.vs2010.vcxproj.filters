@@ -18,6 +18,9 @@
     <Filter Include="CustomMods">
       <UniqueIdentifier>{95231ccd-fe20-497d-9b5f-f59c2616d79f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fireworks">
+      <UniqueIdentifier>{12b57a99-3632-4c27-b3b2-5032a8daeb2d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="_precompile.cpp">

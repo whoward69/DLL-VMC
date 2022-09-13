@@ -22,9 +22,17 @@
 #include "CvGlobals.h"
 
 #include "ICvDLLUserInterface.h"
-
 // must be included after all other headers
 #include "LintFree.h"
+#include <emmintrin.h>
+
+extern "C" unsigned int _ftoui3(const float x) {
+	return (unsigned int)_mm_cvt_ss2si(_mm_set_ss(x));
+}
+
+extern "C" double _ltod3(const __int64 x) {
+	return x;
+}
 
 int hsRes(int num, ...) {
 	va_list vl;

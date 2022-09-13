@@ -20,6 +20,7 @@
 #include "CvInfos.h"
 #include "CvPromotionClasses.h"
 #include "CvAStarNode.h"
+#include "ArgContainer.pb.h"
 
 #define DEFAULT_UNIT_MAP_LAYER 0
 
@@ -118,6 +119,9 @@ public:
 	};
 
 	DestructionNotification<UnitHandle>& getDestructionNotification();
+
+	static void RegistReflectableFunctions();
+	static void GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int unitID);
 
 	void init(int iID, UnitTypes eUnit, UnitAITypes eUnitAI, PlayerTypes eOwner, int iX, int iY, DirectionTypes eFacingDirection, bool bNoMove, bool bSetupGraphical=true, int iMapLayer = DEFAULT_UNIT_MAP_LAYER, int iNumGoodyHutsPopped = 0);
 	void initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitAITypes eUnitAI, PlayerTypes eOwner, int iX, int iY, DirectionTypes eFacingDirection, bool bNoMove, bool bSetupGraphical=true, int iMapLayer = DEFAULT_UNIT_MAP_LAYER, int iNumGoodyHutsPopped = 0);

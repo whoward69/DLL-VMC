@@ -4,4 +4,4 @@ namespace FunctionPointers {
 	FunctionPointerContainer functionPointerUtil;
 }
 
-std::tr1::unordered_map<std::string, std::pair<void(None::*)(void*), int>>* FunctionPointerContainer::methods;
+std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>* FunctionPointerContainer::methods;

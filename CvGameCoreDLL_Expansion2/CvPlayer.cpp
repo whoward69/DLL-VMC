@@ -65,6 +65,7 @@
 // Include this after all other headers.
 #define LINT_WARNINGS_ONLY
 #include "LintFree.h"
+#include "FunctionsRef.h"
 
 //------------------------------------------------------------------------------
 // CvPlayer Version History
@@ -538,6 +539,14 @@ CvPlayer::~CvPlayer()
 	SAFE_DELETE(m_pLeagueAI);
 }
 
+void CvPlayer::RegistReflectableFunctions() {
+	//REGIST_INSTANCE_FUNCTION(CvPlayer::initUnit);
+}
+
+void CvPlayer::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID) {
+	CvPlayer* player = &(GET_PLAYER(playerID));
+	EXECUTE_FUNC_WITH_ARGS(player, args);
+}
 
 //	--------------------------------------------------------------------------------
 void CvPlayer::init(PlayerTypes eID)

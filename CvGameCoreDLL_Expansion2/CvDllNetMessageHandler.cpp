@@ -13,6 +13,7 @@
 #include "CvTypes.h"
 #include "CvGameCoreUtils.h"
 #include "ArgContainer.pb.h"
+#include "NetworkMessageAdapter.h"
 
 CvDllNetMessageHandler::CvDllNetMessageHandler()
 {
@@ -332,6 +333,13 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 	int iData1, int iData2, int iData3, int iData4, int iData5, int iData6,
 	int customCommandType,
 	const char* customMsg) {
+	ArgContainer args;
+	//New invoke way: iData1~iData4: Arguments to locate the instance. iData5: message length, iData6: Invoke id (Avoid repeated execution)
+	if (customMsg[0] != 'e') {
+		char buffer[1024] = "";
+		NetworkMessageAdapter::StringShiftReverse(buffer, customMsg, iData5);
+		args.ParseFromString(std::string(buffer, iData5));
+	}
 	int realCommandType = customCommandType;
 	CvUnit* unit;
 	CvCity* city;
@@ -403,14 +411,14 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 			unit->setExperienceTimes100(iData2, iData3);
 		}
 		break;
-	case CUSTOM_OPERATION_UNIT_SET_NAME:
+	/*case CUSTOM_OPERATION_UNIT_SET_NAME:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID.
 		unit = GET_PLAYER(ePlayer).getUnit(iData1);
 		if (unit != NULL) {
 			unit->setName(customMsg);
 		}
-		break;
+		break;*/
 	case CUSTOM_OPERATION_UNIT_SET_EMBARKED:
 		//ePlayer: Owner of the unit
 		//iData1: Unit ID. iData2: New value.

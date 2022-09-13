@@ -62,11 +62,13 @@
 // Come back to this
 #include "LintFree.h"
 
+#include "FunctionsRef.h"
 
 #if defined(MOD_BUGFIX_USE_GETTERS)
 #define GET_MY_PLAYER() GET_PLAYER(getOwner())
 #endif
-
+/*#include <FTimer.h>
+#include <CvWorldBuilderMap.h>*/
 
 namespace FSerialization
 {
@@ -117,6 +119,20 @@ void ClearUnitDeltas()
 		}
 	}
 }
+}
+
+void CvUnit::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int unitID) {
+	CvUnit* unit = GET_PLAYER(playerID).getUnit(unitID);
+	if (unit == NULL) return;
+	EXECUTE_FUNC_WITH_ARGS(unit, args);
+}
+
+void CvUnit::RegistReflectableFunctions() {
+	//REGIST_INSTANCE_EXECUTER_FUNCTION(CvUnit, CvUnit::airSweep);
+	REGIST_INSTANCE_FUNCTION(CvUnit::kill);
+	REGIST_INSTANCE_FUNCTION(CvUnit::doCommand);
+	REGIST_INSTANCE_FUNCTION(CvUnit::jumpToNearestValidPlot);
+	REGIST_INSTANCE_FUNCTION(CvUnit::setEmbarked);
 }
 
 bool s_dispatchingNetMessage = false;

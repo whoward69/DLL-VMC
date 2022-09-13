@@ -21,7 +21,7 @@
 #include "CvWorldBuilderMapModData.h"
 #include "CvWorldBuilderMapTypeGroup.h"
 #include "FireWorks/FUncopyable.h"
-
+#include <CvGameCoreUtils.h>
 class FIFile;
 class CvWorldBuilderMapTypeDesc;
 

@@ -35,150 +35,180 @@ class ArgContainer;
 // ===================================================================
 
 class ArgContainer : public ::google::protobuf::MessageLite {
- public:
-  ArgContainer();
-  virtual ~ArgContainer();
+public:
+    ArgContainer();
+    virtual ~ArgContainer();
 
-  ArgContainer(const ArgContainer& from);
+    ArgContainer(const ArgContainer& from);
 
-  inline ArgContainer& operator=(const ArgContainer& from) {
-    CopyFrom(from);
-    return *this;
-  }
+    inline ArgContainer& operator=(const ArgContainer& from) {
+        CopyFrom(from);
+        return *this;
+    }
 
-  static const ArgContainer& default_instance();
+    static const ArgContainer& default_instance();
 
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  // Returns the internal default instance pointer. This function can
-  // return NULL thus should not be used by the user. This is intended
-  // for Protobuf internal code. Please use default_instance() declared
-  // above instead.
-  static inline const ArgContainer* internal_default_instance() {
-    return default_instance_;
-  }
-  #endif
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+    // Returns the internal default instance pointer. This function can
+    // return NULL thus should not be used by the user. This is intended
+    // for Protobuf internal code. Please use default_instance() declared
+    // above instead.
+    static inline const ArgContainer* internal_default_instance() {
+        return default_instance_;
+    }
+#endif
 
-  void Swap(ArgContainer* other);
+    void Swap(ArgContainer* other);
 
-  // implements Message ----------------------------------------------
+    // implements Message ----------------------------------------------
 
-  ArgContainer* New() const;
-  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
-  void CopyFrom(const ArgContainer& from);
-  void MergeFrom(const ArgContainer& from);
-  void Clear();
-  bool IsInitialized() const;
+    ArgContainer* New() const;
+    void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
+    void CopyFrom(const ArgContainer& from);
+    void MergeFrom(const ArgContainer& from);
+    void Clear();
+    bool IsInitialized() const;
 
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
+    int ByteSize() const;
+    bool MergePartialFromCodedStream(
+        ::google::protobuf::io::CodedInputStream* input);
+    void SerializeWithCachedSizes(
+        ::google::protobuf::io::CodedOutputStream* output) const;
+    int GetCachedSize() const { return _cached_size_; }
+private:
+    void SharedCtor();
+    void SharedDtor();
+    void SetCachedSize(int size) const;
+public:
 
-  ::std::string GetTypeName() const;
+    ::std::string GetTypeName() const;
 
-  // nested types ----------------------------------------------------
+    // nested types ----------------------------------------------------
 
-  // accessors -------------------------------------------------------
+    // accessors -------------------------------------------------------
 
-  // optional int32 args1 = 1;
-  inline bool has_args1() const;
-  inline void clear_args1();
-  static const int kArgs1FieldNumber = 1;
-  inline ::google::protobuf::int32 args1() const;
-  inline void set_args1(::google::protobuf::int32 value);
+    // required string functionToCall = 1;
+    inline bool has_functiontocall() const;
+    inline void clear_functiontocall();
+    static const int kFunctionToCallFieldNumber = 1;
+    inline const ::std::string& functiontocall() const;
+    inline void set_functiontocall(const ::std::string& value);
+    inline void set_functiontocall(const char* value);
+    inline void set_functiontocall(const char* value, size_t size);
+    inline ::std::string* mutable_functiontocall();
+    inline ::std::string* release_functiontocall();
+    inline void set_allocated_functiontocall(::std::string* functiontocall);
 
-  // optional int32 args2 = 2;
-  inline bool has_args2() const;
-  inline void clear_args2();
-  static const int kArgs2FieldNumber = 2;
-  inline ::google::protobuf::int32 args2() const;
-  inline void set_args2(::google::protobuf::int32 value);
+    // optional int32 args1 = 2;
+    inline bool has_args1() const;
+    inline void clear_args1();
+    static const int kArgs1FieldNumber = 2;
+    inline ::google::protobuf::int32 args1() const;
+    inline void set_args1(::google::protobuf::int32 value);
 
-  // optional int32 args3 = 3;
-  inline bool has_args3() const;
-  inline void clear_args3();
-  static const int kArgs3FieldNumber = 3;
-  inline ::google::protobuf::int32 args3() const;
-  inline void set_args3(::google::protobuf::int32 value);
+    // optional int32 args2 = 3;
+    inline bool has_args2() const;
+    inline void clear_args2();
+    static const int kArgs2FieldNumber = 3;
+    inline ::google::protobuf::int32 args2() const;
+    inline void set_args2(::google::protobuf::int32 value);
 
-  // optional int32 args4 = 4;
-  inline bool has_args4() const;
-  inline void clear_args4();
-  static const int kArgs4FieldNumber = 4;
-  inline ::google::protobuf::int32 args4() const;
-  inline void set_args4(::google::protobuf::int32 value);
+    // optional int32 args3 = 4;
+    inline bool has_args3() const;
+    inline void clear_args3();
+    static const int kArgs3FieldNumber = 4;
+    inline ::google::protobuf::int32 args3() const;
+    inline void set_args3(::google::protobuf::int32 value);
 
-  // optional int32 args5 = 5;
-  inline bool has_args5() const;
-  inline void clear_args5();
-  static const int kArgs5FieldNumber = 5;
-  inline ::google::protobuf::int32 args5() const;
-  inline void set_args5(::google::protobuf::int32 value);
+    // optional int32 args4 = 5;
+    inline bool has_args4() const;
+    inline void clear_args4();
+    static const int kArgs4FieldNumber = 5;
+    inline ::google::protobuf::int32 args4() const;
+    inline void set_args4(::google::protobuf::int32 value);
 
-  // optional int32 args6 = 6;
-  inline bool has_args6() const;
-  inline void clear_args6();
-  static const int kArgs6FieldNumber = 6;
-  inline ::google::protobuf::int32 args6() const;
-  inline void set_args6(::google::protobuf::int32 value);
+    // optional int32 args5 = 6;
+    inline bool has_args5() const;
+    inline void clear_args5();
+    static const int kArgs5FieldNumber = 6;
+    inline ::google::protobuf::int32 args5() const;
+    inline void set_args5(::google::protobuf::int32 value);
 
-  // optional string args7 = 7;
-  inline bool has_args7() const;
-  inline void clear_args7();
-  static const int kArgs7FieldNumber = 7;
-  inline const ::std::string& args7() const;
-  inline void set_args7(const ::std::string& value);
-  inline void set_args7(const char* value);
-  inline void set_args7(const char* value, size_t size);
-  inline ::std::string* mutable_args7();
-  inline ::std::string* release_args7();
-  inline void set_allocated_args7(::std::string* args7);
+    // optional int32 args6 = 7;
+    inline bool has_args6() const;
+    inline void clear_args6();
+    static const int kArgs6FieldNumber = 7;
+    inline ::google::protobuf::int32 args6() const;
+    inline void set_args6(::google::protobuf::int32 value);
 
-  // @@protoc_insertion_point(class_scope:ArgContainer)
- private:
-  inline void set_has_args1();
-  inline void clear_has_args1();
-  inline void set_has_args2();
-  inline void clear_has_args2();
-  inline void set_has_args3();
-  inline void clear_has_args3();
-  inline void set_has_args4();
-  inline void clear_has_args4();
-  inline void set_has_args5();
-  inline void clear_has_args5();
-  inline void set_has_args6();
-  inline void clear_has_args6();
-  inline void set_has_args7();
-  inline void clear_has_args7();
+    // optional int32 args7 = 8;
+    inline bool has_args7() const;
+    inline void clear_args7();
+    static const int kArgs7FieldNumber = 8;
+    inline ::google::protobuf::int32 args7() const;
+    inline void set_args7(::google::protobuf::int32 value);
 
-  ::google::protobuf::int32 args1_;
-  ::google::protobuf::int32 args2_;
-  ::google::protobuf::int32 args3_;
-  ::google::protobuf::int32 args4_;
-  ::google::protobuf::int32 args5_;
-  ::google::protobuf::int32 args6_;
-  ::std::string* args7_;
+    // optional int32 args8 = 9;
+    inline bool has_args8() const;
+    inline void clear_args8();
+    static const int kArgs8FieldNumber = 9;
+    inline ::google::protobuf::int32 args8() const;
+    inline void set_args8(::google::protobuf::int32 value);
 
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+    // optional int32 args9 = 10;
+    inline bool has_args9() const;
+    inline void clear_args9();
+    static const int kArgs9FieldNumber = 10;
+    inline ::google::protobuf::int32 args9() const;
+    inline void set_args9(::google::protobuf::int32 value);
 
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  friend void  protobuf_AddDesc_ArgContainer_2eproto_impl();
-  #else
-  friend void  protobuf_AddDesc_ArgContainer_2eproto();
-  #endif
-  friend void protobuf_AssignDesc_ArgContainer_2eproto();
-  friend void protobuf_ShutdownFile_ArgContainer_2eproto();
+    // @@protoc_insertion_point(class_scope:ArgContainer)
+private:
+    inline void set_has_functiontocall();
+    inline void clear_has_functiontocall();
+    inline void set_has_args1();
+    inline void clear_has_args1();
+    inline void set_has_args2();
+    inline void clear_has_args2();
+    inline void set_has_args3();
+    inline void clear_has_args3();
+    inline void set_has_args4();
+    inline void clear_has_args4();
+    inline void set_has_args5();
+    inline void clear_has_args5();
+    inline void set_has_args6();
+    inline void clear_has_args6();
+    inline void set_has_args7();
+    inline void clear_has_args7();
+    inline void set_has_args8();
+    inline void clear_has_args8();
+    inline void set_has_args9();
+    inline void clear_has_args9();
 
-  void InitAsDefaultInstance();
-  static ArgContainer* default_instance_;
+    ::std::string* functiontocall_;
+    ::google::protobuf::int32 args1_;
+    ::google::protobuf::int32 args2_;
+    ::google::protobuf::int32 args3_;
+    ::google::protobuf::int32 args4_;
+    ::google::protobuf::int32 args5_;
+    ::google::protobuf::int32 args6_;
+    ::google::protobuf::int32 args7_;
+    ::google::protobuf::int32 args8_;
+    ::google::protobuf::int32 args9_;
+
+    mutable int _cached_size_;
+    ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+    friend void  protobuf_AddDesc_ArgContainer_2eproto_impl();
+#else
+    friend void  protobuf_AddDesc_ArgContainer_2eproto();
+#endif
+    friend void protobuf_AssignDesc_ArgContainer_2eproto();
+    friend void protobuf_ShutdownFile_ArgContainer_2eproto();
+
+    void InitAsDefaultInstance();
+    static ArgContainer* default_instance_;
 };
 // ===================================================================
 
@@ -187,206 +217,274 @@ class ArgContainer : public ::google::protobuf::MessageLite {
 
 // ArgContainer
 
-// optional int32 args1 = 1;
+// required string functionToCall = 1;
+inline bool ArgContainer::has_functiontocall() const {
+    return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ArgContainer::set_has_functiontocall() {
+    _has_bits_[0] |= 0x00000001u;
+}
+inline void ArgContainer::clear_has_functiontocall() {
+    _has_bits_[0] &= ~0x00000001u;
+}
+inline void ArgContainer::clear_functiontocall() {
+    if (functiontocall_ != &::google::protobuf::internal::kEmptyString) {
+        functiontocall_->clear();
+    }
+    clear_has_functiontocall();
+}
+inline const ::std::string& ArgContainer::functiontocall() const {
+    return *functiontocall_;
+}
+inline void ArgContainer::set_functiontocall(const ::std::string& value) {
+    set_has_functiontocall();
+    if (functiontocall_ == &::google::protobuf::internal::kEmptyString) {
+        functiontocall_ = new ::std::string;
+    }
+    functiontocall_->assign(value);
+}
+inline void ArgContainer::set_functiontocall(const char* value) {
+    set_has_functiontocall();
+    if (functiontocall_ == &::google::protobuf::internal::kEmptyString) {
+        functiontocall_ = new ::std::string;
+    }
+    functiontocall_->assign(value);
+}
+inline void ArgContainer::set_functiontocall(const char* value, size_t size) {
+    set_has_functiontocall();
+    if (functiontocall_ == &::google::protobuf::internal::kEmptyString) {
+        functiontocall_ = new ::std::string;
+    }
+    functiontocall_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ArgContainer::mutable_functiontocall() {
+    set_has_functiontocall();
+    if (functiontocall_ == &::google::protobuf::internal::kEmptyString) {
+        functiontocall_ = new ::std::string;
+    }
+    return functiontocall_;
+}
+inline ::std::string* ArgContainer::release_functiontocall() {
+    clear_has_functiontocall();
+    if (functiontocall_ == &::google::protobuf::internal::kEmptyString) {
+        return NULL;
+    }
+    else {
+        ::std::string* temp = functiontocall_;
+        functiontocall_ = const_cast<::std::string*>(&::google::protobuf::internal::kEmptyString);
+        return temp;
+    }
+}
+inline void ArgContainer::set_allocated_functiontocall(::std::string* functiontocall) {
+    if (functiontocall_ != &::google::protobuf::internal::kEmptyString) {
+        delete functiontocall_;
+    }
+    if (functiontocall) {
+        set_has_functiontocall();
+        functiontocall_ = functiontocall;
+    }
+    else {
+        clear_has_functiontocall();
+        functiontocall_ = const_cast<::std::string*>(&::google::protobuf::internal::kEmptyString);
+    }
+}
+
+// optional int32 args1 = 2;
 inline bool ArgContainer::has_args1() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
+    return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void ArgContainer::set_has_args1() {
-  _has_bits_[0] |= 0x00000001u;
+    _has_bits_[0] |= 0x00000002u;
 }
 inline void ArgContainer::clear_has_args1() {
-  _has_bits_[0] &= ~0x00000001u;
+    _has_bits_[0] &= ~0x00000002u;
 }
 inline void ArgContainer::clear_args1() {
-  args1_ = 0;
-  clear_has_args1();
+    args1_ = 0;
+    clear_has_args1();
 }
 inline ::google::protobuf::int32 ArgContainer::args1() const {
-  return args1_;
+    return args1_;
 }
 inline void ArgContainer::set_args1(::google::protobuf::int32 value) {
-  set_has_args1();
-  args1_ = value;
+    set_has_args1();
+    args1_ = value;
 }
 
-// optional int32 args2 = 2;
+// optional int32 args2 = 3;
 inline bool ArgContainer::has_args2() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
+    return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void ArgContainer::set_has_args2() {
-  _has_bits_[0] |= 0x00000002u;
+    _has_bits_[0] |= 0x00000004u;
 }
 inline void ArgContainer::clear_has_args2() {
-  _has_bits_[0] &= ~0x00000002u;
+    _has_bits_[0] &= ~0x00000004u;
 }
 inline void ArgContainer::clear_args2() {
-  args2_ = 0;
-  clear_has_args2();
+    args2_ = 0;
+    clear_has_args2();
 }
 inline ::google::protobuf::int32 ArgContainer::args2() const {
-  return args2_;
+    return args2_;
 }
 inline void ArgContainer::set_args2(::google::protobuf::int32 value) {
-  set_has_args2();
-  args2_ = value;
+    set_has_args2();
+    args2_ = value;
 }
 
-// optional int32 args3 = 3;
+// optional int32 args3 = 4;
 inline bool ArgContainer::has_args3() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+    return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void ArgContainer::set_has_args3() {
-  _has_bits_[0] |= 0x00000004u;
+    _has_bits_[0] |= 0x00000008u;
 }
 inline void ArgContainer::clear_has_args3() {
-  _has_bits_[0] &= ~0x00000004u;
+    _has_bits_[0] &= ~0x00000008u;
 }
 inline void ArgContainer::clear_args3() {
-  args3_ = 0;
-  clear_has_args3();
+    args3_ = 0;
+    clear_has_args3();
 }
 inline ::google::protobuf::int32 ArgContainer::args3() const {
-  return args3_;
+    return args3_;
 }
 inline void ArgContainer::set_args3(::google::protobuf::int32 value) {
-  set_has_args3();
-  args3_ = value;
+    set_has_args3();
+    args3_ = value;
 }
 
-// optional int32 args4 = 4;
+// optional int32 args4 = 5;
 inline bool ArgContainer::has_args4() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+    return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void ArgContainer::set_has_args4() {
-  _has_bits_[0] |= 0x00000008u;
+    _has_bits_[0] |= 0x00000010u;
 }
 inline void ArgContainer::clear_has_args4() {
-  _has_bits_[0] &= ~0x00000008u;
+    _has_bits_[0] &= ~0x00000010u;
 }
 inline void ArgContainer::clear_args4() {
-  args4_ = 0;
-  clear_has_args4();
+    args4_ = 0;
+    clear_has_args4();
 }
 inline ::google::protobuf::int32 ArgContainer::args4() const {
-  return args4_;
+    return args4_;
 }
 inline void ArgContainer::set_args4(::google::protobuf::int32 value) {
-  set_has_args4();
-  args4_ = value;
+    set_has_args4();
+    args4_ = value;
 }
 
-// optional int32 args5 = 5;
+// optional int32 args5 = 6;
 inline bool ArgContainer::has_args5() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+    return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void ArgContainer::set_has_args5() {
-  _has_bits_[0] |= 0x00000010u;
+    _has_bits_[0] |= 0x00000020u;
 }
 inline void ArgContainer::clear_has_args5() {
-  _has_bits_[0] &= ~0x00000010u;
+    _has_bits_[0] &= ~0x00000020u;
 }
 inline void ArgContainer::clear_args5() {
-  args5_ = 0;
-  clear_has_args5();
+    args5_ = 0;
+    clear_has_args5();
 }
 inline ::google::protobuf::int32 ArgContainer::args5() const {
-  return args5_;
+    return args5_;
 }
 inline void ArgContainer::set_args5(::google::protobuf::int32 value) {
-  set_has_args5();
-  args5_ = value;
+    set_has_args5();
+    args5_ = value;
 }
 
-// optional int32 args6 = 6;
+// optional int32 args6 = 7;
 inline bool ArgContainer::has_args6() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+    return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void ArgContainer::set_has_args6() {
-  _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000040u;
 }
 inline void ArgContainer::clear_has_args6() {
-  _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000040u;
 }
 inline void ArgContainer::clear_args6() {
-  args6_ = 0;
-  clear_has_args6();
+    args6_ = 0;
+    clear_has_args6();
 }
 inline ::google::protobuf::int32 ArgContainer::args6() const {
-  return args6_;
+    return args6_;
 }
 inline void ArgContainer::set_args6(::google::protobuf::int32 value) {
-  set_has_args6();
-  args6_ = value;
+    set_has_args6();
+    args6_ = value;
 }
 
-// optional string args7 = 7;
+// optional int32 args7 = 8;
 inline bool ArgContainer::has_args7() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+    return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void ArgContainer::set_has_args7() {
-  _has_bits_[0] |= 0x00000040u;
+    _has_bits_[0] |= 0x00000080u;
 }
 inline void ArgContainer::clear_has_args7() {
-  _has_bits_[0] &= ~0x00000040u;
+    _has_bits_[0] &= ~0x00000080u;
 }
 inline void ArgContainer::clear_args7() {
-  if (args7_ != &::google::protobuf::internal::kEmptyString) {
-    args7_->clear();
-  }
-  clear_has_args7();
-}
-inline const ::std::string& ArgContainer::args7() const {
-  return *args7_;
-}
-inline void ArgContainer::set_args7(const ::std::string& value) {
-  set_has_args7();
-  if (args7_ == &::google::protobuf::internal::kEmptyString) {
-    args7_ = new ::std::string;
-  }
-  args7_->assign(value);
-}
-inline void ArgContainer::set_args7(const char* value) {
-  set_has_args7();
-  if (args7_ == &::google::protobuf::internal::kEmptyString) {
-    args7_ = new ::std::string;
-  }
-  args7_->assign(value);
-}
-inline void ArgContainer::set_args7(const char* value, size_t size) {
-  set_has_args7();
-  if (args7_ == &::google::protobuf::internal::kEmptyString) {
-    args7_ = new ::std::string;
-  }
-  args7_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* ArgContainer::mutable_args7() {
-  set_has_args7();
-  if (args7_ == &::google::protobuf::internal::kEmptyString) {
-    args7_ = new ::std::string;
-  }
-  return args7_;
-}
-inline ::std::string* ArgContainer::release_args7() {
-  clear_has_args7();
-  if (args7_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = args7_;
-    args7_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void ArgContainer::set_allocated_args7(::std::string* args7) {
-  if (args7_ != &::google::protobuf::internal::kEmptyString) {
-    delete args7_;
-  }
-  if (args7) {
-    set_has_args7();
-    args7_ = args7;
-  } else {
+    args7_ = 0;
     clear_has_args7();
-    args7_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
+}
+inline ::google::protobuf::int32 ArgContainer::args7() const {
+    return args7_;
+}
+inline void ArgContainer::set_args7(::google::protobuf::int32 value) {
+    set_has_args7();
+    args7_ = value;
+}
+
+// optional int32 args8 = 9;
+inline bool ArgContainer::has_args8() const {
+    return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void ArgContainer::set_has_args8() {
+    _has_bits_[0] |= 0x00000100u;
+}
+inline void ArgContainer::clear_has_args8() {
+    _has_bits_[0] &= ~0x00000100u;
+}
+inline void ArgContainer::clear_args8() {
+    args8_ = 0;
+    clear_has_args8();
+}
+inline ::google::protobuf::int32 ArgContainer::args8() const {
+    return args8_;
+}
+inline void ArgContainer::set_args8(::google::protobuf::int32 value) {
+    set_has_args8();
+    args8_ = value;
+}
+
+// optional int32 args9 = 10;
+inline bool ArgContainer::has_args9() const {
+    return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void ArgContainer::set_has_args9() {
+    _has_bits_[0] |= 0x00000200u;
+}
+inline void ArgContainer::clear_has_args9() {
+    _has_bits_[0] &= ~0x00000200u;
+}
+inline void ArgContainer::clear_args9() {
+    args9_ = 0;
+    clear_has_args9();
+}
+inline ::google::protobuf::int32 ArgContainer::args9() const {
+    return args9_;
+}
+inline void ArgContainer::set_args9(::google::protobuf::int32 value) {
+    set_has_args9();
+    args9_ = value;
 }
 
 

@@ -13,13 +13,13 @@
 #include "CvGlobals.h"
 #include "CvMap.h"
 #include <CvLocalization.h>
-
+//#include <CvWorldBuilderMap.h>
 #undef min
 
-/*inline int hsRes(int time, int operation, int id) {
-	return (time * 10000019 + (operation) * 509796 + id * 6032777) % 10000733;
-}*/
+//Avoiding string truncation.
 
+extern "C" unsigned int _ftoui3(const float x);
+extern "C" double _ltod3(const __int64 x);
 int hsRes(int num, ...);
 
 class InvokeRecorder {
