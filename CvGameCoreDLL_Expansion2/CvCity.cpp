@@ -306,7 +306,7 @@ void CvCity::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, in
 	auto city = GET_PLAYER(playerID).getCity(cityID);
 	
 	if (city == NULL) return;
-	EXECUTE_FUNC_WITH_ARGS(city, args);
+	//EXECUTE_FUNC_WITH_ARGS(*city, args);
 }
 
 //	--------------------------------------------------------------------------------

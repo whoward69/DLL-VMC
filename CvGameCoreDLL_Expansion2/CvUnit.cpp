@@ -124,7 +124,7 @@ void ClearUnitDeltas()
 void CvUnit::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int unitID) {
 	CvUnit* unit = GET_PLAYER(playerID).getUnit(unitID);
 	if (unit == NULL) return;
-	EXECUTE_FUNC_WITH_ARGS(unit, args);
+	//EXECUTE_FUNC_WITH_ARGS(*unit, args);
 }
 
 void CvUnit::RegistReflectableFunctions() {
@@ -133,6 +133,7 @@ void CvUnit::RegistReflectableFunctions() {
 	REGIST_INSTANCE_FUNCTION(CvUnit::doCommand);
 	REGIST_INSTANCE_FUNCTION(CvUnit::jumpToNearestValidPlot);
 	REGIST_INSTANCE_FUNCTION(CvUnit::setEmbarked);
+	//REGIST_INSTANCE_FUNCTION(CvUnit::getMoves);
 }
 
 bool s_dispatchingNetMessage = false;

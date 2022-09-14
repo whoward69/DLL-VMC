@@ -1,7 +1,7 @@
 #include "CvGameCoreDLLPCH.h"
 #include "FunctionsRef.h"
 namespace FunctionPointers {
-	FunctionPointerContainer functionPointerUtil;
+	InstanceFunctionReflector functionPointerUtil;
 }
 
-std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>* FunctionPointerContainer::methods;
+std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>* InstanceFunctionReflector::methods;

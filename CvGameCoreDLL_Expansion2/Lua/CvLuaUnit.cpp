@@ -723,6 +723,7 @@ int CvLuaUnit::lKill(lua_State* L)
 //------------------------------------------------------------------------------
 
 int CvLuaUnit::lKillSync(lua_State* L) {
+	
 	CvUnit* pkUnit = GetInstance(L);
 	const bool bDelay = lua_toboolean(L, 2);
 	const PlayerTypes ePlayer
@@ -730,10 +731,8 @@ int CvLuaUnit::lKillSync(lua_State* L) {
 	const PlayerTypes owner = pkUnit->getOwner();
 	const int ID = pkUnit->GetID();
 	//pkUnit->kill(bDelay, ePlayer);
-	//void(CvUnit::*func)(bool, PlayerTypes) = (void(CvUnit::*)(bool, PlayerTypes))(ReflectionLtwt::functionPointerUtil.methods->find("CvUnit::kill")->second);
-	//(pkUnit->*func)(bDelay, ePlayer);
 	//ReflectionLtwt::functionPointerUtil.ExecuteFunction<void>(pkUnit, "CvUnit::kill", bDelay, ePlayer);
-	FunctionPointers::functionPointerUtil.ExecuteFunctionWrap<void>(pkUnit, "CvUnit::kill", bDelay, ePlayer, -1, -1, -1, -1, -1, -1, -1);
+	FunctionPointers::functionPointerUtil.ExecuteFunctionWraps<void>(*pkUnit, "CvUnit::kill", bDelay, ePlayer, -1, -1, -1, -1, -1, -1, -1);
 	ArgContainer args;
 	args.set_functiontocall("CvUnit::kill");
 	args.set_args1(bDelay);
@@ -968,7 +967,8 @@ int CvLuaUnit::lJumpToNearestValidPlotSync(lua_State* L)
 	PlayerTypes owner = pkUnit->getOwner();
 	int ID = pkUnit->GetID();
 	ReturnValueUtil::container.pushReturnValue(time);
-	bool bResult = pkUnit->jumpToNearestValidPlot();
+	bool bResult = InstanceFunctionReflector::ExecuteFunctionWraps<bool>(*pkUnit, "CvUnit::jumpToNearestValidPlot", 4, 4, 4);;
+	//bool bResult = pkUnit->jumpToNearestValidPlot();
 	lua_pushboolean(L, bResult);
 	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT), "e", 
 		BeliefTypes(ID), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, time);

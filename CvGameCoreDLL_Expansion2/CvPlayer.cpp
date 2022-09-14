@@ -540,12 +540,15 @@ CvPlayer::~CvPlayer()
 }
 
 void CvPlayer::RegistReflectableFunctions() {
-	//REGIST_INSTANCE_FUNCTION(CvPlayer::initUnit);
+	REGIST_INSTANCE_FUNCTION(CvPlayer::initUnit);
+	REGIST_INSTANCE_FUNCTION(CvPlayer::SetAnarchyNumTurns);
+	REGIST_INSTANCE_FUNCTION(CvPlayer::SetNumFreeTechs);
+	REGIST_INSTANCE_FUNCTION(CvPlayer::changeNumResourceTotal);
 }
 
 void CvPlayer::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID) {
-	CvPlayer* player = &(GET_PLAYER(playerID));
-	EXECUTE_FUNC_WITH_ARGS(player, args);
+	CvPlayer& player = (GET_PLAYER(playerID));
+	//EXECUTE_FUNC_WITH_ARGS(player, args);
 }
 
 //	--------------------------------------------------------------------------------

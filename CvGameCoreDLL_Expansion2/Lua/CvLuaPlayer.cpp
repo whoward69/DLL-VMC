@@ -36,6 +36,7 @@
 // include this last to turn warnings into errors for code analysis
 #include "LintFree.h"
 #include <ctime>
+#include <FunctionsRef.h>
 
 //Utility macro for registering methods
 #define Method(Name)			\
@@ -1290,6 +1291,10 @@ int CvLuaPlayer::lInitUnit(lua_State* L)
 
 int CvLuaPlayer::lInitUnitSync(lua_State* L)
 {
+	/*void* ud;
+	lua_Alloc f = lua_getallocf(L, &ud);
+	lua_State* another = lua_newstate(f, ud);*/
+
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	PlayerTypes playerID = pkPlayer->GetID();
 	const UnitTypes eUnit = (UnitTypes)lua_tointeger(L, 2);
@@ -1297,8 +1302,10 @@ int CvLuaPlayer::lInitUnitSync(lua_State* L)
 	const int y = lua_tointeger(L, 4);
 	const UnitAITypes eUnitAI = (UnitAITypes)luaL_optint(L, 5, NO_UNITAI);
 	const DirectionTypes eFacingDirection = (DirectionTypes)luaL_optint(L, 6, NO_DIRECTION);
+
 	int time = GetTickCount() + getLuaLine(L) + rand();
-	CvUnit* pkUnit = pkPlayer->initUnit(eUnit, x, y, eUnitAI, eFacingDirection);
+	//CvUnit* pkUnit = pkPlayer->initUnit(eUnit, x, y, eUnitAI, eFacingDirection);
+	CvUnit* pkUnit = FunctionPointers::functionPointerUtil.ExecuteFunctionWraps<CvUnit*>(*pkPlayer, "CvPlayer::initUnit", eUnit, x, y, eUnitAI, eFacingDirection, false, true, 0, 0);
 	ReturnValueUtil::container.pushReturnValue(time);
 	gDLL->SendFoundReligion(playerID, ReligionTypes(CUSTOM_OPERATION_PLAYER_INIT_UNIT), "e",
 		(BeliefTypes)eUnit, (BeliefTypes)x, (BeliefTypes)y, (BeliefTypes)eUnitAI, eFacingDirection, time);
