@@ -121,19 +121,26 @@ void ClearUnitDeltas()
 }
 }
 
-void CvUnit::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int unitID) {
-	CvUnit* unit = GET_PLAYER(playerID).getUnit(unitID);
+void CvUnit::GetArgumentsAndExecute(ArgContainer& args, PlayerTypes playerID, int unitID) {
+	CvUnit* unit = Provide(playerID, unitID);
 	if (unit == NULL) return;
-	//EXECUTE_FUNC_WITH_ARGS(*unit, args);
+	EXECUTE_INSTANCE_FUNC_WITH_ARGS(*unit, args);
 }
 
-void CvUnit::RegistReflectableFunctions() {
-	//REGIST_INSTANCE_EXECUTER_FUNCTION(CvUnit, CvUnit::airSweep);
+void CvUnit::RegistInstanceFunctions() {
 	REGIST_INSTANCE_FUNCTION(CvUnit::kill);
 	REGIST_INSTANCE_FUNCTION(CvUnit::doCommand);
 	REGIST_INSTANCE_FUNCTION(CvUnit::jumpToNearestValidPlot);
 	REGIST_INSTANCE_FUNCTION(CvUnit::setEmbarked);
-	//REGIST_INSTANCE_FUNCTION(CvUnit::getMoves);
+}
+
+void CvUnit::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvUnit::Provide);
+	REGIST_STATIC_FUNCTION(CvUnit::GetArgumentsAndExecute);
+}
+
+CvUnit* CvUnit::Provide(PlayerTypes player, int id) {
+	return GET_PLAYER(player).getUnit(id);
 }
 
 bool s_dispatchingNetMessage = false;

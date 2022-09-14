@@ -2,82 +2,98 @@
 
 #include <unordered_map>
 #include <LaterFeatures.h>
+#include <ArgumentAdaptor.h>
+
 #define REGIST_INSTANCE_FUNCTION(T) InstanceFunctionReflector::RegistFunction(#T, &T);
+#define REGIST_STATIC_FUNCTION(T) StaticFunctionReflector::RegistFunction(#T, &T);
 
-#define REGIST_INSTANCE_EXECUTER_FUNCTION(TYPE, EXECUTER) InstanceFunctionReflector::RegistFunction(#TYPE, &EXECUTER);
-
-#define EXECUTE_FUNC_WITH_ARGS(REF, ARGS) FunctionPointers::functionPointerUtil.ExecuteFunctionWrap<void>(REF, ARGS->functiontocall(),\
-ARGS->args1(),\
-ARGS->args2(),\
-ARGS->args3(),\
-ARGS->args4(),\
-ARGS->args5(),\
-ARGS->args6(),\
-ARGS->args7(),\
-ARGS->args8(),\
-ARGS->args9()\
+#define EXECUTE_INSTANCE_FUNC_WITH_ARGS(REF, ARGS) InstanceFunctionReflector::ExecuteFunctionWraps<void>(REF, ARGS.functiontocall(),\
+ARGS.args1(),\
+ARGS.args2(),\
+ARGS.args3(),\
+ARGS.args4(),\
+ARGS.args5(),\
+ARGS.args6(),\
+ARGS.args7(),\
+ARGS.args8(),\
+ARGS.args9()\
 );\
 
-struct NoSuchClassException :public std::exception
+struct NoSuchMethodException :public std::exception
 {
 public:
-	explicit NoSuchClassException(const std::string& type_name);
-	virtual ~NoSuchClassException()throw();
+	explicit NoSuchMethodException(const std::string& method_name);
+	virtual ~NoSuchMethodException()throw();
 	virtual const char* what()const throw();
 protected:
 	std::string message;
 };
-
-template<typename...>
-class typelist {};
-
-template<size_t, typename, typename, typename, typename>
-class CallAdapter
-{
-public:
-	template<typename... Ts>
-	int operator()(Ts&&...){return 0;}
-};
-
 class None {};
-template<size_t N, typename ReturnType, typename ClassType, typename... Accum, typename Head, typename... Tail>
-class CallAdapter<N, ReturnType, ClassType, typelist<Accum...>, typelist<Head, Tail...>>
-	: CallAdapter<N, ReturnType, ClassType, typelist<Accum..., Head>, typelist<Tail...>>
-{
+
+class StaticFunctionReflector {
 public:
-	using CallAdapter<N, ReturnType, ClassType, typelist<Accum..., Head>, typelist<Tail...>>::operator();
-	template<size_t D = 0, typename... Ts>
-	auto operator()(ReturnType& ret, ClassType& object, string& name, Accum&... args, Ts&&...)
-		-> typename later_std::enable_if<N + D == sizeof...(Accum), int>::type
-	{
-		ret = InstanceFunctionReflector::ExecuteFunction<ReturnType>(object, name, args...);
-		return 1;
+	template<typename ReturnType, typename... Args>
+	static void RegistFunction(std::string&& name, ReturnType(*func)(Args...)) {
+		(*methods)[name] = std::make_pair((void(*)())func, sizeof...(Args));
 	}
-};
 
-template<size_t, typename, typename, typename, typename>
-class CallAdapterUnAssignable
-{};
-
-template<size_t N, typename ReturnType, typename ClassType, typename... Accum>
-class CallAdapterUnAssignable<N, ReturnType, ClassType, typelist<Accum...>, typelist<>> 
-	: CallAdapter<N, ReturnType, ClassType, typelist<Accum...>, typelist<>> {};
-
-template<size_t N, typename ReturnType, typename ClassType, typename... Accum, typename Head, typename... Tail>
-class CallAdapterUnAssignable<N, ReturnType, ClassType, typelist<Accum...>, typelist<Head, Tail...>>
-	: CallAdapterUnAssignable<N, ReturnType, ClassType, typelist<Accum..., Head>, typelist<Tail...>>
-{
-public:
-	using CallAdapterUnAssignable<N, ReturnType, ClassType, typelist<Accum..., Head>, typelist<Tail...>>::operator();
-	template<size_t D = 0, typename... Ts>
-	auto operator()(ClassType& object, string& name, Accum&... args, Ts&&...)
-		-> typename later_std::enable_if<N + D == sizeof...(Accum), int>::type
-	{
-		InstanceFunctionReflector::ExecuteFunction<ReturnType>(object, name, args...);
-		return 1;
+	template<typename ReturnType, typename... Args>
+	static ReturnType ExecuteFunction(std::string& name, Args&... args) {
+		if (methods->find(name) == methods->end()) {
+			throw NoSuchMethodException(name);
+		}
+		auto func = (ReturnType(*)(Args...))(*methods)[name].first;
+		return (*func)(args...);
 	}
-};
 
+	template<typename ReturnType,
+		typename... Args, size_t... Is,
+		typename later_std::enable_if<later_std::is_same<void, ReturnType>::value, int>::type = 0>
+	static ReturnType Transmit(int i, index_sequence<Is...> seq, string& name, Args&... args)
+	{
+		int unused[] = { (i == Is ?
+			CallAdapterUnAssignableStatic<Is, ReturnType, typelist<>, typelist<Args..., void>>{}.operator()(name, args...)
+					   : 0)... };
+
+		(void)unused;
+	}
+
+	template<typename ReturnType,
+		typename... Args, size_t... Is,
+		typename later_std::enable_if<!later_std::is_same<void, ReturnType>::value, int>::type = 0>
+	static ReturnType Transmit(int i, index_sequence<Is...> seq, string& name, Args&... args)
+	{
+		ReturnType ret{};
+		int unused[] = { (i == Is ?
+			CallAdapterStatic<Is, ReturnType, typelist<>, typelist<Args..., void>>{}.operator()(ret, name, args...)
+					   : 0)... };
+		(void)unused;
+		return ret;
+	}
+
+	template<typename ReturnType, typename... Args>
+	static ReturnType ExecuteFunctionWraps(std::string name, Args... args) {
+		if (methods->find(name) == methods->end()) {
+			throw NoSuchMethodException(name);
+		}
+		int argNum = (*methods)[name].second;
+		if (argNum > sizeof...(Args)) {
+			throw "Arguments miss match";
+		}
+		return Transmit<ReturnType>(argNum, make_index_sequence<sizeof...(Args) + 1>{}, name, args...);
+	}
+
+	StaticFunctionReflector() {
+		methods = new std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>();
+		CvUnit::RegistStaticFunctions();
+	}
+	~StaticFunctionReflector() {
+		methods->clear();
+		delete methods;
+	}
+private:
+	static std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>* methods;
+};
 
 
 class InstanceFunctionReflector {
@@ -136,9 +152,9 @@ public:
 
 	InstanceFunctionReflector() {
 		methods = new std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>();
-		CvUnit::RegistReflectableFunctions();
-		CvCity::RegistReflectableFunctions();
-		CvPlayer::RegistReflectableFunctions();
+		CvUnit::RegistInstanceFunctions();
+		CvCity::RegistInstanceFunctions();
+		CvPlayer::RegistInstanceFunctions();
 	}	
 	~InstanceFunctionReflector() {
 		methods->clear();
@@ -148,6 +164,7 @@ private:
 	static std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>* methods;
 };
 namespace FunctionPointers {
-	extern InstanceFunctionReflector functionPointerUtil;
+	extern InstanceFunctionReflector instanceFunctions;
+	extern StaticFunctionReflector staticFunctions;
 }
 

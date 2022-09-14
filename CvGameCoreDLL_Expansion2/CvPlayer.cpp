@@ -539,7 +539,7 @@ CvPlayer::~CvPlayer()
 	SAFE_DELETE(m_pLeagueAI);
 }
 
-void CvPlayer::RegistReflectableFunctions() {
+void CvPlayer::RegistInstanceFunctions() {
 	REGIST_INSTANCE_FUNCTION(CvPlayer::initUnit);
 	REGIST_INSTANCE_FUNCTION(CvPlayer::SetAnarchyNumTurns);
 	REGIST_INSTANCE_FUNCTION(CvPlayer::SetNumFreeTechs);

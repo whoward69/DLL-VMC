@@ -76,7 +76,7 @@ public:
 	CvPlayer();
 	virtual ~CvPlayer();
 
-	static void RegistReflectableFunctions();
+	static void RegistInstanceFunctions();
 	static void GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID);
 
 	void init(PlayerTypes eID);

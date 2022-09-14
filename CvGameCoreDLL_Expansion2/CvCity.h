@@ -44,7 +44,7 @@ public:
 	CvCity();
 	virtual ~CvCity();
 
-	static void RegistReflectableFunctions();
+	static void RegistInstanceFunctions();
 	static void GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int cityID);
 
 #if defined(MOD_API_EXTENSIONS)

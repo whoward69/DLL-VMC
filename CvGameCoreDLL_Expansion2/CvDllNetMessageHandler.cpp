@@ -334,11 +334,15 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 	int customCommandType,
 	const char* customMsg) {
 	ArgContainer args;
-	//New invoke way: iData1~iData4: Arguments to locate the instance. iData5: message length, iData6: Invoke id (Avoid repeated execution)
+	//New invoke way: iData1~iData4: Arguments to locate the instance. Like playerID, unitID.
+	//iData5: message length, iData6: Invoke id (Avoid repeated execution)
 	if (customMsg[0] != 'e') {
 		char buffer[1024] = "";
 		NetworkMessageAdapter::StringShiftReverse(buffer, customMsg, iData5);
 		args.ParseFromString(std::string(buffer, iData5));
+		string func = args.functiontocall();
+		string head = func.substr(0, func.find_first_of(':')) + "::GetArgumentsAndExecute";
+		
 	}
 	int realCommandType = customCommandType;
 	CvUnit* unit;

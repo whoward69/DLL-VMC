@@ -732,7 +732,7 @@ int CvLuaUnit::lKillSync(lua_State* L) {
 	const int ID = pkUnit->GetID();
 	//pkUnit->kill(bDelay, ePlayer);
 	//ReflectionLtwt::functionPointerUtil.ExecuteFunction<void>(pkUnit, "CvUnit::kill", bDelay, ePlayer);
-	FunctionPointers::functionPointerUtil.ExecuteFunctionWraps<void>(*pkUnit, "CvUnit::kill", bDelay, ePlayer, -1, -1, -1, -1, -1, -1, -1);
+	FunctionPointers::instanceFunctions.ExecuteFunctionWraps<void>(*pkUnit, "CvUnit::kill", bDelay, ePlayer, -1, -1, -1, -1, -1, -1, -1);
 	ArgContainer args;
 	args.set_functiontocall("CvUnit::kill");
 	args.set_args1(bDelay);

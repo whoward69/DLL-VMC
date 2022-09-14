@@ -297,9 +297,8 @@ CvCity::~CvCity()
 	OBJECT_DESTROYED
 }
 
-void CvCity::RegistReflectableFunctions() {
+void CvCity::RegistInstanceFunctions() {
 	REGIST_INSTANCE_FUNCTION(CvCity::setDamage);
-	
 }
 
 void CvCity::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int cityID) {

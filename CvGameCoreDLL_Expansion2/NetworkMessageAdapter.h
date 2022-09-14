@@ -10,6 +10,8 @@
 #define SERIALIZED_SHIFT_NUM 14; 
 
 namespace NetworkMessageAdapter {
+	//Shift the message string or it will be automatically truncated by CIV5 network methods.
 	extern void StringShift(char* buffer, std::string& target);
+	//Shift the message string reversely for decode.
 	extern void StringShiftReverse(char* buffer, const char* target, int msgLength);
 }
