@@ -7,17 +7,18 @@
 #define REGIST_INSTANCE_FUNCTION(T) InstanceFunctionReflector::RegistFunction(#T, &T);
 #define REGIST_STATIC_FUNCTION(T) StaticFunctionReflector::RegistFunction(#T, &T);
 
-#define EXECUTE_INSTANCE_FUNC_WITH_ARGS(REF, ARGS) InstanceFunctionReflector::ExecuteFunctionWraps<void>(REF, ARGS.functiontocall(),\
-ARGS.args1(),\
-ARGS.args2(),\
-ARGS.args3(),\
-ARGS.args4(),\
-ARGS.args5(),\
-ARGS.args6(),\
-ARGS.args7(),\
-ARGS.args8(),\
-ARGS.args9()\
+#define EXECUTE_INSTANCE_FUNC_WITH_ARGS(REF, ARGS) InstanceFunctionReflector::ExecuteFunctionWraps<void>(REF, ARGS->functiontocall(),\
+ARGS->args1(),\
+ARGS->args2(),\
+ARGS->args3(),\
+ARGS->args4(),\
+ARGS->args5(),\
+ARGS->args6(),\
+ARGS->args7(),\
+ARGS->args8(),\
+ARGS->args9()\
 );\
+
 
 struct NoSuchMethodException :public std::exception
 {
@@ -28,6 +29,7 @@ public:
 protected:
 	std::string message;
 };
+
 class None {};
 
 class StaticFunctionReflector {
@@ -36,7 +38,9 @@ public:
 	static void RegistFunction(std::string&& name, ReturnType(*func)(Args...)) {
 		(*methods)[name] = std::make_pair((void(*)())func, sizeof...(Args));
 	}
-
+	/*
+	Please use pass-by-value to pass pointers of objects instead of pass-by-reference.
+	*/
 	template<typename ReturnType, typename... Args>
 	static ReturnType ExecuteFunction(std::string& name, Args&... args) {
 		if (methods->find(name) == methods->end()) {
@@ -52,9 +56,8 @@ public:
 	static ReturnType Transmit(int i, index_sequence<Is...> seq, string& name, Args&... args)
 	{
 		int unused[] = { (i == Is ?
-			CallAdapterUnAssignableStatic<Is, ReturnType, typelist<>, typelist<Args..., void>>{}.operator()(name, args...)
+			CallAdapterUnAssignableStatic<Is, ReturnType, typelist<>, typelist<Args..., void>>::Transmit(name, args...)
 					   : 0)... };
-
 		(void)unused;
 	}
 
@@ -65,12 +68,18 @@ public:
 	{
 		ReturnType ret{};
 		int unused[] = { (i == Is ?
-			CallAdapterStatic<Is, ReturnType, typelist<>, typelist<Args..., void>>{}.operator()(ret, name, args...)
+			CallAdapterStatic<Is, ReturnType, typelist<>, typelist<Args..., void>>::Transmit(ret, name, args...)
 					   : 0)... };
 		(void)unused;
 		return ret;
 	}
 
+	/***
+	Please use pass-by-value to pass pointers of objects.
+	If you call a function with neither too much nor too less arguments, call ExecuteFunction() instead.
+	If the return type of your function is not a simple value type (integers, pointers, bools, etc), please
+	instantiate the function with ReturnType set to "void".
+	***/
 	template<typename ReturnType, typename... Args>
 	static ReturnType ExecuteFunctionWraps(std::string name, Args... args) {
 		if (methods->find(name) == methods->end()) {
@@ -103,6 +112,9 @@ public:
 		(*methods)[name] = std::make_pair((void(None::*)())func, sizeof...(Args));
 	}
 
+	/*
+	Please use pass-by-value to pass pointers of objects instead of pass-by-reference.
+	*/
 	template<typename ReturnType, typename ClassType, typename... Args>
 	static ReturnType ExecuteFunction(ClassType& object, std::string& name, Args&... args) {
 		if (methods->find(name) == methods->end()) {
@@ -118,9 +130,8 @@ public:
 	static ReturnType Transmit(int i, index_sequence<Is...> seq, ClassType& object, string& name, Args&... args)
 	{
 		int unused[] = { (i == Is ?
-			CallAdapterUnAssignable<Is, ReturnType, ClassType, typelist<>, typelist<Args..., void>>{}.operator()(object, name, args...)
+			CallAdapterUnAssignable<Is, ReturnType, ClassType, typelist<>, typelist<Args..., void>>::Transmit(object, name, args...)
 					   : 0)... };
-
 		(void)unused;
 	}
 
@@ -131,12 +142,18 @@ public:
 	{
 		ReturnType ret{};
 		int unused[] = { (i == Is ?
-			CallAdapter<Is, ReturnType, ClassType, typelist<>, typelist<Args..., void>>{}.operator()(ret, object, name, args...)
+			CallAdapter<Is, ReturnType, ClassType, typelist<>, typelist<Args..., void>>::Transmit(ret, object, name, args...)
 					   : 0)... };
 		(void)unused;
 		return ret;
 	}
 
+	/***
+	Please use pass-by-value to pass pointers of objects.
+	If you call a function with neither too much nor too less arguments, call ExecuteFunction() instead.
+	If the return type of your function is not a simple value type (integers, pointers, bools, etc), please
+	instantiate the function with ReturnType set to "void".
+	***/
 	template<typename ReturnType, 
 		typename ClassType, typename... Args>
 	static ReturnType ExecuteFunctionWraps(ClassType& object, std::string name, Args... args) {

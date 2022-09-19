@@ -121,7 +121,7 @@ void ClearUnitDeltas()
 }
 }
 
-void CvUnit::GetArgumentsAndExecute(ArgContainer& args, PlayerTypes playerID, int unitID) {
+void CvUnit::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int unitID) {
 	CvUnit* unit = Provide(playerID, unitID);
 	if (unit == NULL) return;
 	EXECUTE_INSTANCE_FUNC_WITH_ARGS(*unit, args);

@@ -1304,8 +1304,8 @@ int CvLuaPlayer::lInitUnitSync(lua_State* L)
 	const DirectionTypes eFacingDirection = (DirectionTypes)luaL_optint(L, 6, NO_DIRECTION);
 
 	int time = GetTickCount() + getLuaLine(L) + rand();
-	//CvUnit* pkUnit = pkPlayer->initUnit(eUnit, x, y, eUnitAI, eFacingDirection);
-	CvUnit* pkUnit = FunctionPointers::instanceFunctions.ExecuteFunctionWraps<CvUnit*>(*pkPlayer, "CvPlayer::initUnit", eUnit, x, y, eUnitAI, eFacingDirection, false, true, 0, 0);
+	CvUnit* pkUnit = pkPlayer->initUnit(eUnit, x, y, eUnitAI, eFacingDirection);
+	//CvUnit* pkUnit = FunctionPointers::instanceFunctions.ExecuteFunctionWraps<CvUnit*>(*pkPlayer, "CvPlayer::initUnit", eUnit, x, y, eUnitAI, eFacingDirection, false, true, 0, 0);
 	ReturnValueUtil::container.pushReturnValue(time);
 	gDLL->SendFoundReligion(playerID, ReligionTypes(CUSTOM_OPERATION_PLAYER_INIT_UNIT), "e",
 		(BeliefTypes)eUnit, (BeliefTypes)x, (BeliefTypes)y, (BeliefTypes)eUnitAI, eFacingDirection, time);

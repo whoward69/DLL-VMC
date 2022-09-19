@@ -533,6 +533,9 @@
     <ClCompile Include="NetworkMessageAdapter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LargeArgContainer.pb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="banned.h">
@@ -1088,6 +1091,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ArgumentAdaptor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LargeArgContainer.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

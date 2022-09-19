@@ -41,7 +41,7 @@ namespace later_std {
 	};
 }
 
-//Thanks for stack-overflow user Passerby. Please refer to https://stackoverflow.com/questions/73685911/
+//Thanks stack-overflow user Passer By. Please refer to https://stackoverflow.com/questions/73685911/
 namespace cpp11_polyfill
 {
 	template<class T> using Invoke = typename T::type;

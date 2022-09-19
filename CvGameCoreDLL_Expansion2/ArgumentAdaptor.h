@@ -1,4 +1,6 @@
 #pragma once
+//Thanks stack-overflow user Passer By. Please refer to https://stackoverflow.com/questions/73685911/
+
 template<typename...>
 class typelist {};
 
@@ -7,7 +9,7 @@ class CallAdapter
 {
 public:
 	template<typename... Ts>
-	int operator()(Ts&&...) { return 0; }
+	static int Transmit(Ts&&...) { return 0; }
 };
 
 template<size_t N, typename ReturnType, typename ClassType, typename... Accum, typename Head, typename... Tail>
@@ -15,9 +17,9 @@ class CallAdapter<N, ReturnType, ClassType, typelist<Accum...>, typelist<Head, T
 	: CallAdapter<N, ReturnType, ClassType, typelist<Accum..., Head>, typelist<Tail...>>
 {
 public:
-	using CallAdapter<N, ReturnType, ClassType, typelist<Accum..., Head>, typelist<Tail...>>::operator();
+	using CallAdapter<N, ReturnType, ClassType, typelist<Accum..., Head>, typelist<Tail...>>::Transmit;
 	template<size_t D = 0, typename... Ts>
-	auto operator()(ReturnType& ret, ClassType& object, string& name, Accum&... args, Ts&&...)
+	static auto Transmit(ReturnType& ret, ClassType& object, string& name, Accum&... args, Ts&&...)
 		-> typename later_std::enable_if<N + D == sizeof...(Accum), int>::type
 	{
 		ret = InstanceFunctionReflector::ExecuteFunction<ReturnType>(object, name, args...);
@@ -38,9 +40,9 @@ class CallAdapterUnAssignable<N, ReturnType, ClassType, typelist<Accum...>, type
 	: CallAdapterUnAssignable<N, ReturnType, ClassType, typelist<Accum..., Head>, typelist<Tail...>>
 {
 public:
-	using CallAdapterUnAssignable<N, ReturnType, ClassType, typelist<Accum..., Head>, typelist<Tail...>>::operator();
+	using CallAdapterUnAssignable<N, ReturnType, ClassType, typelist<Accum..., Head>, typelist<Tail...>>::Transmit;
 	template<size_t D = 0, typename... Ts>
-	auto operator()(ClassType& object, string& name, Accum&... args, Ts&&...)
+	static auto Transmit(ClassType& object, string& name, Accum&... args, Ts&&...)
 		-> typename later_std::enable_if<N + D == sizeof...(Accum), int>::type
 	{
 		InstanceFunctionReflector::ExecuteFunction<ReturnType>(object, name, args...);
@@ -54,7 +56,7 @@ class CallAdapterStatic
 {
 public:
 	template<typename... Ts>
-	int operator()(Ts&&...) { return 0; }
+	static int Transmit(Ts&&...) { return 0; }
 };
 
 template<size_t N, typename ReturnType, typename... Accum, typename Head, typename... Tail>
@@ -62,9 +64,9 @@ class CallAdapterStatic<N, ReturnType, typelist<Accum...>, typelist<Head, Tail..
 	: CallAdapterStatic<N, ReturnType, typelist<Accum..., Head>, typelist<Tail...>>
 {
 public:
-	using CallAdapterStatic<N, ReturnType, typelist<Accum..., Head>, typelist<Tail...>>::operator();
+	using CallAdapterStatic<N, ReturnType, typelist<Accum..., Head>, typelist<Tail...>>::Transmit;
 	template<size_t D = 0, typename... Ts>
-	auto operator()(ReturnType& ret, string& name, Accum&... args, Ts&&...)
+	static auto Transmit(ReturnType& ret, string& name, Accum&... args, Ts&&...)
 		-> typename later_std::enable_if<N + D == sizeof...(Accum), int>::type
 	{
 		ret = StaticFunctionReflector::ExecuteFunction<ReturnType>(name, args...);
@@ -85,9 +87,9 @@ class CallAdapterUnAssignableStatic<N, ReturnType, typelist<Accum...>, typelist<
 	: CallAdapterUnAssignableStatic<N, ReturnType, typelist<Accum..., Head>, typelist<Tail...>>
 {
 public:
-	using CallAdapterUnAssignableStatic<N, ReturnType, typelist<Accum..., Head>, typelist<Tail...>>::operator();
+	using CallAdapterUnAssignableStatic<N, ReturnType, typelist<Accum..., Head>, typelist<Tail...>>::Transmit;
 	template<size_t D = 0, typename... Ts>
-	auto operator()(string& name, Accum&... args, Ts&&...)
+	static auto Transmit(string& name, Accum&... args, Ts&&...)
 		-> typename later_std::enable_if<N + D == sizeof...(Accum), int>::type
 	{
 		StaticFunctionReflector::ExecuteFunction<ReturnType>(name, args...);

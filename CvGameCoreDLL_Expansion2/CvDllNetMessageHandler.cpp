@@ -333,22 +333,32 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 	int iData1, int iData2, int iData3, int iData4, int iData5, int iData6,
 	int customCommandType,
 	const char* customMsg) {
-	ArgContainer args;
+	//ArgContainer args;
+	//char buffer[1024] = "";
+	
+	
 	//New invoke way: iData1~iData4: Arguments to locate the instance. Like playerID, unitID.
 	//iData5: message length, iData6: Invoke id (Avoid repeated execution)
+	
 	if (customMsg[0] != 'e') {
-		char buffer[1024] = "";
-		NetworkMessageAdapter::StringShiftReverse(buffer, customMsg, iData5);
-		args.ParseFromString(std::string(buffer, iData5));
-		string func = args.functiontocall();
+		NetworkMessageAdapter::StringShiftReverse(NetworkMessageAdapter::ReceiveBuffer, customMsg, iData5);
+		if (customCommandType == CUSTOM_OPERATION_UNIT_KILL) return;
+		NetworkMessageAdapter::ReceiveArgContainer.ParseFromString(std::string(NetworkMessageAdapter::ReceiveBuffer, iData5));
+		string func = NetworkMessageAdapter::ReceiveArgContainer.functiontocall();
 		string head = func.substr(0, func.find_first_of(':')) + "::GetArgumentsAndExecute";
-		
+		StaticFunctionReflector::ExecuteFunctionWraps<void>(head, &NetworkMessageAdapter::ReceiveArgContainer, iData1, iData2, iData3, iData4);
+		NetworkMessageAdapter::ReceiveArgContainer.Clear();
+		NetworkMessageAdapter::Clear(NetworkMessageAdapter::ReceiveBuffer, iData5);
+		return;
 	}
+	
+	
+	if (ReturnValueUtil::container.getReturnValueExist(iData6)) return;
 	int realCommandType = customCommandType;
 	CvUnit* unit;
 	CvCity* city;
 	CvPlot* plot;
-	if (ReturnValueUtil::container.getReturnValueExist(iData6)) return;
+	//if (ReturnValueUtil::container.getReturnValueExist(iData6)) return;
 	switch (realCommandType) {
 	case CUSTOM_OPERATION_UNIT_KILL:
 		//ePlayer: Owner of the unit
@@ -1124,15 +1134,18 @@ void CvDllNetMessageHandler::ResponseIdeologyChoice(PlayerTypes ePlayer, PolicyB
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID, const char* szName)
 {
-	ArgContainer a;
-	a.ParseFromString(szName);
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
+	NetworkMessageAdapter::StringShiftReverse(NetworkMessageAdapter::ReceiveBuffer, szName, iCityID);
+	auto str = std::string(NetworkMessageAdapter::ReceiveBuffer, iCityID);
+	LargeArgContainer cont;
+	cont.ParseFromString(str);
 	if(pkCity)
 	{
 		CvString strName = szName;
 		pkCity->setName(strName);
 	}
+	cont.Clear();
 }
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseRenameUnit(PlayerTypes ePlayer, int iUnitID, const char* szName)

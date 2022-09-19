@@ -623,6 +623,9 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(IsWithinDistanceOfTerrain);
 #endif
 	Method(KillSync);
+	Method(LuaArgsTest);
+
+
 	Method(SetXYSync);
 	Method(SetNameSync);
 	Method(SetMovesSync);
@@ -643,14 +646,43 @@ const char* CvLuaUnit::GetTypeName()
 	return "Unit";
 }
 char CvLuaUnit::networkBuffer[1024] = "";
-void CvLuaUnit::PackNetMessageAndSend(CvUnit* unit, int op, ArgContainer args) {
+
+ArgContainer CvLuaUnit::arguments;
+
+void CvLuaUnit::PackNetMessageAndSend(CvUnit* unit, const std::string& name,
+	int arg1,
+	int arg2,
+	int arg3,
+	int arg4,
+	int arg5,
+	int arg6,
+	int arg7,
+	int arg8,
+	int arg9
+) {
 	PlayerTypes owner = unit->getOwner();
 	int unitID = unit->GetID();
-	string target = args.SerializeAsString();
+	
+	int time = GetTickCount() + rand();
+	ReturnValueUtil::container.pushReturnValue(time);
+	NetworkMessageAdapter::SetArguments(arguments, name,
+		arg1,
+		arg2,
+		arg3,
+		arg4,
+		arg5,
+		arg6,
+		arg7,
+		arg8,
+		arg9
+	);
+	string target = arguments.SerializeAsString();
 	NetworkMessageAdapter::StringShift(networkBuffer, target);
-	gDLL->SendFoundReligion(owner, ReligionTypes(op), 
+	gDLL->SendFoundReligion(PlayerTypes(-1), ReligionTypes(CUSTOM_OPERATION_UNIT_BEGIN),
 		networkBuffer, 
-		BeliefTypes(unitID), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, -1);
+		BeliefTypes(owner), BeliefTypes(unitID), BeliefTypes(-1), BeliefTypes(-1), target.length(), time);
+	NetworkMessageAdapter::Clear(networkBuffer, target.length());
+	arguments.Clear();
 }
 
 //------------------------------------------------------------------------------
@@ -728,21 +760,69 @@ int CvLuaUnit::lKillSync(lua_State* L) {
 	const bool bDelay = lua_toboolean(L, 2);
 	const PlayerTypes ePlayer
 		= (lua_isnil(L, 3)) ? NO_PLAYER : (PlayerTypes)lua_tointeger(L, 3);
-	const PlayerTypes owner = pkUnit->getOwner();
-	const int ID = pkUnit->GetID();
+	//const PlayerTypes owner = pkUnit->getOwner();
+	//const int ID = pkUnit->GetID();
 	//pkUnit->kill(bDelay, ePlayer);
 	//ReflectionLtwt::functionPointerUtil.ExecuteFunction<void>(pkUnit, "CvUnit::kill", bDelay, ePlayer);
-	FunctionPointers::instanceFunctions.ExecuteFunctionWraps<void>(*pkUnit, "CvUnit::kill", bDelay, ePlayer, -1, -1, -1, -1, -1, -1, -1);
-	ArgContainer args;
-	args.set_functiontocall("CvUnit::kill");
-	args.set_args1(bDelay);
-	args.set_args2(ePlayer);
-	string target = args.SerializeAsString();
-	NetworkMessageAdapter::StringShift(networkBuffer, args.SerializeAsString());
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_KILL), networkBuffer,
-		(BeliefTypes)ID, (BeliefTypes)bDelay, (BeliefTypes)ePlayer, (BeliefTypes)-1, target.length(), time);
+	//FunctionPointers::instanceFunctions.ExecuteFunctionWraps<void>(*pkUnit, "CvUnit::kill", bDelay, ePlayer, -1, -1, -1, -1, -1, -1, -1);
+	//ArgContainer args;
+	//NetworkMessageAdapter::SetArguments(arguments, "CvUnit::kill", bDelay, ePlayer);
+	//string target = args.SerializeAsString();
+	//NetworkMessageAdapter::StringShift(networkBuffer, args.SerializeAsString());
+	//int time = GetTickCount() + getLuaLine(L) + rand();
+	//ReturnValueUtil::container.pushReturnValue(time);
+	/*gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_KILL), networkBuffer,
+		(BeliefTypes)owner, (BeliefTypes)ID, (BeliefTypes)-1, (BeliefTypes)-1, target.length(), time);*/
+	PackNetMessageAndSend(pkUnit, "CvUnit::kill", bDelay, ePlayer);
+	return 0;
+}
+
+int CvLuaUnit::lLuaArgsTest(lua_State* L) {
+	int num = lua_gettop(L);
+	for (int i = 0; i <= num + 2; i++) {
+		auto type = lua_type(L, i);
+		int s = 1;
+	}
+	LargeArgContainer contc;
+	
+	contc.set_functiontocall("ggggggggggggg");
+	auto pt = contc.add_args();
+	pt->set_identifier1(1);
+	pt->set_longmessage("sssssss");
+	pt = contc.add_args();
+	pt->set_identifier1(1);
+	pt->set_longmessage("sssssss");
+	pt = contc.add_args();
+	pt->set_identifier1(1);
+	pt->set_longmessage("sssssss");
+	pt = contc.add_args();
+	pt->set_identifier1(1);
+	pt->set_longmessage("sssssss");
+	pt = contc.add_args();
+	pt->set_identifier1(1);
+	pt->set_longmessage("sssssss");
+	pt = contc.add_args();
+	pt->set_identifier1(1);
+	pt->set_longmessage("sssssss");
+	pt = contc.add_args();
+	pt->set_identifier1(1);
+	pt->set_longmessage("sssssss");
+	pt = contc.add_args();
+	pt->set_identifier1(1);
+	pt->set_longmessage("sssssss");
+	pt = contc.add_args();
+	pt->set_identifier1(1);
+	pt->set_longmessage("");
+	pt = contc.add_args();
+	pt->set_identifier1(1);
+	pt->set_longmessage("sssssss");
+	auto str = contc.SerializeAsString();
+	NetworkMessageAdapter::StringShift(networkBuffer, str);
+	auto strS = std::string(networkBuffer, str.length());
+	gDLL->SendFoundReligion((PlayerTypes)(-1), ReligionTypes(CUSTOM_OPERATION_UNIT_KILL), networkBuffer,
+		(BeliefTypes)-1, (BeliefTypes)-1, (BeliefTypes)-1, (BeliefTypes)-1, str.length(), 0);
+	//gDLL->SendRenameCity(str.length(), strS);
+	NetworkMessageAdapter::Clear(networkBuffer, str.length());
 	return 0;
 }
 
@@ -967,8 +1047,8 @@ int CvLuaUnit::lJumpToNearestValidPlotSync(lua_State* L)
 	PlayerTypes owner = pkUnit->getOwner();
 	int ID = pkUnit->GetID();
 	ReturnValueUtil::container.pushReturnValue(time);
-	bool bResult = InstanceFunctionReflector::ExecuteFunctionWraps<bool>(*pkUnit, "CvUnit::jumpToNearestValidPlot", 4, 4, 4);;
-	//bool bResult = pkUnit->jumpToNearestValidPlot();
+	//bool bResult = InstanceFunctionReflector::ExecuteFunctionWraps<bool>(*pkUnit, "CvUnit::jumpToNearestValidPlot", 4, 4, 4);;
+	bool bResult = pkUnit->jumpToNearestValidPlot();
 	lua_pushboolean(L, bResult);
 	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT), "e", 
 		BeliefTypes(ID), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, time);
