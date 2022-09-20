@@ -7,19 +7,6 @@
 #define REGIST_INSTANCE_FUNCTION(T) InstanceFunctionReflector::RegistFunction(#T, &T);
 #define REGIST_STATIC_FUNCTION(T) StaticFunctionReflector::RegistFunction(#T, &T);
 
-#define EXECUTE_INSTANCE_FUNC_WITH_ARGS(REF, ARGS) InstanceFunctionReflector::ExecuteFunctionWraps<void>(REF, ARGS->functiontocall(),\
-ARGS->args1(),\
-ARGS->args2(),\
-ARGS->args3(),\
-ARGS->args4(),\
-ARGS->args5(),\
-ARGS->args6(),\
-ARGS->args7(),\
-ARGS->args8(),\
-ARGS->args9()\
-);\
-
-
 struct NoSuchMethodException :public std::exception
 {
 public:
@@ -111,21 +98,19 @@ public:
 	static void RegistFunction(std::string&& name, ReturnType(ClassType::* func)(Args...)) {
 		(*methods)[name] = std::make_pair((void(None::*)())func, sizeof...(Args));
 	}
-
 	/*
 	Please use pass-by-value to pass pointers of objects instead of pass-by-reference.
 	*/
 	template<typename ReturnType, typename ClassType, typename... Args>
 	static ReturnType ExecuteFunction(ClassType& object, std::string& name, Args&... args) {
 		if (methods->find(name) == methods->end()) {
-			throw "No such method";
+			throw NoSuchMethodException(name);
 		}
 		auto func = (ReturnType(ClassType::*)(Args...))(*methods)[name].first;
 		return (object.*func)(args...);
 	}
 
-	template<typename ReturnType,
-		typename ClassType, typename... Args, size_t... Is,
+	template<typename ReturnType, typename ClassType, typename... Args, size_t... Is,
 		typename later_std::enable_if<later_std::is_same<void, ReturnType>::value, int>::type = 0>
 	static ReturnType Transmit(int i, index_sequence<Is...> seq, ClassType& object, string& name, Args&... args)
 	{
@@ -135,8 +120,7 @@ public:
 		(void)unused;
 	}
 
-	template<typename ReturnType, 
-		typename ClassType, typename... Args, size_t... Is,
+	template<typename ReturnType, typename ClassType, typename... Args, size_t... Is,
 		typename later_std::enable_if<!later_std::is_same<void, ReturnType>::value, int>::type = 0>
 	static ReturnType Transmit(int i, index_sequence<Is...> seq, ClassType& object, string& name, Args&... args)
 	{
@@ -154,17 +138,24 @@ public:
 	If the return type of your function is not a simple value type (integers, pointers, bools, etc), please
 	instantiate the function with ReturnType set to "void".
 	***/
-	template<typename ReturnType, 
-		typename ClassType, typename... Args>
+	template<typename ReturnType, typename ClassType, typename... Args>
 	static ReturnType ExecuteFunctionWraps(ClassType& object, std::string name, Args... args) {
 		if (methods->find(name) == methods->end()) {
-			throw "No such method";
+			throw NoSuchMethodException(name);
 		}
 		int argNum = (*methods)[name].second;
 		if (argNum > sizeof...(Args)) {
 			throw "Arguments miss match";
 		}
 		return Transmit<ReturnType>(argNum, make_index_sequence<sizeof...(Args) + 1>{}, object, name, args...);
+	}
+	/***
+	Make sure the argument list of the function you want to call is compatible with 32-bit integer,
+	e.g. int, bool, float, object pointers, object references (if you pass its pointer instead).
+	***/
+	template<typename ReturnType, typename ClassType, size_t... Is>
+	static ReturnType ExecuteFunctionWrapsWithIntegerArray(ClassType& object, std::string name, int* idx, index_sequence<Is...> seq) {
+		return ExecuteFunctionWraps<ReturnType>(object, name, idx[Is]...);
 	}
 
 	InstanceFunctionReflector() {

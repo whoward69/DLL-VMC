@@ -649,39 +649,25 @@ char CvLuaUnit::networkBuffer[1024] = "";
 
 ArgContainer CvLuaUnit::arguments;
 
-void CvLuaUnit::PackNetMessageAndSend(CvUnit* unit, const std::string& name,
-	int arg1,
-	int arg2,
-	int arg3,
-	int arg4,
-	int arg5,
-	int arg6,
-	int arg7,
-	int arg8,
-	int arg9
+void CvLuaUnit::PackNetMessageAndSend(CvUnit* unit, const std::string& name, int num, ...
 ) {
 	PlayerTypes owner = unit->getOwner();
 	int unitID = unit->GetID();
 	
 	int time = GetTickCount() + rand();
 	ReturnValueUtil::container.pushReturnValue(time);
-	NetworkMessageAdapter::SetArguments(arguments, name,
-		arg1,
-		arg2,
-		arg3,
-		arg4,
-		arg5,
-		arg6,
-		arg7,
-		arg8,
-		arg9
-	);
+	arguments.set_functiontocall(name);
+	va_list vl;
+	va_start(vl, num);
+	for (int i = 0; i < num; ++i) {
+		arguments.add_args(va_arg(vl, int));
+	}
+	va_end(vl);
 	string target = arguments.SerializeAsString();
 	NetworkMessageAdapter::StringShift(networkBuffer, target);
-	gDLL->SendFoundReligion(PlayerTypes(-1), ReligionTypes(CUSTOM_OPERATION_UNIT_BEGIN),
-		networkBuffer, 
+	gDLL->SendFoundReligion(PlayerTypes(-1), ReligionTypes(CUSTOM_OPERATION_UNIT_BEGIN), networkBuffer, 
 		BeliefTypes(owner), BeliefTypes(unitID), BeliefTypes(-1), BeliefTypes(-1), target.length(), time);
-	NetworkMessageAdapter::Clear(networkBuffer, target.length());
+	NetworkMessageAdapter::CClear(networkBuffer, target.length());
 	arguments.Clear();
 }
 
@@ -773,13 +759,13 @@ int CvLuaUnit::lKillSync(lua_State* L) {
 	//ReturnValueUtil::container.pushReturnValue(time);
 	/*gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_KILL), networkBuffer,
 		(BeliefTypes)owner, (BeliefTypes)ID, (BeliefTypes)-1, (BeliefTypes)-1, target.length(), time);*/
-	PackNetMessageAndSend(pkUnit, "CvUnit::kill", bDelay, ePlayer);
+	PackNetMessageAndSend(pkUnit, "CvUnit::kill", 2, bDelay, ePlayer);
 	return 0;
 }
 
 int CvLuaUnit::lLuaArgsTest(lua_State* L) {
 	int num = lua_gettop(L);
-	for (int i = 0; i <= num + 2; i++) {
+	for (int i = 0; i < num; i++) {
 		auto type = lua_type(L, i);
 		int s = 1;
 	}
@@ -822,7 +808,7 @@ int CvLuaUnit::lLuaArgsTest(lua_State* L) {
 	gDLL->SendFoundReligion((PlayerTypes)(-1), ReligionTypes(CUSTOM_OPERATION_UNIT_KILL), networkBuffer,
 		(BeliefTypes)-1, (BeliefTypes)-1, (BeliefTypes)-1, (BeliefTypes)-1, str.length(), 0);
 	//gDLL->SendRenameCity(str.length(), strS);
-	NetworkMessageAdapter::Clear(networkBuffer, str.length());
+	NetworkMessageAdapter::CClear(networkBuffer, str.length());
 	return 0;
 }
 

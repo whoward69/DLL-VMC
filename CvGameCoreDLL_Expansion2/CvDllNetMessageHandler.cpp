@@ -336,7 +336,6 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 	//ArgContainer args;
 	//char buffer[1024] = "";
 	
-	
 	//New invoke way: iData1~iData4: Arguments to locate the instance. Like playerID, unitID.
 	//iData5: message length, iData6: Invoke id (Avoid repeated execution)
 	
@@ -348,7 +347,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 		string head = func.substr(0, func.find_first_of(':')) + "::GetArgumentsAndExecute";
 		StaticFunctionReflector::ExecuteFunctionWraps<void>(head, &NetworkMessageAdapter::ReceiveArgContainer, iData1, iData2, iData3, iData4);
 		NetworkMessageAdapter::ReceiveArgContainer.Clear();
-		NetworkMessageAdapter::Clear(NetworkMessageAdapter::ReceiveBuffer, iData5);
+		NetworkMessageAdapter::CClear(NetworkMessageAdapter::ReceiveBuffer, iData5);
 		return;
 	}
 	

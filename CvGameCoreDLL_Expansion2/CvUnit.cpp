@@ -43,6 +43,8 @@
 #include "CvGameQueries.h"
 #include "CvBarbarians.h"
 
+#include "NetworkMessageAdapter.h"
+
 #if !defined(FINAL_RELEASE)
 #include <sstream>
 
@@ -124,7 +126,13 @@ void ClearUnitDeltas()
 void CvUnit::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int unitID) {
 	CvUnit* unit = Provide(playerID, unitID);
 	if (unit == NULL) return;
-	EXECUTE_INSTANCE_FUNC_WITH_ARGS(*unit, args);
+	for (int i = 0; i < args->args_size(); i++) {
+		NetworkMessageAdapter::ArgumentsToPass[i] = args->args().Get(i);
+	}
+	auto index = make_index_sequence<16>{};
+	InstanceFunctionReflector::ExecuteFunctionWrapsWithIntegerArray<void>(*unit, args->functiontocall(), 
+		NetworkMessageAdapter::ArgumentsToPass, index);
+	NetworkMessageAdapter::IClear(NetworkMessageAdapter::ArgumentsToPass);
 }
 
 void CvUnit::RegistInstanceFunctions() {

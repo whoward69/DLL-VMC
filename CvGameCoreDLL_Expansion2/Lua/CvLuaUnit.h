@@ -28,17 +28,7 @@ public:
 
 protected:
 	static char networkBuffer[1024];
-	static void PackNetMessageAndSend(CvUnit* unit, const std::string& name,
-		int arg1 = 0,
-		int arg2 = 0,
-		int arg3 = 0,
-		int arg4 = 0,
-		int arg5 = 0,
-		int arg6 = 0,
-		int arg7 = 0,
-		int arg8 = 0,
-		int arg9 = 0
-	);
+	static void PackNetMessageAndSend(CvUnit* unit, const std::string& name, int num, ...);
 
 	static int lIsNone(lua_State* L);
 	static int lConvert(lua_State* L);

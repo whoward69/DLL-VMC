@@ -15,20 +15,10 @@ namespace NetworkMessageAdapter {
 	extern void StringShift(char* buffer, std::string& target);
 	//Shift the message string reversely for decode.
 	extern void StringShiftReverse(char* buffer, const char* target, int msgLength);
-	extern void Clear(char* buffer, int msgLength);
-	extern void SetArguments(ArgContainer& args, const std::string& name, 
-		int arg1 = 0,
-		int arg2 = 0,
-		int arg3 = 0,
-		int arg4 = 0,
-		int arg5 = 0,
-		int arg6 = 0,
-		int arg7 = 0,
-		int arg8 = 0,
-		int arg9 = 0
-	);
-
+	extern void CClear(char* buffer, int msgLength);
+	extern void IClear(int* buffer);
 	extern char ReceiveBuffer[1024];
 	extern ArgContainer ReceiveArgContainer;
 	extern LargeArgContainer ReceivrLargeArgContainer;
+	extern int ArgumentsToPass[16];
 }
