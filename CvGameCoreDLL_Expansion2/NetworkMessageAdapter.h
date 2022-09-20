@@ -7,8 +7,8 @@
 #include "CvPlayerAI.h"
 #include "LargeArgContainer.pb.h"
 
-
-#define SERIALIZED_SHIFT_NUM 14; 
+#define MAX_INT32_ARGNUM 16
+#define SERIALIZED_SHIFT_NUM 14
 
 namespace NetworkMessageAdapter {
 	//Shift the message string or it will be automatically truncated by CIV5 network methods.
@@ -20,5 +20,15 @@ namespace NetworkMessageAdapter {
 	extern char ReceiveBuffer[1024];
 	extern ArgContainer ReceiveArgContainer;
 	extern LargeArgContainer ReceivrLargeArgContainer;
-	extern int ArgumentsToPass[16];
+	extern int ArgumentsToPass[MAX_INT32_ARGNUM];
+	template<typename InstanceType>
+	void InstanceArrExecute(InstanceType& reference, ArgContainer* args) {
+		for (int i = 0; i < args->args_size(); i++) {
+			ArgumentsToPass[i] = args->args().Get(i);
+		}
+		auto index = make_index_sequence<MAX_INT32_ARGNUM>{};
+		InstanceFunctionReflector::ExecuteFunctionWrapsWithIntegerArray<void>(reference, args->functiontocall(),
+			ArgumentsToPass, index);
+		IClear(ArgumentsToPass);
+	}
 }

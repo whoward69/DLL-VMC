@@ -791,6 +791,7 @@ int CvLuaUnit::lLuaArgsTest(lua_State* L) {
 	pt->set_identifier1(1);
 	pt->set_longmessage("sssssss");
 	pt = contc.add_args();
+	
 	pt->set_identifier1(1);
 	pt->set_longmessage("sssssss");
 	pt = contc.add_args();
@@ -802,6 +803,7 @@ int CvLuaUnit::lLuaArgsTest(lua_State* L) {
 	pt = contc.add_args();
 	pt->set_identifier1(1);
 	pt->set_longmessage("sssssss");
+	
 	auto str = contc.SerializeAsString();
 	NetworkMessageAdapter::StringShift(networkBuffer, str);
 	auto strS = std::string(networkBuffer, str.length());
@@ -809,6 +811,7 @@ int CvLuaUnit::lLuaArgsTest(lua_State* L) {
 		(BeliefTypes)-1, (BeliefTypes)-1, (BeliefTypes)-1, (BeliefTypes)-1, str.length(), 0);
 	//gDLL->SendRenameCity(str.length(), strS);
 	NetworkMessageAdapter::CClear(networkBuffer, str.length());
+	contc.Clear();
 	return 0;
 }
 

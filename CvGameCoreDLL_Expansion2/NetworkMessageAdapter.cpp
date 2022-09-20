@@ -31,4 +31,4 @@ void NetworkMessageAdapter::StringShiftReverse(char* buffer, const char* target,
 char NetworkMessageAdapter::ReceiveBuffer[1024];
 ArgContainer NetworkMessageAdapter::ReceiveArgContainer;
 LargeArgContainer NetworkMessageAdapter::ReceivrLargeArgContainer;
-int NetworkMessageAdapter::ArgumentsToPass[16];
+int NetworkMessageAdapter::ArgumentsToPass[MAX_INT32_ARGNUM];

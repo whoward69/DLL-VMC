@@ -25,6 +25,7 @@
 #include "CvAchievementUnlocker.h"
 #include "CvUnitCycler.h"
 
+
 class CvPlayerPolicies;
 class CvEconomicAI;
 class CvMilitaryAI;
@@ -77,7 +78,9 @@ public:
 	virtual ~CvPlayer();
 
 	static void RegistInstanceFunctions();
+	static void RegistStaticFunctions();
 	static void GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID);
+	static CvPlayer* Provide(PlayerTypes player);
 
 	void init(PlayerTypes eID);
 	void setupGraphical();

@@ -82,6 +82,8 @@ public:
 	StaticFunctionReflector() {
 		methods = new std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>();
 		CvUnit::RegistStaticFunctions();
+		CvCity::RegistStaticFunctions();
+		CvPlayer::RegistStaticFunctions();
 	}
 	~StaticFunctionReflector() {
 		methods->clear();

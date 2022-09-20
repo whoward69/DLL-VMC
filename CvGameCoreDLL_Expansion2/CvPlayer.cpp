@@ -66,6 +66,7 @@
 #define LINT_WARNINGS_ONLY
 #include "LintFree.h"
 #include "FunctionsRef.h"
+#include "NetworkMessageAdapter.h"
 
 //------------------------------------------------------------------------------
 // CvPlayer Version History
@@ -546,9 +547,19 @@ void CvPlayer::RegistInstanceFunctions() {
 	REGIST_INSTANCE_FUNCTION(CvPlayer::changeNumResourceTotal);
 }
 
+void CvPlayer::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvPlayer::Provide);
+	REGIST_STATIC_FUNCTION(CvPlayer::GetArgumentsAndExecute);
+}
+
+CvPlayer* CvPlayer::Provide(PlayerTypes player) {
+	return &GET_PLAYER(player);
+}
+
 void CvPlayer::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID) {
-	CvPlayer& player = (GET_PLAYER(playerID));
-	//EXECUTE_FUNC_WITH_ARGS(player, args);
+	auto player = Provide(playerID);
+	if (player == NULL) return;
+	NetworkMessageAdapter::InstanceArrExecute(*player, args);
 }
 
 //	--------------------------------------------------------------------------------

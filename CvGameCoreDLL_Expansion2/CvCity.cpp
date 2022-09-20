@@ -45,6 +45,7 @@
 // include after all other headers
 #include "LintFree.h"
 #include "FunctionsRef.h"
+#include "NetworkMessageAdapter.h"
 
 OBJECT_VALIDATE_DEFINITION(CvCity)
 
@@ -105,6 +106,25 @@ void ClearCityDeltas()
 		}
 	}
 }
+}
+
+void CvCity::RegistInstanceFunctions() {
+	REGIST_INSTANCE_FUNCTION(CvCity::setDamage);
+}
+
+void CvCity::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvCity::Provide);
+	REGIST_STATIC_FUNCTION(CvCity::GetArgumentsAndExecute);
+}
+
+CvCity* CvCity::Provide(PlayerTypes player, int cityID) {
+	return GET_PLAYER(player).getCity(cityID);
+}
+
+void CvCity::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int cityID) {
+	auto city = Provide(playerID, cityID);
+	if (city == NULL) return;
+	NetworkMessageAdapter::InstanceArrExecute(*city, args);
 }
 
 
@@ -296,18 +316,6 @@ CvCity::~CvCity()
 
 	OBJECT_DESTROYED
 }
-
-void CvCity::RegistInstanceFunctions() {
-	REGIST_INSTANCE_FUNCTION(CvCity::setDamage);
-}
-
-void CvCity::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int cityID) {
-	auto city = GET_PLAYER(playerID).getCity(cityID);
-	
-	if (city == NULL) return;
-	//EXECUTE_FUNC_WITH_ARGS(*city, args);
-}
-
 //	--------------------------------------------------------------------------------
 #if defined(MOD_API_EXTENSIONS)
 void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, bool bInitialFounding, ReligionTypes eInitialReligion, const char* szName)
