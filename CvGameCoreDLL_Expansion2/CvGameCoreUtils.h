@@ -20,28 +20,6 @@
 
 extern "C" unsigned int _ftoui3(const float x);
 extern "C" double _ltod3(const __int64 x);
-int hsRes(int num, ...);
-
-class InvokeRecorder {
-public:
-	static const int MaxSize = 65536;
-	
-	InvokeRecorder() {
-	}
-	~InvokeRecorder() {
-		//returnValueRecord.clear();
-		//valueMap.clear();
-	}
-	static std::list<int> returnValueRecord;
-	static std::map<int, list<int>::iterator> valueMap;
-	static FCriticalSection m_Locker;
-	static void pushReturnValue(int time);
-	static bool getReturnValueExist(int time);
-};
-namespace ReturnValueUtil {
-	extern InvokeRecorder container;
-}
-
 
 inline int range(int iNum, int iLow, int iHigh)
 {

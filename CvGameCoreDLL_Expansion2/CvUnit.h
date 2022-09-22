@@ -21,6 +21,7 @@
 #include "CvPromotionClasses.h"
 #include "CvAStarNode.h"
 #include "ArgContainer.pb.h"
+#include "CvGameObjectExtractable.h"
 
 #define DEFAULT_UNIT_MAP_LAYER 0
 
@@ -94,7 +95,7 @@ struct CvUnitCaptureDefinition
 	}
 };
 
-class CvUnit
+class CvUnit : public CvGameObjectExtractable
 {
 
 	friend class CvUnitMission;
@@ -120,10 +121,13 @@ public:
 
 	DestructionNotification<UnitHandle>& getDestructionNotification();
 
+	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
 	static void RegistInstanceFunctions();
 	static void RegistStaticFunctions();
 	static void GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int unitID);
 	static CvUnit* Provide(PlayerTypes player, int id);
+	
 
 	void init(int iID, UnitTypes eUnit, UnitAITypes eUnitAI, PlayerTypes eOwner, int iX, int iY, DirectionTypes eFacingDirection, bool bNoMove, bool bSetupGraphical=true, int iMapLayer = DEFAULT_UNIT_MAP_LAYER, int iNumGoodyHutsPopped = 0);
 	void initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitAITypes eUnitAI, PlayerTypes eOwner, int iX, int iY, DirectionTypes eFacingDirection, bool bNoMove, bool bSetupGraphical=true, int iMapLayer = DEFAULT_UNIT_MAP_LAYER, int iNumGoodyHutsPopped = 0);

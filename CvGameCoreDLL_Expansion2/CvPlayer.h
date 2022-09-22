@@ -66,7 +66,7 @@ typedef std::vector< std::pair<UnitClassTypes, PromotionTypes> > UnitClassPromot
 typedef std::vector< std::pair<CivilizationTypes, LeaderHeadTypes> > CivLeaderArray;
 typedef FStaticVector<int, 152* 96, true, c_eCiv5GameplayDLL, 0> CvPlotsVector; // allocate the size of HUGE Terra world just in case (this is max that we ship with)
 
-class CvPlayer
+class CvPlayer : public CvGameObjectExtractable
 {
 	friend class CvPlayerPolicies;
 
@@ -77,6 +77,7 @@ public:
 	CvPlayer();
 	virtual ~CvPlayer();
 
+	void ExtractToArg(BasicArguments* arg);
 	static void RegistInstanceFunctions();
 	static void RegistStaticFunctions();
 	static void GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID);

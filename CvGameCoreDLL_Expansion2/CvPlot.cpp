@@ -42,7 +42,8 @@
 
 // Include this after all other headers.
 #include "LintFree.h"
-
+#include "FunctionsRef.h"
+#include "NetworkMessageUtil.h"
 // Public Functions...
 
 //------------------------------------------------------------------------------
@@ -144,6 +145,31 @@ FDataStream& operator<<(FDataStream& saveTo, const CvArchaeologyData& readFrom)
 	saveTo << readFrom.m_eWork;
 
 	return saveTo;
+}
+
+void CvPlot::RegistInstanceFunctions() {
+	REGIST_INSTANCE_FUNCTION(CvPlot::changeBuildProgress)
+}
+
+void CvPlot::ExtractToArg(BasicArguments* arg) {
+	arg->set_argtype("CvPlot");
+	arg->set_identifier1(getX());
+	arg->set_identifier1(getY());
+}
+
+void CvPlot::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvPlot::Provide);
+	REGIST_STATIC_FUNCTION(CvPlot::GetArgumentsAndExecute);
+}
+
+CvPlot* CvPlot::Provide(int x, int y) {
+	return GC.getMap().plot(x, y);
+}
+
+void CvPlot::GetArgumentsAndExecute(ArgContainer* args, int x, int y) {
+	auto plot = Provide(x, y);
+	if (plot == NULL) return;
+	NetworkMessageUtil::InstanceArrExecute(*plot, args);
 }
 
 //////////////////////////////////////////////////////////////////////////

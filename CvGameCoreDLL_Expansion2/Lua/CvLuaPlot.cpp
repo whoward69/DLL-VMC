@@ -20,6 +20,8 @@
 #include "CvLuaUnit.h"
 #include "../CvGameCoreUtils.h"
 
+#include "NetworkMessageUtil.h"
+
 //Utility macro for registering methods
 #define Method(Name)			\
 	lua_pushcclosure(L, l##Name, 0);	\

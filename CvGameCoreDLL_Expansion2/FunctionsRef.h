@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <LaterFeatures.h>
 #include <ArgumentAdaptor.h>
+#include "CvLuaUnit.h"
 
 #define REGIST_INSTANCE_FUNCTION(T) InstanceFunctionReflector::RegistFunction(#T, &T);
 #define REGIST_STATIC_FUNCTION(T) StaticFunctionReflector::RegistFunction(#T, &T);
@@ -62,7 +63,8 @@ public:
 	}
 
 	/***
-	Please use pass-by-value to pass pointers of objects.
+	Please use pass-by-value to pass pointers of objects if the function you want to call accepts object's 
+	reference or their pointers.
 	If you call a function with neither too much nor too less arguments, call ExecuteFunction() instead.
 	If the return type of your function is not a simple value type (integers, pointers, bools, etc), please
 	instantiate the function with ReturnType set to "void".
@@ -73,9 +75,6 @@ public:
 			throw NoSuchMethodException(name);
 		}
 		int argNum = (*methods)[name].second;
-		if (argNum > sizeof...(Args)) {
-			throw "Arguments miss match";
-		}
 		return Transmit<ReturnType>(argNum, make_index_sequence<sizeof...(Args) + 1>{}, name, args...);
 	}
 
@@ -83,7 +82,11 @@ public:
 		methods = new std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>();
 		CvUnit::RegistStaticFunctions();
 		CvCity::RegistStaticFunctions();
+		CvTeam::RegistStaticFunctions();
+		CvPlot::RegistStaticFunctions();
 		CvPlayer::RegistStaticFunctions();
+
+		CvLuaUnit::RegistStaticFunctions();
 	}
 	~StaticFunctionReflector() {
 		methods->clear();
@@ -135,7 +138,8 @@ public:
 	}
 
 	/***
-	Please use pass-by-value to pass pointers of objects.
+	Please use pass-by-value to pass pointers of objects if the function you want to call accepts object's
+	reference or their pointers.
 	If you call a function with neither too much nor too less arguments, call ExecuteFunction() instead.
 	If the return type of your function is not a simple value type (integers, pointers, bools, etc), please
 	instantiate the function with ReturnType set to "void".
@@ -164,6 +168,8 @@ public:
 		methods = new std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>();
 		CvUnit::RegistInstanceFunctions();
 		CvCity::RegistInstanceFunctions();
+		CvPlot::RegistInstanceFunctions();
+		CvTeam::RegistInstanceFunctions();
 		CvPlayer::RegistInstanceFunctions();
 	}	
 	~InstanceFunctionReflector() {

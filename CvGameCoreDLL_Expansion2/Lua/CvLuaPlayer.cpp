@@ -33,6 +33,8 @@
 #include "CvDllInterfaces.h"
 
 
+#include "NetworkMessageUtil.h"
+
 // include this last to turn warnings into errors for code analysis
 #include "LintFree.h"
 #include <ctime>

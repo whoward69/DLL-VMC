@@ -66,7 +66,7 @@
 #define LINT_WARNINGS_ONLY
 #include "LintFree.h"
 #include "FunctionsRef.h"
-#include "NetworkMessageAdapter.h"
+#include "NetworkMessageUtil.h"
 
 //------------------------------------------------------------------------------
 // CvPlayer Version History
@@ -132,6 +132,33 @@ void ClearPlayerDeltas()
 		archive.clearDelta();
 	}
 }
+}
+
+void CvPlayer::RegistInstanceFunctions() {
+	REGIST_INSTANCE_FUNCTION(CvPlayer::initUnit);
+	REGIST_INSTANCE_FUNCTION(CvPlayer::SetAnarchyNumTurns);
+	REGIST_INSTANCE_FUNCTION(CvPlayer::SetNumFreeTechs);
+	REGIST_INSTANCE_FUNCTION(CvPlayer::changeNumResourceTotal);
+}
+
+void CvPlayer::ExtractToArg(BasicArguments* arg){
+	arg->set_argtype("CvPlayer");
+	arg->set_identifier1(GetID());
+}
+
+void CvPlayer::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvPlayer::Provide);
+	REGIST_STATIC_FUNCTION(CvPlayer::GetArgumentsAndExecute);
+}
+
+CvPlayer* CvPlayer::Provide(PlayerTypes player) {
+	return &GET_PLAYER(player);
+}
+
+void CvPlayer::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID) {
+	auto player = Provide(playerID);
+	if (player == NULL) return;
+	NetworkMessageUtil::InstanceArrExecute(*player, args);
 }
 
 //	--------------------------------------------------------------------------------
@@ -538,28 +565,6 @@ CvPlayer::~CvPlayer()
 	SAFE_DELETE(m_pTrade);
 	SAFE_DELETE(m_pTradeAI);
 	SAFE_DELETE(m_pLeagueAI);
-}
-
-void CvPlayer::RegistInstanceFunctions() {
-	REGIST_INSTANCE_FUNCTION(CvPlayer::initUnit);
-	REGIST_INSTANCE_FUNCTION(CvPlayer::SetAnarchyNumTurns);
-	REGIST_INSTANCE_FUNCTION(CvPlayer::SetNumFreeTechs);
-	REGIST_INSTANCE_FUNCTION(CvPlayer::changeNumResourceTotal);
-}
-
-void CvPlayer::RegistStaticFunctions() {
-	REGIST_STATIC_FUNCTION(CvPlayer::Provide);
-	REGIST_STATIC_FUNCTION(CvPlayer::GetArgumentsAndExecute);
-}
-
-CvPlayer* CvPlayer::Provide(PlayerTypes player) {
-	return &GET_PLAYER(player);
-}
-
-void CvPlayer::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID) {
-	auto player = Provide(playerID);
-	if (player == NULL) return;
-	NetworkMessageAdapter::InstanceArrExecute(*player, args);
 }
 
 //	--------------------------------------------------------------------------------

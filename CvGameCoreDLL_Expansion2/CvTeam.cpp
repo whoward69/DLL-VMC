@@ -33,6 +33,8 @@
 #include "CvDllUnit.h"
 
 #include "LintFree.h"
+#include "FunctionsRef.h"
+#include "NetworkMessageUtil.h"
 
 // statics
 CvTeam* CvTeam::m_aTeams = NULL;
@@ -53,6 +55,29 @@ void CvTeam::freeStatics()
 {
 	delete[] m_aTeams;
 	m_aTeams = NULL;
+}
+
+void CvTeam::GetArgumentsAndExecute(ArgContainer* args, TeamTypes teamID) {
+	auto team = Provide(teamID);
+	if (team == NULL) return;
+	NetworkMessageUtil::InstanceArrExecute(*team, args);
+}
+
+void CvTeam::ExtractToArg(BasicArguments* arg) {
+	arg->set_argtype("CvTeam");
+	arg->set_identifier1(GetID());
+}
+
+void CvTeam::RegistInstanceFunctions() {
+}
+
+void CvTeam::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvTeam::Provide);
+	REGIST_STATIC_FUNCTION(CvTeam::GetArgumentsAndExecute);
+}
+
+CvTeam* CvTeam::Provide(TeamTypes team) {
+	return &getTeam(team);
 }
 
 // Public Functions...

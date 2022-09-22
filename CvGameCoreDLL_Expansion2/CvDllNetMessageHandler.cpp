@@ -13,7 +13,7 @@
 #include "CvTypes.h"
 #include "CvGameCoreUtils.h"
 #include "ArgContainer.pb.h"
-#include "NetworkMessageAdapter.h"
+#include "NetworkMessageUtil.h"
 
 CvDllNetMessageHandler::CvDllNetMessageHandler()
 {
@@ -340,14 +340,14 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 	//iData5: message length, iData6: Invoke id (Avoid repeated execution)
 	
 	if (customMsg[0] != 'e') {
-		NetworkMessageAdapter::StringShiftReverse(NetworkMessageAdapter::ReceiveBuffer, customMsg, iData5);
+		NetworkMessageUtil::StringShiftReverse(NetworkMessageUtil::ReceiveBuffer, customMsg, iData5);
 		if (customCommandType == CUSTOM_OPERATION_UNIT_KILL) return;
-		NetworkMessageAdapter::ReceiveArgContainer.ParseFromString(std::string(NetworkMessageAdapter::ReceiveBuffer, iData5));
-		string func = NetworkMessageAdapter::ReceiveArgContainer.functiontocall();
+		NetworkMessageUtil::ReceiveArgContainer.ParseFromString(std::string(NetworkMessageUtil::ReceiveBuffer, iData5));
+		string func = NetworkMessageUtil::ReceiveArgContainer.functiontocall();
 		string head = func.substr(0, func.find_first_of(':')) + "::GetArgumentsAndExecute";
-		StaticFunctionReflector::ExecuteFunctionWraps<void>(head, &NetworkMessageAdapter::ReceiveArgContainer, iData1, iData2, iData3, iData4);
-		NetworkMessageAdapter::ReceiveArgContainer.Clear();
-		NetworkMessageAdapter::CClear(NetworkMessageAdapter::ReceiveBuffer, iData5);
+		StaticFunctionReflector::ExecuteFunctionWraps<void>(head, &NetworkMessageUtil::ReceiveArgContainer, iData1, iData2, iData3, iData4);
+		NetworkMessageUtil::ReceiveArgContainer.Clear();
+		NetworkMessageUtil::CClear(NetworkMessageUtil::ReceiveBuffer, iData5);
 		return;
 	}
 	
@@ -1133,18 +1133,46 @@ void CvDllNetMessageHandler::ResponseIdeologyChoice(PlayerTypes ePlayer, PolicyB
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID, const char* szName)
 {
+	bool isLua = false;
+	if (iCityID < 0) {
+		isLua = true;
+		iCityID = -iCityID;
+	}
+	auto str = std::string(szName, iCityID);
+	
+	if (NetworkMessageUtil::ReceivrLargeArgContainer.ParseFromString(str)) {
+		auto L = luaL_newstate();
+		for (int i = 0; i < NetworkMessageUtil::ReceivrLargeArgContainer.args_size(); i++) {
+			auto& arg = NetworkMessageUtil::ReceivrLargeArgContainer.args().Get(i);
+			auto& type = arg.argtype();
+			if (type == "int") {
+				lua_pushinteger(L, arg.identifier1());
+			}
+			else if (type == "string") {
+				lua_pushstring(L, arg.longmessage().c_str());
+			}
+			else if (type == "bool") {
+				lua_pushboolean(L, arg.identifier1());
+			}
+			else {
+				StaticFunctionReflector::ExecuteFunctionWraps<void>((type + "::PushToLua"), L, &arg);
+			}
+		}
+		auto funcName = NetworkMessageUtil::ReceivrLargeArgContainer.functiontocall();
+		StaticFunctionReflector::ExecuteFunction<void>(funcName, L);
+		lua_close(L);
+		NetworkMessageUtil::ReceivrLargeArgContainer.Clear();
+		return;
+	}
+	if (isLua) iCityID = -iCityID;
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
-	NetworkMessageAdapter::StringShiftReverse(NetworkMessageAdapter::ReceiveBuffer, szName, iCityID);
-	auto str = std::string(NetworkMessageAdapter::ReceiveBuffer, iCityID);
-	LargeArgContainer cont;
-	cont.ParseFromString(str);
 	if(pkCity)
 	{
 		CvString strName = szName;
 		pkCity->setName(strName);
 	}
-	cont.Clear();
+
 }
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseRenameUnit(PlayerTypes ePlayer, int iUnitID, const char* szName)

@@ -37,13 +37,14 @@ class CvCityEspionage;
 class CvCityCulture;
 class CvPlayer;
 
-class CvCity
+class CvCity : CvGameObjectExtractable
 {
 
 public:
 	CvCity();
 	virtual ~CvCity();
 
+	void ExtractToArg(BasicArguments* arg);
 	static void RegistInstanceFunctions();
 	static void RegistStaticFunctions();
 	static CvCity* Provide(PlayerTypes player, int cityID);

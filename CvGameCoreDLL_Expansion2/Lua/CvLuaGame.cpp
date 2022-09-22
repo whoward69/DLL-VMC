@@ -27,6 +27,8 @@
 #include "../CvGameTextMgr.h"
 #include "../CvReplayMessage.h"
 
+#include "NetworkMessageUtil.h"
+
 #if defined(MOD_DIPLOMACY_STFU)
 #include "../CvDiplomacyAI.h"
 #endif

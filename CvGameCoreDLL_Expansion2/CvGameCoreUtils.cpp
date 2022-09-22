@@ -34,60 +34,6 @@ extern "C" double _ltod3(const __int64 x) {
 	return x;
 }
 
-int hsRes(int num, ...) {
-	va_list vl;
-	va_start(vl, num);
-	long long base = 1, dv = 10000733, mul = 10000019;
-	int res = 0;
-	for (int i = 0; i < num; ++i) {
-		int cur = va_arg(vl, int);
-		res += (base * cur) % dv;
-		res %= dv;
-		base *= mul;
-		base %= dv;
-	}
-	va_end(vl);
-	
-	return res;
-}
-
-std::list<int> InvokeRecorder::returnValueRecord;
-std::map<int, list<int>::iterator> InvokeRecorder::valueMap;
-FCriticalSection InvokeRecorder::m_Locker;
-void InvokeRecorder::pushReturnValue(int time) {
-	while (!m_Locker.Try()) {
-		Sleep(1);
-	}
-	m_Locker.Enter();
-	if (returnValueRecord.size() >= MaxSize) {
-		valueMap.erase(returnValueRecord.front());
-		returnValueRecord.pop_front();
-	}
-	returnValueRecord.push_back(time);
-	valueMap.insert(std::pair<int, list<int>::iterator>(time, --returnValueRecord.end()));
-	m_Locker.Leave();
-}
-
-bool InvokeRecorder::getReturnValueExist(int time) {
-	while (!m_Locker.Try()) {
-		Sleep(1);
-	}
-	m_Locker.Enter();
-	std::map<int, list<int>::iterator>::iterator iter = valueMap.find(time);
-	bool rtn = false;
-	if (iter != valueMap.end()) {
-		rtn = true;
-		returnValueRecord.erase((*iter).second);
-		valueMap.erase(iter);
-	}
-	m_Locker.Leave();
-	return rtn;
-}
-
-namespace ReturnValueUtil {
-	InvokeRecorder container;
-}
-
 int getLuaLine(lua_State* L) {
 	lua_Debug ar;
 	int res = -1;

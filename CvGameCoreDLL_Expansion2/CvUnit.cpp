@@ -44,6 +44,8 @@
 #include "CvBarbarians.h"
 
 
+
+
 #if !defined(FINAL_RELEASE)
 #include <sstream>
 
@@ -64,7 +66,8 @@
 #include "LintFree.h"
 
 #include "FunctionsRef.h"
-#include "NetworkMessageAdapter.h"
+#include "NetworkMessageUtil.h"
+#include "CvLuaUnit.h"
 
 #if defined(MOD_BUGFIX_USE_GETTERS)
 #define GET_MY_PLAYER() GET_PLAYER(getOwner())
@@ -126,14 +129,25 @@ void ClearUnitDeltas()
 void CvUnit::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int unitID) {
 	auto unit = Provide(playerID, unitID);
 	if (unit == NULL) return;
-	NetworkMessageAdapter::InstanceArrExecute(*unit, args);
+	NetworkMessageUtil::InstanceArrExecute(*unit, args);
+}
+
+void CvUnit::ExtractToArg(BasicArguments* arg) {
+	arg->set_argtype("CvUnit");
+	arg->set_identifier1(getOwner());
+	arg->set_identifier2(GetID());
+}
+
+void CvUnit::PushToLua(lua_State* L, BasicArguments* arg) {
+	CvLuaUnit::PushLtwt(L, Provide(PlayerTypes(arg->identifier1()), arg->identifier2()));
 }
 
 void CvUnit::RegistInstanceFunctions() {
 	REGIST_INSTANCE_FUNCTION(CvUnit::kill);
 	REGIST_INSTANCE_FUNCTION(CvUnit::doCommand);
-	REGIST_INSTANCE_FUNCTION(CvUnit::jumpToNearestValidPlot);
 	REGIST_INSTANCE_FUNCTION(CvUnit::setEmbarked);
+	REGIST_INSTANCE_FUNCTION(CvUnit::setXY);
+	REGIST_INSTANCE_FUNCTION(CvUnit::jumpToNearestValidPlot);
 }
 
 void CvUnit::RegistStaticFunctions() {

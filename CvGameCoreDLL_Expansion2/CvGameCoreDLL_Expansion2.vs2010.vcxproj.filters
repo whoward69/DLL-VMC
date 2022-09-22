@@ -18,8 +18,8 @@
     <Filter Include="CustomMods">
       <UniqueIdentifier>{95231ccd-fe20-497d-9b5f-f59c2616d79f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Fireworks">
-      <UniqueIdentifier>{12b57a99-3632-4c27-b3b2-5032a8daeb2d}</UniqueIdentifier>
+    <Filter Include="NetworkSync">
+      <UniqueIdentifier>{b56e3564-bb16-410e-9ac2-1a3814616640}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -525,16 +525,16 @@
       <Filter>CustomMods</Filter>
     </ClCompile>
     <ClCompile Include="FunctionsRef.cpp">
-      <Filter>CustomMods</Filter>
+      <Filter>NetworkSync</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkMessageUtil.cpp">
+      <Filter>NetworkSync</Filter>
     </ClCompile>
     <ClCompile Include="ArgContainer.pb.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetworkMessageAdapter.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>NetworkSync</Filter>
     </ClCompile>
     <ClCompile Include="LargeArgContainer.pb.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>NetworkSync</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1079,22 +1079,25 @@
       <Filter>CustomMods</Filter>
     </ClInclude>
     <ClInclude Include="FunctionsRef.h">
-      <Filter>CustomMods</Filter>
+      <Filter>NetworkSync</Filter>
     </ClInclude>
-    <ClInclude Include="ArgContainer.pb.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetworkMessageAdapter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LaterFeatures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ArgumentAdaptor.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="NetworkMessageUtil.h">
+      <Filter>NetworkSync</Filter>
     </ClInclude>
     <ClInclude Include="LargeArgContainer.pb.h">
-      <Filter>Header Files</Filter>
+      <Filter>NetworkSync</Filter>
+    </ClInclude>
+    <ClInclude Include="ArgContainer.pb.h">
+      <Filter>NetworkSync</Filter>
+    </ClInclude>
+    <ClInclude Include="ArgumentAdaptor.h">
+      <Filter>NetworkSync</Filter>
+    </ClInclude>
+    <ClInclude Include="LaterFeatures.h">
+      <Filter>NetworkSync</Filter>
+    </ClInclude>
+    <ClInclude Include="CvGameObjectExtractable.h">
+      <Filter>NetworkSync</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

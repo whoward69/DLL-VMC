@@ -45,7 +45,8 @@
 // include after all other headers
 #include "LintFree.h"
 #include "FunctionsRef.h"
-#include "NetworkMessageAdapter.h"
+#include "NetworkMessageUtil.h"
+
 
 OBJECT_VALIDATE_DEFINITION(CvCity)
 
@@ -108,6 +109,12 @@ void ClearCityDeltas()
 }
 }
 
+void CvCity::ExtractToArg(BasicArguments* arg) {
+	arg->set_argtype("CvCity");
+	arg->set_identifier1(getOwner());
+	arg->set_identifier2(GetID());
+}
+
 void CvCity::RegistInstanceFunctions() {
 	REGIST_INSTANCE_FUNCTION(CvCity::setDamage);
 }
@@ -124,7 +131,7 @@ CvCity* CvCity::Provide(PlayerTypes player, int cityID) {
 void CvCity::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int cityID) {
 	auto city = Provide(playerID, cityID);
 	if (city == NULL) return;
-	NetworkMessageAdapter::InstanceArrExecute(*city, args);
+	NetworkMessageUtil::InstanceArrExecute(*city, args);
 }
 
 

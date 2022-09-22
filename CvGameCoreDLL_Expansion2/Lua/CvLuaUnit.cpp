@@ -17,7 +17,7 @@
 #include "../CvUnitCombat.h"
 #include <CvGameCoreUtils.h>
 #include <ArgContainer.pb.h>
-#include <NetworkMessageAdapter.h>
+#include "NetworkMessageUtil.h"
 
 
 
@@ -31,9 +31,38 @@ void CvLuaUnit::HandleMissingInstance(lua_State* L)
 {
 	luaL_error(L, "Instance no longer exists.");
 }
+
+void CvLuaUnit::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeLevel);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeMoves);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeDamage);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeCargoSpace);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeExperience);
+
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lDoCommand);
+
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lKill);
+
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetXY);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetName);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetLevel);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetMoves);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetDamage);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetEmbarked);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetReconPlot);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetExperience);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetMadeAttack);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetUnitAIType);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetHasPromotion);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetMadeInterception);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetBaseCombatStrength);
+	
+}
 //------------------------------------------------------------------------------
 void CvLuaUnit::PushMethods(lua_State* L, int t)
 {
+	Method(SendAndExecuteLuaFuncOnAllClients);
+
 	Method(IsNone);
 	Method(Convert);
 #if defined(MOD_API_LUA_EXTENSIONS)
@@ -664,10 +693,10 @@ void CvLuaUnit::PackNetMessageAndSend(CvUnit* unit, const std::string& name, int
 	}
 	va_end(vl);
 	string target = arguments.SerializeAsString();
-	NetworkMessageAdapter::StringShift(networkBuffer, target);
+	NetworkMessageUtil::StringShift(networkBuffer, target);
 	gDLL->SendFoundReligion(PlayerTypes(-1), ReligionTypes(CUSTOM_OPERATION_UNIT_BEGIN), networkBuffer, 
 		BeliefTypes(owner), BeliefTypes(unitID), BeliefTypes(-1), BeliefTypes(-1), target.length(), time);
-	NetworkMessageAdapter::CClear(networkBuffer, target.length());
+	NetworkMessageUtil::CClear(networkBuffer, target.length());
 	arguments.Clear();
 }
 
@@ -752,9 +781,9 @@ int CvLuaUnit::lKillSync(lua_State* L) {
 	//ReflectionLtwt::functionPointerUtil.ExecuteFunction<void>(pkUnit, "CvUnit::kill", bDelay, ePlayer);
 	//FunctionPointers::instanceFunctions.ExecuteFunctionWraps<void>(*pkUnit, "CvUnit::kill", bDelay, ePlayer, -1, -1, -1, -1, -1, -1, -1);
 	//ArgContainer args;
-	//NetworkMessageAdapter::SetArguments(arguments, "CvUnit::kill", bDelay, ePlayer);
+	//NetworkMessageUtil::SetArguments(arguments, "CvUnit::kill", bDelay, ePlayer);
 	//string target = args.SerializeAsString();
-	//NetworkMessageAdapter::StringShift(networkBuffer, args.SerializeAsString());
+	//NetworkMessageUtil::StringShift(networkBuffer, args.SerializeAsString());
 	//int time = GetTickCount() + getLuaLine(L) + rand();
 	//ReturnValueUtil::container.pushReturnValue(time);
 	/*gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_UNIT_KILL), networkBuffer,
@@ -765,9 +794,11 @@ int CvLuaUnit::lKillSync(lua_State* L) {
 
 int CvLuaUnit::lLuaArgsTest(lua_State* L) {
 	int num = lua_gettop(L);
-	for (int i = 0; i < num; i++) {
+	for (int i = 0; i <= num; i++) {
 		auto type = lua_type(L, i);
-		int s = 1;
+		if (type == LUA_TTABLE) {
+			
+		}
 	}
 	LargeArgContainer contc;
 	
@@ -805,12 +836,12 @@ int CvLuaUnit::lLuaArgsTest(lua_State* L) {
 	pt->set_longmessage("sssssss");
 	
 	auto str = contc.SerializeAsString();
-	NetworkMessageAdapter::StringShift(networkBuffer, str);
+	NetworkMessageUtil::StringShift(networkBuffer, str);
 	auto strS = std::string(networkBuffer, str.length());
 	gDLL->SendFoundReligion((PlayerTypes)(-1), ReligionTypes(CUSTOM_OPERATION_UNIT_KILL), networkBuffer,
 		(BeliefTypes)-1, (BeliefTypes)-1, (BeliefTypes)-1, (BeliefTypes)-1, str.length(), 0);
 	//gDLL->SendRenameCity(str.length(), strS);
-	NetworkMessageAdapter::CClear(networkBuffer, str.length());
+	NetworkMessageUtil::CClear(networkBuffer, str.length());
 	contc.Clear();
 	return 0;
 }

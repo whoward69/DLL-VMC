@@ -12,6 +12,7 @@
 #include "CvLuaCity.h"
 #include "CvLuaPlot.h"
 #include "CvLuaUnit.h"
+#include "NetworkMessageUtil.h"
 #include <CvGameCoreUtils.h>
 
 //Utility macro for registering methods
