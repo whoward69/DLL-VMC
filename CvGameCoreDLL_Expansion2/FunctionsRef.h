@@ -79,7 +79,7 @@ public:
 	}
 
 	StaticFunctionReflector() {
-		methods = new std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>();
+		methods = new std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>(2048);
 		CvUnit::RegistStaticFunctions();
 		CvCity::RegistStaticFunctions();
 		CvTeam::RegistStaticFunctions();
@@ -87,6 +87,7 @@ public:
 		CvPlayer::RegistStaticFunctions();
 
 		CvLuaUnit::RegistStaticFunctions();
+
 	}
 	~StaticFunctionReflector() {
 		methods->clear();
@@ -165,7 +166,7 @@ public:
 	}
 
 	InstanceFunctionReflector() {
-		methods = new std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>();
+		methods = new std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>(2048);
 		CvUnit::RegistInstanceFunctions();
 		CvCity::RegistInstanceFunctions();
 		CvPlot::RegistInstanceFunctions();

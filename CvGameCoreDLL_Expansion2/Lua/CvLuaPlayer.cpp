@@ -45,6 +45,83 @@
 	lua_pushcclosure(L, l##Name, 0);	\
 	lua_setfield(L, t, #Name);
 
+void CvLuaPlayer::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeFreePromotionCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumWorldWonders);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeBaseBuildingGoldMaintenance);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNewCityExtraPopulation);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGold);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulturePerTurnForFree);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulturePerTurnFromMinorCivs);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulture);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeFaith);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeExtraHappinessPerCity);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeUnhappinessFromUnits);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeHappinessPerGarrisonedUnit);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeHappinessPerTradeRoute);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeBarbarianCombatBonus);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGarrisonedCityRangeStrikeModifier);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAlwaysSeeBarbCampsCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAnarchyNumTurns);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAdvancedStartPoints);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldenAgeProgressMeter);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumGoldenAges);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldenAgeTurns);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumUnitGoldenAges);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldPerUnitTimes100);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeConscriptCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeScoreFromFutureTech);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeMinorCivFriendshipWithMajor);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumResourceTotal);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeCombatExperience);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNavalCombatExperience);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumPlotsBought);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumFreePolicies);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumFreeTenets);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumFreeGreatPeople);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumMayaBoosts);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumFaithGreatPeople);
+
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lInitUnit);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lInitCity);
+
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetFaithPurchaseType);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetFaithPurchaseIndex);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetBaseBuildingGoldMaintenance);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetGreatGeneralCombatBonus);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetStartingPlot);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetGold);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetJONSCulture);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetFaith);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetHappiness);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetHappinessPerGarrisonedUnit);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetHappinessPerTradeRoute);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetBarbarianCombatBonus);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetAlwaysSeeBarbCampsCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetHasPolicy);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetAnarchyNumTurns);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetAdvancedStartPoints);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetGoldenAgeProgressMeter);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumGoldenAges);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetConscriptCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetMinorCivUniqueUnit);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetPersonalityType);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetOption);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetPlayable);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetResearchingTech);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetCombatExperience);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNavalCombatExperience);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumPlotsBought);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumFreeTechs);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumFreePolicies);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumFreeTenets);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumFreeGreatPeople);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumWondersBeatenTo);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumMayaBoosts);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumFaithGreatPeople);
+
+}
+
 //------------------------------------------------------------------------------
 void CvLuaPlayer::Register(lua_State* L)
 {

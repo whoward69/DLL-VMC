@@ -352,7 +352,7 @@ void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligi
 	}
 	
 	
-	if (ReturnValueUtil::container.getReturnValueExist(iData6)) return;
+	if (InvokeRecorder::getReturnValueExist(iData6)) return;
 	int realCommandType = customCommandType;
 	CvUnit* unit;
 	CvCity* city;
@@ -1141,6 +1141,7 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 	auto str = std::string(szName, iCityID);
 	
 	if (NetworkMessageUtil::ReceivrLargeArgContainer.ParseFromString(str)) {
+		if (InvokeRecorder::getReturnValueExist(NetworkMessageUtil::ReceivrLargeArgContainer.invokestamp())) return;
 		auto L = luaL_newstate();
 		for (int i = 0; i < NetworkMessageUtil::ReceivrLargeArgContainer.args_size(); i++) {
 			auto& arg = NetworkMessageUtil::ReceivrLargeArgContainer.args().Get(i);

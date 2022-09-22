@@ -22,6 +22,7 @@
 class CvLuaPlayer : public CvLuaScopedInstance<CvLuaPlayer, CvPlayerAI>
 {
 public:
+	static void RegistStaticFunctions();
 	//! Push all player instances to Lua
 	static void Register(lua_State* L);
 
