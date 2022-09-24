@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -279,9 +279,17 @@ private:
 //!  - One instance for each team of civs
 //!  - Accessed by any class that needs to check technology ownership
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-class CvTeamTechs
+class CvTeamTechs : public CvGameObjectExtractable
 {
 public:
+
+	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
+	static void RegistInstanceFunctions();
+	static void RegistStaticFunctions();
+	static CvTeamTechs* Provide(TeamTypes team);
+	static void GetArgumentsAndExecute(ArgContainer* args, TeamTypes team);
+
 	CvTeamTechs(void);
 	~CvTeamTechs(void);
 	void Init(CvTechXMLEntries* pTechs, CvTeam* pTeam);

@@ -9,6 +9,7 @@
 #include "CvGameCoreDLLPCH.h"
 #include "FunctionsRef.h"
 #include "CvLuaSupport.h"
+#include "CvLuaPlayer.h"
 #include "CvLuaArea.h"
 #include "CvLuaCity.h"
 #include "CvLuaPlot.h"
@@ -26,6 +27,15 @@
 	lua_pushcclosure(L, l##Name, 0);	\
 	lua_setfield(L, t, #Name);
 
+
+
+int CvLuaUnit::lTestObj(lua_State* L) {
+	auto unit = GetInstance(L);
+	auto player = CvLuaPlayer::GetInstance(L, 2);
+	auto player2 = CvLuaPlayer::GetInstance(L, 3);
+	auto num = lua_gettop(L);
+	return 0;
+}
 //------------------------------------------------------------------------------
 void CvLuaUnit::HandleMissingInstance(lua_State* L)
 {
@@ -33,35 +43,49 @@ void CvLuaUnit::HandleMissingInstance(lua_State* L)
 }
 
 void CvLuaUnit::RegistStaticFunctions() {
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeLevel);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeMoves);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeDamage);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeCargoSpace);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeExperience);
+
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lTestObj);
 
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lDoCommand);
 
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lKill);
 
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetXY);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetName);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetLevel);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetMoves);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetDamage);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lJumpToNearestValidPlot);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lAddMessage);
+
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetEmbarked);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetReconPlot);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetExperience);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetMadeAttack);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetUnitAIType);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetHasPromotion);
-	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetMadeInterception);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetBaseCombatStrength);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetHotKeyNumber);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetXY);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetReconPlot);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetDamage);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetMoves);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetExperience);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetLevel);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetMadeAttack);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetMadeInterception);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetPromotionReady);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetOriginalOwner);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetLeaderUnitType);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetName);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetScriptData);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetScenarioData);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetHasPromotion);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetDeployFromOperationTurn);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeCargoSpace);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeDamage);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeMoves);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeExperience);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeLevel);
 	
 }
 //------------------------------------------------------------------------------
 void CvLuaUnit::PushMethods(lua_State* L, int t)
 {
-	Method(SendAndExecuteLuaFuncOnAllClients);
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+	Method(TestObj);
 
 	Method(IsNone);
 	Method(Convert);

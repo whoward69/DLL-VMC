@@ -22,10 +22,69 @@
 
 
 using namespace CvLuaArgs;
+void CvLuaCity::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaCity::lKill);
 
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetResourceDemanded);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetProduction);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetPopulation);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetHighestPopulation);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetJONSCultureStored);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetJONSCultureLevel);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetFood);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetOverflowProduction);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetFeatureProduction);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetOccupied);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetPuppet);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetNeverLost);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetDrafted);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetWeLoveTheKingDayCounter);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetProductionAutomated);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetCitySizeBoost);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetRevealed);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetName);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetBuildingProduction);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetBuildingProductionTime);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetUnitProduction);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetFocusType);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetDamage);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetNumRealBuilding);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetBuildingGreatWork);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lSetBuildingYieldChange);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeProduction);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangePopulation);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeBaseGreatPeopleRate);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeJONSCultureStored);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeJONSCultureLevel);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeJONSCulturePerTurnFromBuildings);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeJONSCulturePerTurnFromPolicies);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeJONSCulturePerTurnFromSpecialists);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeJONSCulturePerTurnFromReligion);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeCultureRateModifier);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeFaithPerTurnFromReligion);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeWonderProductionModifier);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeHealRate);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeFood);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeResistanceTurns);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeRazingTurns);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeWeLoveTheKingDayCounter);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeBaseYieldRateFromTerrain);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeBaseYieldRateFromBuildings);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeBaseYieldRateFromSpecialists);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeBaseYieldRateFromMisc);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeBaseYieldRateFromReligion);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeBuildingProduction);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeBuildingProductionTime);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeUnitProduction);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeSpecialistGreatPersonProgressTimes100);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lChangeDamage);
+}
 //------------------------------------------------------------------------------
 void CvLuaCity::PushMethods(lua_State* L, int t)
 {
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+
 	Method(IsNone);
 	Method(Kill);
 

@@ -27,9 +27,44 @@
 	lua_pushcclosure(L, l##Name, 0);	\
 	lua_setfield(L, t, #Name);
 
+void CvLuaPlot::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetFeatureType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetTerrainType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetArea);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetOwnershipDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetImprovementDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetUpgradeProgress);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetStartingPlot);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetNEOfRiver);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetWOfRiver);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetNWOfRiver);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetOwner);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetPlotType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetResourceType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetNumResource);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetImprovementType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetImprovementPillaged);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetRouteType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetRevealed);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetScriptData);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetContinentArtType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetCityPurchaseID);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeExtraMovePathCost);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeOwnershipDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeImprovementDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeUpgradeProgress);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeNumResource);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeVisibilityCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeBuildProgress);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeInvisibleVisibilityCount);
+}
+
 //------------------------------------------------------------------------------
 void CvLuaPlot::PushMethods(lua_State* L, int t)
 {
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+
 	Method(CanHaveFeature);
 	Method(GetFeatureType);
 	Method(GetTerrainType);

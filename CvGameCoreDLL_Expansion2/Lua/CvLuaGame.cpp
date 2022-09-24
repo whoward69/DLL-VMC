@@ -35,10 +35,55 @@
 
 #define Method(func) RegisterMethod(L, l##func, #func);
 
+void CvLuaGame::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetUnitedNationsCountdown);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetGameTurn);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMaxTurns);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMaxCityElimination);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetNumAdvancedStartPoints);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetStartYear);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetEstimateEndTurn);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetTargetScore);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetStaticTutorialActive);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetEverRightClickMoved);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorMessageHasBeenSeen);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorBadAttackInterrupt);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorCityAttackInterrupt);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAIAutoPlay);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetScoreDirty);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetDebugMode);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetPitbossTurnTime);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetActivePlayer);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetPausePlayer);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetWinner);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetGameState);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetNumVotesForTeam);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetOption);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetVictoryValid);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetName);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetPlotExtraYield);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetCombatWarned);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorRecommenderCity);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorRecommenderTech);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMinimumFaithNextPantheon);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetHolyCity);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetFounder);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeMaxTurns);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNoNukesCount);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNukesExploded);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNumVotesForTeam);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangePlotExtraCost);
+
+}
 //------------------------------------------------------------------------------
 const char* CvLuaGame::GetInstanceName()
 {
 	return "Game";
+}
+
+const char* CvLuaGame::GetInstanceNameCv()
+{
+	return "CvGame";
 }
 //------------------------------------------------------------------------------
 CvGame* CvLuaGame::GetInstance(lua_State* L, int idx)
@@ -48,6 +93,9 @@ CvGame* CvLuaGame::GetInstance(lua_State* L, int idx)
 //------------------------------------------------------------------------------
 void CvLuaGame::RegisterMembers(lua_State* L)
 {
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+
 	Method(CanHandleAction);
 	Method(HandleAction);
 	Method(UpdateScore);

@@ -47,6 +47,8 @@
 #include "FunctionsRef.h"
 #include "NetworkMessageUtil.h"
 
+#include "CvLuaCity.h"
+
 
 OBJECT_VALIDATE_DEFINITION(CvCity)
 
@@ -115,12 +117,17 @@ void CvCity::ExtractToArg(BasicArguments* arg) {
 	arg->set_identifier2(GetID());
 }
 
+void CvCity::PushToLua(lua_State* L, BasicArguments* arg) {
+	CvLuaCity::PushLtwt(L, Provide(PlayerTypes(arg->identifier1()), arg->identifier2()));
+}
+
 void CvCity::RegistInstanceFunctions() {
 	REGIST_INSTANCE_FUNCTION(CvCity::setDamage);
 }
 
 void CvCity::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvCity::Provide);
+	REGIST_STATIC_FUNCTION(CvCity::PushToLua);
 	REGIST_STATIC_FUNCTION(CvCity::GetArgumentsAndExecute);
 }
 

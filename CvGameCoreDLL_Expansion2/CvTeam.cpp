@@ -33,8 +33,8 @@
 #include "CvDllUnit.h"
 
 #include "LintFree.h"
-#include "FunctionsRef.h"
 #include "NetworkMessageUtil.h"
+#include "CvLuaTeam.h"
 
 // statics
 CvTeam* CvTeam::m_aTeams = NULL;
@@ -61,6 +61,10 @@ void CvTeam::GetArgumentsAndExecute(ArgContainer* args, TeamTypes teamID) {
 	auto team = Provide(teamID);
 	if (team == NULL) return;
 	NetworkMessageUtil::InstanceArrExecute(*team, args);
+}
+
+void CvTeam::PushToLua(lua_State* L, BasicArguments* arg){
+	CvLuaTeam::PushLtwt(L, Provide((TeamTypes)arg->identifier1()));
 }
 
 void CvTeam::ExtractToArg(BasicArguments* arg) {

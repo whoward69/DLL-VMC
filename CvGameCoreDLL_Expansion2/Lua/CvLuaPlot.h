@@ -21,6 +21,8 @@
 class CvLuaPlot : public CvLuaScopedInstance<CvLuaPlot, CvPlot>
 {
 public:
+	static void RegistStaticFunctions();
+
 	//! Push CvPlot methods into table t
 	static void PushMethods(lua_State* L, int t);
 

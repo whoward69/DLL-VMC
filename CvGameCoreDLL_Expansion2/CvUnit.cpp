@@ -152,6 +152,7 @@ void CvUnit::RegistInstanceFunctions() {
 
 void CvUnit::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvUnit::Provide);
+	REGIST_STATIC_FUNCTION(CvUnit::PushToLua);
 	REGIST_STATIC_FUNCTION(CvUnit::GetArgumentsAndExecute);
 }
 

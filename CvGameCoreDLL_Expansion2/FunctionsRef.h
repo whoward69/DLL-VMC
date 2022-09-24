@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include <LaterFeatures.h>
 #include <ArgumentAdaptor.h>
-#include "CvLuaUnit.h"
 
 #define REGIST_INSTANCE_FUNCTION(T) InstanceFunctionReflector::RegistFunction(#T, &T);
 #define REGIST_STATIC_FUNCTION(T) StaticFunctionReflector::RegistFunction(#T, &T);
@@ -78,17 +77,7 @@ public:
 		return Transmit<ReturnType>(argNum, make_index_sequence<sizeof...(Args) + 1>{}, name, args...);
 	}
 
-	StaticFunctionReflector() {
-		methods = new std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>(2048);
-		CvUnit::RegistStaticFunctions();
-		CvCity::RegistStaticFunctions();
-		CvTeam::RegistStaticFunctions();
-		CvPlot::RegistStaticFunctions();
-		CvPlayer::RegistStaticFunctions();
-
-		CvLuaUnit::RegistStaticFunctions();
-
-	}
+	StaticFunctionReflector();
 	~StaticFunctionReflector() {
 		methods->clear();
 		delete methods;
@@ -165,14 +154,7 @@ public:
 		return ExecuteFunctionWraps<ReturnType>(object, name, idx[Is]...);
 	}
 
-	InstanceFunctionReflector() {
-		methods = new std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>(2048);
-		CvUnit::RegistInstanceFunctions();
-		CvCity::RegistInstanceFunctions();
-		CvPlot::RegistInstanceFunctions();
-		CvTeam::RegistInstanceFunctions();
-		CvPlayer::RegistInstanceFunctions();
-	}	
+	InstanceFunctionReflector();
 	~InstanceFunctionReflector() {
 		methods->clear();
 		delete methods;

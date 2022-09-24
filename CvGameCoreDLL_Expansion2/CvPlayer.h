@@ -78,10 +78,11 @@ public:
 	virtual ~CvPlayer();
 
 	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
 	static void RegistInstanceFunctions();
 	static void RegistStaticFunctions();
 	static void GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID);
-	static CvPlayer* Provide(PlayerTypes player);
+	static CvPlayerAI* Provide(PlayerTypes player);
 
 	void init(PlayerTypes eID);
 	void setupGraphical();

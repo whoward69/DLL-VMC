@@ -16,6 +16,8 @@
 class CvLuaUnit : public CvLuaScopedInstance<CvLuaUnit, CvUnit>
 {
 public:
+	static int lTestObj(lua_State* L);
+
 	static void RegistStaticFunctions();
 
 	//! Push CvUnit methods into table t

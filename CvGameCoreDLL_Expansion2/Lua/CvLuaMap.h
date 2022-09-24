@@ -24,8 +24,11 @@
 class CvLuaMap : public CvLuaStaticInstance<CvLuaMap, CvMap>
 {
 public:
+	static void RegistStaticFunctions();
+
 	//! Returns the name of the static instance.
 	static const char* GetInstanceName();
+	static const char* GetInstanceNameCv();
 
 	//! Returns the static instance.
 	static CvMap* GetInstance(lua_State* L, int idx);

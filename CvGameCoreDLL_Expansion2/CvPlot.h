@@ -89,6 +89,7 @@ public:
 	~CvPlot();
 
 	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
 	static void RegistInstanceFunctions();
 	static void RegistStaticFunctions();
 	static CvPlot* Provide(int x, int y);

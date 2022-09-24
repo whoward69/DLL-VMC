@@ -15,7 +15,7 @@
 class CvLuaArea :  public CvLuaScopedInstance<CvLuaArea, CvArea>
 {
 public:
-
+	static void RegistStaticFunctions();
 	//! Push CvArea methods into table t
 	static void PushMethods(lua_State* L, int t);
 

@@ -20,7 +20,7 @@ namespace NetworkMessageUtil {
 	extern void IClear(int* buffer);
 	extern char ReceiveBuffer[1024];
 	extern ArgContainer ReceiveArgContainer;
-	extern LargeArgContainer ReceivrLargeArgContainer;
+	extern LargeArgContainer ReceiveLargeArgContainer;
 	extern int ArgumentsToPass[MAX_INT32_ARGNUM];
 	template<typename InstanceType>
 	void InstanceArrExecute(InstanceType& reference, ArgContainer* args) {

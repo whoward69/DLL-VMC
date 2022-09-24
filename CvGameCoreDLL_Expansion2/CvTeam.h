@@ -24,6 +24,7 @@ public:
 	~CvTeam();
 
 	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
 	static void RegistInstanceFunctions();
 	static void RegistStaticFunctions();
 	static void GetArgumentsAndExecute(ArgContainer* args, TeamTypes playerID);
