@@ -128,19 +128,11 @@ void CvCity::RegistInstanceFunctions() {
 void CvCity::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvCity::Provide);
 	REGIST_STATIC_FUNCTION(CvCity::PushToLua);
-	REGIST_STATIC_FUNCTION(CvCity::GetArgumentsAndExecute);
 }
 
 CvCity* CvCity::Provide(PlayerTypes player, int cityID) {
 	return GET_PLAYER(player).getCity(cityID);
 }
-
-void CvCity::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int cityID) {
-	auto city = Provide(playerID, cityID);
-	if (city == NULL) return;
-	NetworkMessageUtil::InstanceArrExecute(*city, args);
-}
-
 
 //	--------------------------------------------------------------------------------
 // Public Functions...

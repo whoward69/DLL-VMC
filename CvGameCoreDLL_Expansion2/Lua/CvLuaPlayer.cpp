@@ -140,7 +140,6 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 #endif
 
 	Method(InitUnit);
-	Method(InitUnitSync);
 	Method(InitUnitWithNameOffset);
 	Method(DisbandUnit);
 	Method(AddFreeUnit);
@@ -290,7 +289,6 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetGold);
 	Method(SetGold);
 	Method(ChangeGold);
-	Method(ChangeGoldSync);
 	Method(CalculateGrossGold);
 	Method(GetLifetimeGrossGold);
 	Method(GetGoldFromCitiesTimes100);
@@ -329,7 +327,6 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 	Method(GetJONSCulture);
 	Method(SetJONSCulture);
-	Method(SetJONSCultureSync);
 	Method(ChangeJONSCulture);
 
 	Method(GetJONSCultureEverGenerated);
@@ -482,8 +479,6 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(HasPolicy);
 
 	Method(SetHasPolicy);
-	Method(SetHasPolicySync);
-
 	Method(GetNextPolicyCost);
 	Method(CanAdoptPolicy);
 	Method(DoAdoptPolicy);
@@ -512,7 +507,6 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(IsAnarchy);
 	Method(GetAnarchyNumTurns);
 	Method(SetAnarchyNumTurns);
-	Method(SetAnarchyNumTurnsSync);
 	Method(ChangeAnarchyNumTurns);
 
 	Method(GetAdvancedStartPoints);
@@ -812,7 +806,6 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetNumResourceUsed);
 	Method(GetNumResourceTotal);
 	Method(ChangeNumResourceTotal);
-	Method(ChangeNumResourceTotalSync);
 	Method(GetNumResourceAvailable);
 
 	Method(GetResourceExport);
@@ -1028,7 +1021,6 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 	Method(GetNumFreeTechs);
 	Method(SetNumFreeTechs);
-	Method(SetNumFreeTechsSync);
 	Method(GetNumFreePolicies);
 	Method(SetNumFreePolicies);
 	Method(ChangeNumFreePolicies);
@@ -1367,30 +1359,6 @@ int CvLuaPlayer::lInitUnit(lua_State* L)
 	return 1;
 }
 
-
-int CvLuaPlayer::lInitUnitSync(lua_State* L)
-{
-	/*void* ud;
-	lua_Alloc f = lua_getallocf(L, &ud);
-	lua_State* another = lua_newstate(f, ud);*/
-
-	CvPlayerAI* pkPlayer = GetInstance(L);
-	PlayerTypes playerID = pkPlayer->GetID();
-	const UnitTypes eUnit = (UnitTypes)lua_tointeger(L, 2);
-	const int x = lua_tointeger(L, 3);
-	const int y = lua_tointeger(L, 4);
-	const UnitAITypes eUnitAI = (UnitAITypes)luaL_optint(L, 5, NO_UNITAI);
-	const DirectionTypes eFacingDirection = (DirectionTypes)luaL_optint(L, 6, NO_DIRECTION);
-
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	CvUnit* pkUnit = pkPlayer->initUnit(eUnit, x, y, eUnitAI, eFacingDirection);
-	//CvUnit* pkUnit = FunctionPointers::instanceFunctions.ExecuteFunctionWraps<CvUnit*>(*pkPlayer, "CvPlayer::initUnit", eUnit, x, y, eUnitAI, eFacingDirection, false, true, 0, 0);
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(playerID, ReligionTypes(CUSTOM_OPERATION_PLAYER_INIT_UNIT), "e",
-		(BeliefTypes)eUnit, (BeliefTypes)x, (BeliefTypes)y, (BeliefTypes)eUnitAI, eFacingDirection, time);
-	CvLuaUnit::Push(L, pkUnit);
-	return 1;
-}
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //CvUnit* initUnitWithNameOffset(UnitTypes eUnit, int iX, int iY, UnitAITypes eUnitAI = NO_UNITAI, DirectionTypes eFacingDirection = NO_DIRECTION);
@@ -2438,18 +2406,6 @@ int CvLuaPlayer::lChangeGold(lua_State* L)
 	return 1;
 }
 
-int CvLuaPlayer::lChangeGoldSync(lua_State* L)
-{
-	CvPlayerAI* pkPlayer = GetInstance(L);
-	PlayerTypes player = pkPlayer->GetID();
-	int iValue = lua_tointeger(L, 2);
-	pkPlayer->GetTreasury()->ChangeGold(iValue);
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(player, ReligionTypes(CUSTOM_OPERATION_PLAYER_TREASURY_CHANGE_GOLD), "e",
-		BeliefTypes(iValue), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, time);
-	return 1;
-}
 //------------------------------------------------------------------------------
 //int CalculateGrossGold();
 int CvLuaPlayer::lCalculateGrossGold(lua_State* L)
@@ -2648,17 +2604,6 @@ int CvLuaPlayer::lSetJONSCulture(lua_State* L)
 	return BasicLuaMethod(L, &CvPlayerAI::setJONSCulture);
 }
 
-int CvLuaPlayer::lSetJONSCultureSync(lua_State* L)
-{
-	CvPlayerAI* pkPlayer = GetInstance(L);
-	int iNewValue = lua_tointeger(L, 2);
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(pkPlayer->GetID(), ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_JONSCULTURE), "e",
-		BeliefTypes(iNewValue), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, time);
-	pkPlayer->setJONSCulture(iNewValue);
-	return 0;
-}
 //------------------------------------------------------------------------------
 //void changeJONSCulture(int iChange);
 int CvLuaPlayer::lChangeJONSCulture(lua_State* L)
@@ -5364,22 +5309,6 @@ int CvLuaPlayer::lSetHasPolicy(lua_State* L)
 #endif
 }
 
-int CvLuaPlayer::lSetHasPolicySync(lua_State* L)
-{
-	CvPlayerAI* pkPlayer = GetInstance(L);
-	const PolicyTypes iIndex = (PolicyTypes)lua_tointeger(L, 2);
-	bool bValue = lua_toboolean(L, 3);
-	bool bFree = luaL_optbool(L, 4, false);
-	const PlayerTypes ePlayer = pkPlayer->GetID();
-	//iData1: Policy index. iData2: bValue. iData3: bFree.
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(ePlayer, ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_HAS_POLICY), "e", 
-		(BeliefTypes)iIndex, (BeliefTypes)bValue, (BeliefTypes)bFree, (BeliefTypes)-1, -1, time);
-	pkPlayer->setHasPolicy(iIndex, bValue, bFree);
-	return 0;
-
-}
 //------------------------------------------------------------------------------
 //int getNextPolicyCost();
 int CvLuaPlayer::lGetNextPolicyCost(lua_State* L)
@@ -5643,19 +5572,6 @@ int CvLuaPlayer::lGetAnarchyNumTurns(lua_State* L)
 int CvLuaPlayer::lSetAnarchyNumTurns(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlayerAI::SetAnarchyNumTurns);
-}
-
-int CvLuaPlayer::lSetAnarchyNumTurnsSync(lua_State* L)
-{
-	CvPlayerAI* pkPlayer = GetInstance(L);
-	int numTurns = lua_tointeger(L, 2);
-	PlayerTypes player = pkPlayer->GetID();
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(player, ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_ANARCHY), "e", 
-		BeliefTypes(numTurns), BeliefTypes(-1), BeliefTypes(-1), BeliefTypes(-1), -1, time);
-	pkPlayer->SetAnarchyNumTurns(numTurns);
-	return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -7655,19 +7571,6 @@ int CvLuaPlayer::lChangeNumResourceTotal(lua_State* L)
 	return BasicLuaMethod(L, &CvPlayerAI::changeNumResourceTotal);
 }
 
-int CvLuaPlayer::lChangeNumResourceTotalSync(lua_State* L)
-{
-	CvPlayerAI* pkPlayer = GetInstance(L);
-	ResourceTypes iRes = (ResourceTypes)lua_tointeger(L, 2);
-	int iChange = lua_tointeger(L, 3);
-	bool bIgnoreWarning = luaL_optinteger(L, 4, false);
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(pkPlayer->GetID(), ReligionTypes(CUSTOM_OPERATION_PLAYER_CHANGE_NUM_RES), "e",
-		BeliefTypes(iRes), BeliefTypes(iChange), BeliefTypes(bIgnoreWarning), BeliefTypes(-1), -1, time);
-	pkPlayer->changeNumResourceTotal(iRes, iChange, bIgnoreWarning);
-	return 0;
-}
 //------------------------------------------------------------------------------
 //int getNumResourceAvailable(ResourceTypes  iIndex, bool bIncludeImport);
 int CvLuaPlayer::lGetNumResourceAvailable(lua_State* L)
@@ -9926,17 +9829,6 @@ int CvLuaPlayer::lSetNumFreeTechs(lua_State* L)
 	return 1;
 }
 
-int CvLuaPlayer::lSetNumFreeTechsSync(lua_State* L)
-{
-	CvPlayer* pkPlayer = GetInstance(L);
-	const int iNumTechs = lua_tointeger(L, 2);
-	pkPlayer->SetNumFreeTechs(iNumTechs);
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(pkPlayer->GetID(), ReligionTypes(CUSTOM_OPERATION_PLAYER_SET_NUM_FREETECH), "e",
-		(BeliefTypes)iNumTechs, (BeliefTypes)-1, (BeliefTypes)-1, (BeliefTypes)-1, -1, time);
-	return 1;
-}
 //------------------------------------------------------------------------------
 int CvLuaPlayer::lGetNumFreePolicies(lua_State* L)
 {

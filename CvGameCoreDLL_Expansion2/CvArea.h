@@ -44,7 +44,6 @@ public:
 	static void RegistInstanceFunctions();
 	static void RegistStaticFunctions();
 	static CvArea* Provide(int id);
-	static void GetArgumentsAndExecute(ArgContainer* args, int id);
 
 	void init(int iID, bool bWater);
 	void uninit();

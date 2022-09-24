@@ -57,12 +57,6 @@ void CvTeam::freeStatics()
 	m_aTeams = NULL;
 }
 
-void CvTeam::GetArgumentsAndExecute(ArgContainer* args, TeamTypes teamID) {
-	auto team = Provide(teamID);
-	if (team == NULL) return;
-	NetworkMessageUtil::InstanceArrExecute(*team, args);
-}
-
 void CvTeam::PushToLua(lua_State* L, BasicArguments* arg){
 	CvLuaTeam::PushLtwt(L, Provide((TeamTypes)arg->identifier1()));
 }
@@ -77,7 +71,7 @@ void CvTeam::RegistInstanceFunctions() {
 
 void CvTeam::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvTeam::Provide);
-	REGIST_STATIC_FUNCTION(CvTeam::GetArgumentsAndExecute);
+	REGIST_STATIC_FUNCTION(CvTeam::PushToLua);
 }
 
 CvTeam* CvTeam::Provide(TeamTypes team) {

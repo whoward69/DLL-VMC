@@ -49,7 +49,6 @@ public:
 	static void RegistInstanceFunctions();
 	static void RegistStaticFunctions();
 	static CvCity* Provide(PlayerTypes player, int cityID);
-	static void GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int cityID);
 
 #if defined(MOD_API_EXTENSIONS)
 	void init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits = true, bool bInitialFounding = true, ReligionTypes eInitialReligion = NO_RELIGION, const char* szName = NULL);

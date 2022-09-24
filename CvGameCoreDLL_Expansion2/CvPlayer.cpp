@@ -153,17 +153,10 @@ void CvPlayer::PushToLua(lua_State* L, BasicArguments* arg) {
 void CvPlayer::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvPlayer::Provide);
 	REGIST_STATIC_FUNCTION(CvPlayer::PushToLua);
-	REGIST_STATIC_FUNCTION(CvPlayer::GetArgumentsAndExecute);
 }
 
 CvPlayerAI* CvPlayer::Provide(PlayerTypes player) {
 	return &GET_PLAYER(player);
-}
-
-void CvPlayer::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID) {
-	auto player = Provide(playerID);
-	if (player == NULL) return;
-	NetworkMessageUtil::InstanceArrExecute(*player, args);
 }
 
 //	--------------------------------------------------------------------------------

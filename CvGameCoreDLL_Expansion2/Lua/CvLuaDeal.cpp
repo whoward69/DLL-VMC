@@ -51,7 +51,6 @@ void CvLuaDeal::PushMethods(lua_State* L, int t)
 	Method(GetFromPlayer);
 	Method(GetToPlayer);
 	Method(SetFromPlayer);
-	//Method(SetFromPlayerSync);
 	Method(SetToPlayer);
 
 	Method(GetSurrenderingPlayer);

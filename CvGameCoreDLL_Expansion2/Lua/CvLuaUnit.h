@@ -11,7 +11,6 @@
 #define CVLUAUNIT_H
 
 #include "CvLuaScopedInstance.h"
-#include <ArgContainer.pb.h>
 
 class CvLuaUnit : public CvLuaScopedInstance<CvLuaUnit, CvUnit>
 {
@@ -28,11 +27,8 @@ public:
 
 	//! Gets the type name
 	static const char* GetTypeName();
-	static ArgContainer arguments;
 
 protected:
-	static char networkBuffer[1024];
-	static void PackNetMessageAndSend(CvUnit* unit, const std::string& name, int num, ...);
 
 	static int lIsNone(lua_State* L);
 	static int lConvert(lua_State* L);
@@ -41,20 +37,11 @@ protected:
 	LUAAPIEXTN(UpgradeTo, pUnit, iUpgradeUnitType, bIsFree);
 #endif
 	static int lKill(lua_State* L);
-
-
-	//LUAAPIEXTN(KillSync);
-	static int lKillSync(lua_State* L);
-
-	static int lLuaArgsTest(lua_State* L);
-
-
 	static int lIsActionRecommended(lua_State* L);
 	static int lIsBetterDefenderThan(lua_State* L);
 
 	static int lCanDoCommand(lua_State* L);
 	static int lDoCommand(lua_State* L);
-	static int lDoCommandSync(lua_State* L);
 
 	static int lGetPathEndTurnPlot(lua_State* L);
 	static int lGeneratePath(lua_State* L);
@@ -68,7 +55,6 @@ protected:
 	static int lCanMoveOrAttackInto(lua_State* L);
 	static int lCanMoveThrough(lua_State* L);
 	static int lJumpToNearestValidPlot(lua_State* L);
-	static int lJumpToNearestValidPlotSync(lua_State* L);
 
 	static int lGetCombatDamage(lua_State* L);
 	static int lGetFireSupportUnit(lua_State* L);
@@ -88,7 +74,6 @@ protected:
 	static int lCanAirPatrol(lua_State* L);
 	static int lIsEmbarked(lua_State* L);
 	static int lSetEmbarked(lua_State* L);
-	static int lSetEmbarkedSync(lua_State* L);
 	static int lCanSeaPatrol(lua_State* L);
 	static int lCanHeal(lua_State* L);
 	static int lCanSentry(lua_State* L);
@@ -413,9 +398,6 @@ protected:
 	LUAAPIEXTN(GetXY, int); // Returns int X, int Y
 #endif
 	static int lSetXY(lua_State* L);
-	static int lSetXYSync(lua_State* L);
-
-
 	static int lAt(lua_State* L);
 	static int lAtPlot(lua_State* L);
 	static int lGetPlot(lua_State* L);
@@ -428,14 +410,11 @@ protected:
 
 	static int lGetDamage(lua_State* L);
 	static int lSetDamage(lua_State* L);
-	static int lSetDamageSync(lua_State* L);
 	static int lChangeDamage(lua_State* L);
-	static int lChangeDamageSync(lua_State* L);
 
 	static int lGetMoves(lua_State* L);
 
 	static int lSetMoves(lua_State* L);
-	static int lSetMovesSync(lua_State* L);
 
 	static int lChangeMoves(lua_State* L);
 	static int lFinishMoves(lua_State* L);
@@ -444,10 +423,8 @@ protected:
 	static int lGetExperience(lua_State* L);
 
 	static int lSetExperience(lua_State* L);
-	static int lSetExperienceSync(lua_State* L);
 
 	static int lChangeExperience(lua_State* L);
-	static int lChangeExperienceSync(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_UNITS_XP_TIMES_100)
 	LUAAPIEXTN(GetExperienceTimes100, int);
 	LUAAPIEXTN(SetExperienceTimes100, void, iExpTimes100, iMax);
@@ -455,7 +432,6 @@ protected:
 #endif
 	static int lGetLevel(lua_State* L);
 	static int lSetLevel(lua_State* L);
-	static int lSetLevelSync(lua_State* L);
 	static int lChangeLevel(lua_State* L);
 	static int lGetFacingDirection(lua_State* L);
 	static int lRotateFacingDirectionClockwise(lua_State* L);
@@ -516,7 +492,6 @@ protected:
 
 	static int lIsOutOfAttacks(lua_State* L);
 	static int lSetMadeAttack(lua_State* L);
-	static int lSetMadeAttackSync(lua_State* L);
 	static int lisOutOfInterceptions(lua_State* L);
 	static int lSetMadeInterception(lua_State* L);
 
@@ -560,7 +535,6 @@ protected:
 	static int lHasName(lua_State* L);
 	static int lGetNameKey(lua_State* L);
 	static int lSetName(lua_State* L);
-	static int lSetNameSync(lua_State* L);
 	static int lIsTerrainDoubleMove(lua_State* L);
 	static int lIsFeatureDoubleMove(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_PROMOTIONS_HALF_MOVE)
@@ -586,7 +560,6 @@ protected:
 	static int lIsHasPromotion(lua_State* L);
 
 	static int lSetHasPromotion(lua_State* L);
-	static int lSetHasPromotionSync(lua_State* L);
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(SetActivityType, void, iActivityType, bClearFortify);

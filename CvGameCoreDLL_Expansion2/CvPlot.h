@@ -93,7 +93,6 @@ public:
 	static void RegistInstanceFunctions();
 	static void RegistStaticFunctions();
 	static CvPlot* Provide(int x, int y);
-	static void GetArgumentsAndExecute(ArgContainer* args, int x, int y);
 
 	void init(int iX, int iY);
 	void uninit();

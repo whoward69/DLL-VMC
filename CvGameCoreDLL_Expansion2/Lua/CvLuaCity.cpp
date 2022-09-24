@@ -279,9 +279,7 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(GetGameTurnLastExpanded);
 	Method(GetPopulation);
 	Method(SetPopulation);
-	Method(SetPopulationSync);
 	Method(ChangePopulation);
-	Method(ChangePopulationSync);
 	Method(GetRealPopulation);
 
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
@@ -404,7 +402,6 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(GetFood);
 	Method(GetFoodTimes100);
 	Method(SetFood);
-	Method(SetFoodSync);
 	Method(ChangeFood);
 	Method(GetFoodKept);
 	Method(GetMaxFoodKeptPercent);
@@ -425,7 +422,6 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(IsResistance);
 	Method(GetResistanceTurns);
 	Method(ChangeResistanceTurns);
-	Method(ChangeResistanceTurnsSync);
 
 	Method(IsRazing);
 	Method(GetRazingTurns);
@@ -434,12 +430,10 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(IsOccupied);
 
 	Method(SetOccupied);
-	Method(SetOccupiedSync);
 
 	Method(IsPuppet);
 
 	Method(SetPuppet);
-	Method(SetPuppetSync);
 
 	Method(GetHappinessFromBuildings);
 	Method(GetHappiness);
@@ -550,7 +544,6 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 
 	Method(GetDamage);
 	Method(SetDamage);
-	Method(SetDamageSync);
 	Method(ChangeDamage);
 	Method(GetMaxHitPoints);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_EVENTS_CITY_BOMBARD)
@@ -570,7 +563,6 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(GetNumRealBuilding);
 
 	Method(SetNumRealBuilding);
-	Method(SetNumRealBuildingSync);
 
 
 	Method(GetNumFreeBuilding);
@@ -2205,23 +2197,6 @@ int CvLuaCity::lSetPopulation(lua_State* L)
 	return 1;
 //	return BasicLuaMethod(L, &CvCity::setPopulation);
 }
-
-int CvLuaCity::lSetPopulationSync(lua_State* L)
-{
-	CvCity* pkCity = GetInstance(L);
-	int iValue = lua_tointeger(L, 2);
-	int bReassignPop = lua_toboolean(L, 3);
-	const int ID = pkCity->GetID();
-	PlayerTypes ePlayer = pkCity->getOwner();
-	CvAssertMsg(bReassignPop != 0, "It is super dangerous to set this to false.  Ken would love to see why you are doing this.");
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(ePlayer, ReligionTypes(CUSTOM_OPERATION_CITY_SET_POPULATION), "e", 
-		BeliefTypes(ID), BeliefTypes(iValue), BeliefTypes(bReassignPop), BeliefTypes(-1), -1, time);
-	pkCity->setPopulation(iValue, bReassignPop);
-	return 1;
-	//	return BasicLuaMethod(L, &CvCity::setPopulation);
-}
 //------------------------------------------------------------------------------
 //void changePopulation(int iChange);
 int CvLuaCity::lChangePopulation(lua_State* L)
@@ -2236,23 +2211,6 @@ int CvLuaCity::lChangePopulation(lua_State* L)
 //	return BasicLuaMethod(L, &CvCity::changePopulation);
 }
 
-int CvLuaCity::lChangePopulationSync(lua_State* L)
-{
-	CvCity* pkCity = GetInstance(L);
-	int iChange = lua_tointeger(L, 2);
-	int bReassignPop = lua_toboolean(L, 3);
-	CvAssertMsg(bReassignPop != 0, "It is super dangerous to set this to false.  Ken would love to see why you are doing this.");
-	//pkCity->changePopulation(iChange, bReassignPop);
-	PlayerTypes owner = pkCity->getOwner();
-	int ID = pkCity->GetID();
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITY_CHANGE_POPULATION), "e", 
-		BeliefTypes(ID), BeliefTypes(iChange), BeliefTypes(bReassignPop), BeliefTypes(-1), -1, time);
-	pkCity->changePopulation(iChange, bReassignPop);
-	return 1;
-	//	return BasicLuaMethod(L, &CvCity::changePopulation);
-}
 //------------------------------------------------------------------------------
 //int getRealPopulation();
 int CvLuaCity::lGetRealPopulation(lua_State* L)
@@ -2970,19 +2928,6 @@ int CvLuaCity::lSetFood(lua_State* L)
 	return BasicLuaMethod(L, &CvCity::setFood);
 }
 
-int CvLuaCity::lSetFoodSync(lua_State* L)
-{
-	CvCity* pkCity = GetInstance(L);
-	int iFood = lua_tointeger(L, 2);
-	int ID = pkCity->GetID();
-	PlayerTypes owner = pkCity->getOwner();
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITY_SET_FOOD), "e", 
-		BeliefTypes(ID), BeliefTypes(iFood), BeliefTypes(-1), BeliefTypes(-1), -1, time);
-	pkCity->setFood(iFood);
-	return 0;
-}
 //------------------------------------------------------------------------------
 //void changeFood(int iChange);
 int CvLuaCity::lChangeFood(lua_State* L)
@@ -3126,20 +3071,6 @@ int CvLuaCity::lChangeResistanceTurns(lua_State* L)
 	return BasicLuaMethod(L, &CvCity::ChangeResistanceTurns);
 }
 
-int CvLuaCity::lChangeResistanceTurnsSync(lua_State* L)
-{
-	CvCity* pkCity = GetInstance(L);
-	int iChangeValue = lua_tointeger(L, 2);
-	PlayerTypes owner = pkCity->getOwner();
-	int ID = pkCity->GetID();
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITY_CHANGE_RESIST), "e",
-		BeliefTypes(ID), BeliefTypes(iChangeValue), BeliefTypes(-1), BeliefTypes(-1), -1, time);
-	pkCity->ChangeResistanceTurns(iChangeValue);
-	return 0;
-}
-
 //int IsRazing();
 int CvLuaCity::lIsRazing(lua_State* L)
 {
@@ -3167,20 +3098,6 @@ int CvLuaCity::lSetOccupied(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvCity::SetOccupied);
 }
-
-int CvLuaCity::lSetOccupiedSync(lua_State* L)
-{
-	CvCity* pkCity = GetInstance(L);
-	bool bNewValue = lua_toboolean(L, 2);
-	const PlayerTypes owner = pkCity->getOwner();
-	const int ID = pkCity->GetID();
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITY_SET_OCCUPIED), "e",
-		(BeliefTypes)ID, (BeliefTypes)bNewValue, (BeliefTypes)-1, (BeliefTypes)-1, -1, time);
-	pkCity->SetOccupied(bNewValue);
-	return 0;
-}
 //------------------------------------------------------------------------------
 //int IsPuppet();
 int CvLuaCity::lIsPuppet(lua_State* L)
@@ -3192,19 +3109,6 @@ int CvLuaCity::lIsPuppet(lua_State* L)
 int CvLuaCity::lSetPuppet(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvCity::SetPuppet);
-}
-int CvLuaCity::lSetPuppetSync(lua_State* L)
-{
-	CvCity* pkCity = GetInstance(L);
-	bool bNewValue = lua_toboolean(L, 2);
-	const PlayerTypes owner = pkCity->getOwner();
-	const int ID = pkCity->GetID();
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITY_SET_PUPPET), "e",
-		(BeliefTypes)ID, (BeliefTypes)bNewValue, (BeliefTypes)-1, (BeliefTypes)-1, -1, time);
-	pkCity->SetPuppet(bNewValue);
-	return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -3982,20 +3886,6 @@ int CvLuaCity::lSetDamage(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvCity::setDamage);
 }
-int CvLuaCity::lSetDamageSync(lua_State* L)
-{
-	CvCity* pkCity = GetInstance(L);
-	const PlayerTypes owner = pkCity->getOwner();
-	const int iNewValue = lua_tointeger(L, 2);
-	const bool bNoMessage = luaL_optbool(L, 3, false);
-	const int ID = pkCity->GetID();
-	int time = GetTickCount() + getLuaLine(L) + rand();
-	ReturnValueUtil::container.pushReturnValue(time);
-	gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITY_SET_DAMAGE), "e", 
-		BeliefTypes(ID), BeliefTypes(iNewValue), BeliefTypes(bNoMessage), BeliefTypes(-1), -1, time);
-	pkCity->setDamage(iNewValue, bNoMessage);
-	return 0;
-}
 
 //------------------------------------------------------------------------------
 //void changeDamage(int iChange);
@@ -4150,26 +4040,6 @@ int CvLuaCity::lSetNumRealBuilding(lua_State* L)
 	if(iIndex != NO_BUILDING)
 	{
 		const int iNewValue = lua_tointeger(L, 3);
-		pkCity->GetCityBuildings()->SetNumRealBuilding(iIndex, iNewValue);
-	}
-
-	return 1;
-}
-
-int CvLuaCity::lSetNumRealBuildingSync(lua_State* L)
-{
-	CvCity* pkCity = GetInstance(L);
-	const BuildingTypes iIndex = toValue<BuildingTypes>(L, 2);
-	const PlayerTypes owner = pkCity->getOwner();
-	const int ID = pkCity->GetID();
-
-	if (iIndex != NO_BUILDING)
-	{
-		const int iNewValue = lua_tointeger(L, 3);
-		int time = GetTickCount() + getLuaLine(L) + rand();
-		ReturnValueUtil::container.pushReturnValue(time);
-		gDLL->SendFoundReligion(owner, ReligionTypes(CUSTOM_OPERATION_CITYBUILDING_SET_NUM_BUILDING), "e",
-			(BeliefTypes)ID, (BeliefTypes)iIndex, (BeliefTypes)iNewValue, (BeliefTypes)-1, -1, time);
 		pkCity->GetCityBuildings()->SetNumRealBuilding(iIndex, iNewValue);
 	}
 

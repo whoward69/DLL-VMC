@@ -168,7 +168,6 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ArgContainer.pb.cpp" />
     <ClCompile Include="CustomMods.cpp" />
     <ClCompile Include="CvAchievementInfo.cpp" />
     <ClCompile Include="CvCityManager.cpp" />
@@ -345,7 +344,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\CvGameCoreDLLUtil\include\CustomModsGlobal.h" />
-    <ClInclude Include="ArgContainer.pb.h" />
     <ClInclude Include="ArgumentAdaptor.h" />
     <ClInclude Include="banned.h" />
     <ClInclude Include="CustomMods.h" />

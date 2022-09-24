@@ -126,12 +126,6 @@ void ClearUnitDeltas()
 }
 }
 
-void CvUnit::GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int unitID) {
-	auto unit = Provide(playerID, unitID);
-	if (unit == NULL) return;
-	NetworkMessageUtil::InstanceArrExecute(*unit, args);
-}
-
 void CvUnit::ExtractToArg(BasicArguments* arg) {
 	arg->set_argtype("CvUnit");
 	arg->set_identifier1(getOwner());
@@ -153,7 +147,6 @@ void CvUnit::RegistInstanceFunctions() {
 void CvUnit::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvUnit::Provide);
 	REGIST_STATIC_FUNCTION(CvUnit::PushToLua);
-	REGIST_STATIC_FUNCTION(CvUnit::GetArgumentsAndExecute);
 }
 
 CvUnit* CvUnit::Provide(PlayerTypes player, int id) {

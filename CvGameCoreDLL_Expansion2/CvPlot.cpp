@@ -163,18 +163,11 @@ void CvPlot::ExtractToArg(BasicArguments* arg) {
 
 void CvPlot::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvPlot::Provide);
-	REGIST_STATIC_FUNCTION(CvPlot::GetArgumentsAndExecute);
 	REGIST_STATIC_FUNCTION(CvPlot::PushToLua);
 }
 
 CvPlot* CvPlot::Provide(int x, int y) {
 	return GC.getMap().plot(x, y);
-}
-
-void CvPlot::GetArgumentsAndExecute(ArgContainer* args, int x, int y) {
-	auto plot = Provide(x, y);
-	if (plot == NULL) return;
-	NetworkMessageUtil::InstanceArrExecute(*plot, args);
 }
 
 //////////////////////////////////////////////////////////////////////////

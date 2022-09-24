@@ -530,9 +530,6 @@
     <ClCompile Include="NetworkMessageUtil.cpp">
       <Filter>NetworkSync</Filter>
     </ClCompile>
-    <ClCompile Include="ArgContainer.pb.cpp">
-      <Filter>NetworkSync</Filter>
-    </ClCompile>
     <ClCompile Include="LargeArgContainer.pb.cpp">
       <Filter>NetworkSync</Filter>
     </ClCompile>
@@ -1085,9 +1082,6 @@
       <Filter>NetworkSync</Filter>
     </ClInclude>
     <ClInclude Include="LargeArgContainer.pb.h">
-      <Filter>NetworkSync</Filter>
-    </ClInclude>
-    <ClInclude Include="ArgContainer.pb.h">
       <Filter>NetworkSync</Filter>
     </ClInclude>
     <ClInclude Include="ArgumentAdaptor.h">

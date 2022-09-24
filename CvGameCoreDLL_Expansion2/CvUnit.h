@@ -20,7 +20,6 @@
 #include "CvInfos.h"
 #include "CvPromotionClasses.h"
 #include "CvAStarNode.h"
-#include "ArgContainer.pb.h"
 #include "CvGameObjectExtractable.h"
 
 #define DEFAULT_UNIT_MAP_LAYER 0
@@ -37,7 +36,7 @@ class CvPathNode;
 
 typedef MissionData MissionQueueNode;
 
-typedef FFastSmallFixedList< MissionQueueNode, 12, true, c_eCiv5GameplayDLL > MissionQueue;
+typedef FFastSmallFixedList<MissionQueueNode, 12, true, c_eCiv5GameplayDLL> MissionQueue;
 
 typedef FObjectHandle<CvUnit> UnitHandle;
 typedef FStaticVector<CvPlot*, 20, true, c_eCiv5GameplayDLL, 0> UnitMovementQueue;
@@ -125,7 +124,6 @@ public:
 	static void PushToLua(lua_State* L, BasicArguments* arg);
 	static void RegistInstanceFunctions();
 	static void RegistStaticFunctions();
-	static void GetArgumentsAndExecute(ArgContainer* args, PlayerTypes playerID, int unitID);
 	static CvUnit* Provide(PlayerTypes player, int id);
 	
 

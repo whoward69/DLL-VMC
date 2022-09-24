@@ -50,7 +50,6 @@ protected:
 #endif
 
 	static int lInitUnit(lua_State* L);
-	static int lInitUnitSync(lua_State* L);
 	static int lInitUnitWithNameOffset(lua_State* L);
 	static int lDisbandUnit(lua_State* L);
 	static int lAddFreeUnit(lua_State* L);
@@ -198,7 +197,6 @@ protected:
 	static int lGetGold(lua_State* L);
 	static int lSetGold(lua_State* L);
 	static int lChangeGold(lua_State* L);
-	static int lChangeGoldSync(lua_State* L);
 	static int lCalculateGrossGold(lua_State* L);
 	static int lGetLifetimeGrossGold(lua_State* L);
 	static int lGetGoldFromCitiesTimes100(lua_State* L);
@@ -235,7 +233,6 @@ protected:
 
 	static int lGetJONSCulture(lua_State* L);
 	static int lSetJONSCulture(lua_State* L);
-	static int lSetJONSCultureSync(lua_State* L);
 	static int lChangeJONSCulture(lua_State* L);
 
 	static int lGetJONSCultureEverGenerated(lua_State* L);
@@ -381,9 +378,7 @@ protected:
 	static int lGetNumPolicies(lua_State* L);
 	static int lGetNumPoliciesInBranch(lua_State* L);
 	static int lHasPolicy(lua_State* L);
-
 	static int lSetHasPolicy(lua_State* L);
-	static int lSetHasPolicySync(lua_State* L);
 
 	static int lGetNextPolicyCost(lua_State* L);
 	static int lCanAdoptPolicy(lua_State* L);
@@ -413,7 +408,6 @@ protected:
 	static int lIsAnarchy(lua_State* L);
 	static int lGetAnarchyNumTurns(lua_State* L);
 	static int lSetAnarchyNumTurns(lua_State* L);
-	static int lSetAnarchyNumTurnsSync(lua_State* L);
 	static int lChangeAnarchyNumTurns(lua_State* L);
 
 	static int lGetAdvancedStartPoints(lua_State* L);
@@ -715,7 +709,6 @@ protected:
 	static int lGetNumResourceUsed(lua_State* L);
 	static int lGetNumResourceTotal(lua_State* L);
 	static int lChangeNumResourceTotal(lua_State* L);
-	static int lChangeNumResourceTotalSync(lua_State* L);
 	static int lGetNumResourceAvailable(lua_State* L);
 
 	static int lGetResourceExport(lua_State* L);
@@ -938,7 +931,6 @@ protected:
 
 	static int lGetNumFreeTechs(lua_State* L);
 	static int lSetNumFreeTechs(lua_State* L);
-	static int lSetNumFreeTechsSync(lua_State* L);
 	static int lGetNumFreePolicies(lua_State* L);
 	static int lSetNumFreePolicies(lua_State* L);
 	static int lChangeNumFreePolicies(lua_State* L);
