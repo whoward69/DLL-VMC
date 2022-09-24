@@ -70,7 +70,7 @@ template<class Derived, class InstanceType>
 int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_State* L) {
 	auto num = lua_gettop(L);
 	std::string funcToCall;
-	if (num < 2) return 0;
+	if (num < 1) return 0;
 	for (int i = 1; i <= num; i++) {
 		auto type = lua_type(L, i);
 
@@ -114,7 +114,16 @@ int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_S
 	}
 	lua_remove(L, 1); //remove the name of the function you want to execute.
 	lua_settop(L, num - 1);
-	int time = GetTickCount() + rand();
+	auto checkSum = 0;
+	for (int i = 0; i < NetworkMessageUtil::ReceiveLargeArgContainer.args_size(); i++) {
+		if (NetworkMessageUtil::ReceiveLargeArgContainer.args(i).has_identifier1()) {
+			checkSum += NetworkMessageUtil::ReceiveLargeArgContainer.args(i).identifier1();
+		}
+		if (NetworkMessageUtil::ReceiveLargeArgContainer.args(i).has_identifier2()) {
+			checkSum += 65001 * NetworkMessageUtil::ReceiveLargeArgContainer.args(i).identifier2();
+		}
+	}
+	int time = GetTickCount() + rand() + checkSum;
 	InvokeRecorder::pushReturnValue(time);
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_functiontocall(funcToCall);
@@ -128,7 +137,7 @@ template<class Derived, class InstanceType>
 int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunctionPostpone(lua_State* L) {
 	auto num = lua_gettop(L);
 	std::string funcToCall;
-	if (num < 2) return 0;
+	if (num < 1) return 0;
 	for (int i = 1; i <= num; i++) {
 		auto type = lua_type(L, i);
 		BasicArguments* arg;
