@@ -9,7 +9,7 @@ For example, if you are executing a custom button function, call:
 ``` lua
 unit = player:SendAndExecuteLuaFunction("CvLuaPlayer::lInitUnit", GameInfoTypes[unitType], plotX, plotY)
 unit:SendAndExecuteLuaFunction("CvLuaUnit::lKill", false)
-Game.SendAndExecuteLuaFunction("CvLuaGame:lSetPlotExtraYield", x, y, GameInfoTypes.YIELD_FOOD, 1)
+Game.SendAndExecuteLuaFunction("CvLuaGame::lSetPlotExtraYield", x, y, GameInfoTypes.YIELD_FOOD, 1)
 ``` 
 instead of 
 ``` lua

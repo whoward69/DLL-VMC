@@ -162,6 +162,7 @@
       <ModuleDefinitionFile>$(ProjectDir)CvGameCoreDLL.def</ModuleDefinitionFile>
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
       <AdditionalOptions>/LTCG %(AdditionalOptions)</AdditionalOptions>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <ResourceCompile>
       <SuppressStartupBanner>false</SuppressStartupBanner>
