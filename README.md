@@ -29,8 +29,14 @@ Currently, not all the methods can be called in this way, available methods are:
 CvLuaUnit::lKill();
 CvLuaUnit::lDoCommand();
 CvLuaUnit::lPushMission();
-CvLuaPlayer::lInit();
 CvLuaUnit::lJumpToNearestValidPlot();
+CvLuaPlayer::lInitUnit();
+CvLuaPlayer::lInitCity();
+CvLuaPlayer::lKillCities();
+CvLuaPlayer::lKillUnits();
+CvLuaPlayer::lAcquireCity();
+CvLuaPlayer::lRaze();
+CvLuaCity::lKill();
 ``` 
 And all the lua methods prefixed with ***lSet***, ***lChange*** belongning to class **CvLuaUnit**, **CvLuaCity**, **CvLuaTeam**, **CvLuaTeamTech**,  **CvLuaPlot**, **CvLuaPlayer**, **CvLuaMap**, **CvLuaGame**.   
 Currently you can pass ***LUA_TNUMBER***, ***LUA_TSTRING***, ***LUA_TBOOLEAN***, ***LUA_TNILL*** and lua game instances ***unit***, ***player***, ***team***, ***plot***, ***city***, ***teamTech*** which are actually ***LUA_TTABLE*** as arguments to invoke **SendAndExecuteLuaFunction**.   
