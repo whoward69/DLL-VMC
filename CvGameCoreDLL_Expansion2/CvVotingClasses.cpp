@@ -18,7 +18,7 @@
 #include "cvStopWatch.h"
 
 #include "LintFree.h"
-#include "CvLuaLeague.h"
+#include "Lua/CvLuaLeague.h"
 #include "NetworkMessageUtil.h"
 
 

@@ -1,34 +1,13 @@
 #include <CvGameCoreDLLPCH.h>
 #include "NetworkMessageUtil.h"
 
-void NetworkMessageUtil::StringShift(char* buffer, std::string& target) {
-	int size = target.size();
-	memcpy(buffer, target.c_str(), size);
-	for (int i = 0; i < size; i++) {
-		buffer[i] += SERIALIZED_SHIFT_NUM;
-	}
-}
-
-void NetworkMessageUtil::CClear(char* buffer, int msgLength) {
-	for (int i = 0; i < msgLength; i++) {
-		buffer[i] = 0;
-	}
-}
-
 void NetworkMessageUtil::IClear(int* buffer) {
 	for (int i = 0; i < 16; i++) {
 		buffer[i] = 0;
 	}
 }
 
-void NetworkMessageUtil::StringShiftReverse(char* buffer, const char* target, int msgLength) {
-	memcpy(buffer, target, msgLength);
-	for (int i = 0; i < msgLength; i++) {
-		buffer[i] -= SERIALIZED_SHIFT_NUM;
-	}
-}
 
-char NetworkMessageUtil::ReceiveBuffer[1024];
 LargeArgContainer NetworkMessageUtil::ReceiveLargeArgContainer;
 int NetworkMessageUtil::ArgumentsToPass[MAX_INT32_ARGNUM];
 
@@ -36,7 +15,7 @@ int NetworkMessageUtil::ArgumentsToPass[MAX_INT32_ARGNUM];
 std::list<int> InvokeRecorder::returnValueRecord;
 std::map<int, list<int>::iterator> InvokeRecorder::valueMap;
 FCriticalSection InvokeRecorder::m_Locker;
-void InvokeRecorder::pushReturnValue(int time) {
+void InvokeRecorder::pushTimeValue(int time) {
 	while (!m_Locker.Try()) {
 		Sleep(1);
 	}
@@ -50,7 +29,7 @@ void InvokeRecorder::pushReturnValue(int time) {
 	m_Locker.Leave();
 }
 
-bool InvokeRecorder::getReturnValueExist(int time) {
+bool InvokeRecorder::getTimeValueExist(int time) {
 	while (!m_Locker.Try()) {
 		Sleep(1);
 	}

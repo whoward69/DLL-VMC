@@ -244,7 +244,7 @@ int CvLuaScopedInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_S
 		}
 	}
 	int time = GetTickCount() + rand() + checkSum;
-	InvokeRecorder::pushReturnValue(time);
+	InvokeRecorder::pushTimeValue(time);
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_functiontocall(funcToCall);
 	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
@@ -297,7 +297,7 @@ int CvLuaScopedInstance<Derived, InstanceType>::lSendAndExecuteLuaFunctionPostpo
 	lua_remove(L, 2); //remove the name of the function you want to execute.
 	lua_settop(L, num - 1);
 	int time = GetTickCount() + rand();
-	//InvokeRecorder::pushReturnValue(time);
+	//InvokeRecorder::pushTimeValue(time);
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_functiontocall(funcToCall);
 	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
