@@ -13,6 +13,8 @@
 #include "CvTypes.h"
 #include "CvGameCoreUtils.h"
 
+#include "NetworkMessageUtil.h"
+
 CvDllNetMessageHandler::CvDllNetMessageHandler()
 {
 }
@@ -326,285 +328,10 @@ void CvDllNetMessageHandler::ResponseFoundPantheon(PlayerTypes ePlayer, BeliefTy
 	}
 }
 
-void CvDllNetMessageHandler::TransmissCustomizedOperationFromResponseFoundReligion(
-	PlayerTypes ePlayer, 
-	int customCommandType, 
-	int iData1, int iData2, int iData3, int iData4, int iData5, int iData6,
-	const char* customMsg) {
-	int realCommandType = customCommandType;
-	CvUnit* unit;
-	CvCity* city;
-	CvPlot* plot;
-	if (ReturnValueUtil::container.getReturnValueExist(iData6, realCommandType, iData1)) return;
-	switch (realCommandType) {
-	case CUSTOM_OPERATION_UNIT_KILL:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: Executer of the command. iData3: bDelay
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->kill(iData3 > 0, (PlayerTypes)iData2);
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_TELEPORT:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: X. iData3: Y, iData4: boolean flags. iData5: Mark executed
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->setXY(iData2, iData3,
-				iData4 & (1 << 0), iData4 & (1 << 1), iData4 & (1 << 2), iData4 & (1 << 3));
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_SET_DAMAGE:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: iNewValue. iData3: ePlayer. iData4: bNotifyEntity
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->setDamage(iData2, (PlayerTypes)iData3, -1, iData4 > 0);
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_GIVE_PROMOTION:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: promotion. iData3: new value
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->setHasPromotion(PromotionTypes(iData2), iData3 > 0);
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_SET_LEVEL:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: level.
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->setLevel(iData2);
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_SET_MOVE:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: New value.
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->setMoves(iData2);
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_SET_MADEATK:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: New value.
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->setMadeAttack(iData2 > 0);
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_SET_EXPERIENCE:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: New value. iData3: iMax
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->setExperienceTimes100(iData2 * 100, iData3);
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_SET_NAME:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID.
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->setName(customMsg);
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_SET_EMBARKED:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: New value.
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->setEmbarked(iData2);
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_CHANGE_DAMAGE:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: Change value. iData3: operater. iData4: iUnit.
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->changeDamage(iData2, PlayerTypes(iData3), iData4);
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_CHANGE_EXP:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: Change value. iData3: iMax. iData4: option integers.
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->changeExperienceTimes100(iData2 * 100, iData3, iData4 & 1, iData4 & (1 << 1), iData4 & (1 << 2));
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_JUMP_VALID_PLOT:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: time.
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->jumpToNearestValidPlot();
-		}
-		break;
-	case CUSTOM_OPERATION_UNIT_DO_COMMAND:
-		//ePlayer: Owner of the unit
-		//iData1: Unit ID. iData2: command type. iData3: data1. iData4: data2
-		unit = GET_PLAYER(ePlayer).getUnit(iData1);
-		if (unit != NULL) {
-			unit->doCommand((CommandTypes)iData2, iData3, iData4);
-		}
-		break;
-
-	case CUSTOM_OPERATION_PLAYER_INIT_UNIT:
-		//ePlayer: The player to give unit
-		//iData1: Unit type. iData2: X. iData3: Y. iData4: Unit AI. iData5: Direction. iData6: ID of return value.
-		//if the message is sent from local player, execute before sending network message.
-		GET_PLAYER(ePlayer).initUnit((UnitTypes)iData1, iData2, iData3, (UnitAITypes)iData4, (DirectionTypes)iData5);
-		break;
-	case CUSTOM_OPERATION_PLAYER_SET_HAS_POLICY:
-		//ePlayer: The player to give policy
-		//iData1: Policy index. iData2: bValue. iData3: bFree.
-		GET_PLAYER(ePlayer).setHasPolicy(PolicyTypes(iData1), iData2 > 0, iData3 > 0);
-		break;
-	case CUSTOM_OPERATION_PLAYER_SET_JONSCULTURE:
-		//ePlayer: The player to set culture
-		//iData1: New value.
-		GET_PLAYER(ePlayer).setJONSCulture(iData1);
-		break;
-	case CUSTOM_OPERATION_PLAYER_SET_ANARCHY:
-		//ePlayer: The player to set culture
-		//iData1: Anarchy turns.
-		GET_PLAYER(ePlayer).SetAnarchyNumTurns(iData1);
-		break;
-	case CUSTOM_OPERATION_PLAYER_CHANGE_NUM_RES:
-		//ePlayer: The player to change res
-		//iData1: Resourse ID. iData2: change value. iData3: include import.
-		GET_PLAYER(ePlayer).changeNumResourceTotal((ResourceTypes)iData1, iData2, iData3);
-		break;
-	case CUSTOM_OPERATION_PLAYER_CHANGE_GOLD:
-		//ePlayer: The player to change res
-		//iData1: Change num.
-		GET_PLAYER(ePlayer).GetTreasury()->ChangeGold(iData1);
-		break;
-
-	case CUSTOM_OPERATION_CITY_SET_NUM_BUILDING:
-		//ePlayer: Owner of the city
-		//iData1: City ID. iData2: Building type. iData3: New value.
-		city = GET_PLAYER(ePlayer).getCity(iData1);
-		if (city != NULL) {
-			city->GetCityBuildings()->SetNumRealBuilding((BuildingTypes)iData2, iData3);
-		}
-		break;
-	case CUSTOM_OPERATION_CITY_SET_DAMAGE:
-		//ePlayer: Owner of the city
-		//iData1: City ID. iData2: New value. iData3: No message.
-		city = GET_PLAYER(ePlayer).getCity(iData1);
-		if (city != NULL) {
-			city->setDamage(iData2, iData3 > 0);
-		}
-		break;
-	case CUSTOM_OPERATION_CITY_SET_PUPPET:
-		//ePlayer: Owner of the city
-		//iData1: City ID. iData2: New value
-		city = GET_PLAYER(ePlayer).getCity(iData1);
-		if (city != NULL) {
-			city->SetPuppet(iData2 > 0);
-		}
-		break;
-	case CUSTOM_OPERATION_CITY_SET_OCCUPIED:
-		//ePlayer: Owner of the city
-		//iData1: City ID. iData2: New value
-		city = GET_PLAYER(ePlayer).getCity(iData1);
-		if (city != NULL) {
-			city->SetOccupied(iData2 > 0);
-		}
-		break;
-	case CUSTOM_OPERATION_CITY_SET_POPULATION:
-		//ePlayer: Owner of the city
-		//iData1: City ID. iData2: New value. iData3: bReassignPop.
-		city = GET_PLAYER(ePlayer).getCity(iData1);
-		if (city != NULL) {
-			city->setPopulation(iData2, iData3);
-		}
-		break;
-	case CUSTOM_OPERATION_CITY_SET_FOOD:
-		//ePlayer: Owner of the city
-		//iData1: City ID. iData2: New value.
-		city = GET_PLAYER(ePlayer).getCity(iData1);
-		if (city != NULL) {
-			city->setFood(iData2);
-		}
-		break;
-	case CUSTOM_OPERATION_CITY_CHANGE_RESIST:
-		//ePlayer: Owner of the city
-		//iData1: City ID. iData2: New value.
-		city = GET_PLAYER(ePlayer).getCity(iData1);
-		if (city != NULL) {
-			city->ChangeResistanceTurns(iData2);
-		}
-		break;
-	case CUSTOM_OPERATION_CITY_CHANGE_POPULATION:
-		//ePlayer: Owner of the city
-		//iData1: City ID. iData2: Change value. iData3: Reassign pop.
-		city = GET_PLAYER(ePlayer).getCity(iData1);
-		if (city != NULL) {
-			city->changePopulation(iData2, iData3);
-		}
-		break;
-
-	case CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE:
-		//ePlayer: Player done the improvement
-		//iData1: Improvement ID. iData2: Plot X. iData3: Plot Y.
-		plot = GC.getMap().plot(iData2, iData3);
-		if (plot != NULL) {
-			plot->setImprovementType((ImprovementTypes)iData1, ePlayer);
-		}
-		break;
-	case CUSTOM_OPERATION_PLOT_SET_REVEALED:
-		//ePlayer: Owner of the unit(if exists)
-		//iData1: Teamtype ID. iData2: bNewValue (<<0) and bTerrainOnly (<<1), iData3: UnitID, iData4:eFromTeam, iData5: X, iData6: Y
-		plot = GC.getMap().plot(iData5, iData6);
-		if (plot != NULL) {
-			unit = ePlayer == NO_PLAYER ? NULL : GET_PLAYER(ePlayer).getUnit(iData3);
-			plot->setRevealed(TeamTypes(iData1), iData2 & 1, unit, iData2 & (1 << 1), TeamTypes(iData4));
-		}
-		break;
-	case CUSTOM_OPERATION_PLOT_SET_RESOURCE:
-		//ePlayer: None
-		//iData1: Resource ID. iData2: Num. iData3:For minor CIV iData4: Plot X. iData5: Plot Y.
-		plot = GC.getMap().plot(iData4, iData5);
-		if (plot != NULL) {
-			plot->setResourceType(ResourceTypes(iData1), iData2, iData3);
-		}
-		break;
-	case CUSTOM_OPERATION_PLOT_SET_ROUTE:
-		//ePlayer: None
-		//iData1: New value. iData2: X. iData3: Y.
-		plot = GC.getMap().plot(iData2, iData3);
-		if (plot != NULL) {
-			plot->setRouteType((RouteTypes)iData1);
-		}
-		break;
-	case CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS:
-		//ePlayer: Done player
-		//iData1: Type. iData2: New value. iData3: X. iData4: Y
-		plot = GC.getMap().plot(iData3, iData4);
-		if (plot != NULL) {
-			plot->changeBuildProgress((BuildTypes)iData1, iData2, ePlayer);
-		}
-		break;
-	default:
-		break;
-	
-	}
-	
-}
-
 //------------------------------------------------------------------------------
 // Use this method for customized operations.
 void CvDllNetMessageHandler::ResponseFoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion, const char* szCustomName, BeliefTypes eBelief1, BeliefTypes eBelief2, BeliefTypes eBelief3, BeliefTypes eBelief4, int iCityX, int iCityY)
 {
-	if ((UINT16(eReligion >> 16) > 0)) {
-		TransmissCustomizedOperationFromResponseFoundReligion(ePlayer, eReligion, eBelief1, eBelief2, eBelief3, eBelief4, iCityX, iCityY, szCustomName);
-		return;
-	}
-
 	CvGame& kGame(GC.getGame());
 	CvGameReligions* pkGameReligions(kGame.GetGameReligions());
 
@@ -1093,6 +820,46 @@ void CvDllNetMessageHandler::ResponseIdeologyChoice(PlayerTypes ePlayer, PolicyB
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID, const char* szName)
 {
+	bool isLua = false;
+	if (iCityID < 0) {
+		isLua = true;
+		iCityID = -iCityID;
+	}
+	auto str = std::string(szName, iCityID);
+	
+	if (NetworkMessageUtil::ReceiveLargeArgContainer.ParseFromString(str)) {
+		if (InvokeRecorder::getReturnValueExist(NetworkMessageUtil::ReceiveLargeArgContainer.invokestamp())) {
+			return;
+		}
+		auto L = luaL_newstate();
+		for (int i = 0; i < NetworkMessageUtil::ReceiveLargeArgContainer.args_size(); i++) {
+			auto& arg = NetworkMessageUtil::ReceiveLargeArgContainer.args().Get(i);
+			auto& type = arg.argtype();
+			if (type == "int") {
+				lua_pushinteger(L, arg.identifier1());
+			}
+			else if (type == "string") {
+				lua_pushstring(L, arg.longmessage().c_str());
+			}
+			else if (type == "bool") {
+				lua_pushboolean(L, arg.identifier1());
+			}
+			else if (type == "nil") {
+				lua_pushnil(L);
+			}
+			else {
+				auto& name = type + "::PushToLua";
+				BasicArguments* ptr = (BasicArguments*)&arg;
+				StaticFunctionReflector::ExecuteFunction<void>((name), L, ptr);
+			}
+		}
+		auto funcName = NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall();
+		StaticFunctionReflector::ExecuteFunction<void>(funcName, L);
+		lua_close(L);
+		NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+		return;
+	}
+	if (isLua) iCityID = -iCityID;
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
 	if(pkCity)
@@ -1100,6 +867,7 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 		CvString strName = szName;
 		pkCity->setName(strName);
 	}
+
 }
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseRenameUnit(PlayerTypes ePlayer, int iUnitID, const char* szName)

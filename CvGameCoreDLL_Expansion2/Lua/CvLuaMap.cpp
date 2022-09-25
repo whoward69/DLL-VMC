@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -21,13 +21,23 @@
 #include "..\CvFractal.h"
 #include "..\CvMap.h"
 #include "..\CvGameCoreUtils.h"
+#include "CvLuaUnit.h"
 
 #define Method(func) RegisterMethod(L, l##func, #func);
+
+void CvLuaMap::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaMap::lChangeAIMapHint);
+}
 
 //------------------------------------------------------------------------------
 const char* CvLuaMap::GetInstanceName()
 {
 	return "Map";
+}
+
+const char* CvLuaMap::GetInstanceNameCv()
+{
+	return "CvMap";
 }
 //------------------------------------------------------------------------------
 CvMap* CvLuaMap::GetInstance(lua_State* /*L*/, int /*idx*/)
@@ -37,6 +47,9 @@ CvMap* CvLuaMap::GetInstance(lua_State* /*L*/, int /*idx*/)
 //------------------------------------------------------------------------------
 void CvLuaMap::RegisterMembers(lua_State* L)
 {
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+
 	Method(Areas);
 	Method(FindBiggestArea);
 	Method(FindWater);

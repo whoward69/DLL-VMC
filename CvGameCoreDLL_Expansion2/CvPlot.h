@@ -81,12 +81,18 @@ struct CvArchaeologyData
 FDataStream& operator>>(FDataStream&, CvArchaeologyData&);
 FDataStream& operator<<(FDataStream&, const CvArchaeologyData&);
 
-class CvPlot
+class CvPlot : public CvGameObjectExtractable
 {
 
 public:
 	CvPlot();
 	~CvPlot();
+
+	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
+	static void RegistInstanceFunctions();
+	static void RegistStaticFunctions();
+	static CvPlot* Provide(int x, int y);
 
 	void init(int iX, int iY);
 	void uninit();

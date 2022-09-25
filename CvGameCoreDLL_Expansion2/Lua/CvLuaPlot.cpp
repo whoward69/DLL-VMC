@@ -20,14 +20,51 @@
 #include "CvLuaUnit.h"
 #include "../CvGameCoreUtils.h"
 
+#include "NetworkMessageUtil.h"
+
 //Utility macro for registering methods
 #define Method(Name)			\
 	lua_pushcclosure(L, l##Name, 0);	\
 	lua_setfield(L, t, #Name);
 
+void CvLuaPlot::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetFeatureType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetTerrainType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetArea);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetOwnershipDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetImprovementDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetUpgradeProgress);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetStartingPlot);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetNEOfRiver);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetWOfRiver);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetNWOfRiver);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetOwner);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetPlotType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetResourceType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetNumResource);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetImprovementType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetImprovementPillaged);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetRouteType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetRevealed);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetScriptData);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetContinentArtType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetCityPurchaseID);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeExtraMovePathCost);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeOwnershipDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeImprovementDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeUpgradeProgress);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeNumResource);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeVisibilityCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeBuildProgress);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeInvisibleVisibilityCount);
+}
+
 //------------------------------------------------------------------------------
 void CvLuaPlot::PushMethods(lua_State* L, int t)
 {
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+
 	Method(CanHaveFeature);
 	Method(GetFeatureType);
 	Method(GetTerrainType);
@@ -211,18 +248,15 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(GetResourceType);
 	Method(GetNonObsoleteResourceType);
 	Method(SetResourceType);
-	Method(SetResourceTypeSync);
 	Method(GetNumResource);
 	Method(SetNumResource);
 	Method(ChangeNumResource);
 
 	Method(GetImprovementType);
 	Method(SetImprovementType);
-	Method(SetImprovementTypeSync);
 	Method(SetImprovementPillaged);
 	Method(GetRouteType);
 	Method(SetRouteType);
-	Method(SetRouteTypeSync);
 	Method(IsRoutePillaged);
 #if defined(MOD_API_LUA_EXTENSIONS)
 	Method(SetRoutePillaged);
@@ -272,12 +306,10 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 
 	Method(IsRevealed);
 	Method(SetRevealed);
-	Method(SetRevealedSync);
 	Method(GetRevealedImprovementType);
 	Method(GetRevealedRouteType);
 	Method(GetBuildProgress);
 	Method(ChangeBuildProgress);
-	Method(ChangeBuildProgressSync);
 
 	Method(GetInvisibleVisibilityCount);
 	Method(IsInvisibleVisible);
@@ -476,9 +508,9 @@ int CvLuaPlot::lSetFeatureType(lua_State* L)
 	const int variety = luaL_optinteger(L, 3, -1);
 
 	pkPlot->setFeatureType((FeatureTypes)featureType, variety);
-
 	return 0;
 }
+
 //------------------------------------------------------------------------------
 int CvLuaPlot::lSetTerrainType(lua_State* L)
 {
@@ -1461,19 +1493,6 @@ int CvLuaPlot::lSetResourceType(lua_State* L)
 	return BasicLuaMethod(L, &CvPlot::setResourceType);
 }
 
-int CvLuaPlot::lSetResourceTypeSync(lua_State* L)
-{
-	//iData1: Resource ID. iData2: Num. iData3:For minor CIV iData4: Plot X. iData5: Plot Y.
-	CvPlot* pkPlot = GetInstance(L);
-	ResourceTypes res = ResourceTypes(lua_tointeger(L, 2));
-	int iResNum = luaL_optint(L, 3, 0);
-	bool bForMinorCivPlot = luaL_optbool(L, 4, false);
-	int time = GetTickCount();
-	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_SET_RESOURCE, res);
-	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_RESOURCE), "e", 
-		BeliefTypes(res), BeliefTypes(iResNum), BeliefTypes(bForMinorCivPlot), BeliefTypes(pkPlot->getX()), pkPlot->getY(), time);
-	return 0;
-}
 //------------------------------------------------------------------------------
 //int getNumResource();
 int CvLuaPlot::lGetNumResource(lua_State* L)
@@ -1506,19 +1525,6 @@ int CvLuaPlot::lSetImprovementType(lua_State* L)
 	return BasicLuaMethod(L, &CvPlot::setImprovementType);
 }
 
-int CvLuaPlot::lSetImprovementTypeSync(lua_State* L)
-{
-	//iData1: Improvement ID. iData3: Plot X. iData4: Plot Y.
-	CvPlot* pkPlot = GetInstance(L);
-	const ImprovementTypes iType = (ImprovementTypes)lua_tointeger(L, 2);
-	const PlayerTypes player = (PlayerTypes)luaL_optinteger(L, 3, NO_PLAYER);
-	pkPlot->setImprovementType(iType, player);
-	int time = GetTickCount();
-	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE, iType);
-	gDLL->SendFoundReligion(player, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_IMPRVTYPE), "e",
-		(BeliefTypes)iType, (BeliefTypes)pkPlot->getX(), (BeliefTypes)pkPlot->getY(), (BeliefTypes)-1, -1, time);
-	return 0;
-}
 
 //------------------------------------------------------------------------------
 //void setImprovementType(bool b);
@@ -1539,16 +1545,6 @@ int CvLuaPlot::lSetRouteType(lua_State* L)
 	return BasicLuaMethod(L, &CvPlot::setRouteType);
 }
 
-int CvLuaPlot::lSetRouteTypeSync(lua_State* L)
-{
-	CvPlot* pkPlot = GetInstance(L);
-	const int iRouteType = lua_tointeger(L, 2);
-	int time = GetTickCount();
-	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_SET_ROUTE, iRouteType);
-	gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_ROUTE), "e",
-		BeliefTypes(iRouteType), BeliefTypes(pkPlot->getX()), BeliefTypes(pkPlot->getY()), BeliefTypes(-1), -1, time);
-	return 0;
-}
 //------------------------------------------------------------------------------
 int CvLuaPlot::lIsRoutePillaged(lua_State* L)
 {
@@ -1867,39 +1863,6 @@ int CvLuaPlot::lSetRevealed(lua_State* L)
 	return 0;
 }
 
-int CvLuaPlot::lSetRevealedSync(lua_State* L)
-{
-	CvPlot* pkPlot = GetInstance(L);
-	const int X = pkPlot->getX(), Y = pkPlot->getY();
-	const TeamTypes eTeam = (TeamTypes)lua_tointeger(L, 2);
-	const bool bNewValue = lua_toboolean(L, 3);
-	const bool bTerrainOnly = luaL_optint(L, 4, 0);
-	const TeamTypes eFromTeam = (TeamTypes)luaL_optint(L, 5, NO_TEAM);
-	//ePlayer: Owner of the unit(if exists)
-	//iData1: Teamtype ID. iData2: bNewValue (<<0) and bTerrainOnly (<<1), iData3: UnitID, iData4:eFromTeam, iData5: X, iData6: Y
-	int optInt = 0;
-	optInt |= bNewValue ? 1 : 0;
-	optInt |= bTerrainOnly ? 1 << 1 : 0;
-
-	if (lua_gettop(L) >= 6)
-	{
-		CvUnit* pkUnit = CvLuaUnit::GetInstance(L, 6);
-		const int ID = pkUnit->GetID();
-		const PlayerTypes ePlayer = pkUnit->getOwner();
-		gDLL->SendFoundReligion(ePlayer, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_REVEALED), "e",
-			(BeliefTypes)eTeam, (BeliefTypes)optInt, (BeliefTypes)ID, (BeliefTypes)eFromTeam, X, Y);
-		//pkPlot->setRevealed(eTeam, bNewValue, pkUnit, bTerrainOnly, eFromTeam);
-	}
-	else
-	{
-		//pkPlot->setRevealed(eTeam, bNewValue, NULL, bTerrainOnly, eFromTeam);
-		
-		gDLL->SendFoundReligion(NO_PLAYER, ReligionTypes(CUSTOM_OPERATION_PLOT_SET_REVEALED), "e",
-			(BeliefTypes)eTeam, (BeliefTypes)optInt, (BeliefTypes)-1, (BeliefTypes)eFromTeam, X, Y);
-	}
-
-	return 0;
-}
 //------------------------------------------------------------------------------
 //ImprovementTypes getRevealedImprovementType(TeamTypes eTeam, bool bDebug);
 int CvLuaPlot::lGetRevealedImprovementType(lua_State* L)
@@ -1943,20 +1906,6 @@ int CvLuaPlot::lChangeBuildProgress(lua_State* L)
 	return BasicLuaMethod(L, &CvPlot::changeBuildProgress);
 }
 
-int CvLuaPlot::lChangeBuildProgressSync(lua_State* L)
-{
-	CvPlot* pkPlot = GetInstance(L);
-	int iType = lua_tointeger(L, 2);
-	int iChange = lua_tointeger(L, 3);
-	int donePlayer = luaL_optinteger(L, 4, NO_PLAYER);
-	int time = GetTickCount();
-	bool res = pkPlot->changeBuildProgress(BuildTypes(iType), iChange, PlayerTypes(donePlayer));
-	ReturnValueUtil::container.pushReturnValue(time, CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS, iType);
-	CvLuaArgs::pushValue<bool>(L, res);
-	gDLL->SendFoundReligion((PlayerTypes)donePlayer, (ReligionTypes)CUSTOM_OPERATION_PLOT_CHANGE_BUILD_PROGRESS, "e",
-		BeliefTypes(iType), BeliefTypes(iChange), BeliefTypes(pkPlot->getX()), BeliefTypes(pkPlot->getY()), -1, time);
-	return 1;
-}
 //------------------------------------------------------------------------------
 //int getInvisibleVisibilityCount(TeamTypes eTeam, InvisibleTypes eInvisible);
 int CvLuaPlot::lGetInvisibleVisibilityCount(lua_State* L)

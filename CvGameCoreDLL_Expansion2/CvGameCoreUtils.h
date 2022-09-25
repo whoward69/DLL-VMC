@@ -13,29 +13,13 @@
 #include "CvGlobals.h"
 #include "CvMap.h"
 #include <CvLocalization.h>
-
+//#include <CvWorldBuilderMap.h>
 #undef min
 
-class InvokeRecorder {
-public:
-	static const int MaxSize = 1024;
-	
-	InvokeRecorder() {
-	}
-	~InvokeRecorder() {
-		//returnValueRecord.clear();
-		//valueMap.clear();
-	}
-	static std::list<int> returnValueRecord;
-	static std::map<int, list<int>::iterator> valueMap;
-	static FCriticalSection m_Locker;
-	static void pushReturnValue(int time, int operation, int id);
-	static bool getReturnValueExist(int time, int operation, int id);
-};
-namespace ReturnValueUtil {
-	extern InvokeRecorder container;
-}
+//Avoiding string truncation.
 
+extern "C" unsigned int _ftoui3(const float x);
+extern "C" double _ltod3(const __int64 x);
 
 inline int range(int iNum, int iLow, int iHigh)
 {
@@ -89,6 +73,9 @@ inline int wrapCoordDifference(int iDiff, uint uiRange, bool bWrap)
 
 	return iDiff;
 }
+
+int getLuaLine(lua_State* L);
+
 
 inline int dxWrap(int iDX)
 {

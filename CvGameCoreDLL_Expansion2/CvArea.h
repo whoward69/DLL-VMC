@@ -31,13 +31,19 @@ struct CvAreaBoundaries
 };
 
 //////////////////////////////////////////////////////////////////////////
-class CvArea
+class CvArea : public CvGameObjectExtractable
 {
 
 public:
 
 	CvArea();
 	~CvArea();
+
+	void ExtractToArg(BasicArguments* arg); // This class's lua wrapper seems to has no setter method.
+	static void PushToLua(lua_State* L, BasicArguments* arg);
+	static void RegistInstanceFunctions();
+	static void RegistStaticFunctions();
+	static CvArea* Provide(int id);
 
 	void init(int iID, bool bWater);
 	void uninit();

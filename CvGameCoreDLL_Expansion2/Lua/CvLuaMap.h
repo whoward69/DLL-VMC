@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -24,8 +24,11 @@
 class CvLuaMap : public CvLuaStaticInstance<CvLuaMap, CvMap>
 {
 public:
+	static void RegistStaticFunctions();
+
 	//! Returns the name of the static instance.
 	static const char* GetInstanceName();
+	static const char* GetInstanceNameCv();
 
 	//! Returns the static instance.
 	static CvMap* GetInstance(lua_State* L, int idx);

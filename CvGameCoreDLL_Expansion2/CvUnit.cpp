@@ -43,6 +43,9 @@
 #include "CvGameQueries.h"
 #include "CvBarbarians.h"
 
+
+
+
 #if !defined(FINAL_RELEASE)
 #include <sstream>
 
@@ -62,11 +65,15 @@
 // Come back to this
 #include "LintFree.h"
 
+#include "FunctionsRef.h"
+#include "NetworkMessageUtil.h"
+#include "CvLuaUnit.h"
 
 #if defined(MOD_BUGFIX_USE_GETTERS)
 #define GET_MY_PLAYER() GET_PLAYER(getOwner())
 #endif
-
+/*#include <FTimer.h>
+#include <CvWorldBuilderMap.h>*/
 
 namespace FSerialization
 {
@@ -117,6 +124,33 @@ void ClearUnitDeltas()
 		}
 	}
 }
+}
+
+void CvUnit::ExtractToArg(BasicArguments* arg) {
+	arg->set_argtype("CvUnit");
+	arg->set_identifier1(getOwner());
+	arg->set_identifier2(GetID());
+}
+
+void CvUnit::PushToLua(lua_State* L, BasicArguments* arg) {
+	CvLuaUnit::PushLtwt(L, Provide(PlayerTypes(arg->identifier1()), arg->identifier2()));
+}
+
+void CvUnit::RegistInstanceFunctions() {
+	REGIST_INSTANCE_FUNCTION(CvUnit::kill);
+	REGIST_INSTANCE_FUNCTION(CvUnit::doCommand);
+	REGIST_INSTANCE_FUNCTION(CvUnit::setEmbarked);
+	REGIST_INSTANCE_FUNCTION(CvUnit::setXY);
+	REGIST_INSTANCE_FUNCTION(CvUnit::jumpToNearestValidPlot);
+}
+
+void CvUnit::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvUnit::Provide);
+	REGIST_STATIC_FUNCTION(CvUnit::PushToLua);
+}
+
+CvUnit* CvUnit::Provide(PlayerTypes player, int id) {
+	return GET_PLAYER(player).getUnit(id);
 }
 
 bool s_dispatchingNetMessage = false;

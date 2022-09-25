@@ -44,6 +44,11 @@
 
 // include after all other headers
 #include "LintFree.h"
+#include "FunctionsRef.h"
+#include "NetworkMessageUtil.h"
+
+#include "CvLuaCity.h"
+
 
 OBJECT_VALIDATE_DEFINITION(CvCity)
 
@@ -106,6 +111,28 @@ void ClearCityDeltas()
 }
 }
 
+void CvCity::ExtractToArg(BasicArguments* arg) {
+	arg->set_argtype("CvCity");
+	arg->set_identifier1(getOwner());
+	arg->set_identifier2(GetID());
+}
+
+void CvCity::PushToLua(lua_State* L, BasicArguments* arg) {
+	CvLuaCity::PushLtwt(L, Provide(PlayerTypes(arg->identifier1()), arg->identifier2()));
+}
+
+void CvCity::RegistInstanceFunctions() {
+	REGIST_INSTANCE_FUNCTION(CvCity::setDamage);
+}
+
+void CvCity::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvCity::Provide);
+	REGIST_STATIC_FUNCTION(CvCity::PushToLua);
+}
+
+CvCity* CvCity::Provide(PlayerTypes player, int cityID) {
+	return GET_PLAYER(player).getCity(cityID);
+}
 
 //	--------------------------------------------------------------------------------
 // Public Functions...
@@ -295,8 +322,6 @@ CvCity::~CvCity()
 
 	OBJECT_DESTROYED
 }
-
-
 //	--------------------------------------------------------------------------------
 #if defined(MOD_API_EXTENSIONS)
 void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, bool bInitialFounding, ReligionTypes eInitialReligion, const char* szName)

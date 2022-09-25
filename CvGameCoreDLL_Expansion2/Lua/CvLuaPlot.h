@@ -21,6 +21,8 @@
 class CvLuaPlot : public CvLuaScopedInstance<CvLuaPlot, CvPlot>
 {
 public:
+	static void RegistStaticFunctions();
+
 	//! Push CvPlot methods into table t
 	static void PushMethods(lua_State* L, int t);
 
@@ -57,6 +59,7 @@ protected:
 
 	//! (LUA) CvPlot::SetFeatureType.
 	static int lSetFeatureType(lua_State* L);
+	static int lSetFeatureTypeSync(lua_State* L);
 
 	//! (LUA) CvPlot::SetTerrainType.
 	static int lSetTerrainType(lua_State* L);
@@ -233,6 +236,7 @@ protected:
 	static int lGetNumResource(lua_State* L);
 	static int lSetNumResource(lua_State* L);
 	static int lChangeNumResource(lua_State* L);
+	static int lChangeNumResourceSync(lua_State* L);
 
 	static int lGetImprovementType(lua_State* L);
 	static int lSetImprovementType(lua_State* L);

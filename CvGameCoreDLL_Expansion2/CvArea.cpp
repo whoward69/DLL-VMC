@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -22,7 +22,25 @@
 #include "CvInfosSerializationHelper.h"
 // include after all other headers
 #include "LintFree.h"
+#include "NetworkMessageUtil.h"
+#include "CvLuaArea.h"
 
+void CvArea::ExtractToArg(BasicArguments* arg) {
+	throw NoSuchMethodException("CvArea::ExtractToArg");
+}
+
+CvArea* CvArea::Provide(int id) {
+	return GC.getMap().getArea(id);
+}
+
+void CvArea::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvArea::PushToLua);
+	REGIST_STATIC_FUNCTION(CvArea::Provide);
+}
+
+void CvArea::PushToLua(lua_State* L, BasicArguments* arg) {
+	CvLuaArea::PushLtwt(L, Provide(arg->identifier1()));
+}
 // Public Functions...
 //	--------------------------------------------------------------------------------
 CvArea::CvArea()

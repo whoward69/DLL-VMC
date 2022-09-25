@@ -22,8 +22,10 @@
 class CvLuaGame : public CvLuaStaticInstance<CvLuaGame, CvGame>
 {
 public:
+	static void RegistStaticFunctions();
 	//! Returns the name of the static instance.
 	static const char* GetInstanceName();
+	static const char* GetInstanceNameCv();
 
 	//! Returns the static instance
 	static CvGame* GetInstance(lua_State* L = NULL, int idx = 0);
@@ -249,6 +251,7 @@ protected:
 	static int lAddPlayer(lua_State* L);
 
 	static int lSetPlotExtraYield(lua_State* L);
+	static int lSetPlotExtraYieldSync(lua_State* L);
 	static int lChangePlotExtraCost(lua_State* L);
 
 	static int lIsCivEverActive(lua_State* L);

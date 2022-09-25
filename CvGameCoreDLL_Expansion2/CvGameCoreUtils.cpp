@@ -22,52 +22,30 @@
 #include "CvGlobals.h"
 
 #include "ICvDLLUserInterface.h"
-
 // must be included after all other headers
 #include "LintFree.h"
+#include <emmintrin.h>
 
-inline int hsRes(int time, int operation, int id) {
-	return (time * 10000019 + (operation) * 509796 + id * 6032777) % 10000733;
+extern "C" unsigned int _ftoui3(const float x) {
+	return (unsigned int)_mm_cvt_ss2si(_mm_set_ss(x));
 }
 
-std::list<int> InvokeRecorder::returnValueRecord;
-std::map<int, list<int>::iterator> InvokeRecorder::valueMap;
-FCriticalSection InvokeRecorder::m_Locker;
-void InvokeRecorder::pushReturnValue(int time, int operation, int id) {
-	while (!m_Locker.Try()) {
-		Sleep(1);
-	}
-	m_Locker.Enter();
-	if (returnValueRecord.size() >= MaxSize) {
-		valueMap.erase(returnValueRecord.front());
-		returnValueRecord.pop_front();
-	}
-	int res = hsRes(time, operation, id);
-	returnValueRecord.push_back(res);
-	valueMap.insert(std::pair<int, list<int>::iterator>(res, --returnValueRecord.end()));
-	m_Locker.Leave();
+extern "C" double _ltod3(const __int64 x) {
+	return x;
 }
 
-bool InvokeRecorder::getReturnValueExist(int time, int operation, int id) {
-	while (!m_Locker.Try()) {
-		Sleep(1);
+int getLuaLine(lua_State* L) {
+	lua_Debug ar;
+	int res = -1;
+	if (lua_getstack(L, 1, &ar))
+	{
+		lua_getinfo(L, "l", &ar);
+		res = ar.currentline;
 	}
-	m_Locker.Enter();
-	int res = hsRes(time, operation, id);
-	std::map<int, list<int>::iterator>::iterator iter = valueMap.find(res);
-	bool rtn = false;
-	if (iter != valueMap.end()) {
-		rtn = true;
-		returnValueRecord.erase((*iter).second);
-		valueMap.erase(iter);
-	}
-	m_Locker.Leave();
-	return rtn;
+	return res;
 }
 
-namespace ReturnValueUtil {
-	InvokeRecorder container;
-}
+
 
 /// This function will return the CvPlot associated with the Index (0 to 36) of a City at iX,iY.  The lower the Index the closer the Plot is to the City (roughly)
 CvPlot* plotCity(int iX, int iY, int iIndex)

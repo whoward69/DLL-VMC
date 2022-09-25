@@ -15,6 +15,7 @@
 class CvLuaCity : public CvLuaScopedInstance<CvLuaCity, CvCity>
 {
 public:
+	static void RegistStaticFunctions();
 	//! Push CvCity methods into table t
 	static void PushMethods(lua_State* L, int t);
 
@@ -217,9 +218,7 @@ protected:
 	static int lGetGameTurnLastExpanded(lua_State* L);
 	static int lGetPopulation(lua_State* L);
 	static int lSetPopulation(lua_State* L);
-	static int lSetPopulationSync(lua_State* L);
 	static int lChangePopulation(lua_State* L);
-	static int lChangePopulationSync(lua_State* L);
 	static int lGetRealPopulation(lua_State* L);
 
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
@@ -337,7 +336,6 @@ protected:
 	static int lGetFood(lua_State* L);
 	static int lGetFoodTimes100(lua_State* L);
 	static int lSetFood(lua_State* L);
-	static int lSetFoodSync(lua_State* L);
 	static int lChangeFood(lua_State* L);
 	static int lGetFoodKept(lua_State* L);
 	static int lGetMaxFoodKeptPercent(lua_State* L);
@@ -358,21 +356,16 @@ protected:
 	static int lIsResistance(lua_State* L);
 	static int lGetResistanceTurns(lua_State* L);
 	static int lChangeResistanceTurns(lua_State* L);
-	static int lChangeResistanceTurnsSync(lua_State* L);
 
 	static int lIsRazing(lua_State* L);
 	static int lGetRazingTurns(lua_State* L);
 	static int lChangeRazingTurns(lua_State* L);
 
 	static int lIsOccupied(lua_State* L);
-
 	static int lSetOccupied(lua_State* L);
-	static int lSetOccupiedSync(lua_State* L);
 
 	static int lIsPuppet(lua_State* L);
-
 	static int lSetPuppet(lua_State* L);
-	static int lSetPuppetSync(lua_State* L);
 
 	static int lGetHappinessFromBuildings(lua_State* L);
 	static int lGetHappiness(lua_State* L);
@@ -485,7 +478,7 @@ protected:
 
 	static int lGetDamage(lua_State* L);
 	static int lSetDamage(lua_State* L);
-	static int lSetDamageSync(lua_State* L);
+
 	static int lChangeDamage(lua_State* L);
 	static int lGetMaxHitPoints(lua_State* L);
 
@@ -506,7 +499,6 @@ protected:
 	static int lGetNumForcedWorkingPlots(lua_State* L);
 	static int lGetNumRealBuilding(lua_State* L);
 	static int lSetNumRealBuilding(lua_State* L);
-	static int lSetNumRealBuildingSync(lua_State* L);
 	static int lGetNumFreeBuilding(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(SetNumFreeBuilding, void, iBuildingType, iCount);

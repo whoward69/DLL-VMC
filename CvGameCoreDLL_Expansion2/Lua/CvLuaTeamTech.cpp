@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -15,12 +15,22 @@
 #include <CvGameCoreDLLPCH.h>
 #include "CvLuaSupport.h"
 #include "CvLuaTeamTech.h"
+#include <FunctionsRef.h>
 
 //Utility macro for registering methods
 #define Method(Name)			\
 	lua_pushcclosure(L, l##Name, 0);	\
 	lua_setfield(L, t, #Name);
 
+void CvLuaTeamTech::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaTeamTech::lSetHasTech);
+	REGIST_STATIC_FUNCTION(CvLuaTeamTech::lSetNoTradeTech);
+	REGIST_STATIC_FUNCTION(CvLuaTeamTech::lSetResearchProgress);
+	REGIST_STATIC_FUNCTION(CvLuaTeamTech::lSetResearchProgressTimes100);
+	REGIST_STATIC_FUNCTION(CvLuaTeamTech::lChangeResearchProgress);
+	REGIST_STATIC_FUNCTION(CvLuaTeamTech::lChangeResearchProgressTimes100);
+	REGIST_STATIC_FUNCTION(CvLuaTeamTech::lChangeResearchProgressPercent);
+}
 //------------------------------------------------------------------------------
 void CvLuaTeamTech::HandleMissingInstance(lua_State* L)
 {
@@ -29,6 +39,9 @@ void CvLuaTeamTech::HandleMissingInstance(lua_State* L)
 //------------------------------------------------------------------------------
 void CvLuaTeamTech::PushMethods(lua_State* L, int t)
 {
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+
 	Method(SetHasTech);
 	Method(HasTech);
 
