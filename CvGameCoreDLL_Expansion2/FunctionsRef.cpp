@@ -7,7 +7,9 @@
 #include "CvLuaUnit.h"
 #include "CvLuaPlayer.h"
 #include "CvLuaPlot.h"
+#include "CvLuaTeam.h"
 #include "CvLuaTeamTech.h"
+#include "CvLuaLeague.h"
 
 namespace FunctionPointers {
 	InstanceFunctionReflector instanceFunctions;
@@ -24,19 +26,23 @@ const char* NoSuchMethodException::what()const throw(){
 
 StaticFunctionReflector::StaticFunctionReflector() {
 	StaticFunctionReflector::methods = new std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>(2048);
-	CvUnit::RegistStaticFunctions();
-	CvCity::RegistStaticFunctions();
-	CvTeam::RegistStaticFunctions();
-	CvPlot::RegistStaticFunctions();
-	CvPlayer::RegistStaticFunctions();
 
-	CvLuaUnit::RegistStaticFunctions();
-	CvLuaPlayer::RegistStaticFunctions();
+	CvCity::RegistStaticFunctions();
+	CvPlayer::RegistStaticFunctions();
+	CvPlot::RegistStaticFunctions();
+	CvTeam::RegistStaticFunctions();
+	CvTeamTechs::RegistStaticFunctions();
+	CvUnit::RegistStaticFunctions();
+
 	CvLuaCity::RegistStaticFunctions();
-	CvLuaMap::RegistStaticFunctions();
 	CvLuaGame::RegistStaticFunctions();
+	CvLuaMap::RegistStaticFunctions();
+	CvLuaPlayer::RegistStaticFunctions();
 	CvLuaPlot::RegistStaticFunctions();
+	CvLuaTeam::RegistStaticFunctions();
 	CvLuaTeamTech::RegistStaticFunctions();
+	CvLuaUnit::RegistStaticFunctions();
+	
 }
 
 InstanceFunctionReflector::InstanceFunctionReflector() {
