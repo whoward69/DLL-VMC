@@ -136,12 +136,9 @@ void CvLuaScopedInstance<Derived, InstanceType>::PushLtwt(lua_State* L, Instance
 {
 	if (pkType)
 	{
-
 		lua_createtable(L, 0, 1);
 		lua_pushlightuserdata(L, pkType);
 		lua_setfield(L, -2, "__instance");
-		const int size = lua_gettop(L);
-		int x = 0;
 	}
 	else
 	{

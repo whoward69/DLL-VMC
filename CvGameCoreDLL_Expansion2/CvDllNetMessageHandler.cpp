@@ -829,6 +829,7 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 	
 	if (NetworkMessageUtil::ReceiveLargeArgContainer.ParseFromString(str)) {
 		if (InvokeRecorder::getTimeValueExist(NetworkMessageUtil::ReceiveLargeArgContainer.invokestamp())) {
+			NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
 			return;
 		}
 		auto L = luaL_newstate();
@@ -859,6 +860,7 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 		NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
 		return;
 	}
+	NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
 	if (isLua) iCityID = -iCityID;
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
