@@ -17,7 +17,7 @@ namespace FunctionPointers {
 }
 
 NoSuchMethodException::NoSuchMethodException(const std::string& method_name){
-	this->message = "Method " + method_name + "does not exist in dictionry.";
+	this->message = "Method " + method_name + " does not exist in dictionry.";
 }
 NoSuchMethodException::~NoSuchMethodException(){}
 const char* NoSuchMethodException::what()const throw(){

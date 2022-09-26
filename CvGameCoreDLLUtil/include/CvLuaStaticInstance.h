@@ -68,120 +68,29 @@ void CvLuaStaticInstance<Derived, InstanceType>::RegisterMethod(lua_State *L, lu
 
 template<class Derived, class InstanceType>
 int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_State* L) {
-	auto num = lua_gettop(L);
-	std::string funcToCall;
-	if (num < 1) return 0;
-	for (int i = 1; i <= num; i++) {
-		auto type = lua_type(L, i);
-
-		BasicArguments* arg;
-		
-		if (i == 1) {
-			
-			if (type == LUA_TSTRING) {
-				funcToCall = lua_tostring(L, i);
-				continue;
-			}
-			else {
-				NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
-				return 0;
-			}
-		}
-		arg = NetworkMessageUtil::ReceiveLargeArgContainer.add_args();
-		if (type == LUA_TNIL) {
-			arg->set_argtype("nil");
-		}
-		if (type == LUA_TTABLE) {
-			auto instance = CvLuaScopedInstance<CvLuaUnit, CvGameObjectExtractable>::GetInstance(L, i);
-			instance->ExtractToArg(arg);
-		}
-		else if (type == LUA_TNUMBER) {
-			auto number = (int)lua_tointeger(L, i);
-			arg->set_argtype("int");
-			arg->set_identifier1(number);
-		}
-
-		else if (type == LUA_TSTRING) {
-			auto str = lua_tostring(L, i);
-			arg->set_argtype("string");
-			arg->set_longmessage(str);
-		}
-		else if (type == LUA_TBOOLEAN) {
-			auto tf = lua_toboolean(L, i);
-			arg->set_argtype("bool");
-			arg->set_identifier1(tf);
-		}
-	}
-	lua_remove(L, 1); //remove the name of the function you want to execute.
-	lua_settop(L, num - 1);
-	auto checkSum = 0;
-	for (int i = 0; i < NetworkMessageUtil::ReceiveLargeArgContainer.args_size(); i++) {
-		if (NetworkMessageUtil::ReceiveLargeArgContainer.args(i).has_identifier1()) {
-			checkSum += NetworkMessageUtil::ReceiveLargeArgContainer.args(i).identifier1();
-		}
-		if (NetworkMessageUtil::ReceiveLargeArgContainer.args(i).has_identifier2()) {
-			checkSum += 65001 * NetworkMessageUtil::ReceiveLargeArgContainer.args(i).identifier2();
-		}
-	}
-	int time = GetTickCount() + rand() + checkSum;
+	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 1) < 0;
+	if (fault) return 0;
+	auto checkNum = NetworkMessageUtil::checkNum();
+	int time = GetTickCount() + rand() + checkNum;
 	InvokeRecorder::pushTimeValue(time);
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
-	NetworkMessageUtil::ReceiveLargeArgContainer.set_functiontocall(funcToCall);
 	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
 	gDLL->SendRenameCity(-str.length(), str);
+	auto rtn = 0;
+	try {
+		rtn = StaticFunctionReflector::ExecuteFunction<int>(NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall(), L);
+	}
+	catch (NoSuchMethodException e) {
+		CUSTOMLOG(e.what());
+	}
 	NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
-	return StaticFunctionReflector::ExecuteFunction<int>(funcToCall, L);
+	return rtn;
 }
 
 template<class Derived, class InstanceType>
 int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunctionPostpone(lua_State* L) {
-	auto num = lua_gettop(L);
-	std::string funcToCall;
-	if (num < 1) return 0;
-	for (int i = 1; i <= num; i++) {
-		auto type = lua_type(L, i);
-		BasicArguments* arg;
-		if (i == 1) {
-			if (type == LUA_TSTRING) {
-				funcToCall = lua_tostring(L, i);
-				continue;
-			}
-			else {
-				NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
-				return 0;
-			}
-		}
-		arg = NetworkMessageUtil::ReceiveLargeArgContainer.add_args();
-		if (type == LUA_TNIL) {
-			arg->set_argtype("nil");
-		}
-		if (type == LUA_TTABLE) {
-			auto instance = CvLuaScopedInstance<CvLuaUnit, CvGameObjectExtractable>::GetInstance(L, i);
-			instance->ExtractToArg(arg);
-		}
-		else if (type == LUA_TNUMBER) {
-			auto number = (int)lua_tointeger(L, i);
-			arg->set_argtype("int");
-			arg->set_identifier1(number);
-		}
-
-		else if (type == LUA_TSTRING) {
-			auto str = lua_tostring(L, i);
-			arg->set_argtype("string");
-			arg->set_longmessage(str);
-		}
-		else if (type == LUA_TBOOLEAN) {
-			auto tf = lua_toboolean(L, i);
-			arg->set_argtype("bool");
-			arg->set_identifier1(tf);
-		}
-	}
-	lua_remove(L, 1); //remove the name of the function you want to execute.
-	lua_settop(L, num - 1);
-	int time = GetTickCount() + rand();
-	//InvokeRecorder::pushTimeValue(time);
-	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
-	NetworkMessageUtil::ReceiveLargeArgContainer.set_functiontocall(funcToCall);
+	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 2) < 0;
+	if (fault) return 0;
 	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
 	gDLL->SendRenameCity(-str.length(), str);
 	NetworkMessageUtil::ReceiveLargeArgContainer.Clear();

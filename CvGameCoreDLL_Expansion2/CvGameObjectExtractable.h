@@ -4,4 +4,5 @@
 class CvGameObjectExtractable {
 public:
 	virtual void ExtractToArg(BasicArguments* arg) = 0;
+	static void HandleMissingInstance(lua_State*) {};
 };

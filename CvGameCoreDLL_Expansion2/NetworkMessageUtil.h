@@ -13,6 +13,7 @@ namespace NetworkMessageUtil {
 	extern void IClear(int* buffer);
 	extern LargeArgContainer ReceiveLargeArgContainer;
 	extern int ArgumentsToPass[MAX_INT32_ARGNUM];
+	extern int ProcessLuaArgForReflection(lua_State* L, int indexOfFuncName);
 	//template<typename InstanceType>
 	/*void InstanceArrExecute(InstanceType& reference, ArgContainer* args) {
 		for (int i = 0; i < args->args_size(); i++) {
@@ -23,6 +24,7 @@ namespace NetworkMessageUtil {
 			ArgumentsToPass, index);
 		IClear(ArgumentsToPass);
 	}*/
+	extern int checkNum();
 }
 
 class InvokeRecorder {

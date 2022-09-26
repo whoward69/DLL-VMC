@@ -37,6 +37,15 @@ public:
 		return (*func)(args...);
 	}
 
+	template<typename ReturnType, typename... Args>
+	static ReturnType ExecuteFunction(const std::string& name, Args&... args) {
+		if (methods->find(name) == methods->end()) {
+			throw NoSuchMethodException(name);
+		}
+		auto func = (ReturnType(*)(Args...))(*methods)[name].first;
+		return (*func)(args...);
+	}
+
 	template<typename ReturnType,
 		typename... Args, size_t... Is,
 		typename later_std::enable_if<later_std::is_same<void, ReturnType>::value, int>::type = 0>
@@ -98,6 +107,15 @@ public:
 	*/
 	template<typename ReturnType, typename ClassType, typename... Args>
 	static ReturnType ExecuteFunction(ClassType& object, std::string& name, Args&... args) {
+		if (methods->find(name) == methods->end()) {
+			throw NoSuchMethodException(name);
+		}
+		auto func = (ReturnType(ClassType::*)(Args...))(*methods)[name].first;
+		return (object.*func)(args...);
+	}
+
+	template<typename ReturnType, typename ClassType, typename... Args>
+	static ReturnType ExecuteFunction(ClassType& object, const std::string& name, Args&... args) {
 		if (methods->find(name) == methods->end()) {
 			throw NoSuchMethodException(name);
 		}

@@ -17,11 +17,6 @@ public:
 	CvDllNetMessageHandler();
 	~CvDllNetMessageHandler();
 
-	//Receiving customized commands.
-	void TransmissCustomizedOperationFromResponseFoundReligion(PlayerTypes ePlaye, 
-		int iData1, int iData2, int iData3, int iData4, int iData5, int iData6, int customCommandType,
-		const char* szCustomName);
-
 	void* DLLCALL QueryInterface(GUID guidInterface);
 
 	static void operator delete(void* p);

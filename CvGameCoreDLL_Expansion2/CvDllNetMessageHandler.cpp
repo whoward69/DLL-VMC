@@ -828,7 +828,7 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 	auto str = std::string(szName, iCityID);
 	
 	if (NetworkMessageUtil::ReceiveLargeArgContainer.ParseFromString(str)) {
-		if (InvokeRecorder::getTimeValueExist(NetworkMessageUtil::ReceiveLargeArgContainer.invokestamp())) {
+		if (NetworkMessageUtil::ReceiveLargeArgContainer.has_invokestamp() && InvokeRecorder::getTimeValueExist(NetworkMessageUtil::ReceiveLargeArgContainer.invokestamp())) {
 			NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
 			return;
 		}
