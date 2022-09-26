@@ -24,18 +24,23 @@ int NetworkMessageUtil::checkNum() {
 int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFuncName) {
 	auto num = lua_gettop(L);
 	std::string funcToCall;
-	if (num < indexOfFuncName) return -1;
+	if (num < indexOfFuncName) {
+		ReceiveLargeArgContainer.Clear();
+		return -1;
+	}
 	for (int i = 1; i <= num; i++) {
 		auto type = lua_type(L, i);
-		BasicArguments* arg;
 		if (i == indexOfFuncName) {
 			if (type == LUA_TSTRING) {
 				funcToCall = lua_tostring(L, i);
 				continue;
 			}
-			else return -1;
+			else {
+				
+				return -1;
+			}
 		}
-		arg = NetworkMessageUtil::ReceiveLargeArgContainer.add_args();
+		auto arg = ReceiveLargeArgContainer.add_args();
 		if (type == LUA_TNIL) {
 			arg->set_argtype("nil");
 		}
@@ -62,7 +67,7 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 	}
 	lua_remove(L, indexOfFuncName); //remove the name of the function you want to execute.
 	lua_settop(L, num - 1);
-	NetworkMessageUtil::ReceiveLargeArgContainer.set_functiontocall(funcToCall);
+	ReceiveLargeArgContainer.set_functiontocall(funcToCall);
 	return num - 1;
 }
 
