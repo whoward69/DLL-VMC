@@ -30,9 +30,13 @@
 
 int CvLuaUnit::lTestObj(lua_State* L) {
 	auto unit = GetInstance(L);
-	auto player = CvLuaPlayer::GetInstance(L, 2);
-	auto player2 = CvLuaPlayer::GetInstance(L, 3);
-	auto num = lua_gettop(L);
+	auto type = lua_type(L, 2);
+	if (type == LUA_TFUNCTION) {
+		auto ptr = lua_tocfunction(L, 2);
+		auto& name = StaticFunctionReflector::GetFunctionPointerName(ptr);
+		int x = 0;
+	}
+	
 	return 0;
 }
 //------------------------------------------------------------------------------

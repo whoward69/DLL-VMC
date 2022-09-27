@@ -24,6 +24,14 @@ public:
 	template<typename ReturnType, typename... Args>
 	static void RegistFunction(std::string&& name, ReturnType(*func)(Args...)) {
 		(*methods)[name] = std::make_pair((void(*)())func, sizeof...(Args));
+		(*names)[(void(*)())func] = name;
+	}
+
+	template<typename ReturnType, typename... Args>
+	static const std::string& GetFunctionPointerName(ReturnType(*func)(Args...)) {
+		const auto& name = names->find((void(*)())func);
+		if (name == names->end()) throw NoSuchMethodException("Unknown function in arguments");
+		return name->second;
 	}
 	/*
 	Please use pass-by-value to pass pointers of objects instead of pass-by-reference.
@@ -93,6 +101,7 @@ public:
 	}
 private:
 	static std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>* methods;
+	static std::tr1::unordered_map<void(*)(), std::string>* names;
 };
 
 

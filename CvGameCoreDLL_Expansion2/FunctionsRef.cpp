@@ -26,6 +26,7 @@ const char* NoSuchMethodException::what()const throw(){
 
 StaticFunctionReflector::StaticFunctionReflector() {
 	StaticFunctionReflector::methods = new std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>(2048);
+	StaticFunctionReflector::names = new std::tr1::unordered_map<void(*)(), std::string>(2048);
 
 	CvCity::RegistStaticFunctions();
 	CvPlayer::RegistStaticFunctions();
@@ -56,3 +57,4 @@ InstanceFunctionReflector::InstanceFunctionReflector() {
 
 std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>* InstanceFunctionReflector::methods;
 std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>* StaticFunctionReflector::methods;
+std::tr1::unordered_map<void(*)(), std::string>* StaticFunctionReflector::names;

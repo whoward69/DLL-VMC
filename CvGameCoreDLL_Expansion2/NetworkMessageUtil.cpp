@@ -35,6 +35,17 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 				funcToCall = lua_tostring(L, i);
 				continue;
 			}
+			else if (type == LUA_TFUNCTION) {
+				try {
+					auto funcPtr = lua_tocfunction(L, i);
+					funcToCall = StaticFunctionReflector::GetFunctionPointerName(funcPtr);
+				}
+				catch (NoSuchMethodException e) {
+					ReceiveLargeArgContainer.Clear();
+					return -1;
+				}
+				continue;
+			}
 			else {
 				
 				return -1;
