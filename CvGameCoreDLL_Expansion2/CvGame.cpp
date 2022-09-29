@@ -67,7 +67,7 @@
 // Public Functions...
 // must be included after all other headers
 #include "LintFree.h"
-
+#include "NetworkMessageUtil.h"
 //------------------------------------------------------------------------------
 // CvGame Version History
 // Version 1 
@@ -167,7 +167,7 @@ void CvGame::init(HandicapTypes eHandicap)
 	int iStartTurn;
 	int iEstimateEndTurn;
 	int iI;
-
+	InvokeRecorder::clear();
 	//--------------------------------
 	// Init saved data
 	reset(eHandicap);

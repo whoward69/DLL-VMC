@@ -10,13 +10,15 @@ void NetworkMessageUtil::IClear(int* buffer) {
 
 int NetworkMessageUtil::checkNum() {
 	auto checkNum = 0;
+	auto base = 1;
 	for (int i = 0; i < ReceiveLargeArgContainer.args_size(); i++) {
 		if (ReceiveLargeArgContainer.args(i).has_identifier1()) {
-			checkNum += ReceiveLargeArgContainer.args(i).identifier1();
+			checkNum += ReceiveLargeArgContainer.args(i).identifier1() * base;
 		}
 		if (ReceiveLargeArgContainer.args(i).has_identifier2()) {
-			checkNum += 65001 * ReceiveLargeArgContainer.args(i).identifier2();
+			checkNum += 65001 * ReceiveLargeArgContainer.args(i).identifier2() * base;
 		}
+		base *= 107;
 	}
 	return checkNum;
 }
@@ -84,31 +86,38 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 
 LargeArgContainer NetworkMessageUtil::ReceiveLargeArgContainer;
 int NetworkMessageUtil::ArgumentsToPass[MAX_INT32_ARGNUM];
-
-
-std::list<int> InvokeRecorder::returnValueRecord;
-std::map<int, list<int>::iterator> InvokeRecorder::valueMap;
+std::list<std::string> InvokeRecorder::returnValueRecord;
+std::map<std::string, list<std::string>::iterator> InvokeRecorder::valueMap;
 FCriticalSection InvokeRecorder::m_Locker;
-void InvokeRecorder::pushTimeValue(int time) {
+void InvokeRecorder::clear() {
+	returnValueRecord.clear();
+	valueMap.clear();
+}
+
+
+void InvokeRecorder::pushInvoke(std::string& invoke) {
 	while (!m_Locker.Try()) {
 		Sleep(1);
 	}
 	m_Locker.Enter();
+	if (valueMap.find(invoke) != valueMap.end()) {
+		CUSTOMLOG("Collision where invoke = %s", invoke);
+	}
 	if (returnValueRecord.size() >= MaxSize) {
 		valueMap.erase(returnValueRecord.front());
 		returnValueRecord.pop_front();
 	}
-	returnValueRecord.push_back(time);
-	valueMap.insert(std::pair<int, list<int>::iterator>(time, --returnValueRecord.end()));
+	returnValueRecord.push_back(invoke);
+	valueMap.insert(std::pair<std::string, list<std::string>::iterator>(invoke, --returnValueRecord.end()));
 	m_Locker.Leave();
 }
 
-bool InvokeRecorder::getTimeValueExist(int time) {
+bool InvokeRecorder::getInvokeExist(std::string& invoke) {
 	while (!m_Locker.Try()) {
 		Sleep(1);
 	}
 	m_Locker.Enter();
-	std::map<int, list<int>::iterator>::iterator iter = valueMap.find(time);
+	auto& iter = valueMap.find(invoke);
 	bool rtn = false;
 	if (iter != valueMap.end()) {
 		rtn = true;

@@ -34,14 +34,14 @@ public:
 	InvokeRecorder() {
 	}
 	~InvokeRecorder() {
-		//returnValueRecord.clear();
-		//valueMap.clear();
+		clear();
 	}
-	static std::list<int> returnValueRecord;
-	static std::map<int, std::list<int>::iterator> valueMap;
+	static void clear();
+	static std::list<std::string> returnValueRecord;
+	static std::map<std::string, std::list<std::string>::iterator> valueMap;
 	static FCriticalSection m_Locker;
-	static void pushTimeValue(int time);
-	static bool getTimeValueExist(int time);
+	static void pushInvoke(std::string& invoke);
+	static bool getInvokeExist(std::string& invoke);
 };
 namespace ReturnValueUtil {
 	extern InvokeRecorder container;

@@ -70,11 +70,10 @@ template<class Derived, class InstanceType>
 int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_State* L) {
 	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 1) < 0;
 	if (fault) return 0;
-	auto checkNum = NetworkMessageUtil::checkNum();
-	int time = GetTickCount() + rand() + checkNum;
-	InvokeRecorder::pushTimeValue(time);
+	int time = GetTickCount() + rand();
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
 	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
+	InvokeRecorder::pushInvoke(str);
 	gDLL->SendRenameCity(-str.length(), str);
 	auto rtn = 0;
 	try {
