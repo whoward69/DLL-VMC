@@ -49,7 +49,7 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 				continue;
 			}
 			else {
-				
+				ReceiveLargeArgContainer.Clear();
 				return -1;
 			}
 		}
