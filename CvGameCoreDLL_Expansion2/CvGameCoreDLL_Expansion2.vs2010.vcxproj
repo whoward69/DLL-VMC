@@ -345,6 +345,26 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\CvGameCoreDLLUtil\include\CustomModsGlobal.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvAssert.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvDllInterfaces.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvDllInterfaces2.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvDLLUtilDefines.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvEnums.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvEnumSerialization.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvGameCoreDLLUtil.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvGameCoreDLLUtil_Win32Headers.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaArgTemplates.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaMethodWrapper.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaStaticInstance.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvString.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvStringUtils.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvStructs.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvWeightedVector.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLDatabaseUtility.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLScriptSystem.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLUserInterface.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLUtility.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\LinkedList.h" />
     <ClInclude Include="ArgumentAdaptor.h" />
     <ClInclude Include="banned.h" />
     <ClInclude Include="CustomMods.h" />

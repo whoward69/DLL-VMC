@@ -88,7 +88,7 @@ LargeArgContainer NetworkMessageUtil::ReceiveLargeArgContainer;
 int NetworkMessageUtil::ArgumentsToPass[MAX_INT32_ARGNUM];
 std::list<std::string> InvokeRecorder::returnValueRecord;
 std::map<std::string, list<std::string>::iterator> InvokeRecorder::valueMap;
-FCriticalSection InvokeRecorder::m_Locker;
+
 void InvokeRecorder::clear() {
 	returnValueRecord.clear();
 	valueMap.clear();
@@ -96,10 +96,10 @@ void InvokeRecorder::clear() {
 
 
 void InvokeRecorder::pushInvoke(std::string& invoke) {
-	while (!m_Locker.Try()) {
-		Sleep(1);
-	}
-	m_Locker.Enter();
+	//while (!m_Locker.Try()) {
+	//	Sleep(1);
+	//}
+	//m_Locker.Enter();
 	if (valueMap.find(invoke) != valueMap.end()) {
 		CUSTOMLOG("Collision where invoke = %s", invoke);
 	}
@@ -109,14 +109,9 @@ void InvokeRecorder::pushInvoke(std::string& invoke) {
 	}
 	returnValueRecord.push_back(invoke);
 	valueMap.insert(std::pair<std::string, list<std::string>::iterator>(invoke, --returnValueRecord.end()));
-	m_Locker.Leave();
 }
 
 bool InvokeRecorder::getInvokeExist(std::string& invoke) {
-	while (!m_Locker.Try()) {
-		Sleep(1);
-	}
-	m_Locker.Enter();
 	auto& iter = valueMap.find(invoke);
 	bool rtn = false;
 	if (iter != valueMap.end()) {
@@ -124,7 +119,6 @@ bool InvokeRecorder::getInvokeExist(std::string& invoke) {
 		returnValueRecord.erase((*iter).second);
 		valueMap.erase(iter);
 	}
-	m_Locker.Leave();
 	return rtn;
 }
 
