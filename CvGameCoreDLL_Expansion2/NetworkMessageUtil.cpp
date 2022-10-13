@@ -96,10 +96,6 @@ void InvokeRecorder::clear() {
 
 
 void InvokeRecorder::pushInvoke(std::string& invoke) {
-	//while (!m_Locker.Try()) {
-	//	Sleep(1);
-	//}
-	//m_Locker.Enter();
 	if (valueMap.find(invoke) != valueMap.end()) {
 		CUSTOMLOG("Collision where invoke = %s", invoke);
 	}
