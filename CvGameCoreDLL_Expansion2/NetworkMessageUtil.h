@@ -24,7 +24,6 @@ namespace NetworkMessageUtil {
 			ArgumentsToPass, index);
 		IClear(ArgumentsToPass);
 	}*/
-	extern int checkNum();
 }
 
 class InvokeRecorder {

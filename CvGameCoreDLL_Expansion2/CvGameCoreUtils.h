@@ -74,8 +74,6 @@ inline int wrapCoordDifference(int iDiff, uint uiRange, bool bWrap)
 	return iDiff;
 }
 
-int getLuaLine(lua_State* L);
-
 
 inline int dxWrap(int iDX)
 {

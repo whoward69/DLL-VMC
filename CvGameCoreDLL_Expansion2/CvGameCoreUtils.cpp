@@ -34,19 +34,6 @@ extern "C" double _ltod3(const __int64 x) {
 	return x;
 }
 
-int getLuaLine(lua_State* L) {
-	lua_Debug ar;
-	int res = -1;
-	if (lua_getstack(L, 1, &ar))
-	{
-		lua_getinfo(L, "l", &ar);
-		res = ar.currentline;
-	}
-	return res;
-}
-
-
-
 /// This function will return the CvPlot associated with the Index (0 to 36) of a City at iX,iY.  The lower the Index the closer the Plot is to the City (roughly)
 CvPlot* plotCity(int iX, int iY, int iIndex)
 {

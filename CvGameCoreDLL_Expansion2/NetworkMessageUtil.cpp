@@ -2,25 +2,12 @@
 #include "NetworkMessageUtil.h"
 #include "CvLuaScopedInstance.h"
 
+
+
 void NetworkMessageUtil::IClear(int* buffer) {
 	for (int i = 0; i < 16; i++) {
 		buffer[i] = 0;
 	}
-}
-
-int NetworkMessageUtil::checkNum() {
-	auto checkNum = 0;
-	auto base = 1;
-	for (int i = 0; i < ReceiveLargeArgContainer.args_size(); i++) {
-		if (ReceiveLargeArgContainer.args(i).has_identifier1()) {
-			checkNum += ReceiveLargeArgContainer.args(i).identifier1() * base;
-		}
-		if (ReceiveLargeArgContainer.args(i).has_identifier2()) {
-			checkNum += 65001 * ReceiveLargeArgContainer.args(i).identifier2() * base;
-		}
-		base *= 107;
-	}
-	return checkNum;
 }
 
 int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFuncName) {
@@ -44,12 +31,34 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 				}
 				catch (NoSuchMethodException e) {
 					ReceiveLargeArgContainer.Clear();
+					//auto dbg = 
+					lua_Debug ar;
+					int res = -1;
+					char* srcName = nullptr;
+					if (lua_getstack(L, 1, &ar))
+					{
+						lua_getinfo(L, "sl", &ar);
+						res = ar.currentline;
+						srcName = ar.short_src;
+					}
+					CUSTOMLOG("An unkwown function pointer passed to SendAndExecuteLuaFunction at %s : line %d", srcName ? srcName : "NULL", res);
 					return -1;
 				}
 				continue;
 			}
 			else {
 				ReceiveLargeArgContainer.Clear();
+				lua_Debug ar;
+				int res = -1;
+				char* srcName = nullptr;
+				if (lua_getstack(L, 1, &ar))
+				{
+					lua_getinfo(L, "sl", &ar);
+					res = ar.currentline;
+					srcName = ar.short_src;
+				}
+				CUSTOMLOG("First argument passed to SendAndExecuteLuaFunction must be either string or function you want to call, at %s : line %d", srcName ? srcName : "NULL", res);
+				
 				return -1;
 			}
 		}
