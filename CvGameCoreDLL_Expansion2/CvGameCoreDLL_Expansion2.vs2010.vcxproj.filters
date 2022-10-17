@@ -1093,6 +1093,66 @@
     <ClInclude Include="CvGameObjectExtractable.h">
       <Filter>NetworkSync</Filter>
     </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvAssert.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvDllInterfaces.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvDllInterfaces2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvDLLUtilDefines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvEnums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvEnumSerialization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvGameCoreDLLUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvGameCoreDLLUtil_Win32Headers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaArgTemplates.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaMethodWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaStaticInstance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvString.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvStringUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvWeightedVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLDatabaseUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLScriptSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLUserInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\LinkedList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CvGameCoreDLL.rc" />
