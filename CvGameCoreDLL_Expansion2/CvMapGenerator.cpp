@@ -277,13 +277,13 @@ int CvMapGenerator::pGenerateRandomMap(lua_State* L)
 {
 	cvStopWatch stopWatch("CvMapGenerator - GenerateRandomMap()");
 	ICvEngineScriptSystem1* pkScriptSystem = (ICvEngineScriptSystem1*)lua_touserdata(L, 1);
-
+	CvRandom::isMapGenerating = true;
 	lua_getglobal(L, "GenerateMap");
 	if(lua_isnil(L, -1))
 		luaL_error(L, "Cannot find map script entry point GenerateMap()");
 
 	pkScriptSystem->CallFunction(L, 0, 0);
-
+	CvRandom::isMapGenerating = false;
 	return 0;
 }
 //------------------------------------------------------------------------------

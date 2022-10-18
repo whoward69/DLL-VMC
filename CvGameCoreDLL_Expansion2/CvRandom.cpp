@@ -23,6 +23,8 @@
 #define RANDOM_C      (12345)
 #define RANDOM_SHIFT  (16)
 
+bool CvRandom::isMapGenerating = false;
+
 CvRandom::CvRandom() :
 	m_ulRandomSeed(0)
 	, m_ulCallCount(0)
@@ -128,7 +130,7 @@ unsigned short CvRandom::get(unsigned short usNum, const char* pszLog)
 	unsigned long ulNewSeed = ((RANDOM_A * m_ulRandomSeed) + RANDOM_C);
 	unsigned short us = ((unsigned short)((((ulNewSeed >> RANDOM_SHIFT) & MAX_UNSIGNED_SHORT) * ((unsigned long)usNum)) / (MAX_UNSIGNED_SHORT + 1)));
 
-	if(GC.getLogging())
+	if(GC.getLogging() && !isMapGenerating)
 	{
 		int iRandLogging = GC.getRandLogging();
 		if(iRandLogging > 0 && (m_bSynchronous || (iRandLogging & RAND_LOGGING_ASYNCHRONOUS_FLAG) != 0))
@@ -149,7 +151,7 @@ unsigned short CvRandom::get(unsigned short usNum, const char* pszLog)
 					sprintf_s(szOut, "%d, %d, %u, %u, %u, %8x, %s, %s\n", kGame.getGameTurn(), kGame.getTurnSlice(), (uint)usNum, (uint)us, getSeed(), (uint)this, m_bSynchronous?"sync":"async", (pszLog != NULL)?pszLog:"Unknown");
 					pLog->Msg(szOut);
 
-#if !defined(FINAL_RELEASE)
+//#if !defined(FINAL_RELEASE)
 					if((iRandLogging & RAND_LOGGING_CALLSTACK_FLAG) != 0)
 					{
 #ifdef _DEBUG
@@ -172,7 +174,7 @@ unsigned short CvRandom::get(unsigned short usNum, const char* pszLog)
 #endif
 						}
 					}
-#endif
+//#endif
 				}
 			}
 		}
