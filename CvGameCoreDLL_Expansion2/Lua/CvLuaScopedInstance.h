@@ -193,7 +193,7 @@ template<class Derived, class InstanceType>
 int CvLuaScopedInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_State* L) {
 	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 2) < 0;
 	if (fault) return 0;
-	int time = GetTickCount() + rand();
+	int time = GetTickCount();
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
 	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
 	InvokeRecorder::pushInvoke(str);
@@ -214,7 +214,7 @@ template<class Derived, class InstanceType>
 int CvLuaScopedInstance<Derived, InstanceType>::lSendAndExecuteLuaFunctionPostpone(lua_State* L) {
 	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 2) < 0;
 	if (fault) return 0;
-	int time = GetTickCount() + rand();
+	int time = GetTickCount();
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
 	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
 	gDLL->SendRenameCity(-str.length(), str);

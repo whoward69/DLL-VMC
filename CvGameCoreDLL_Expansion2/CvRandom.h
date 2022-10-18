@@ -14,6 +14,7 @@
 
 #ifdef _DEBUG
 #include <vector>
+#include <FCallStack.h>
 #endif//_DEBUG
 
 class CvRandom
