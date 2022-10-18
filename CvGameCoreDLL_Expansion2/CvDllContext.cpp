@@ -904,17 +904,28 @@ bool CvDllGameContext::RandomNumberGeneratorSyncCheck(PlayerTypes ePlayer, ICvRa
 
 		char formatBuf[128] = {"\0"};
 		std::string rngLogMessage = "Game Random Number Generators are out of sync : local.seed=";
-		rngLogMessage += _itoa_s(localSimRandomNumberGenerator.getSeed(), formatBuf, 10);
+		_itoa_s(localSimRandomNumberGenerator.getSeed(), formatBuf, 10);
+		rngLogMessage += formatBuf;
+
 		rngLogMessage += ", remote.seed=";
-		rngLogMessage += _itoa_s(pkRandom->getSeed(), formatBuf, 10);
+		_itoa_s(pkRandom->getSeed(), formatBuf, 10);
+		rngLogMessage += formatBuf;
+
 		rngLogMessage += "\n\tlocal.callCount=";
-		rngLogMessage += _itoa_s(localSimRandomNumberGenerator.getCallCount(), formatBuf, 10);
+		_itoa_s(localSimRandomNumberGenerator.getCallCount(), formatBuf, 10);
+		rngLogMessage += formatBuf;
+
 		rngLogMessage += ", remote.callCount=";
-		rngLogMessage += _itoa_s(pkRandom->getCallCount(), formatBuf, 10);
+		_itoa_s(pkRandom->getCallCount(), formatBuf, 10);
+		rngLogMessage += formatBuf;
+
 		rngLogMessage += "\n\tlocal.resetCount=";
-		rngLogMessage += _itoa_s(localSimRandomNumberGenerator.getResetCount(), formatBuf, 10);
+		_itoa_s(localSimRandomNumberGenerator.getResetCount(), formatBuf, 10);
+		rngLogMessage += formatBuf;
+
 		rngLogMessage += ", remote.resetCount=";
-		rngLogMessage += _itoa_s(pkRandom->getResetCount(), formatBuf, 10);
+		_itoa_s(pkRandom->getResetCount(), formatBuf, 10);
+		rngLogMessage += formatBuf;
 		rngLogMessage += "\n";
 
 		if (localSimRandomNumberGenerator.callStackDebuggingEnabled() && pkRandom->callStackDebuggingEnabled())
