@@ -917,38 +917,41 @@ bool CvDllGameContext::RandomNumberGeneratorSyncCheck(PlayerTypes ePlayer, ICvRa
 		rngLogMessage += _itoa_s(pkRandom->getResetCount(), formatBuf, 10);
 		rngLogMessage += "\n";
 
-		if(localSimRandomNumberGenerator.callStackDebuggingEnabled() && pkRandom->callStackDebuggingEnabled())
+		if (localSimRandomNumberGenerator.callStackDebuggingEnabled() && pkRandom->callStackDebuggingEnabled())
 		{
 			std::string localCallStack("");
 			std::string remoteCallStack("");
 			localSimRandomNumberGenerator.resolveCallStacks();
 			const std::vector<std::string>& localCallStacks = localSimRandomNumberGenerator.getResolvedCallStacks();
-			const std::vector<std::string>& remoteCallStacks =  pkRandom->getResolvedCallStacks();
+			const std::vector<std::string>& remoteCallStacks = pkRandom->getResolvedCallStacks();
 			const std::vector<unsigned long>& localSeedHistory = localSimRandomNumberGenerator.getSeedHistory();
 			const std::vector<unsigned long>& remoteSeedHistory = pkRandom->getSeedHistory();
 			std::vector<unsigned long>::const_iterator localSeedIterator = localSeedHistory.begin();
 			std::vector<unsigned long>::const_iterator remoteSeedIterator = remoteSeedHistory.begin();
 			unsigned int callNumber = 0;
-			for(localSeedIterator = localSeedHistory.begin(), remoteSeedIterator = remoteSeedHistory.begin(); localSeedIterator != localSeedHistory.end() && remoteSeedIterator != remoteSeedHistory.end(); ++localSeedIterator, ++remoteSeedIterator, ++callNumber)
+			for (localSeedIterator = localSeedHistory.begin(), remoteSeedIterator = remoteSeedHistory.begin(); localSeedIterator != localSeedHistory.end() && remoteSeedIterator != remoteSeedHistory.end(); ++localSeedIterator, ++remoteSeedIterator, ++callNumber)
 			{
-				if(*localSeedIterator != *remoteSeedIterator)
+				if (*localSeedIterator != *remoteSeedIterator)
 				{
-					if(callNumber < localCallStacks.size() && callNumber < remoteCallStacks.size())
+					if (callNumber < localCallStacks.size() && callNumber < remoteCallStacks.size())
 					{
 						rngLogMessage += "At Call #";
-						rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
+						_itoa_s(callNumber, formatBuf, 10);
+						rngLogMessage += formatBuf;
 						rngLogMessage += " random number seeds are different.\n";
-						if(callNumber > 0)
+						if (callNumber > 0)
 						{
 							rngLogMessage += "Call #";
-							rngLogMessage += _itoa_s(callNumber - 1, formatBuf, 10);
+							_itoa_s(callNumber - 1, formatBuf, 10);
+							rngLogMessage += formatBuf;
 							rngLogMessage += "\nLocal:\n";
 							rngLogMessage += localCallStacks[callNumber - 1];
 							rngLogMessage += "\nRemote:\n";
 							rngLogMessage += remoteCallStacks[callNumber - 1];
 						}
 						rngLogMessage += "Call #";
-						rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
+						_itoa_s(callNumber, formatBuf, 10);
+						rngLogMessage += formatBuf;
 						rngLogMessage += "\nLocal:\n";
 						rngLogMessage += localCallStacks[callNumber];
 						rngLogMessage += "\nRemote:\n";
@@ -957,23 +960,25 @@ bool CvDllGameContext::RandomNumberGeneratorSyncCheck(PlayerTypes ePlayer, ICvRa
 					}
 				}
 			}
-			if(localSeedIterator != localSeedHistory.end() && remoteSeedIterator == remoteSeedHistory.end())
+			if (localSeedIterator != localSeedHistory.end() && remoteSeedIterator == remoteSeedHistory.end())
 			{
 				rngLogMessage += "\nLocal random number generator called more than remote at call #";
-				rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
+				_itoa_s(callNumber, formatBuf, 10);
+				rngLogMessage += formatBuf;
 				rngLogMessage += "\n";
-				if(callNumber < localSeedHistory.size())
+				if (callNumber < localSeedHistory.size())
 				{
 					rngLogMessage += "Local CallStack:\n";
 					rngLogMessage += localCallStacks[callNumber];
 				}
 			}
-			else if(remoteSeedIterator != remoteSeedHistory.end() && localSeedIterator == localSeedHistory.end())
+			else if (remoteSeedIterator != remoteSeedHistory.end() && localSeedIterator == localSeedHistory.end())
 			{
 				rngLogMessage += "\nremote random number generator called more than local at call #";
-				rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
+				_itoa_s(callNumber, formatBuf, 10);
+				rngLogMessage += formatBuf;
 				rngLogMessage += "\n";
-				if(callNumber < remoteSeedHistory.size())
+				if (callNumber < remoteSeedHistory.size())
 				{
 					rngLogMessage += "remote CallStack:\n";
 					rngLogMessage += remoteCallStacks[callNumber];
@@ -983,12 +988,13 @@ bool CvDllGameContext::RandomNumberGeneratorSyncCheck(PlayerTypes ePlayer, ICvRa
 			// find first different call
 			std::vector<std::string>::const_iterator localCallStackIterator;
 			std::vector<std::string>::const_iterator remoteCallStackIterator;
-			for(localCallStackIterator = localCallStacks.begin(), remoteCallStackIterator = remoteCallStacks.begin(), callNumber = 0; localCallStackIterator != localCallStacks.end() && remoteCallStackIterator != remoteCallStacks.end(); ++localCallStackIterator, ++remoteCallStackIterator, ++callNumber)
+			for (localCallStackIterator = localCallStacks.begin(), remoteCallStackIterator = remoteCallStacks.begin(), callNumber = 0; localCallStackIterator != localCallStacks.end() && remoteCallStackIterator != remoteCallStacks.end(); ++localCallStackIterator, ++remoteCallStackIterator, ++callNumber)
 			{
-				if(*localCallStackIterator != *remoteCallStackIterator)
+				if (*localCallStackIterator != *remoteCallStackIterator)
 				{
 					rngLogMessage += "\nFirst different callstack at call #";
-					rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
+					_itoa_s(callNumber, formatBuf, 10);
+					rngLogMessage += formatBuf;
 					rngLogMessage += "\n";
 					rngLogMessage += "Local :\n";
 					rngLogMessage += *localCallStackIterator;
@@ -998,14 +1004,14 @@ bool CvDllGameContext::RandomNumberGeneratorSyncCheck(PlayerTypes ePlayer, ICvRa
 				}
 			}
 
-			if(logFile)
+			if (logFile)
 			{
 				logFile->DebugMsg(rngLogMessage.c_str());
 			}
 
 			CvAssertMsg(false, rngLogMessage.c_str());
 
-			if(logFile)
+			if (logFile)
 			{
 				rngLogMessage = "\nDebug dump:\n";
 
@@ -1015,21 +1021,24 @@ bool CvDllGameContext::RandomNumberGeneratorSyncCheck(PlayerTypes ePlayer, ICvRa
 				localSeedIterator = localSeedHistory.begin();
 				remoteSeedIterator = remoteSeedHistory.begin();
 				callNumber = 0;
-				while(localSeedIterator != localSeedHistory.end() || remoteSeedIterator != remoteSeedHistory.end())
+				while (localSeedIterator != localSeedHistory.end() || remoteSeedIterator != remoteSeedHistory.end())
 				{
 					++callNumber;
 					rngLogMessage += "\t Call #";
-					rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
+					_itoa_s(callNumber, formatBuf, 10);
+					rngLogMessage += formatBuf;
 					rngLogMessage += " LOCAL=";
-					if(localSeedIterator != localSeedHistory.end())
+					if (localSeedIterator != localSeedHistory.end())
 					{
-						rngLogMessage += _itoa_s(*localSeedIterator, formatBuf, 10);
+						_itoa_s(*localSeedIterator, formatBuf, 10);
+						rngLogMessage += formatBuf;
 						++localSeedIterator;
 					}
 					rngLogMessage += "\tREMOTE=";
-					if(remoteSeedIterator != remoteSeedHistory.end())
+					if (remoteSeedIterator != remoteSeedHistory.end())
 					{
-						rngLogMessage += _itoa_s(*remoteSeedIterator, formatBuf, 10);
+						_itoa_s(*remoteSeedIterator, formatBuf, 10);
+						rngLogMessage += formatBuf;
 						++remoteSeedIterator;
 					}
 					rngLogMessage += "\n";
@@ -1040,18 +1049,20 @@ bool CvDllGameContext::RandomNumberGeneratorSyncCheck(PlayerTypes ePlayer, ICvRa
 				std::string lastCallStackLogged;
 				unsigned int repeatCount = 0;
 				std::vector<std::string>::const_iterator i;
-				for(i = localCallStacks.begin(); i != localCallStacks.end(); ++i)
+				for (i = localCallStacks.begin(); i != localCallStacks.end(); ++i)
 				{
-					if(lastCallStackLogged != *i)
+					if (lastCallStackLogged != *i)
 					{
-						if(repeatCount > 0)
+						if (repeatCount > 0)
 						{
 							rngLogMessage += "Last message repeated ";
-							rngLogMessage += _itoa_s(repeatCount, formatBuf, 10);
+							_itoa_s(repeatCount, formatBuf, 10);
+							rngLogMessage += formatBuf;
 							rngLogMessage += " times\n";
 						}
 						rngLogMessage += "Call #";
-						rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
+						_itoa_s(callNumber, formatBuf, 10);
+						rngLogMessage += formatBuf;
 						rngLogMessage += "\n";
 						rngLogMessage += *i;
 						lastCallStackLogged = *i;
@@ -1067,18 +1078,20 @@ bool CvDllGameContext::RandomNumberGeneratorSyncCheck(PlayerTypes ePlayer, ICvRa
 				rngLogMessage += "\nRemote callstack history\n";
 				callNumber = 0;
 				repeatCount = 0;
-				for(i = remoteCallStacks.begin(); i != remoteCallStacks.end(); ++i)
+				for (i = remoteCallStacks.begin(); i != remoteCallStacks.end(); ++i)
 				{
-					if(lastCallStackLogged != *i)
+					if (lastCallStackLogged != *i)
 					{
-						if(repeatCount > 0)
+						if (repeatCount > 0)
 						{
 							rngLogMessage += "Last message repeated ";
-							rngLogMessage += _itoa_s(repeatCount, formatBuf, 10);
+							_itoa_s(repeatCount, formatBuf, 10);
+							rngLogMessage += formatBuf;
 							rngLogMessage += " times\n";
 						}
 						rngLogMessage += "Call #";
-						rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
+						_itoa_s(callNumber, formatBuf, 10);
+						rngLogMessage += formatBuf;
 						rngLogMessage += "\n";
 						rngLogMessage += *i;
 						lastCallStackLogged = *i;
@@ -1096,7 +1109,7 @@ bool CvDllGameContext::RandomNumberGeneratorSyncCheck(PlayerTypes ePlayer, ICvRa
 		}
 		else
 		{
-			if(logFile)
+			if (logFile)
 			{
 				logFile->DebugMsg(rngLogMessage.c_str());
 			}
