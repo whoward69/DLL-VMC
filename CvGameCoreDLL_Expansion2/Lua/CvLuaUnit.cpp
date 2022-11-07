@@ -53,6 +53,10 @@ void CvLuaUnit::RegistStaticFunctions() {
 
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lKill);
 
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lEndTrader);
+
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lRecallTrader);
+
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lPushMission);
 
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lJumpToNearestValidPlot);
@@ -78,11 +82,16 @@ void CvLuaUnit::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetScenarioData);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetHasPromotion);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetDeployFromOperationTurn);
+
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeCargoSpace);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeDamage);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeMoves);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeExperience);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeLevel);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeMaxHitPointsBase);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeExperienceTimes100);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeStatsKilled);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeStatsTravelled);
 	
 }
 //------------------------------------------------------------------------------

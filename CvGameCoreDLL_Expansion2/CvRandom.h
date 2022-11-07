@@ -17,6 +17,27 @@
 #include <FCallStack.h>
 #endif//_DEBUG
 
+#include "StackWalker.h"
+
+class RNGStackWalker : public StackWalker {
+public:
+	RNGStackWalker() : m_pLog(nullptr), StackWalker() {}
+	void SetLog(FILogFile* pLog) { m_pLog = pLog; }
+protected:
+	virtual void OnSymInit(LPCSTR, DWORD, LPCSTR) {  }
+	virtual void OnLoadModule(LPCSTR, LPCSTR, DWORD64, DWORD, DWORD, LPCSTR, LPCSTR, ULONGLONG) {  }
+	virtual void OnOutput(LPCSTR szText)
+	{
+		if (strstr(szText, "ERROR") == nullptr && strstr(szText, "not available") == nullptr)
+		{
+			if (m_pLog) m_pLog->Msg(szText);
+		}
+	}
+	FILogFile* m_pLog;
+};
+
+extern RNGStackWalker dbgRNGStackWalker;
+
 class CvRandom
 {
 
@@ -62,6 +83,8 @@ protected:
 	unsigned long m_ulRandomSeed;
 
 	// for OOS checks/debugging
+	
+	std::string m_name;
 	unsigned long m_ulCallCount;
 	unsigned long m_ulResetCount;
 	bool m_bSynchronous;		// If true, the instance is marked as being one that should be synchronous across multi-player games.

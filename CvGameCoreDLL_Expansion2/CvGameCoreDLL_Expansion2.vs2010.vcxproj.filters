@@ -21,6 +21,9 @@
     <Filter Include="NetworkSync">
       <UniqueIdentifier>{b56e3564-bb16-410e-9ac2-1a3814616640}</UniqueIdentifier>
     </Filter>
+    <Filter Include="NetworkSync\LogTool">
+      <UniqueIdentifier>{07de94c1-9da9-4a44-8fee-d5e847b674fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="_precompile.cpp">
@@ -532,6 +535,9 @@
     </ClCompile>
     <ClCompile Include="LargeArgContainer.pb.cpp">
       <Filter>NetworkSync</Filter>
+    </ClCompile>
+    <ClCompile Include="StackWalker.cpp">
+      <Filter>NetworkSync\LogTool</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1152,6 +1158,9 @@
     </ClInclude>
     <ClInclude Include="..\CvGameCoreDLLUtil\include\LinkedList.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StackWalker.h">
+      <Filter>NetworkSync\LogTool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

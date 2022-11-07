@@ -71,9 +71,33 @@ int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_S
 	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 1) < 0;
 	if (fault) return 0;
 	int time = GetTickCount();
-	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
+	lua_Debug dbg;
+	string errWhere = "";
+	int line = 0;
+	if (lua_getstack(L, 1, &dbg))
+	{
+		lua_getinfo(L, "sl", &dbg);
+		line = dbg.currentline;
+		errWhere += dbg.short_src;
+	}
+
+	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time + line);
 	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
-	InvokeRecorder::pushInvoke(str);
+	try {
+		InvokeRecorder::pushInvoke(str);
+	}
+	catch (NetworkMessageCollisionExceptopn e) {
+		//lua_getinfo(L, "Sl", &dbg);
+		char buf[1024] = { 0 };
+		_itoa_s(line, buf, 10);
+		string collisionMsg = "Collision happened: File name: ";
+		collisionMsg += errWhere;
+		collisionMsg += " at line: ";
+		collisionMsg += buf;
+		collisionMsg += " with call: ";
+		collisionMsg += str;
+		CUSTOMLOG(collisionMsg);
+	}
 	gDLL->SendRenameCity(-str.length(), str);
 	auto rtn = 0;
 	try {

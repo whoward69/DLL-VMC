@@ -824,44 +824,44 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 	if (iCityID < 0) {
 		isLua = true;
 		iCityID = -iCityID;
-	}
-	auto str = std::string(szName, iCityID);
-	
-	if (NetworkMessageUtil::ReceiveLargeArgContainer.ParseFromString(str)) {
-		if (InvokeRecorder::getInvokeExist(str)) {
+		auto str = std::string(szName, iCityID);
+		if (NetworkMessageUtil::ReceiveLargeArgContainer.ParseFromString(str)) {
+			if (InvokeRecorder::getInvokeExist(str)) {
+				NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+				return;
+			}
+			auto L = luaL_newstate();
+			for (int i = 0; i < NetworkMessageUtil::ReceiveLargeArgContainer.args_size(); i++) {
+				auto& arg = NetworkMessageUtil::ReceiveLargeArgContainer.args().Get(i);
+				auto& type = arg.argtype();
+				if (type == "int") {
+					lua_pushinteger(L, arg.identifier1());
+				}
+				else if (type == "string") {
+					lua_pushstring(L, arg.longmessage().c_str());
+				}
+				else if (type == "bool") {
+					lua_pushboolean(L, arg.identifier1());
+				}
+				else if (type == "nil") {
+					lua_pushnil(L);
+				}
+				else {
+					auto& name = type + "::PushToLua";
+					auto basicArgPtr = (BasicArguments*)&arg;
+					StaticFunctionReflector::ExecuteFunction<void>((name), L, basicArgPtr);
+				}
+			}
+			auto funcName = NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall();
+			StaticFunctionReflector::ExecuteFunction<void>(funcName, L);
+			lua_close(L);
 			NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
 			return;
 		}
-		auto L = luaL_newstate();
-		for (int i = 0; i < NetworkMessageUtil::ReceiveLargeArgContainer.args_size(); i++) {
-			auto& arg = NetworkMessageUtil::ReceiveLargeArgContainer.args().Get(i);
-			auto& type = arg.argtype();
-			if (type == "int") {
-				lua_pushinteger(L, arg.identifier1());
-			}
-			else if (type == "string") {
-				lua_pushstring(L, arg.longmessage().c_str());
-			}
-			else if (type == "bool") {
-				lua_pushboolean(L, arg.identifier1());
-			}
-			else if (type == "nil") {
-				lua_pushnil(L);
-			}
-			else {
-				auto& name = type + "::PushToLua";
-				BasicArguments* ptr = (BasicArguments*)&arg;
-				StaticFunctionReflector::ExecuteFunction<void>((name), L, ptr);
-			}
-		}
-		auto funcName = NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall();
-		StaticFunctionReflector::ExecuteFunction<void>(funcName, L);
-		lua_close(L);
 		NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
-		return;
+		//return;
 	}
-	NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
-	if (isLua) iCityID = -iCityID;
+
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
 	if(pkCity)

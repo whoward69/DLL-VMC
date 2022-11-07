@@ -95,8 +95,8 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 
 LargeArgContainer NetworkMessageUtil::ReceiveLargeArgContainer;
 int NetworkMessageUtil::ArgumentsToPass[MAX_INT32_ARGNUM];
-std::list<std::string> InvokeRecorder::returnValueRecord;
-std::map<std::string, list<std::string>::iterator> InvokeRecorder::valueMap;
+std::list<std::pair<std::string, int>> InvokeRecorder::returnValueRecord;
+std::map<std::string, list<std::pair<std::string, int>>::iterator> InvokeRecorder::valueMap;
 
 void InvokeRecorder::clear() {
 	returnValueRecord.clear();
@@ -105,15 +105,20 @@ void InvokeRecorder::clear() {
 
 
 void InvokeRecorder::pushInvoke(std::string& invoke) {
-	if (valueMap.find(invoke) != valueMap.end()) {
-		CUSTOMLOG("Collision where invoke = %s", invoke);
+	auto& targetEntry = valueMap.find(invoke);
+	if (targetEntry != valueMap.end()) {
+		//throw NetworkMessageCollisionExceptopn(invoke);
+		targetEntry->second->second++;
 	}
-	if (returnValueRecord.size() >= MaxSize) {
-		valueMap.erase(returnValueRecord.front());
-		returnValueRecord.pop_front();
+	else {
+		if (returnValueRecord.size() >= MaxSize) {
+			valueMap.erase(returnValueRecord.front().first);
+			returnValueRecord.pop_front();
+			CUSTOMLOG("MaxSize exceeded")
+		}
+		returnValueRecord.push_back(std::make_pair(invoke, 0));
+		valueMap.insert(std::make_pair(invoke, --returnValueRecord.end()));
 	}
-	returnValueRecord.push_back(invoke);
-	valueMap.insert(std::pair<std::string, list<std::string>::iterator>(invoke, --returnValueRecord.end()));
 }
 
 bool InvokeRecorder::getInvokeExist(std::string& invoke) {
@@ -121,12 +126,24 @@ bool InvokeRecorder::getInvokeExist(std::string& invoke) {
 	bool rtn = false;
 	if (iter != valueMap.end()) {
 		rtn = true;
-		returnValueRecord.erase((*iter).second);
-		valueMap.erase(iter);
+		auto invokeNumber = --(iter->second->second);
+		if (invokeNumber == 0) {
+			returnValueRecord.erase((*iter).second);
+			valueMap.erase(iter);
+			
+		}
 	}
 	return rtn;
 }
 
 namespace ReturnValueUtil {
 	InvokeRecorder container;
+}
+
+NetworkMessageCollisionExceptopn::NetworkMessageCollisionExceptopn(const std::string& invoke_msg) {
+	this->message = "Collision happened when invoke " + invoke_msg;
+}
+NetworkMessageCollisionExceptopn::~NetworkMessageCollisionExceptopn() {}
+const char* NetworkMessageCollisionExceptopn::what()const throw() {
+	return this->message.c_str();
 }

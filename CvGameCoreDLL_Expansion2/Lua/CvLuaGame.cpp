@@ -36,6 +36,14 @@
 #define Method(func) RegisterMethod(L, l##func, #func);
 
 void CvLuaGame::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeMaxTurns);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNoNukesCount);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNukesExploded);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNumVotesForTeam);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangePlotExtraCost);
+
+	REGIST_STATIC_FUNCTION(CvLuaGame::lHandleAction);
+
 	REGIST_STATIC_FUNCTION(CvLuaGame::lSetUnitedNationsCountdown);
 	REGIST_STATIC_FUNCTION(CvLuaGame::lSetGameTurn);
 	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMaxTurns);
@@ -68,11 +76,8 @@ void CvLuaGame::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMinimumFaithNextPantheon);
 	REGIST_STATIC_FUNCTION(CvLuaGame::lSetHolyCity);
 	REGIST_STATIC_FUNCTION(CvLuaGame::lSetFounder);
-	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeMaxTurns);
-	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNoNukesCount);
-	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNukesExploded);
-	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNumVotesForTeam);
-	REGIST_STATIC_FUNCTION(CvLuaGame::lChangePlotExtraCost);
+	
+	
 
 }
 //------------------------------------------------------------------------------

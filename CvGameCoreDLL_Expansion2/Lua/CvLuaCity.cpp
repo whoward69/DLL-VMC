@@ -25,6 +25,14 @@ using namespace CvLuaArgs;
 void CvLuaCity::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvLuaCity::lKill);
 
+	REGIST_STATIC_FUNCTION(CvLuaCity::lClearOrderQueue);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lClearWorkingOverride);
+	REGIST_STATIC_FUNCTION(CvLuaCity::lClearGreatWorks);
+
+	REGIST_STATIC_FUNCTION(CvLuaCity::lDoTask);
+
+	REGIST_STATIC_FUNCTION(CvLuaCity::lPushOrder);
+
 	REGIST_STATIC_FUNCTION(CvLuaCity::lSetResourceDemanded);
 	REGIST_STATIC_FUNCTION(CvLuaCity::lSetProduction);
 	REGIST_STATIC_FUNCTION(CvLuaCity::lSetPopulation);

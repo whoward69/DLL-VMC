@@ -4781,8 +4781,29 @@ void CvPlayer::doTurnPostDiplomacy()
 	// Do turn for all Cities
 	{
 		AI_PERF_FORMAT("AI-perf.csv", ("Do City Turns, Turn %03d, %s", GC.getGame().getElapsedGameTurns(), getCivilizationShortDescription()) );
+		// Try to solve rng desync problem.
+		int iRandLogging = GC.getRandLogging();
+		
 		if(getNumCities() > 0)
 		{
+			FILogFile* pLog = LOGFILEMGR.GetLog("RandCalls.csv", FILogFile::kDontTimeStamp);
+			if (iRandLogging > 0 && pLog) {
+				char buffer[1024] = { 0 };
+				string msg = "Processing city doturn: iNumCitys: ";
+				
+				_itoa_s(getNumCities(), buffer, 10);
+				msg += buffer;
+
+				msg += " Current player: ";
+				_itoa_s(GetID(), buffer, 10);
+				msg += buffer;
+
+				msg += " Name: ";
+				msg += getName();
+				pLog->Msg(msg.c_str());
+				pLog->Msg("\n");
+			}
+
 			int iLoop = 0;
 			for(CvCity* pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
 			{

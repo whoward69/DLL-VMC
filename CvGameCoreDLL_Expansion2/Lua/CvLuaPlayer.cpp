@@ -46,6 +46,32 @@
 	lua_setfield(L, t, #Name);
 
 void CvLuaPlayer::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lAcquireCity);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lAddCityName);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lAddNotification);
+
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumWorldWonders);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeBaseBuildingGoldMaintenance);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNewCityExtraPopulation);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGold);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulturePerTurnForFree);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulturePerTurnFromMinorCivs);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulture);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeFaith);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeExtraHappinessPerCity);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeUnhappinessFromUnits);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeHappinessPerGarrisonedUnit);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeHappinessPerTradeRoute);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeBarbarianCombatBonus);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGarrisonedCityRangeStrikeModifier);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAlwaysSeeBarbCampsCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAnarchyNumTurns);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAdvancedStartPoints);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldenAgeProgressMeter);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumGoldenAges);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldenAgeTurns);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumUnitGoldenAges);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldPerUnitTimes100);
 	
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lInitUnit);
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lInitCity);
@@ -53,9 +79,7 @@ void CvLuaPlayer::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lKillCities);
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lKillUnits);
 
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lAcquireCity);
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lRaze);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lAddCityName);
 
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumWondersBeatenTo);
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetFaithPurchaseType);
@@ -95,28 +119,7 @@ void CvLuaPlayer::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumMayaBoosts);
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumFaithGreatPeople);
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetEmbarkedGraphicOverride);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumWorldWonders);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeBaseBuildingGoldMaintenance);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNewCityExtraPopulation);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGold);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulturePerTurnForFree);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulturePerTurnFromMinorCivs);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulture);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeFaith);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeExtraHappinessPerCity);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeUnhappinessFromUnits);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeHappinessPerGarrisonedUnit);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeHappinessPerTradeRoute);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeBarbarianCombatBonus);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGarrisonedCityRangeStrikeModifier);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAlwaysSeeBarbCampsCount);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAnarchyNumTurns);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAdvancedStartPoints);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldenAgeProgressMeter);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumGoldenAges);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldenAgeTurns);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumUnitGoldenAges);
-	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldPerUnitTimes100);
+
 }
 
 //------------------------------------------------------------------------------

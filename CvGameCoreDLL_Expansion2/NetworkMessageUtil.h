@@ -26,9 +26,20 @@ namespace NetworkMessageUtil {
 	}*/
 }
 
+struct NetworkMessageCollisionExceptopn :public std::exception
+{
+public:
+	explicit NetworkMessageCollisionExceptopn(const std::string& method_name);
+	virtual ~NetworkMessageCollisionExceptopn()throw();
+	virtual const char* what()const throw();
+protected:
+	std::string message;
+};
+
+
 class InvokeRecorder {
 public:
-	static const int MaxSize = 65536;
+	static const int MaxSize = 262144;
 
 	InvokeRecorder() {
 	}
@@ -36,8 +47,8 @@ public:
 		clear();
 	}
 	static void clear();
-	static std::list<std::string> returnValueRecord;
-	static std::map<std::string, std::list<std::string>::iterator> valueMap;
+	static std::list<std::pair<std::string, int>> returnValueRecord;
+	static std::map<std::string, std::list<std::pair<std::string, int>>::iterator> valueMap;
 	static void pushInvoke(std::string& invoke);
 	static bool getInvokeExist(std::string& invoke);
 };
