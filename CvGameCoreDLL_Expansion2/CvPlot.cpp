@@ -3003,7 +3003,7 @@ const UnitHandle CvPlot::getBestDefender(PlayerTypes eOwner, PlayerTypes eAttack
 						{
 							if(!bTestCanMove || (pLoopUnit->canMove() && !(pLoopUnit->isCargo())))
 							{
-								if((pAttacker == NULL) || (pAttacker->getDomainType() != DOMAIN_AIR) || (pLoopUnit->getDamage() < pAttacker->GetRangedCombatLimit()))
+								//if((pAttacker == NULL) || (pAttacker->getDomainType() != DOMAIN_AIR) || (pLoopUnit->getDamage() < pAttacker->GetRangedCombatLimit()))
 								{
 									if(pLoopUnit->isBetterDefenderThan(pBestUnit.pointer(), pAttacker))
 									{

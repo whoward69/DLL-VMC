@@ -2298,7 +2298,7 @@ bool CvUnit::isBetterDefenderThan(const CvUnit* pDefender, const CvUnit* pAttack
 
 	if(pAttacker)
 	{
-		if(getDamage() >= pAttacker->GetCombatLimit() && pDefender->getDamage() < pAttacker->GetCombatLimit())
+		/*if (getDamage() >= pAttacker->GetCombatLimit() && pDefender->getDamage() < pAttacker->GetCombatLimit())
 		{
 			return false;
 		}
@@ -2306,7 +2306,7 @@ bool CvUnit::isBetterDefenderThan(const CvUnit* pDefender, const CvUnit* pAttack
 		if(pDefender->getDamage() >= pAttacker->GetCombatLimit() && getDamage() < pAttacker->GetCombatLimit())
 		{
 			return true;
-		}
+		}*/
 	}
 
 	iOurDefense = GetMaxDefenseStrength(plot(), pAttacker);
@@ -3278,13 +3278,13 @@ bool CvUnit::canMoveInto(const CvPlot& plot, byte bMoveFlags) const
 				const UnitHandle pDefender = plot.getBestDefender(NO_PLAYER, getOwner(), this, true);
 				if(pDefender)
 				{
-					if(pDefender->getDamage() >= GetCombatLimit())
+					/*if (pDefender->getDamage() >= GetCombatLimit())
 					{
 						return false;
-					}
+					}*/
 
 					// EFB: Check below is not made when capturing civilians
-					else if(pDefender->GetBaseCombatStrength() > 0)	// Note: this value will be 0 for embarked Units
+					if(pDefender->GetBaseCombatStrength() > 0)	// Note: this value will be 0 for embarked Units
 					{
 						// EFB: Added so units can't come out of cities to attack (but so that units in city's pathing doesn't fail all the time)
 						if(!(bMoveFlags & MOVEFLAG_NOT_ATTACKING_THIS_TURN) && !IsCanAttackWithMoveNow())

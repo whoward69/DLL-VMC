@@ -116,7 +116,7 @@ void InvokeRecorder::pushInvoke(std::string& invoke) {
 			returnValueRecord.pop_front();
 			CUSTOMLOG("MaxSize exceeded")
 		}
-		returnValueRecord.push_back(std::make_pair(invoke, 0));
+		returnValueRecord.push_back(std::make_pair(invoke, 1));
 		valueMap.insert(std::make_pair(invoke, --returnValueRecord.end()));
 	}
 }
@@ -127,10 +127,9 @@ bool InvokeRecorder::getInvokeExist(std::string& invoke) {
 	if (iter != valueMap.end()) {
 		rtn = true;
 		auto invokeNumber = --(iter->second->second);
-		if (invokeNumber == 0) {
+		if (invokeNumber <= 0) {
 			returnValueRecord.erase((*iter).second);
 			valueMap.erase(iter);
-			
 		}
 	}
 	return rtn;

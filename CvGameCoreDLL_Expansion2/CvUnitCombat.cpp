@@ -679,7 +679,7 @@ void CvUnitCombat::GenerateRangedCombatInfo(CvUnit& kAttacker, CvUnit* pkDefende
 #if defined(MOD_UNITS_MAX_HP)
 		if(iDamage + pkDefender->getDamage() > kAttacker.GetMaxHitPoints())
 		{
-			iDamage = kAttacker.GetMaxHitPoints() - pkDefender->getDamage();
+			//iDamage = kAttacker.GetMaxHitPoints() - pkDefender->getDamage();
 		}
 #else
 		if(iDamage + pkDefender->getDamage() > GC.getMAX_HIT_POINTS())
