@@ -1,9 +1,10 @@
 # CIV5-MPDLL
 
-This repos is based on whoward69's DLL-VMC v97. It fixes out-of-sync problem of playing with mods in multiplayer game by creating lua interface allows to execute arbitrary lua-CPP interface methods or CPP functions (in progress) on all the clients in a multiplayer game by providing their name and arguments. 
+This repos is based on whoward69's DLL-VMC v97. It fixes out-of-sync problem of playing with mods in multiplayer game by creating lua interface allows to execute arbitrary lua-CPP interface methods or CPP functions (in progress) on all the clients in a multiplayer game by providing their names and arguments. 
 
 # Usage
 Call *SendAndExecuteLuaFunction* in lua, the first argument is the function name you want to call. Remember the name should be prefixed with **ClassName::l** (it's actually their name in CPP source). Instead of providing function name, providing the function itself is also allowed.
+*SendAndExecuteLuaFunction* is registered as static method for lua object **Game**, **Map** ad as instance method for lua object **Unit**, **Player**, **Plot**, **City**.
 For example, if you are executing a custom button function, call: 
 
 ``` lua
@@ -28,7 +29,7 @@ This will execute the methods with given arguments on all the clients in a multi
 
 # How to Compile
 You **must** have *VS2008* and *VS2013* tool chain installed. In project configuration, enter the page *VC++ directory*, change executable path to your *VS2013* compiler path (Usually **"\Microsoft Visual Studio 12.0\VC\bin"** and **"\Microsoft Visual Studio 12.0\Common7\IDE"**), the remaining set to *VS2008* tool chain's path.  
-If you have them installed in the path **"C:\Program Files (x86)"**, you can just open the sln file with *VS2022* and compile.
+If you have them installed in the path **"C:\Program Files (x86)"**, you can open the sln file with *VS2022* and compile without modifiying configurations.
 # Caution
 Currently, not all the methods can be called in this way, available methods are:
 ``` c++
@@ -36,6 +37,9 @@ CvLuaUnit::lKill();
 CvLuaUnit::lDoCommand();
 CvLuaUnit::lPushMission();
 CvLuaUnit::lJumpToNearestValidPlot();
+CvLuaUnit::lEndTrader();
+CvLuaUnit::lRecallTrader();
+
 CvLuaPlayer::lInitUnit();
 CvLuaPlayer::lInitCity();
 CvLuaPlayer::lKillCities();
@@ -46,8 +50,5 @@ CvLuaCity::lKill();
 ``` 
 And all the lua methods prefixed with ***lSet***, ***lChange*** belongning to class **CvLuaUnit**, **CvLuaCity**, **CvLuaTeam**, **CvLuaTeamTech**,  **CvLuaPlot**, **CvLuaPlayer**, **CvLuaMap**, **CvLuaGame**.   
 Currently you can pass ***LUA_TNUMBER***, ***LUA_TSTRING***, ***LUA_TBOOLEAN***, ***LUA_TNILL*** and lua game instances ***unit***, ***player***, ***team***, ***plot***, ***city***, ***teamTech*** which are actually ***LUA_TTABLE*** as arguments to invoke **SendAndExecuteLuaFunction**.   
-
-  
-The DLL is **NOT** intensively tested.
 
  
