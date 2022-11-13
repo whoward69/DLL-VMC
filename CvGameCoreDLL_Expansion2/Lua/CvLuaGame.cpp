@@ -498,7 +498,9 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 	Method(AnyoneHasTech);
 	Method(AnyoneHasUnit);
 	Method(AnyoneHasUnitClass);
+	
 #endif
+	Method(GetAuthenticatedSeed);
 }
 //------------------------------------------------------------------------------
 
@@ -1644,6 +1646,11 @@ int CvLuaGame::lGetName(lua_State* L)
 {
 	luaL_error(L, "NYI");
 	return 0;
+}
+
+int CvLuaGame::lGetAuthenticatedSeed(lua_State* L) {
+	lua_pushinteger(L, GetInstance()->getJonRand().getSeed());
+	return 1;
 }
 //------------------------------------------------------------------------------
 //int Rand(max_num, log);

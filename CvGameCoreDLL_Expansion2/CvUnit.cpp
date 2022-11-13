@@ -6321,7 +6321,20 @@ bool CvUnit::canAirliftAt(const CvPlot* pPlot, int iX, int iY) const
 		}
 	}
 #endif
+	auto iTargetPlotOwner = pTargetPlot->getOwner();
+	auto iThisUnitOwner = getOwner();
+	auto iThisPlotOwner = pPlot->getOwner();
+	if (iThisUnitOwner != NO_PLAYER) {
+		if (GET_PLAYER(iThisUnitOwner).IsAtWarWith(iTargetPlotOwner)) {
+			return false;
+		}
+	}
 
+	if (iThisPlotOwner != NO_PLAYER) {
+		if (GET_PLAYER(iThisPlotOwner).IsAtWarWith(iTargetPlotOwner)) {
+			return false;
+		}
+	}
 #if defined(MOD_GLOBAL_RELOCATION)
 	if (pToPlot == pFromPlot)
 #else

@@ -56,6 +56,7 @@ void CvLuaUnit::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lEndTrader);
 
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lRecallTrader);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lRangeStrike);
 
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lPushMission);
 

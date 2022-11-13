@@ -3797,6 +3797,7 @@ void CvGameDeals::LogDealComplete(CvDeal* pDeal)
 #if defined(MOD_AI_MP_DIPLOMACY)
 void CvGameDeals::LogDealFailed(CvDeal* pDeal, bool bNoRenew, bool bNotAccepted, bool bNotValid)
 {
+	if (!pDeal) return;
 	if(GC.getLogging() && GC.getAILogging())
 	{
 		CvString strLogName;
