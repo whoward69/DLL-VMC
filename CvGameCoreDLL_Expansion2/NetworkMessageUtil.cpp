@@ -17,6 +17,10 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 		ReceiveLargeArgContainer.Clear();
 		return -1;
 	}
+	/*
+	* For broadcasting lua function, maybe we can directly send function pointers.
+	* For broadcasting CPP function, reflection is needed.
+	*/
 	for (int i = 1; i <= num; i++) {
 		auto type = lua_type(L, i);
 		if (i == indexOfFuncName) {
