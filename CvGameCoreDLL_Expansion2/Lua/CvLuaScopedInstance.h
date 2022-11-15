@@ -143,6 +143,7 @@ void CvLuaScopedInstance<Derived, InstanceType>::PushLtwt(lua_State* L, Instance
 	else
 	{
 		lua_pushnil(L);
+		throw NoSuchMethodException("Null ptr");
 	}
 }
 //------------------------------------------------------------------------------

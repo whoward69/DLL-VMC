@@ -48,7 +48,7 @@ public:
 	}
 	static void clear();
 	static std::list<std::pair<std::string, int>> returnValueRecord;
-	static std::map<std::string, std::list<std::pair<std::string, int>>::iterator> valueMap;
+	static std::tr1::unordered_map<std::string, std::list<std::pair<std::string, int>>::iterator> valueMap;
 	static void pushInvoke(std::string& invoke);
 	static bool getInvokeExist(std::string& invoke);
 };

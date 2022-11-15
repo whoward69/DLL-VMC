@@ -158,7 +158,7 @@ void CvPlot::RegistInstanceFunctions() {
 void CvPlot::ExtractToArg(BasicArguments* arg) {
 	arg->set_argtype("CvPlot");
 	arg->set_identifier1(getX());
-	arg->set_identifier1(getY());
+	arg->set_identifier2(getY());
 }
 
 void CvPlot::RegistStaticFunctions() {

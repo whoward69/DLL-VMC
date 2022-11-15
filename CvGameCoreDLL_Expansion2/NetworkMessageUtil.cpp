@@ -100,7 +100,7 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 LargeArgContainer NetworkMessageUtil::ReceiveLargeArgContainer;
 int NetworkMessageUtil::ArgumentsToPass[MAX_INT32_ARGNUM];
 std::list<std::pair<std::string, int>> InvokeRecorder::returnValueRecord;
-std::map<std::string, list<std::pair<std::string, int>>::iterator> InvokeRecorder::valueMap;
+std::tr1::unordered_map<std::string, list<std::pair<std::string, int>>::iterator> InvokeRecorder::valueMap;
 
 void InvokeRecorder::clear() {
 	returnValueRecord.clear();

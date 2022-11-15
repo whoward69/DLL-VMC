@@ -827,6 +827,7 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 		auto str = std::string(szName, iCityID);
 		if (NetworkMessageUtil::ReceiveLargeArgContainer.ParseFromString(str)) {
 			if (InvokeRecorder::getInvokeExist(str)) {
+				//CUSTOMLOG("Received an already executed fuction call with message: %s", NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall());
 				NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
 				return;
 			}
@@ -849,10 +850,19 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 				else {
 					auto& name = type + "::PushToLua";
 					auto basicArgPtr = (BasicArguments*)&arg;
-					StaticFunctionReflector::ExecuteFunction<void>((name), L, basicArgPtr);
+					try {
+						StaticFunctionReflector::ExecuteFunction<void>((name), L, basicArgPtr);
+					}
+					catch (NoSuchMethodException e) {
+						CUSTOMLOG("Received an null ptr fuction call with message: %s", NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall().c_str());
+						NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+						return;
+					}
+					
 				}
 			}
 			auto funcName = NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall();
+			//CUSTOMLOG("Try to execute received fuction call with function name: %s", funcName);
 			StaticFunctionReflector::ExecuteFunction<void>(funcName, L);
 			lua_close(L);
 			NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
