@@ -4,7 +4,7 @@ This repos is based on whoward69's DLL-VMC v97. It fixes out-of-sync problem of 
 
 # Usage
 Call *SendAndExecuteLuaFunction* in lua, the first argument is the function name (or the function it self selected by ".") you want to call, and followings are the argument you want to pass. Remember if function names are provided, they should be prefixed with **ClassName::l** (it's actually their name in CPP source). 
-*SendAndExecuteLuaFunction* is registered as static method for lua object **Game**, **Map** ad as instance method for lua object **Unit**, **Player**, **Plot**, **City**.
+*SendAndExecuteLuaFunction* is registered as static method for lua object **Game**, **Map** and as instance method for lua object **Unit**, **Player**, **Plot**, **City**.
 For example, if you are executing a custom button function, call: 
 
 ``` lua
