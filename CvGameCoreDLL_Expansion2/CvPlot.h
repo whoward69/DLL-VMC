@@ -854,7 +854,9 @@ public:
 	bool IsAdjacentToTerrain(TerrainTypes iTerrainType) const;
 	bool IsWithinDistanceOfTerrain(TerrainTypes iTerrainType, int iDistance) const;
 #endif
-
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	int CvPlot::ComputeYieldFromOtherAdjacentImprovement(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
+#endif
 protected:
 	class PlotBoolField
 	{

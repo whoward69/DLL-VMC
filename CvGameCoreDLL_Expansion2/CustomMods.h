@@ -96,6 +96,10 @@
 // Enables the Unified Yields (YIELD_GOLDEN_AGE_POINTS) extensions (v57)
 #define MOD_API_UNIFIED_YIELDS_GOLDEN_AGE           (true)
 
+// Enables improvements to boost adjacent improvement's yield.
+#define MOD_API_VP_ADJACENT_YIELD_BOOST				gCustomMods.isAPI_VP_ADJACENT_YIELD_BOOST()
+
+
 // Push various hard-coded values controlling the game out into XML - see DB/CONFIG/GameInXml.sql for specific values -->
 #define MOD_CONFIG_GAME_IN_XML                      gCustomMods.isCONFIG_GAME_IN_XML()
 // Push various hard-coded values controlling the AI out into XML - see DB/CONFIG/AiInXml.sql for specific values
@@ -1337,6 +1341,7 @@ public:
 	MOD_OPT_DECL(API_RELIGION);
 	MOD_OPT_DECL(API_PLOT_BASED_DAMAGE);
 	MOD_OPT_DECL(API_PLOT_YIELDS);
+	MOD_OPT_DECL(API_VP_ADJACENT_YIELD_BOOST);
 	MOD_OPT_DECL(API_ACHIEVEMENTS);
 	MOD_OPT_DECL(API_EXTENSIONS);
 	MOD_OPT_DECL(API_LUA_EXTENSIONS);

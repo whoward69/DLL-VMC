@@ -178,6 +178,10 @@ public:
 	int GetAdjacentSameTypeYield(int i) const;
 #endif
 
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	int GetAdjacentImprovementYieldChanges(int i, int j) const;
+#endif
+
 	int GetTechYieldChanges(int i, int j) const;
 	int* GetTechYieldChangesArray(int i);
 	int GetTechNoFreshWaterYieldChanges(int i, int j) const;
@@ -302,6 +306,10 @@ protected:
 
 #if defined(MOD_API_UNIFIED_YIELDS)
 	int* m_piAdjacentSameTypeYield;
+#endif
+
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	int** m_ppiAdjacentImprovementYieldChanges;
 #endif
 
 	int** m_ppiTechYieldChanges;
