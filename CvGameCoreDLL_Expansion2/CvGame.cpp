@@ -1900,9 +1900,9 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 
 				//NOTE:  These times exclude the time used for AI processing.
 				//Time since the current player's turn started.  Used for measuring time for players in sequential turn mode.
-				float timeSinceCurrentTurnStart = m_curTurnTimer.Peek() + m_fCurrentTurnTimerPauseDelta; 
+				float timeSinceCurrentTurnStart = m_curTurnTimer.Peek() + m_fCurrentTurnTimerPauseDelta;
 				//Time since the game (year) turn started.  Used for measuring time for players in simultaneous turn mode.
-				float timeSinceGameTurnStart = m_timeSinceGameTurnStart.Peek() + m_fCurrentTurnTimerPauseDelta; 
+				float timeSinceGameTurnStart = m_timeSinceGameTurnStart.Peek() + m_fCurrentTurnTimerPauseDelta;
 				
 				float timeElapsed = (curPlayer.isSimultaneousTurns() ? timeSinceGameTurnStart : timeSinceCurrentTurnStart);
 				if(curPlayer.isTurnActive())
@@ -1956,7 +1956,7 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 				if(isLocalPlayer)
 				{//update the local end turn timer.
 					CvPreGame::setEndTurnTimerLength(gameTurnEnd);
-					iface->updateEndTurnTimer(timeElapsed / gameTurnEnd);
+					iface->updateEndTurnTimer (timeElapsed / gameTurnEnd);
 				}
 			}
 		}

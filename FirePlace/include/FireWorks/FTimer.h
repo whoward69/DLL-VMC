@@ -64,13 +64,30 @@ struct FTimer
 		return (m_fTimer = 0);	
 	}
 
-	float Peek() const	 { return  ReadF(  m_qStart ); }
+	double Peek() { return  TryRead(  m_qStart ); }
 	float Stop()	 { return (m_fTimer = Peek()); }
 	operator float() { return  m_fTimer; }
 
   __int64 m_qStart;		// Hi-Rez count @ Start()
     float m_fTimer;		// elapsed time @ Stop()
 
+	float TryRead(__int64 offset = 0) {
+		LARGE_INTEGER  stopCount = {};
+		bool ret;
+		if (ret) {
+			ret = QueryPerformanceCounter(&stopCount);
+		}
+		if (m_qRate == 0) {
+			QueryPerformanceFrequency((LARGE_INTEGER*) & m_qRate);
+		}
+		__int64 elapsed = 0.0;
+		if (ret) {
+			auto div = ((LARGE_INTEGER*)(&m_qRate))->QuadPart;
+			if (((LARGE_INTEGER*)(&m_qRate))->QuadPart == 0) div = 1;
+			elapsed = -(__int64)((((LARGE_INTEGER*)(&offset))->QuadPart - stopCount.QuadPart) * 1000000 / div / 1000 / 1000);
+		}
+		return (float)elapsed;
+	}
     //--
     //  Static interface
     //    

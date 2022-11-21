@@ -10397,7 +10397,7 @@ bool CvUnit::canBuild(const CvPlot* pPlot, BuildTypes eBuild, bool bTestVisible,
 			{
 				if(pLoopUnit->IsWork() && pLoopUnit->getBuildType() != NO_BUILD)
 				{
-					return false;
+					if(pLoopUnit->getBuildType() != eBuild) return false;
 				}
 			}
 		}
@@ -10516,6 +10516,33 @@ bool CvUnit::build(BuildTypes eBuild)
 		// Update Resource info
 		if(pkBuildInfo)
 		{
+
+			IDInfo* pPlotUnitNode = pPlot->headUnitNode();
+
+			while (pPlotUnitNode != NULL)
+			{
+				CvUnit* pLoopUnit = ::getUnit(*pPlotUnitNode);
+				pPlotUnitNode = pPlot->nextUnitNode(pPlotUnitNode);
+				if (pLoopUnit == this) {
+					continue;
+				}
+				if (pLoopUnit->getOwner() != getOwner())
+				{
+					continue;
+				}
+				if (pLoopUnit->IsWork() && pLoopUnit->getBuildType() == getBuildType()) {
+					auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(pLoopUnit));
+					gDLL->GameplayUnitWork(pDllUnit.get(), -1);
+					if (pLoopUnit->m_unitMoveLocs.size() > 0)
+					{
+						pLoopUnit->PublishQueuedVisualizationMoves();
+					}
+					//auto pMissionData = pLoopUnit->mission
+					CvUnitMission::DeleteMissionQueueNode(pLoopUnit, CvUnitMission::HeadMissionQueueNode(pLoopUnit->m_missionQueue));
+				}
+				
+			}
+		
 			ImprovementTypes eImprovement = NO_IMPROVEMENT;
 			RouteTypes eRoute = NO_ROUTE;
 

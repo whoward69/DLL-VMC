@@ -31,7 +31,7 @@ extern "C" unsigned int _ftoui3(const float x) {
 }
 
 extern "C" double _ltod3(const __int64 x) {
-	return x;
+	return static_cast<float> (x);
 }
 
 /// This function will return the CvPlot associated with the Index (0 to 36) of a City at iX,iY.  The lower the Index the closer the Plot is to the City (roughly)
