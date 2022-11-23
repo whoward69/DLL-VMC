@@ -157,6 +157,9 @@ CvImprovementEntry::CvImprovementEntry(void):
 #if defined(MOD_API_UNIFIED_YIELDS)
 	m_piAdjacentSameTypeYield(NULL),
 #endif
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	m_ppiAdjacentImprovementYieldChanges(NULL),
+#endif
 	m_ppiTechYieldChanges(NULL),
 	m_ppiTechNoFreshWaterYieldChanges(NULL),
 	m_ppiTechFreshWaterYieldChanges(NULL),
@@ -184,6 +187,12 @@ CvImprovementEntry::~CvImprovementEntry(void)
 	SAFE_DELETE_ARRAY(m_pbImprovementMakesValid);
 #if defined(MOD_API_UNIFIED_YIELDS)
 	SAFE_DELETE_ARRAY(m_piAdjacentSameTypeYield);
+#endif
+
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	if (m_ppiAdjacentImprovementYieldChanges != nullptr) {
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiAdjacentImprovementYieldChanges);
+	}
 #endif
 
 	if(m_paImprovementResource != NULL)
@@ -423,6 +432,40 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 	const int iNumTechs = GC.getNumTechInfos();
 	CvAssertMsg(iNumTechs > 0, "Num Tech Infos <= 0");
 
+	//Adjacent improvement changes
+	{
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+		if (MOD_API_VP_ADJACENT_YIELD_BOOST) {
+			const int iNumImprovements = kUtility.MaxRows("Improvements");
+			CvAssertMsg(iNumImprovements > 0, "Num Improvement Infos <= 0");
+			kUtility.Initialize2DArray(m_ppiAdjacentImprovementYieldChanges, iNumImprovements, iNumYields);
+
+			std::string strKey = "Improvements - AdjacentImprovementYieldChanges";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Improvements.ID as ImprovementID, Yield from Improvement_AdjacentImprovementYieldChanges inner join Yields on YieldType = Yields.Type inner join Improvements on OtherImprovementType = Improvements.Type where ImprovementType = ?");
+			}
+
+			pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+			while (pResults->Step())
+			{
+				const int yield_idx = pResults->GetInt(0);
+				CvAssert(yield_idx > -1);
+
+				const int improvement_idx = pResults->GetInt(1);
+				CvAssert(improvement_idx > -1);
+
+				const int yield = pResults->GetInt(2);
+
+				m_ppiAdjacentImprovementYieldChanges[improvement_idx][yield_idx] = yield;
+			}
+
+			pResults->Reset();
+		}
+#endif
+	}
 
 	//TechYieldChanges
 	{
@@ -1107,6 +1150,18 @@ int CvImprovementEntry::GetAdjacentSameTypeYield(int i) const
 	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
 	CvAssertMsg(i > -1, "Index out of bounds");
 	return m_piAdjacentSameTypeYield ? m_piAdjacentSameTypeYield[i] : false;
+}
+#endif
+
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+int CvImprovementEntry::GetAdjacentImprovementYieldChanges(int i, int j) const
+{
+	if (!MOD_API_VP_ADJACENT_YIELD_BOOST) return 0;
+	CvAssertMsg(i < GC.getNumImprovementInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiAdjacentImprovementYieldChanges[i][j];
 }
 #endif
 

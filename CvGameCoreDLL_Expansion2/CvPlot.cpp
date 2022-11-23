@@ -6764,6 +6764,71 @@ void CvPlot::setImprovementType(ImprovementTypes eNewValue, PlayerTypes eBuilder
 			{
 				area()->changeNumImprovements(eOldImprovement, -1);
 			}
+
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+			if (eBuilder != NO_PLAYER && eOldImprovement != NO_IMPROVEMENT && getOwner() == eBuilder)
+			{
+				CvImprovementEntry* pImprovement2 = GC.getImprovementInfo(eOldImprovement);
+				if (pImprovement2)
+				{
+					for (int iJ = 0; iJ < NUM_DIRECTION_TYPES; ++iJ)
+					{
+						CvPlot* pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iJ));
+
+						if (pAdjacentPlot != NULL && pAdjacentPlot->getImprovementType() != NO_IMPROVEMENT && pAdjacentPlot->getOwner() == eBuilder)
+						{
+							bool bUp = false;
+							for (int iK = 0; iK < NUM_YIELD_TYPES; ++iK)
+							{
+
+								if (pImprovement2->GetAdjacentImprovementYieldChanges(pAdjacentPlot->getImprovementType(), (YieldTypes)iK) > 0)
+								{
+									bUp = true;
+									break;
+								}
+							}
+							if (bUp)
+							{
+								pAdjacentPlot->updateYield();
+							}
+						}
+					}
+				}
+			}
+
+
+			if (eBuilder != NO_PLAYER && eOldImprovement != NO_IMPROVEMENT && getOwner() == eBuilder)
+			{
+				CvImprovementEntry* pImprovement2 = GC.getImprovementInfo(eOldImprovement);
+				if (pImprovement2)
+				{
+					for (int iJ = 0; iJ < NUM_DIRECTION_TYPES; ++iJ)
+					{
+						CvPlot* pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iJ));
+
+						if (pAdjacentPlot != NULL && pAdjacentPlot->getImprovementType() != NO_IMPROVEMENT && pAdjacentPlot->getOwner() == eBuilder)
+						{
+							bool bUp = false;
+							for (int iK = 0; iK < NUM_YIELD_TYPES; ++iK)
+							{
+
+								if (pImprovement2->GetAdjacentImprovementYieldChanges(pAdjacentPlot->getImprovementType(), (YieldTypes)iK) > 0)
+								{
+									bUp = true;
+									break;
+								}
+							}
+							if (bUp)
+							{
+								pAdjacentPlot->updateYield();
+							}
+						}
+					}
+				}
+			}
+#endif
+
+
 			// Someone owns this plot
 			if(owningPlayerID != NO_PLAYER)
 			{
@@ -8398,6 +8463,27 @@ int CvPlot::calculateYield(YieldTypes eYield, bool bDisplay)
 				iYield += GET_PLAYER(getOwner()).GetPlayerPolicies()->GetNumericModifier(POLICYMOD_EXTRA_CULTURE_FROM_IMPROVEMENTS);
 				iYield += GET_PLAYER(getOwner()).GetPlayerPolicies()->GetImprovementCultureChange(eImprovement);
 			}
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+			if (getOwner() == ePlayer)
+			{
+				for (int iI = 0; iI < NUM_DIRECTION_TYPES; ++iI)
+				{
+					CvPlot* pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iI));
+
+					if (pAdjacentPlot == NULL)
+						continue;
+
+					if (pAdjacentPlot->getImprovementType() != NO_IMPROVEMENT && pAdjacentPlot->getOwner() == ePlayer)
+					{
+						CvImprovementEntry* pImprovement2 = GC.getImprovementInfo(pAdjacentPlot->getImprovementType());
+						if (pImprovement2)
+						{
+							iYield += pImprovement2->GetAdjacentImprovementYieldChanges(eImprovement, eYield);
+						}
+					}
+				}
+			}
+#endif
 		}
 	}
 
@@ -11273,6 +11359,27 @@ int CvPlot::getYieldWithBuild(BuildTypes eBuild, YieldTypes eYield, bool bWithUp
 #if defined(MOD_API_UNIFIED_YIELDS)
 			}
 #endif
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+			if (getOwner() == ePlayer)
+			{
+				for (int iI = 0; iI < NUM_DIRECTION_TYPES; ++iI)
+				{
+					CvPlot* pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iI));
+
+					if (pAdjacentPlot == NULL)
+						continue;
+
+					if (pAdjacentPlot->getImprovementType() != NO_IMPROVEMENT && pAdjacentPlot->getOwner() == ePlayer)
+					{
+						CvImprovementEntry* pImprovement2 = GC.getImprovementInfo(pAdjacentPlot->getImprovementType());
+						if (pImprovement2)
+						{
+							iYield += pImprovement2->GetAdjacentImprovementYieldChanges(eImprovement, eYield);
+						}
+					}
+				}
+			}
+#endif
 		}
 	}
 
@@ -12108,5 +12215,36 @@ bool CvPlot::IsWithinDistanceOfTerrain(TerrainTypes iTerrainType, int iDistance)
 	}
 
 	return false;
+}
+#endif
+
+
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+int CvPlot::ComputeYieldFromOtherAdjacentImprovement(CvImprovementEntry& kImprovement, YieldTypes eYield) const
+{
+	if (!MOD_API_VP_ADJACENT_YIELD_BOOST) return 0;
+	CvPlot* pAdjacentPlot;
+	int iRtnValue = 0;
+
+	for (int iJ = 0; iJ < GC.getNumImprovementInfos(); iJ++)
+	{
+		ImprovementTypes eImprovement = (ImprovementTypes)iJ;
+		if (eImprovement != NO_IMPROVEMENT)
+		{
+			if (kImprovement.GetAdjacentImprovementYieldChanges(eImprovement, eYield) > 0)
+			{
+				for (int iI = 0; iI < NUM_DIRECTION_TYPES; iI++)
+				{
+					pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iI));
+					if (pAdjacentPlot && pAdjacentPlot->getImprovementType() == eImprovement)
+					{
+						iRtnValue += kImprovement.GetAdjacentImprovementYieldChanges(eImprovement, eYield);
+					}
+				}
+			}
+		}
+	}
+
+	return iRtnValue;
 }
 #endif
