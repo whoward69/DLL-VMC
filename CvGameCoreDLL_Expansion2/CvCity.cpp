@@ -6302,7 +6302,7 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 	VALIDATE_OBJECT
 
 	CvBuildingEntry* pBuildingInfo = GC.getBuildingInfo(eBuilding);
-
+	
 	if(pBuildingInfo == NULL)
 		return;
 
@@ -13875,7 +13875,7 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 {
 	CvAssertMsg(eUnitType >= 0 || eBuildingType >= 0 || eProjectType >= 0, "No valid passed in");
 	CvAssertMsg(!(eUnitType >= 0 && eBuildingType >= 0) && !(eUnitType >= 0 && eProjectType >= 0) && !(eBuildingType >= 0 && eProjectType >= 0), "Only one being passed");
-
+	
 	// Can't purchase anything in a puppeted city
 	// slewis - The Venetian Exception
 	bool bIsPuppet = IsPuppet();

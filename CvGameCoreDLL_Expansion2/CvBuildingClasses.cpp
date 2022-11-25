@@ -209,6 +209,12 @@ CvBuildingEntry::CvBuildingEntry(void):
 
 	m_iNumThemingBonuses(0)
 {
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+		for (int i = 0; i < NUM_YIELD_TYPES; i++) {
+			m_iNumAllowPurchaseUnits[i] = 0;
+			m_piAllowPurchaseUnits[i] = nullptr;
+		}
+#endif
 }
 
 /// Destructor
@@ -256,6 +262,15 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiPlotYieldChange);
 #endif
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiBuildingClassYieldChanges);
+
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+	if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
+		for (int i = 0; i < NUM_YIELD_TYPES; i++) {
+			if(m_piAllowPurchaseUnits[i]) delete[] m_piAllowPurchaseUnits[i];
+		}
+	}
+#endif
+
 }
 
 /// Read from XML file
@@ -570,6 +585,60 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 		}
 	}
 
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+	//Buildings enable city to purchase units.
+	{
+		if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
+			for (int i = 0; i < NUM_YIELD_TYPES; i++) {
+				char namedText[512];
+				sprintf_s(namedText, "select count(*) from Building_EnableUnitPurchase inner join Yields on Yields.Type = YieldType where Yields.ID = %d and BuildingType = ?", i);
+				char cstrKey[512];
+				sprintf_s(cstrKey, "Building_EnableUnitPurchase_%d_Count", i);
+				std::string strKey(cstrKey);
+				auto pResultAllowUnitCount = kUtility.GetResults(strKey);
+				if (pResultAllowUnitCount == NULL)
+				{
+					pResultAllowUnitCount = kUtility.PrepareResults(strKey, namedText);
+				}
+
+				pResultAllowUnitCount->Bind(1, szBuildingType);
+
+				pResultAllowUnitCount->Step();
+				m_iNumAllowPurchaseUnits[i] = pResultAllowUnitCount->GetInt(0);
+
+				pResultAllowUnitCount->Reset();
+				m_piAllowPurchaseUnits[i] = new std::pair<int, int>[m_iNumAllowPurchaseUnits[i]];
+			}
+		}
+	}
+
+	{
+		if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
+			for (int i = 0; i < NUM_YIELD_TYPES; i++) {
+				char cstrKey[512];
+				sprintf_s(cstrKey, "Building_EnableUnitPurchase_%d", i);
+				std::string strKey(cstrKey);
+				char query[512];
+				sprintf_s(query, "select UnitClasses.ID as UnitClasseID, Building_EnableUnitPurchase.Cost as Cost from Building_EnableUnitPurchase\
+				inner join Yields on Yields.Type = YieldType inner join UnitClasses on UnitClasses.Type = UnitClassType where Yields.ID = %d and BuildingType = ?", i);
+				auto pResultAllowUnit = kUtility.GetResults(strKey);
+				if (pResultAllowUnit == NULL)
+				{
+					pResultAllowUnit = kUtility.PrepareResults(strKey, query);
+				}
+				pResultAllowUnit->Bind(1, szBuildingType);
+				int idx = 0;
+				while (pResultAllowUnit->Step()) {
+					const int UnitClasseID = pResultAllowUnit->GetInt(0);
+					const int Cost = pResultAllowUnit->GetInt(1);
+					m_piAllowPurchaseUnits[i][idx] = std::make_pair(UnitClasseID, Cost);
+					idx++;
+				}
+			}
+		}
+	}
+#endif // MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+
 	//TerrainYieldChanges
 	{
 		kUtility.Initialize2DArray(m_ppaiTerrainYieldChange, "Terrains", "Yields");
@@ -734,6 +803,10 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 		m_iNumThemingBonuses = idx;
 		pResourceTypes->Reset();
 	}
+
+
+
+	
 
 	return true;
 }

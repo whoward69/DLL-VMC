@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	?1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -530,6 +530,11 @@ private:
 	int* m_piLocalResourceOrs;
 	int* m_paiHurryModifier;
 
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+	int m_iNumAllowPurchaseUnits[NUM_YIELD_TYPES];
+	std::pair<int, int>* m_piAllowPurchaseUnits[NUM_YIELD_TYPES];
+#endif 
+
 	bool* m_pbBuildingClassNeededInCity;
 	int* m_piNumFreeUnits;
 
@@ -715,6 +720,8 @@ private:
 
 	std::vector<BuildingYieldChange> m_aBuildingYieldChange;
 	std::vector<BuildingGreatWork> m_aBuildingGreatWork;
+
+	
 
 	CvBuildingXMLEntries* m_pBuildings;
 	CvCity* m_pCity;

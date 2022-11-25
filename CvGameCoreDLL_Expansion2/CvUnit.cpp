@@ -522,7 +522,8 @@ void CvUnit::initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitA
 		for(iI = 0; iI < iNumNames; iI++)
 		{
 			int iIndex = (iNameOffset + iI) % iNumNames;
-			CvString strName = getUnitInfo().GetUnitNames(iIndex);
+			auto strPtr = getUnitInfo().GetUnitNames(iIndex);
+			auto strName = strPtr ? *(strPtr) : "";
 			
 #if defined(MOD_EVENTS_UNIT_DATA)
 			if (MOD_EVENTS_UNIT_DATA) {

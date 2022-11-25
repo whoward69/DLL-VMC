@@ -1245,11 +1245,11 @@ const bool CvUnitEntry::GetUnitArtInfoEraVariation() const
 
 
 /// Unique names for individual units (for great people)
-const char* CvUnitEntry::GetUnitNames(int i) const
+CvString* CvUnitEntry::GetUnitNames(int i)
 {
 	CvAssertMsg(i < GetNumUnitNames(), "Index out of bounds");
 	CvAssertMsg(i > -1, "Index out of bounds");
-	return (m_paszUnitNames) ? m_paszUnitNames[i] : NULL;
+	return (m_paszUnitNames) ? m_paszUnitNames + i : nullptr;
 }
 
 /// Unique great works created by individual units.

@@ -99,6 +99,9 @@
 // Enables improvements to boost adjacent improvement's yield.
 #define MOD_API_VP_ADJACENT_YIELD_BOOST				gCustomMods.isAPI_VP_ADJACENT_YIELD_BOOST()
 
+// Enables buildings to unlock purchase of units
+#define MOD_API_BUILDING_ENABLE_PURCHASE_UNITS		gCustomMods.isAPI_BUILDING_ENABLE_PURCHASE_UNITS()
+
 
 // Push various hard-coded values controlling the game out into XML - see DB/CONFIG/GameInXml.sql for specific values -->
 #define MOD_CONFIG_GAME_IN_XML                      gCustomMods.isCONFIG_GAME_IN_XML()
@@ -1342,6 +1345,7 @@ public:
 	MOD_OPT_DECL(API_PLOT_BASED_DAMAGE);
 	MOD_OPT_DECL(API_PLOT_YIELDS);
 	MOD_OPT_DECL(API_VP_ADJACENT_YIELD_BOOST);
+	MOD_OPT_DECL(API_BUILDING_ENABLE_PURCHASE_UNITS);
 	MOD_OPT_DECL(API_ACHIEVEMENTS);
 	MOD_OPT_DECL(API_EXTENSIONS);
 	MOD_OPT_DECL(API_LUA_EXTENSIONS);
