@@ -327,7 +327,10 @@ public:
 
 	CvThemingBonusInfo *GetThemingBonusInfo(int i) const;
 	int GetNumThemingBonuses() const {return m_iNumThemingBonuses;};
-
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+	int GetNumAllowPurchaseUnitsByYieldType(YieldTypes iType);
+	std::pair<UnitClassTypes, int>* GetAllowPurchaseUnitsByYieldType(YieldTypes iType);
+#endif
 private:
 	int m_iBuildingClassType;
 	const CvBuildingClassInfo* m_pkBuildingClassInfo;
@@ -532,7 +535,7 @@ private:
 
 #ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
 	int m_iNumAllowPurchaseUnits[NUM_YIELD_TYPES];
-	std::pair<int, int>* m_piAllowPurchaseUnits[NUM_YIELD_TYPES];
+	std::pair<UnitClassTypes, int>* m_piAllowPurchaseUnits[NUM_YIELD_TYPES];
 #endif 
 
 	bool* m_pbBuildingClassNeededInCity;

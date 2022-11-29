@@ -15516,7 +15516,7 @@ int CvUnit::getUnitAICargo(UnitAITypes eUnitAI) const
 bool CvUnit::IsHasNoValidMove() const
 {
 #if defined(MOD_GLOBAL_STACKING_RULES)
-	if(plot()->getNumFriendlyUnitsOfType(this) <= plot()->getUnitLimit())
+	if(!plot() || plot()->getNumFriendlyUnitsOfType(this) <= plot()->getUnitLimit())
 #else
 	if(plot()->getNumFriendlyUnitsOfType(this) <= GC.getPLOT_UNIT_LIMIT())
 #endif

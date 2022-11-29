@@ -1060,7 +1060,7 @@ int CvLuaCity::lGetFaithPurchaseUnitTooltip(lua_State* L)
 	CvString toolTip;
 	CvCity* pkCity = GetInstance(L);
 	const UnitTypes eUnit = (UnitTypes) lua_tointeger(L, 2);
-
+	pkCity->canTrain(eUnit, false, false, false, false, &toolTip);
 	// Already a unit here
 	if(!pkCity->CanPlaceUnitHere(eUnit))
 	{

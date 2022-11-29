@@ -5026,12 +5026,39 @@ int CvCity::GetPurchaseCost(UnitTypes eUnit)
 
 	bool bIsSpaceshipPart = pkUnitInfo->GetSpaceshipProject() != NO_PROJECT;
 
+	int iCost = GetPurchaseCostFromProduction(getProductionNeeded(eUnit));
 	if (iModifier == -1 && (!bIsSpaceshipPart || !GET_PLAYER(getOwner()).IsEnablesSSPartPurchase()))
 	{
-		return -1;
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+		if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
+			CvTeam& owningTeam = GET_TEAM(getTeam());
+			auto vBuildingList = GetCityBuildings()->GetBuildings()->GetBuildingEntries();
+			int currentMinMod = MAXINT32;
+			for (auto it = vBuildingList.begin(); it != vBuildingList.end(); it++) {
+				auto pBuildingEntry = *it;
+				if (pBuildingEntry && GetCityBuildings()->GetNumBuilding((BuildingTypes)pBuildingEntry->GetID()) > 0 && !owningTeam.isObsoleteBuilding((BuildingTypes)(pBuildingEntry->GetID()))) {
+					int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_GOLD);
+					auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_GOLD);
+					if (pAllowPurchaseList) {
+						for (int i = 0; i < num; i++) {
+							if (pkUnitInfo->GetUnitClassType() == pAllowPurchaseList[i].first) {
+								if (pAllowPurchaseList[i].second >= 0 && pAllowPurchaseList[i].second < currentMinMod) {
+									currentMinMod = pAllowPurchaseList[i].second;
+									iModifier = currentMinMod;
+								}
+							}
+						}
+					}
+					
+				}
+			}
+		}
+		
+#endif
+		if(iModifier == -1) return -1;
 	}
 
-	int iCost = GetPurchaseCostFromProduction(getProductionNeeded(eUnit));
+	
 	iCost *= (100 + iModifier);
 	iCost /= 100;
 
@@ -5207,6 +5234,30 @@ int CvCity::GetFaithPurchaseCost(UnitTypes eUnit, bool bIncludeBeliefDiscounts)
 	{
 		// Cost goes up in later eras
 		iCost = pkUnitInfo->GetFaithCost();
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+		if (iCost <= 0 && MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
+			CvTeam& owningTeam = GET_TEAM(getTeam());
+			auto vBuildingList = GetCityBuildings()->GetBuildings()->GetBuildingEntries();
+			int currentMinMod = MAXINT32;
+			for (auto it = vBuildingList.begin(); it != vBuildingList.end(); it++) {
+				auto pBuildingEntry = *it;
+				if (pBuildingEntry && GetCityBuildings()->GetNumBuilding((BuildingTypes)pBuildingEntry->GetID()) > 0 && !owningTeam.isObsoleteBuilding((BuildingTypes)(pBuildingEntry->GetID()))) {
+					int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_FAITH);
+					auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_FAITH);
+					if (pAllowPurchaseList) {
+						for (int i = 0; i < num; i++) {
+							if (pkUnitInfo->GetUnitClassType() == pAllowPurchaseList[i].first) {
+								if (pAllowPurchaseList[i].second > 0 && pAllowPurchaseList[i].second < currentMinMod) {
+									currentMinMod = pAllowPurchaseList[i].second;
+									iCost = currentMinMod;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+#endif
 		EraTypes eEra = GET_TEAM(GET_PLAYER(getOwner()).getTeam()).GetCurrentEra();
 		int iMultiplier = GC.getEraInfo(eEra)->getFaithCostMultiplier();
 		iCost = iCost * iMultiplier / 100;

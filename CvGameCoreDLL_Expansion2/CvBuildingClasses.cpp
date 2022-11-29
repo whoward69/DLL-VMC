@@ -607,7 +607,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 				m_iNumAllowPurchaseUnits[i] = pResultAllowUnitCount->GetInt(0);
 
 				pResultAllowUnitCount->Reset();
-				m_piAllowPurchaseUnits[i] = new std::pair<int, int>[m_iNumAllowPurchaseUnits[i]];
+				m_piAllowPurchaseUnits[i] = new std::pair<UnitClassTypes, int>[m_iNumAllowPurchaseUnits[i]];
 			}
 		}
 	}
@@ -619,7 +619,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 				sprintf_s(cstrKey, "Building_EnableUnitPurchase_%d", i);
 				std::string strKey(cstrKey);
 				char query[512];
-				sprintf_s(query, "select UnitClasses.ID as UnitClasseID, Building_EnableUnitPurchase.Cost as Cost from Building_EnableUnitPurchase\
+				sprintf_s(query, "select UnitClasses.ID as UnitClasseID, Building_EnableUnitPurchase.CostModifier as CostModifier from Building_EnableUnitPurchase\
 				inner join Yields on Yields.Type = YieldType inner join UnitClasses on UnitClasses.Type = UnitClassType where Yields.ID = %d and BuildingType = ?", i);
 				auto pResultAllowUnit = kUtility.GetResults(strKey);
 				if (pResultAllowUnit == NULL)
@@ -630,8 +630,8 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 				int idx = 0;
 				while (pResultAllowUnit->Step()) {
 					const int UnitClasseID = pResultAllowUnit->GetInt(0);
-					const int Cost = pResultAllowUnit->GetInt(1);
-					m_piAllowPurchaseUnits[i][idx] = std::make_pair(UnitClasseID, Cost);
+					const int CostModifier = pResultAllowUnit->GetInt(1);
+					m_piAllowPurchaseUnits[i][idx] = std::make_pair((UnitClassTypes)UnitClasseID, CostModifier);
 					idx++;
 				}
 			}
@@ -2223,6 +2223,20 @@ CvThemingBonusInfo *CvBuildingEntry::GetThemingBonusInfo(int i) const
 		return &m_paThemingBonusInfo[i];
 	}
 }
+
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+int CvBuildingEntry::GetNumAllowPurchaseUnitsByYieldType(YieldTypes iType) {
+	CvAssertMsg(iType < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(iType > -1, "Index out of bounds");
+	return m_iNumAllowPurchaseUnits[iType];
+}
+
+std::pair<UnitClassTypes, int>* CvBuildingEntry::GetAllowPurchaseUnitsByYieldType(YieldTypes iType) {
+	CvAssertMsg(iType < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(iType > -1, "Index out of bounds");
+	return m_piAllowPurchaseUnits[iType];
+}
+#endif
 
 //=====================================
 // CvBuildingXMLEntries
