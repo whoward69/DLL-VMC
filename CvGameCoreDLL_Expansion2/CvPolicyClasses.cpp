@@ -4028,7 +4028,22 @@ void CvPlayerPolicies::SetPolicyBranchBlocked(PolicyBranchTypes eBranchType, boo
 				}
 			}
 		}
+		ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
+		if (pkScriptSystem)
+		{
+			CvLuaArgsHandle args;
+			args->Push(m_pPlayer->GetID());
+			args->Push(eBranchType);
+			args->Push(bValue);
+
+			// Attempt to execute the game events.
+			// Will return false if there are no registered listeners.
+			bool bResult = false;
+			LuaSupport::CallHook(pkScriptSystem, "PlayerBlockPolicyBranch", args.get(), bResult);
+		}
 	}
+
+	
 }
 
 /// Accessor: is eBranchType blocked because of branch choices?

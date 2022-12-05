@@ -3133,7 +3133,7 @@ void CvPlayer::acquireCity(CvCity* pOldCity, bool bConquest, bool bGift)
 		args->Push(bConquest);
 		args->Push((int)paGreatWorkData.size());
 		args->Push(iCaptureGreatWorks);
-
+		args->Push(pNewCity->GetID());
 		bool bResult;
 		LuaSupport::CallHook(pkScriptSystem, "CityCaptureComplete", args.get(), bResult);
 	}
