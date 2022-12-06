@@ -28,8 +28,12 @@ This will execute the methods with given arguments on all the clients in a multi
 
 
 # How to Compile
-You **must** have both *VS2008* and *VS2013* tool chain installed. In project configuration, enter the page *VC++ directory*, change executable path to your *VS2013* compiler path (Usually **"\Microsoft Visual Studio 12.0\VC\bin"** and **"\Microsoft Visual Studio 12.0\Common7\IDE"**), the remaining set to *VS2008* tool chain's path.  
-If you have them installed in the path **"C:\Program Files (x86)"**, you can open the sln file with *VS2022* and compile without modifiying configurations.
+You **must** have both [VS2008](https://download.microsoft.com/download/E/8/E/E8EEB394-7F42-4963-A2D8-29559B738298/VS2008ExpressWithSP1ENUX1504728.iso) and [VS2013](https://myvs.download.prss.microsoft.com/sg/en_visual_studio_professional_2013_with_update_4_x86_dvd_5935322.iso?t=93b7e13c-7a5d-4b98-97b6-f5021d4fcfb0&e=1670320259&h=e1ed4a7ee658461d495e4b10cf019233b62433d30d03a6ecadc7fbc1ef567103&su=1) tool chain installed. In project configuration, enter the page *VC++ directory*, change executable path to your *VS2013* compiler path (Usually **"\Microsoft Visual Studio 12.0\VC\bin"** and **"\Microsoft Visual Studio 12.0\Common7\IDE"**), the remaining set to *VS2008* tool chain's path.  
+
+If you have them installed in the path **"C:\Program Files (x86)"**, you can open the sln file with *VS2022* and compile without modifiying configurations. The configurations in *VS2022* is like this:
+
+![](images/vs2022-sln-configuration.png)
+
 # Caution
 Currently, not all the methods can be called in this way, available methods are:
 ``` c++
