@@ -24,6 +24,18 @@
     <Filter Include="NetworkSync\LogTool">
       <UniqueIdentifier>{07de94c1-9da9-4a44-8fee-d5e847b674fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="FireWorks Headers">
+      <UniqueIdentifier>{19e11ef8-7ac6-4f11-96ae-b9463d96f350}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FireWorks Headers\EventSystem">
+      <UniqueIdentifier>{26e02691-5d13-4024-8669-9c4e6db352fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FireWorks Headers\Flua">
+      <UniqueIdentifier>{1643fd32-88d6-4879-b40b-36cf0ceeab62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FireWorks Headers\Win32">
+      <UniqueIdentifier>{f4792a4c-150e-4ff1-bf14-29b5840d6ff0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="_precompile.cpp">
@@ -1129,9 +1141,6 @@
     <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaMethodWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaStaticInstance.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\CvGameCoreDLLUtil\include\CvString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1162,11 +1171,197 @@
     <ClInclude Include="StackWalker.h">
       <Filter>NetworkSync\LogTool</Filter>
     </ClInclude>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaStaticInstance.h">
+      <Filter>Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FArray.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAssert.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAStarNode.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAtomic.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAutoArchive.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAutoArchiveClassContainer.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAutoVariable.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAutoVariableBase.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAutoVector.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FBatchAllocate.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FBitFlags.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FCallStack.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FCrc32.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FCriticalSection.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FDataStream.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FDefNew.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FEndian.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFastAllocator.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFastList.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFastVector.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFileDefines.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFileStream.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFileSystem.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFireTypes.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFreeListArrayBase.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFreeListTrashArray.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FIFile.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FIGameIniParser.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FILogFile.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FInputDevice.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FMemHooks.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FMemoryStream.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FObjectHandle.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FObjectPool.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FPrefetch.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FRemark.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FSTLBlockAllocator.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FSTLBlockAllocatorMT.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FStlContainerSerialization.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FString.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FTempHeap.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FTimer.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FUncopyable.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FUndefNew.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\FVariableSystem.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\LintFree.h">
+      <Filter>FireWorks Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\EventSystem\FastDelegate.h">
+      <Filter>FireWorks Headers\EventSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLua.h">
+      <Filter>FireWorks Headers\Flua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaCommon.h">
+      <Filter>FireWorks Headers\Flua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaFStringSupport.h">
+      <Filter>FireWorks Headers\Flua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaGlobalData.h">
+      <Filter>FireWorks Headers\Flua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaPointerProtection.h">
+      <Filter>FireWorks Headers\Flua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaStaticFunctions.h">
+      <Filter>FireWorks Headers\Flua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaTypeExposure.h">
+      <Filter>FireWorks Headers\Flua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaTypes.h">
+      <Filter>FireWorks Headers\Flua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\Win32\FDebugHelper.h">
+      <Filter>FireWorks Headers\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FirePlace\include\FireWorks\Win32\FKBInputDevice.h">
+      <Filter>FireWorks Headers\Win32</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CvGameCoreDLL.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.gitignore" />
+    <None Include="..\FirePlace\include\FireWorks\FCriticalSection.inl">
+      <Filter>FireWorks Headers</Filter>
+    </None>
+    <None Include="..\FirePlace\include\FireWorks\FStringA.inl">
+      <Filter>FireWorks Headers</Filter>
+    </None>
+    <None Include="..\FirePlace\include\FireWorks\FStringW.inl">
+      <Filter>FireWorks Headers</Filter>
+    </None>
+    <None Include="..\FirePlace\include\FireWorks\Win32\FDebugHelper.inl">
+      <Filter>FireWorks Headers\Win32</Filter>
+    </None>
   </ItemGroup>
 </Project>
