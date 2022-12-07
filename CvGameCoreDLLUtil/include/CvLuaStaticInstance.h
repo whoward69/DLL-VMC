@@ -83,21 +83,7 @@ int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_S
 
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time + line);
 	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
-	try {
-		InvokeRecorder::pushInvoke(str);
-	}
-	catch (NetworkMessageCollisionExceptopn e) {
-		//lua_getinfo(L, "Sl", &dbg);
-		char buf[1024] = { 0 };
-		_itoa_s(line, buf, 10);
-		string collisionMsg = "Collision happened: File name: ";
-		collisionMsg += errWhere;
-		collisionMsg += " at line: ";
-		collisionMsg += buf;
-		collisionMsg += " with call: ";
-		collisionMsg += str;
-		CUSTOMLOG(collisionMsg);
-	}
+	InvokeRecorder::pushInvoke(str);
 	gDLL->SendRenameCity(-str.length(), str);
 	auto rtn = 0;
 	try {
@@ -112,7 +98,7 @@ int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_S
 
 template<class Derived, class InstanceType>
 int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunctionPostpone(lua_State* L) {
-	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 2) < 0;
+	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 1) < 0;
 	if (fault) return 0;
 	int time = GetTickCount();
 	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
