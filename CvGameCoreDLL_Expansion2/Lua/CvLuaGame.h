@@ -37,6 +37,12 @@ protected:
 
 	static int lCanHandleAction(lua_State* L);
 	static int lHandleAction(lua_State* L);
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	static int lHandleMultiplayerTeamSignal(lua_State* L);
+	static int lHandleMultiplayerTeamSignalImpl(lua_State* L);
+#endif // MOD_API_MP_PLOT_SIGNAL
+
+	
 
 	static int lUpdateScore(lua_State* L);
 	static int lCycleCities(lua_State* L);

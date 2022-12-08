@@ -44,6 +44,8 @@ void CvLuaGame::RegistStaticFunctions() {
 
 	REGIST_STATIC_FUNCTION(CvLuaGame::lHandleAction);
 
+	REGIST_STATIC_FUNCTION(CvLuaGame::lHandleMultiplayerTeamSignalImpl);
+
 	REGIST_STATIC_FUNCTION(CvLuaGame::lSetUnitedNationsCountdown);
 	REGIST_STATIC_FUNCTION(CvLuaGame::lSetGameTurn);
 	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMaxTurns);
@@ -103,6 +105,10 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 
 	Method(CanHandleAction);
 	Method(HandleAction);
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	Method(HandleMultiplayerTeamSignal);
+#endif // MOD_API_MP_PLOT_SIGNAL
+
 	Method(UpdateScore);
 	Method(CycleCities);
 	Method(CycleUnits);
@@ -526,6 +532,40 @@ int CvLuaGame::lHandleAction(lua_State* L)
 	return 0;
 }
 //------------------------------------------------------------------------------
+// 
+#ifdef MOD_API_MP_PLOT_SIGNAL
+int CvLuaGame::lHandleMultiplayerTeamSignal(lua_State* L) {
+	auto pKGame = GetInstance();
+	const PlayerTypes iPlayer = (PlayerTypes)lua_tointeger(L, 1);
+	const int iPlotX = lua_tointeger(L, 2);
+	const int iPlotY = lua_tointeger(L, 3);
+	uint64 curTime = GetTickCount64();
+	if (curTime - pKGame->GetLastMPSignalInvokeTime() >= 500 && iPlayer != NO_PLAYER) {
+		//pKGame->GenerateMPSignalNotification(iPlayer, iPlotX, iPlotY);
+		auto L = luaL_newstate();
+		lua_pushstring(L, "CvLuaGame::lHandleMultiplayerTeamSignalImpl");
+		lua_pushinteger(L, iPlayer);
+		lua_pushinteger(L, iPlotX);
+		lua_pushinteger(L, iPlotY);
+		lSendAndExecuteLuaFunctionPostpone(L);
+		pKGame->SetLastMPSignalInvokeTime(curTime);
+		lua_close(L);
+	}
+	return 0;
+}
+
+int CvLuaGame::lHandleMultiplayerTeamSignalImpl(lua_State* L) {
+	auto pKGame = GetInstance();
+	const PlayerTypes iPlayer = (PlayerTypes)lua_tointeger(L, 1);
+	const int iPlotX = lua_tointeger(L, 2);
+	const int iPlotY = lua_tointeger(L, 3);
+	pKGame->GenerateMPSignalNotification(iPlayer, iPlotX, iPlotY);
+	
+	return 0;
+}
+#endif // DEBUG
+
+
 // void updateScore(bool bForce);
 int CvLuaGame::lUpdateScore(lua_State* L)
 {

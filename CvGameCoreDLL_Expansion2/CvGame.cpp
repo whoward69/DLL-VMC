@@ -101,6 +101,10 @@ CvGame::CvGame() :
 	, m_bFOW(true)
 	, m_bArchaeologyTriggered(false)
 	, m_lastTurnAICivsProcessed(-1)
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	, m_uiLastMPSignalInvokeTime(0)
+#endif // MOD_API_MP_PLOT_SIGNAL
+	
 {
 	m_aiEndTurnMessagesReceived = FNEW(int[MAX_PLAYERS], c_eCiv5GameplayDLL, 0);
 	m_aiRankPlayer = FNEW(int[MAX_PLAYERS], c_eCiv5GameplayDLL, 0);        // Ordered by rank...
@@ -12212,3 +12216,28 @@ bool CvGame::AnyoneHasUnitClass(UnitClassTypes iUnitClassType) const
 	return false;
 }
 #endif
+
+#ifdef MOD_API_MP_PLOT_SIGNAL
+void CvGame::GenerateMPSignalNotification(PlayerTypes iFromPlayer, int iPlotX, int iPlotY) {
+	CvNotifications* pNotifications = GET_PLAYER(getActivePlayer()).GetNotifications();
+	CvPlayer& pFromPlayer = GET_PLAYER(iFromPlayer);
+	if (pNotifications)
+	{
+		Localization::String strMessage = Localization::Lookup("TXT_KEY_SP_NOTIFICATION_MP_PLOT_SIGNAL");
+		Localization::String strSummary = Localization::Lookup("TXT_KEY_SP_NOTIFICATION_MP_PLOT_SIGNAL_SUMMARY");
+		if (GC.getGame().isGameMultiPlayer() && pFromPlayer.isHuman())
+		{
+			strMessage << pFromPlayer.getNickName();
+		}
+		else
+		{
+			strMessage << pFromPlayer.getNameKey();
+		}
+		pNotifications->Add(
+			NOTIFICATION_CITY_GROWTH, strMessage.toUTF8(), strSummary.toUTF8(),
+			iPlotX, iPlotY, 0, iFromPlayer);
+	}
+}
+#endif // MOD_API_MP_PLOT_SIGNAL
+
+

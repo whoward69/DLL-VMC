@@ -610,12 +610,18 @@ public:
 	bool AnyoneHasUnit(UnitTypes iUnitType) const;
 	bool AnyoneHasUnitClass(UnitClassTypes iUnitClassType) const;
 #endif
-
 public:
 
 	//Function to determine city size from city population
 	unsigned int GetVariableCitySizeFromPopulation(unsigned int nPopulation);
 
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	uint64 GetLastMPSignalInvokeTime() { return m_uiLastMPSignalInvokeTime; }
+	void SetLastMPSignalInvokeTime(uint64 uiNewValue) { m_uiLastMPSignalInvokeTime = uiNewValue; }
+	void GenerateMPSignalNotification(PlayerTypes iFromPlayer, int iPlotX, int iPlotY);
+#endif // MOD_API_MP_PLOT_SIGNAL
+
+	
 	//------------------------------------------------------------
 	//------------------------------------------------------------
 	//------------------------------------------------------------
@@ -727,6 +733,11 @@ protected:
 
 	int** m_apaiPlayerVote;
 	int** m_ppaaiTeamVictoryRank;
+
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	uint64 m_uiLastMPSignalInvokeTime;
+#endif // MOD_API_MP_PLOT_SIGNAL
+
 
 	Database::Results* m_pDiploResponseQuery;
 
