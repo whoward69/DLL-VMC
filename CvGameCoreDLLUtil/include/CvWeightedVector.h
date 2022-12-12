@@ -137,8 +137,7 @@ public:
 	/// Sort this stuff from highest to lowest
 	void SortItems ()
 	{
-		//std::sort(m_pItems.begin(), m_pItems.end());
-		StableSortItems();
+		std::sort(m_pItems.begin(), m_pItems.end());
 	}
 
 	void StableSortItems()

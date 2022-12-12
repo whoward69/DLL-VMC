@@ -382,7 +382,7 @@ template< class T, eMPoolType pool_type>
 template< class Predicate >
 inline void FArray<T,pool_type>::Sort( Predicate pred )
 {
-	std::stable_sort( FArray<T,pool_type>::begin(), FArray<T, pool_type>::end(), pred );
+	std::sort( FArray<T,pool_type>::begin(), FArray<T, pool_type>::end(), pred );
 }
 
 #endif	//FARRAY_H
