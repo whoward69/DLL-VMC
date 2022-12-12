@@ -215,7 +215,7 @@ bool CvHomelandAI::IsAnyValidExploreMoves(const CvUnit* pUnit) const
 
 		if (aDistanceList.size())
 		{
-			std::sort(aDistanceList.begin(), aDistanceList.end(), SortUnitDistance);
+			std::stable_sort(aDistanceList.begin(), aDistanceList.end(), SortUnitDistance);
 
 			for (DistanceSortedPlotArray::const_iterator itr = aDistanceList.begin(); itr != aDistanceList.end(); ++itr)
 			{
