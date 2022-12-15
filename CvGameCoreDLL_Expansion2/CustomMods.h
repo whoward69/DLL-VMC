@@ -110,6 +110,8 @@
 // Push various hard-coded values controlling the AI out into XML - see DB/CONFIG/AiInXml.sql for specific values
 #define MOD_CONFIG_AI_IN_XML                        gCustomMods.isCONFIG_AI_IN_XML()
 
+#define MOD_GLOBAL_INTERNAL_TRADE_ROUTE_BONUS_FROM_ORIGIN_CITY gCustomMods.isGLOBAL_INTERNAL_TRADE_ROUTE_BONUS_FROM_ORIGIN_CITY()
+
 // If A declares war on B that preempts a co-op war, A is locked into the war for the same number of turns as if they had agreed to the co-op war (v86) 
 #define MOD_GLOBAL_EARLY_COOP_WAR_LOCK				gCustomMods.isGLOBAL_EARLY_COOP_WAR_LOCK()
 // Changes the stacking limits based on what the tile is (city, fort, plain, etc) - AFFECTS SAVE GAME DATA FORMAT
@@ -1164,6 +1166,7 @@ public:
 	int getOption(std::string sName, int defValue = 0);
 	int getCivOption(const char* szCiv, const char* szName, int defValue = 0);
 
+	MOD_OPT_DECL(GLOBAL_INTERNAL_TRADE_ROUTE_BONUS_FROM_ORIGIN_CITY);
 	MOD_OPT_DECL(GLOBAL_EARLY_COOP_WAR_LOCK);
 	MOD_OPT_DECL(GLOBAL_STACKING_RULES);
 	MOD_OPT_DECL(GLOBAL_BREAK_CIVILIAN_1UPT);
