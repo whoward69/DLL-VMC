@@ -2637,8 +2637,10 @@ int CvPlayerTrade::GetTradeConnectionValueTimes100 (const TradeConnection& kTrad
 					iValue += GetTradeConnectionPolicyValueTimes100(kTradeConnection, eYield);
 					iValue += GetTradeConnectionOtherTraitValueTimes100(kTradeConnection, eYield, false);
 #endif
+					CvCity* pOriginCity = CvGameTrade::GetOriginCity(kTradeConnection);
+					iValue += pOriginCity->getYieldRate(YIELD_FOOD, true) * 100;
 					iValue += GC.getEraInfo(GET_PLAYER(kTradeConnection.m_eDestOwner).GetCurrentEra())->getTradeRouteFoodBonusTimes100();
-					iValue *= GC.getEraInfo(GC.getGame().getStartEra())->getGrowthPercent();
+					iValue *= GC.getEraInfo(GC.getGame().getStartEra())->getGrowthPercent() + 110;
 					iValue /= 100;
 
 					int iModifier = 100;
@@ -2661,8 +2663,10 @@ int CvPlayerTrade::GetTradeConnectionValueTimes100 (const TradeConnection& kTrad
 					iValue += GetTradeConnectionPolicyValueTimes100(kTradeConnection, eYield);
 					iValue += GetTradeConnectionOtherTraitValueTimes100(kTradeConnection, eYield, false);
 #endif
+					CvCity* pOriginCity = CvGameTrade::GetOriginCity(kTradeConnection);
+					iValue += pOriginCity->getYieldRate(YIELD_PRODUCTION, true) * 100;
 					iValue += GC.getEraInfo(GET_PLAYER(kTradeConnection.m_eDestOwner).GetCurrentEra())->getTradeRouteProductionBonusTimes100();
-					iValue *= (GC.getEraInfo(GC.getGame().getStartEra())->getConstructPercent() + GC.getEraInfo(GC.getGame().getStartEra())->getTrainPercent()) / 2;
+					iValue *= (GC.getEraInfo(GC.getGame().getStartEra())->getConstructPercent() + GC.getEraInfo(GC.getGame().getStartEra())->getTrainPercent() + 2 * 110) / 2;
 					iValue /= 100;
 
 					int iModifier = 100;
