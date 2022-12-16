@@ -29,9 +29,20 @@
 extern "C" unsigned int _ftoui3(const float x) {
 	return (unsigned int)_mm_cvt_ss2si(_mm_set_ss(x));
 }
-
-extern "C" double _ltod3(const __int64 x) {
-	return static_cast<float> (x);
+static const unsigned long long _Int32ToUInt32[] = { 0ULL, 0x41F0000000000000ULL };
+extern "C"  __declspec(naked) double _cdecl _ltod3(const __int64 x) {
+	__asm
+	{
+		xorps   xmm1, xmm1
+		cvtsi2sd xmm1, edx
+		xorps   xmm0, xmm0
+		cvtsi2sd xmm0, ecx
+		shr     ecx, 31
+		mulsd   xmm1, ds:_Int32ToUInt32[8]          //_DP2to32
+		addsd   xmm0, ds : _Int32ToUInt32[ecx * 8]
+		addsd   xmm0, xmm1
+		retn
+	}
 }
 
 /// This function will return the CvPlot associated with the Index (0 to 36) of a City at iX,iY.  The lower the Index the closer the Plot is to the City (roughly)

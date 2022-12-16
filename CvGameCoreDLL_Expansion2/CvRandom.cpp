@@ -137,7 +137,7 @@ unsigned short CvRandom::get(unsigned short usNum, const char* pszLog)
 	if(!isMapGenerating)
 	{
 		int iRandLogging = GC.getRandLogging();
-		if(iRandLogging > 0)
+		if(iRandLogging > 0 && m_bSynchronous)
 		{
 #if !defined(FINAL_RELEASE)
 			if(!gDLL->IsGameCoreThread() && gDLL->IsGameCoreExecuting() && m_bSynchronous)
