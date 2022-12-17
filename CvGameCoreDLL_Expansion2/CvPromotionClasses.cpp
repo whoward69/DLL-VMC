@@ -9,6 +9,7 @@
 #include "ICvDLLUserInterface.h"
 #include "CvGameCoreUtils.h"
 #include "CvUnitClasses.h"
+#include "CustomMods.h"
 
 // include this after all other headers!
 #include "LintFree.h"
@@ -799,6 +800,45 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 			"UnitType",
 			"PromotionType",
 			szPromotionType);
+	}
+#endif
+
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+	if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+	{
+		// UnitPromotions_PromotionModifiers
+		std::string sqlKey = "UnitPromotions_PromotionModifiers";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if (pResults == nullptr)
+		{
+			const char* sql = "select t2.ID, t1.Modifier, t1.Attack, t1.Defense from UnitPromotions_PromotionModifiers as t1 left join UnitPromotions t2 on t1.OtherPromotionType = t2.`Type` where t1.PromotionType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, sql);
+		}
+
+		CvAssert(pResults);
+		if (pResults == nullptr)
+		{
+			return false;
+		}
+
+		pResults->Bind(1, szPromotionType);
+
+		while (pResults->Step())
+		{
+			const PromotionTypes iOtherPromotionType = static_cast<PromotionTypes>(pResults->GetInt(0));
+			CvAssert(iOtherPromotionType > -1 && iOtherPromotionType < GC.getNumPromotionInfos());
+
+			const int iModifier = pResults->GetInt("Modifier");
+			m_pPromotionModifiers[iOtherPromotionType] += iModifier;
+
+			const int iAttack = pResults->GetInt("Attack");
+			m_pPromotionAttackModifiers[iOtherPromotionType] += iAttack;
+
+			const int iDefense = pResults->GetInt("Defense");
+			m_pPromotionDefenseModifiers[iOtherPromotionType] += iDefense;
+		}
+
+		pResults->Reset();
 	}
 #endif
 
