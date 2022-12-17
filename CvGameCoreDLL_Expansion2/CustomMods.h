@@ -104,6 +104,7 @@
 // Enables buildings to unlock purchase of units
 #define MOD_API_BUILDING_ENABLE_PURCHASE_UNITS		gCustomMods.isAPI_BUILDING_ENABLE_PURCHASE_UNITS()
 
+#define MOD_API_PROMOTION_TO_PROMOTION_MOD          gCustomMods.isAPI_PROMOTION_TO_PROMOTION_MOD()
 
 // Push various hard-coded values controlling the game out into XML - see DB/CONFIG/GameInXml.sql for specific values -->
 #define MOD_CONFIG_GAME_IN_XML                      gCustomMods.isCONFIG_GAME_IN_XML()
@@ -1354,9 +1355,8 @@ public:
 	MOD_OPT_DECL(API_ACHIEVEMENTS);
 	MOD_OPT_DECL(API_EXTENSIONS);
 	MOD_OPT_DECL(API_LUA_EXTENSIONS);
-
+	MOD_OPT_DECL(API_PROMOTION_TO_PROMOTION_MOD);
 	MOD_OPT_DECL(API_MP_PLOT_SIGNAL);
-	
 
 	MOD_OPT_DECL(CONFIG_GAME_IN_XML);
 	MOD_OPT_DECL(CONFIG_AI_IN_XML);
