@@ -746,6 +746,10 @@ public:
 	int otherPromotionModifier(PromotionTypes other) const;
 	int otherPromotionAttackModifier(PromotionTypes other) const;
 	int otherPromotionDefenseModifier(PromotionTypes other) const;
+
+	int otherPromotionModifierByUnit(const CvUnit* otherUnit) const;
+	int otherPromotionAttackModifierByUnit(const CvUnit* otherUnit) const;
+	int otherPromotionDefenseModifierByUnit(const CvUnit* otherUnit) const;
 #endif
 
 	bool IsHasNoValidMove() const;

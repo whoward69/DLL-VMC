@@ -15379,6 +15379,7 @@ int CvUnit::otherPromotionModifier(PromotionTypes other) const
 	CvAssertMsg(other > -1, "otherPromotionModifier: lower bound");
 	return m_Promotions.GetOtherPromotionModifier(other);
 }
+
 int CvUnit::otherPromotionAttackModifier(PromotionTypes other) const
 {
 	VALIDATE_OBJECT
@@ -15386,12 +15387,79 @@ int CvUnit::otherPromotionAttackModifier(PromotionTypes other) const
 	CvAssertMsg(other > -1, "otherPromotionAttackModifier: lower bound");
 	return m_Promotions.GetOtherPromotionAttackModifier(other);
 }
+
 int CvUnit::otherPromotionDefenseModifier(PromotionTypes other) const
 {
 	VALIDATE_OBJECT
 	CvAssertMsg(other < GC.getNumPromotionInfos(), "otherPromotionDefenseModifier: upper bound");
 	CvAssertMsg(other > -1, "otherPromotionDefenseModifier: lower bound");
 	return m_Promotions.GetOtherPromotionDefenseModifier(other);
+}
+
+int CvUnit::otherPromotionModifierByUnit(const CvUnit* otherUnit) const
+{
+	if (otherUnit == nullptr)
+	{
+		return 0;
+	}
+
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes otherPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* otherPromotion = GC.getPromotionInfo(otherPromotionType);
+		if (otherPromotion == nullptr || !otherUnit->isHasPromotion(otherPromotionType))
+		{
+			continue;
+		}
+
+		iSum += this->otherPromotionModifier(otherPromotionType);
+	}
+	return iSum;
+}
+
+int CvUnit::otherPromotionAttackModifierByUnit(const CvUnit* otherUnit) const
+{
+	if (otherUnit == nullptr)
+	{
+		return 0;
+	}
+
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes otherPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* otherPromotion = GC.getPromotionInfo(otherPromotionType);
+		if (otherPromotion == nullptr || !otherUnit->isHasPromotion(otherPromotionType))
+		{
+			continue;
+		}
+
+		iSum += this->otherPromotionAttackModifier(otherPromotionType);
+	}
+	return iSum;
+}
+
+int CvUnit::otherPromotionDefenseModifierByUnit(const CvUnit* otherUnit) const
+{
+	if (otherUnit == nullptr)
+	{
+		return 0;
+	}
+
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes otherPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* otherPromotion = GC.getPromotionInfo(otherPromotionType);
+		if (otherPromotion == nullptr || !otherUnit->isHasPromotion(otherPromotionType))
+		{
+			continue;
+		}
+
+		iSum += this->otherPromotionDefenseModifier(otherPromotionType);
+	}
+	return iSum;
 }
 #endif
 
