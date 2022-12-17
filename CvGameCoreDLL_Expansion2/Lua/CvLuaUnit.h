@@ -377,6 +377,12 @@ protected:
 	static int lCapitalDefenseModifier(lua_State* L);
 	static int lCapitalDefenseFalloff(lua_State* L);
 
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+	static int lOtherPromotionModifier(lua_State* L);
+	static int lOtherPromotionAttackModifier(lua_State* L);
+	static int lOtherPromotionDefenseModifier(lua_State* L);
+#endif
+
 	static int lSpecialCargo(lua_State* L);
 	static int lDomainCargo(lua_State* L);
 	static int lCargoSpace(lua_State* L);

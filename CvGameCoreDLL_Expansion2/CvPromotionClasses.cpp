@@ -9,6 +9,7 @@
 #include "ICvDLLUserInterface.h"
 #include "CvGameCoreUtils.h"
 #include "CvUnitClasses.h"
+#include "CustomMods.h"
 
 // include this after all other headers!
 #include "LintFree.h"
@@ -799,6 +800,45 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 			"UnitType",
 			"PromotionType",
 			szPromotionType);
+	}
+#endif
+
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+	if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+	{
+		// UnitPromotions_PromotionModifiers
+		std::string sqlKey = "UnitPromotions_PromotionModifiers";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if (pResults == nullptr)
+		{
+			const char* sql = "select t2.ID, t1.Modifier, t1.Attack, t1.Defense from UnitPromotions_PromotionModifiers as t1 left join UnitPromotions t2 on t1.OtherPromotionType = t2.`Type` where t1.PromotionType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, sql);
+		}
+
+		CvAssert(pResults);
+		if (pResults == nullptr)
+		{
+			return false;
+		}
+
+		pResults->Bind(1, szPromotionType);
+
+		while (pResults->Step())
+		{
+			const PromotionTypes iOtherPromotionType = static_cast<PromotionTypes>(pResults->GetInt(0));
+			CvAssert(iOtherPromotionType > -1 && iOtherPromotionType < GC.getNumPromotionInfos());
+
+			const int iModifier = pResults->GetInt("Modifier");
+			m_pPromotionModifiers[iOtherPromotionType] += iModifier;
+
+			const int iAttack = pResults->GetInt("Attack");
+			m_pPromotionAttackModifiers[iOtherPromotionType] += iAttack;
+
+			const int iDefense = pResults->GetInt("Defense");
+			m_pPromotionDefenseModifiers[iOtherPromotionType] += iDefense;
+		}
+
+		pResults->Reset();
 	}
 #endif
 
@@ -2096,6 +2136,63 @@ bool CvPromotionEntry::IsPostCombatRandomPromotion(int i) const
 	return m_pbPostCombatRandomPromotion ? m_pbPostCombatRandomPromotion[i] : false;
 }
 
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+int CvPromotionEntry::GetOtherPromotionModifier(PromotionTypes other) const
+{
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "GetOtherPromotionModifier: upper bound");
+	CvAssertMsg(other > -1, "GetOtherPromotionModifier: lower bound");
+
+	if (other <= -1 || other >= GC.getNumPromotionInfos())
+	{
+		return -1;
+	}
+
+	auto iterator = m_pPromotionModifiers.find(other);
+	if (iterator == m_pPromotionModifiers.end())
+	{
+		return 0;
+	}
+
+	return iterator->second;
+}
+int CvPromotionEntry::GetOtherPromotionAttackModifier(PromotionTypes other) const
+{
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "GetOtherPromotionAttackModifier: upper bound");
+	CvAssertMsg(other > -1, "GetOtherPromotionAttackModifier: lower bound");
+
+	if (other <= -1 || other >= GC.getNumPromotionInfos())
+	{
+		return -1;
+	}
+
+	auto iterator = m_pPromotionAttackModifiers.find(other);
+	if (iterator == m_pPromotionAttackModifiers.end())
+	{
+		return 0;
+	}
+
+	return iterator->second;
+}
+int CvPromotionEntry::GetOtherPromotionDefenseModifier(PromotionTypes other) const
+{
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "GetOtherPromotionDefenseModifier: upper bound");
+	CvAssertMsg(other > -1, "GetOtherPromotionDefenseModifier: lower bound");
+
+	if (other <= -1 || other >= GC.getNumPromotionInfos())
+	{
+		return -1;
+	}
+
+	auto iterator = m_pPromotionDefenseModifiers.find(other);
+	if (iterator == m_pPromotionDefenseModifiers.end())
+	{
+		return 0;
+	}
+
+	return iterator->second;
+}
+#endif
+
 //=====================================
 // CvPromotionEntryXMLEntries
 //=====================================
@@ -2375,6 +2472,57 @@ PromotionTypes CvUnitPromotions::ChangePromotionAfterCombat(PromotionTypes eInde
 
 	return NO_PROMOTION;
 }
+
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+int CvUnitPromotions::GetOtherPromotionModifier(PromotionTypes other) const
+{
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes thisPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* thisPromotion = GC.getPromotionInfo(thisPromotionType);
+		if (thisPromotion == nullptr || !HasPromotion(thisPromotionType))
+		{
+			continue;
+		}
+
+		iSum += thisPromotion->GetOtherPromotionModifier(other);
+	}
+	return iSum;
+}
+int CvUnitPromotions::GetOtherPromotionAttackModifier(PromotionTypes other) const
+{
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes thisPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* thisPromotion = GC.getPromotionInfo(thisPromotionType);
+		if (thisPromotion == nullptr || !HasPromotion(thisPromotionType))
+		{
+			continue;
+		}
+
+		iSum += thisPromotion->GetOtherPromotionAttackModifier(other);
+	}
+	return iSum;
+}
+int CvUnitPromotions::GetOtherPromotionDefenseModifier(PromotionTypes other) const
+{
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes thisPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* thisPromotion = GC.getPromotionInfo(thisPromotionType);
+		if (thisPromotion == nullptr || !HasPromotion(thisPromotionType))
+		{
+			continue;
+		}
+
+		iSum += thisPromotion->GetOtherPromotionDefenseModifier(other);
+	}
+	return iSum;
+}
+#endif
 
 // PRIVATE METHODS
 

@@ -538,7 +538,7 @@ public:
 	int GetBaseRangedCombatStrength() const;
 #if defined(MOD_API_EXTENSIONS)
 	void SetBaseRangedCombatStrength(int iStrength);
-#endif
+#endif 
 	int GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* pCity, bool bAttacking, bool bForRangedAttack) const;
 
 	int GetAirCombatDamage(const CvUnit* pDefender, CvCity* pCity, bool bIncludeRand, int iAssumeExtraDamage = 0) const;
@@ -741,6 +741,16 @@ public:
 	int unitClassDefenseModifier(UnitClassTypes eUnitClass) const;
 	int unitCombatModifier(UnitCombatTypes eUnitCombat) const;
 	int domainModifier(DomainTypes eDomain) const;
+
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+	int otherPromotionModifier(PromotionTypes other) const;
+	int otherPromotionAttackModifier(PromotionTypes other) const;
+	int otherPromotionDefenseModifier(PromotionTypes other) const;
+
+	int otherPromotionModifierByUnit(const CvUnit* otherUnit) const;
+	int otherPromotionAttackModifierByUnit(const CvUnit* otherUnit) const;
+	int otherPromotionDefenseModifierByUnit(const CvUnit* otherUnit) const;
+#endif
 
 	bool IsHasNoValidMove() const;
 

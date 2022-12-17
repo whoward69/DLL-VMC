@@ -12414,6 +12414,14 @@ int CvUnit::GetGenericMaxStrengthModifier(const CvUnit* pOtherUnit, const CvPlot
 		iTempModifier = getUnitClassModifier(pOtherUnit->getUnitClassType());
 		iModifier += iTempModifier;
 
+		// Promotion-Promotion Modifier
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		{
+			iModifier += otherPromotionModifierByUnit(pOtherUnit);
+		}
+#endif
+
 		// Unit Combat type Modifier
 		if(pOtherUnit->getUnitCombatType() != NO_UNITCOMBAT)
 		{
@@ -12618,6 +12626,14 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 		iTempModifier = unitClassAttackModifier(pDefender->getUnitClassType());
 		iModifier += iTempModifier;
 
+		// Promotion-Promotion Modifier
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		{
+			iModifier += otherPromotionAttackModifierByUnit(pDefender);
+		}
+#endif
+
 		// Bonus VS fortified
 		if(pDefender->getFortifyTurns() > 0)
 			iModifier += attackFortifiedModifier();
@@ -12740,6 +12756,14 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 		// Unit Class Defense Modifier
 		iTempModifier = unitClassDefenseModifier(pAttacker->getUnitClassType());
 		iModifier += iTempModifier;
+
+		// Promotion-Promotion Modifier
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		{
+			iModifier += otherPromotionDefenseModifierByUnit(pAttacker);
+		}
+#endif
 	}
 
 	// Unit can't drop below 10% strength
@@ -12936,6 +12960,14 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		// Unit Class Mod
 		iModifier += getUnitClassModifier(pOtherUnit->getUnitClassType());
 
+		// Promotion-Promotion Modifier
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		{
+			iModifier += otherPromotionModifierByUnit(pOtherUnit);
+		}
+#endif
+
 		// Unit combat modifier VS other unit
 		if(pOtherUnit->getUnitCombatType() != NO_UNITCOMBAT)
 			iModifier += unitCombatModifier(pOtherUnit->getUnitCombatType());
@@ -12990,6 +13022,14 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		{
 			// Unit Class Attack Mod
 			iModifier += unitClassAttackModifier(pOtherUnit->getUnitClassType());
+
+			// Promotion-Promotion Modifier
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		{
+			iModifier += otherPromotionAttackModifierByUnit(pOtherUnit);
+		}
+#endif
 
 			////////////////////////
 			// KNOWN BATTLE PLOT
@@ -13063,6 +13103,14 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 
 			// Unit Class Defense Mod
 			iModifier += unitClassDefenseModifier(pOtherUnit->getUnitClassType());
+
+			// Promotion-Promotion Modifier
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+			if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+			{
+				iModifier += otherPromotionDefenseModifierByUnit(pOtherUnit);
+			}
+#endif
 		}
 	}
 
@@ -15371,6 +15419,97 @@ int CvUnit::domainModifier(DomainTypes eDomain) const
 	return (getExtraDomainModifier(eDomain));
 }
 
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+int CvUnit::otherPromotionModifier(PromotionTypes other) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "otherPromotionModifier: upper bound");
+	CvAssertMsg(other > -1, "otherPromotionModifier: lower bound");
+	return m_Promotions.GetOtherPromotionModifier(other);
+}
+
+int CvUnit::otherPromotionAttackModifier(PromotionTypes other) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "otherPromotionAttackModifier: upper bound");
+	CvAssertMsg(other > -1, "otherPromotionAttackModifier: lower bound");
+	return m_Promotions.GetOtherPromotionAttackModifier(other);
+}
+
+int CvUnit::otherPromotionDefenseModifier(PromotionTypes other) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "otherPromotionDefenseModifier: upper bound");
+	CvAssertMsg(other > -1, "otherPromotionDefenseModifier: lower bound");
+	return m_Promotions.GetOtherPromotionDefenseModifier(other);
+}
+
+int CvUnit::otherPromotionModifierByUnit(const CvUnit* otherUnit) const
+{
+	if (otherUnit == nullptr)
+	{
+		return 0;
+	}
+
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes otherPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* otherPromotion = GC.getPromotionInfo(otherPromotionType);
+		if (otherPromotion == nullptr || !otherUnit->isHasPromotion(otherPromotionType))
+		{
+			continue;
+		}
+
+		iSum += this->otherPromotionModifier(otherPromotionType);
+	}
+	return iSum;
+}
+
+int CvUnit::otherPromotionAttackModifierByUnit(const CvUnit* otherUnit) const
+{
+	if (otherUnit == nullptr)
+	{
+		return 0;
+	}
+
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes otherPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* otherPromotion = GC.getPromotionInfo(otherPromotionType);
+		if (otherPromotion == nullptr || !otherUnit->isHasPromotion(otherPromotionType))
+		{
+			continue;
+		}
+
+		iSum += this->otherPromotionAttackModifier(otherPromotionType);
+	}
+	return iSum;
+}
+
+int CvUnit::otherPromotionDefenseModifierByUnit(const CvUnit* otherUnit) const
+{
+	if (otherUnit == nullptr)
+	{
+		return 0;
+	}
+
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes otherPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* otherPromotion = GC.getPromotionInfo(otherPromotionType);
+		if (otherPromotion == nullptr || !otherUnit->isHasPromotion(otherPromotionType))
+		{
+			continue;
+		}
+
+		iSum += this->otherPromotionDefenseModifier(otherPromotionType);
+	}
+	return iSum;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 SpecialUnitTypes CvUnit::specialCargo() const
