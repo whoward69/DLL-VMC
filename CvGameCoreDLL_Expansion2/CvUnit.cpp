@@ -12626,6 +12626,14 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 		iTempModifier = unitClassAttackModifier(pDefender->getUnitClassType());
 		iModifier += iTempModifier;
 
+		// Promotion-Promotion Modifier
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		{
+			iModifier += otherPromotionAttackModifierByUnit(pDefender);
+		}
+#endif
+
 		// Bonus VS fortified
 		if(pDefender->getFortifyTurns() > 0)
 			iModifier += attackFortifiedModifier();
@@ -13006,6 +13014,14 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		{
 			// Unit Class Attack Mod
 			iModifier += unitClassAttackModifier(pOtherUnit->getUnitClassType());
+
+			// Promotion-Promotion Modifier
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		{
+			iModifier += otherPromotionAttackModifierByUnit(pOtherUnit);
+		}
+#endif
 
 			////////////////////////
 			// KNOWN BATTLE PLOT
