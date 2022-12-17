@@ -2136,6 +2136,63 @@ bool CvPromotionEntry::IsPostCombatRandomPromotion(int i) const
 	return m_pbPostCombatRandomPromotion ? m_pbPostCombatRandomPromotion[i] : false;
 }
 
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+int CvPromotionEntry::GetOtherPromotionModifier(PromotionTypes other) const
+{
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "GetOtherPromotionModifier: upper bound");
+	CvAssertMsg(other > -1, "GetOtherPromotionModifier: lower bound");
+
+	if (other <= -1 || other >= GC.getNumPromotionInfos())
+	{
+		return -1;
+	}
+
+	auto iterator = m_pPromotionModifiers.find(other);
+	if (iterator == m_pPromotionModifiers.end())
+	{
+		return 0;
+	}
+
+	return iterator->second;
+}
+int CvPromotionEntry::GetOtherPromotionAttackModifier(PromotionTypes other) const
+{
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "GetOtherPromotionModifier: upper bound");
+	CvAssertMsg(other > -1, "GetOtherPromotionModifier: lower bound");
+
+	if (other <= -1 || other >= GC.getNumPromotionInfos())
+	{
+		return -1;
+	}
+
+	auto iterator = m_pPromotionAttackModifiers.find(other);
+	if (iterator == m_pPromotionAttackModifiers.end())
+	{
+		return 0;
+	}
+
+	return iterator->second;
+}
+int CvPromotionEntry::GetOtherPromotionDefenseModifier(PromotionTypes other) const
+{
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "GetOtherPromotionModifier: upper bound");
+	CvAssertMsg(other > -1, "GetOtherPromotionModifier: lower bound");
+
+	if (other <= -1 || other >= GC.getNumPromotionInfos())
+	{
+		return -1;
+	}
+
+	auto iterator = m_pPromotionDefenseModifiers.find(other);
+	if (iterator == m_pPromotionDefenseModifiers.end())
+	{
+		return 0;
+	}
+
+	return iterator->second;
+}
+#endif
+
 //=====================================
 // CvPromotionEntryXMLEntries
 //=====================================
