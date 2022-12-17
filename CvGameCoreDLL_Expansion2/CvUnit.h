@@ -742,6 +742,12 @@ public:
 	int unitCombatModifier(UnitCombatTypes eUnitCombat) const;
 	int domainModifier(DomainTypes eDomain) const;
 
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+	int otherPromotionModifier(PromotionTypes other) const;
+	int otherPromotionAttackModifier(PromotionTypes other) const;
+	int otherPromotionDefenseModifier(PromotionTypes other) const;
+#endif
+
 	bool IsHasNoValidMove() const;
 
 	inline int GetID() const

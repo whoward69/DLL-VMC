@@ -15371,6 +15371,29 @@ int CvUnit::domainModifier(DomainTypes eDomain) const
 	return (getExtraDomainModifier(eDomain));
 }
 
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+int CvUnit::otherPromotionModifier(PromotionTypes other) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "otherPromotionModifier: upper bound");
+	CvAssertMsg(other > -1, "otherPromotionModifier: lower bound");
+	return m_Promotions.GetOtherPromotionModifier(other);
+}
+int CvUnit::otherPromotionAttackModifier(PromotionTypes other) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "otherPromotionAttackModifier: upper bound");
+	CvAssertMsg(other > -1, "otherPromotionAttackModifier: lower bound");
+	return m_Promotions.GetOtherPromotionAttackModifier(other);
+}
+int CvUnit::otherPromotionDefenseModifier(PromotionTypes other) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "otherPromotionDefenseModifier: upper bound");
+	CvAssertMsg(other > -1, "otherPromotionDefenseModifier: lower bound");
+	return m_Promotions.GetOtherPromotionDefenseModifier(other);
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 SpecialUnitTypes CvUnit::specialCargo() const
