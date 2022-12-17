@@ -2473,6 +2473,57 @@ PromotionTypes CvUnitPromotions::ChangePromotionAfterCombat(PromotionTypes eInde
 	return NO_PROMOTION;
 }
 
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+int CvUnitPromotions::GetOtherPromotionModifier(PromotionTypes other) const
+{
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes thisPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* thisPromotion = GC.getPromotionInfo(thisPromotionType);
+		if (thisPromotion == nullptr || !HasPromotion(thisPromotionType))
+		{
+			continue;
+		}
+
+		iSum += thisPromotion->GetOtherPromotionModifier(other);
+	}
+	return iSum;
+}
+int CvUnitPromotions::GetOtherPromotionAttackModifier(PromotionTypes other) const
+{
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes thisPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* thisPromotion = GC.getPromotionInfo(thisPromotionType);
+		if (thisPromotion == nullptr || !HasPromotion(thisPromotionType))
+		{
+			continue;
+		}
+
+		iSum += thisPromotion->GetOtherPromotionAttackModifier(other);
+	}
+	return iSum;
+}
+int CvUnitPromotions::GetOtherPromotionDefenseModifier(PromotionTypes other) const
+{
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes thisPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* thisPromotion = GC.getPromotionInfo(thisPromotionType);
+		if (thisPromotion == nullptr || !HasPromotion(thisPromotionType))
+		{
+			continue;
+		}
+
+		iSum += thisPromotion->GetOtherPromotionDefenseModifier(other);
+	}
+	return iSum;
+}
+#endif
+
 // PRIVATE METHODS
 
 // Is this (post-combat) promotion already present for some unit of this player?

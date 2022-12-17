@@ -531,6 +531,12 @@ public:
 
 	PromotionTypes ChangePromotionAfterCombat(PromotionTypes eIndex);
 
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+	int GetOtherPromotionModifier(PromotionTypes other) const;
+	int GetOtherPromotionAttackModifier(PromotionTypes other) const;
+	int GetOtherPromotionDefenseModifier(PromotionTypes other) const;
+#endif
+
 private:
 
 	bool IsInUseByPlayer(PromotionTypes eIndex, PlayerTypes ePlayer); 
