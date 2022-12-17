@@ -12756,6 +12756,14 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 		// Unit Class Defense Modifier
 		iTempModifier = unitClassDefenseModifier(pAttacker->getUnitClassType());
 		iModifier += iTempModifier;
+
+		// Promotion-Promotion Modifier
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+		{
+			iModifier += otherPromotionDefenseModifierByUnit(pAttacker);
+		}
+#endif
 	}
 
 	// Unit can't drop below 10% strength
@@ -13095,6 +13103,14 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 
 			// Unit Class Defense Mod
 			iModifier += unitClassDefenseModifier(pOtherUnit->getUnitClassType());
+
+			// Promotion-Promotion Modifier
+#if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+			if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+			{
+				iModifier += otherPromotionDefenseModifierByUnit(pOtherUnit);
+			}
+#endif
 		}
 	}
 
