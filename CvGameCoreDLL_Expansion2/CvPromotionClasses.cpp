@@ -2157,8 +2157,8 @@ int CvPromotionEntry::GetOtherPromotionModifier(PromotionTypes other) const
 }
 int CvPromotionEntry::GetOtherPromotionAttackModifier(PromotionTypes other) const
 {
-	CvAssertMsg(other < GC.getNumPromotionInfos(), "GetOtherPromotionModifier: upper bound");
-	CvAssertMsg(other > -1, "GetOtherPromotionModifier: lower bound");
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "GetOtherPromotionAttackModifier: upper bound");
+	CvAssertMsg(other > -1, "GetOtherPromotionAttackModifier: lower bound");
 
 	if (other <= -1 || other >= GC.getNumPromotionInfos())
 	{
@@ -2175,8 +2175,8 @@ int CvPromotionEntry::GetOtherPromotionAttackModifier(PromotionTypes other) cons
 }
 int CvPromotionEntry::GetOtherPromotionDefenseModifier(PromotionTypes other) const
 {
-	CvAssertMsg(other < GC.getNumPromotionInfos(), "GetOtherPromotionModifier: upper bound");
-	CvAssertMsg(other > -1, "GetOtherPromotionModifier: lower bound");
+	CvAssertMsg(other < GC.getNumPromotionInfos(), "GetOtherPromotionDefenseModifier: upper bound");
+	CvAssertMsg(other > -1, "GetOtherPromotionDefenseModifier: lower bound");
 
 	if (other <= -1 || other >= GC.getNumPromotionInfos())
 	{
