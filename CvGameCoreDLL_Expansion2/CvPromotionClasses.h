@@ -11,6 +11,8 @@
 #define CIV5_PROMOTION_CLASSES_H
 
 #include "CvBitfield.h"
+#include <unordered_map>
+#include "CustomMods.h"
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //  CLASS:      CvPromotionEntry
@@ -453,6 +455,12 @@ protected:
 	bool* m_pbUnitName;
 #endif
 	bool* m_pbPostCombatRandomPromotion;
+
+ #if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
+	std::tr1::unordered_map<PromotionTypes, int> m_pPromotionModifiers; // key: other promotion type, value: modifier * 100
+	std::tr1::unordered_map<PromotionTypes, int> m_pPromotionAttackModifiers; // key: other promotion type, value: attack modifier * 100
+	std::tr1::unordered_map<PromotionTypes, int> m_pPromotionDefenseModifiers; // key: other promotion type, value: defense modifier * 100
+ #endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
