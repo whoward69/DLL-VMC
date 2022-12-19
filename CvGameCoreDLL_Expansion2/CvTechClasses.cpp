@@ -1724,8 +1724,10 @@ void CvTeamTechs::PushToLua(lua_State* L, BasicArguments* arg) {
 }
 
 CvTeamTechs* CvTeamTechs::Provide(TeamTypes team) {
-
-	return GET_TEAM(team).GetTeamTechs();
+	if (team < 0 || team >= MAX_TEAMS) throw NetworkMessageNullPointerExceptopn("CvTeam", team);
+	auto rtn = GET_TEAM(team).GetTeamTechs();
+	if (!rtn) throw NetworkMessageNullPointerExceptopn("CvTeamTechs", team);
+	return rtn;
 }
 
 void CvTeamTechs::ExtractToArg(BasicArguments* arg) {

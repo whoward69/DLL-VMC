@@ -539,17 +539,14 @@ int CvLuaGame::lHandleMultiplayerTeamSignal(lua_State* L) {
 	const PlayerTypes iPlayer = (PlayerTypes)lua_tointeger(L, 1);
 	const int iPlotX = lua_tointeger(L, 2);
 	const int iPlotY = lua_tointeger(L, 3);
+	
 	uint64 curTime = GetTickCount64();
 	if (curTime - pKGame->GetLastMPSignalInvokeTime() >= 500 && iPlayer != NO_PLAYER) {
 		//pKGame->GenerateMPSignalNotification(iPlayer, iPlotX, iPlotY);
-		auto L = luaL_newstate();
 		lua_pushstring(L, "CvLuaGame::lHandleMultiplayerTeamSignalImpl");
-		lua_pushinteger(L, iPlayer);
-		lua_pushinteger(L, iPlotX);
-		lua_pushinteger(L, iPlotY);
+		lua_insert(L, 1);
 		lSendAndExecuteLuaFunctionPostpone(L);
 		pKGame->SetLastMPSignalInvokeTime(curTime);
-		lua_close(L);
 	}
 	return 0;
 }

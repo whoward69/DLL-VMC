@@ -131,7 +131,10 @@ void CvCity::RegistStaticFunctions() {
 }
 
 CvCity* CvCity::Provide(PlayerTypes player, int cityID) {
-	return GET_PLAYER(player).getCity(cityID);
+	if (player < 0 || player >= MAX_PLAYERS) throw NetworkMessageNullPointerExceptopn("CvPlayer", player);
+	auto rtn = GET_PLAYER(player).getCity(cityID);
+	if (!rtn) throw NetworkMessageNullPointerExceptopn("CvCity", player, cityID);
+	return rtn;
 }
 
 //	--------------------------------------------------------------------------------

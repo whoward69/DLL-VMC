@@ -150,7 +150,10 @@ void CvUnit::RegistStaticFunctions() {
 }
 
 CvUnit* CvUnit::Provide(PlayerTypes player, int id) {
-	return GET_PLAYER(player).getUnit(id);
+	if (player < 0 || player >= MAX_PLAYERS) throw NetworkMessageNullPointerExceptopn("CvPlayer", player);
+	auto rtn = GET_PLAYER(player).getUnit(id);
+	if (!rtn) throw NetworkMessageNullPointerExceptopn("CvUnit", player, id);
+	return rtn;
 }
 
 bool s_dispatchingNetMessage = false;

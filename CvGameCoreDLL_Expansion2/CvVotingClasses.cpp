@@ -1805,7 +1805,9 @@ FDataStream& operator<<(FDataStream& saveTo, const CvRepealProposal& readFrom)
 //			CvLeague
 // ================================================================================
 CvLeague* CvLeague::Provide(LeagueTypes league) {
-	return GC.getGame().GetGameLeagues()->GetLeague(league);
+	auto rtn = GC.getGame().GetGameLeagues()->GetLeague(league);
+	if (!rtn) throw NetworkMessageNullPointerExceptopn("CvLeague", league);
+	return rtn;
 }
 
 void CvLeague::ExtractToArg(BasicArguments* arg) {

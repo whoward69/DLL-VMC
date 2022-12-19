@@ -30,7 +30,9 @@ void CvArea::ExtractToArg(BasicArguments* arg) {
 }
 
 CvArea* CvArea::Provide(int id) {
-	return GC.getMap().getArea(id);
+	auto rtn = GC.getMap().getArea(id);
+	if (!rtn) throw NetworkMessageNullPointerExceptopn("CvArea", id);
+	return rtn;
 }
 
 void CvArea::RegistStaticFunctions() {

@@ -156,6 +156,7 @@ void CvPlayer::RegistStaticFunctions() {
 }
 
 CvPlayerAI* CvPlayer::Provide(PlayerTypes player) {
+	if(player < 0 || player >= MAX_PLAYERS) throw NetworkMessageNullPointerExceptopn("CvPlayer", player);
 	return &GET_PLAYER(player);
 }
 

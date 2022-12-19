@@ -8,6 +8,7 @@
 #include <FCriticalSection.h>
 
 #define MAX_INT32_ARGNUM 16
+#define LUA_NETWORKMSG_DEBUG
 
 namespace NetworkMessageUtil {
 	extern void IClear(int* buffer);
@@ -26,11 +27,11 @@ namespace NetworkMessageUtil {
 	}*/
 }
 
-struct NetworkMessageCollisionExceptopn :public std::exception
+struct NetworkMessageNullPointerExceptopn :public std::exception
 {
 public:
-	explicit NetworkMessageCollisionExceptopn(const std::string& method_name);
-	virtual ~NetworkMessageCollisionExceptopn()throw();
+	explicit NetworkMessageNullPointerExceptopn(const std::string& typeName, int id1 = -1, int id2 = -1);
+	virtual ~NetworkMessageNullPointerExceptopn()throw();
 	virtual const char* what()const throw();
 protected:
 	std::string message;

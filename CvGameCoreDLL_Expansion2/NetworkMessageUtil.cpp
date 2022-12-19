@@ -35,15 +35,14 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 				}
 				catch (NoSuchMethodException e) {
 					ReceiveLargeArgContainer.Clear();
-					//auto dbg = 
 					lua_Debug ar;
 					int res = -1;
 					char* srcName = nullptr;
 					if (lua_getstack(L, 1, &ar))
 					{
-						lua_getinfo(L, "sl", &ar);
+						lua_getinfo(L, "Sl", &ar);
 						res = ar.currentline;
-						srcName = ar.short_src;
+						srcName = (char*)ar.source;
 					}
 					CUSTOMLOG("An unkwown function pointer passed to SendAndExecuteLuaFunction at %s : line %d", srcName ? srcName : "NULL", res);
 					return -1;
@@ -57,9 +56,9 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 				char* srcName = nullptr;
 				if (lua_getstack(L, 1, &ar))
 				{
-					lua_getinfo(L, "sl", &ar);
+					lua_getinfo(L, "Sl", &ar);
 					res = ar.currentline;
-					srcName = ar.short_src;
+					srcName = (char*)ar.source;
 				}
 				CUSTOMLOG("First argument passed to SendAndExecuteLuaFunction must be either string or function you want to call, at %s : line %d", srcName ? srcName : "NULL", res);
 				
@@ -91,6 +90,22 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 			arg->set_identifier1(tf);
 		}
 	}
+#ifdef LUA_NETWORKMSG_DEBUG
+	auto debugArg = ReceiveLargeArgContainer.add_args(); 
+	lua_Debug ar;
+	int res = -1;
+	char* srcName = nullptr;
+	if (lua_getstack(L, 1, &ar))
+	{
+		lua_getinfo(L, "Sl", &ar);
+		res = ar.currentline;
+		srcName = (char*)ar.source;
+	}
+	debugArg->set_argtype("LuaNetworkDebugMsg");
+	debugArg->set_identifier1(res);
+	debugArg->set_longmessage(srcName ? srcName : "Unknown");
+#endif // LUA_NETWORKMSG_DEBUG
+
 	lua_remove(L, indexOfFuncName); //remove the name of the function you want to execute.
 	lua_settop(L, num - 1);
 	ReceiveLargeArgContainer.set_functiontocall(funcToCall);
@@ -143,10 +158,17 @@ namespace ReturnValueUtil {
 	InvokeRecorder container;
 }
 
-NetworkMessageCollisionExceptopn::NetworkMessageCollisionExceptopn(const std::string& invoke_msg) {
-	this->message = "Collision happened when invoke " + invoke_msg;
+NetworkMessageNullPointerExceptopn::NetworkMessageNullPointerExceptopn(const std::string& typeName, int id1, int id2) {
+	this->message = "A game object not exists locally passed to us, Type is: " + typeName;
+	this->message += ", Identifiers are: ";
+	char buffer[1024] = { 0 };
+	_itoa_s(id1, buffer, 10);
+	this->message += buffer;
+	_itoa_s(id2, buffer, 10);
+	this->message += ", ";
+	this->message += buffer;
 }
-NetworkMessageCollisionExceptopn::~NetworkMessageCollisionExceptopn() {}
-const char* NetworkMessageCollisionExceptopn::what()const throw() {
+NetworkMessageNullPointerExceptopn::~NetworkMessageNullPointerExceptopn() {}
+const char* NetworkMessageNullPointerExceptopn::what()const throw() {
 	return this->message.c_str();
 }

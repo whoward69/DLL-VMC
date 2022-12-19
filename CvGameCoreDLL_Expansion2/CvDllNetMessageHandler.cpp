@@ -823,16 +823,29 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 	bool isLua = false;
 	if (iCityID < 0) {
 		isLua = true;
+		char* senderFileName = nullptr;
+		auto senderFileLine = -1;
 		iCityID = -iCityID;
 		auto str = std::string(szName, iCityID);
 		if (NetworkMessageUtil::ReceiveLargeArgContainer.ParseFromString(str)) {
 			if (InvokeRecorder::getInvokeExist(str)) {
-				//CUSTOMLOG("Received an already executed fuction call with message: %s", NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall());
 				NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
 				return;
 			}
 			auto L = luaL_newstate();
-			for (int i = 0; i < NetworkMessageUtil::ReceiveLargeArgContainer.args_size(); i++) {
+			auto msgSize = NetworkMessageUtil::ReceiveLargeArgContainer.args_size();
+#ifdef LUA_NETWORKMSG_DEBUG
+			msgSize--;
+			auto& debugArg = NetworkMessageUtil::ReceiveLargeArgContainer.args().Get(msgSize);
+			if (msgSize >= 0 && debugArg.argtype() == "LuaNetworkDebugMsg") {
+				senderFileName = (char*)debugArg.longmessage().c_str();
+				senderFileLine = debugArg.identifier1();
+			}
+			else {
+				msgSize++;
+			}
+#endif
+			for (int i = 0; i < msgSize; i++) {
 				auto& arg = NetworkMessageUtil::ReceiveLargeArgContainer.args().Get(i);
 				auto& type = arg.argtype();
 				if (type == "int") {
@@ -847,6 +860,7 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 				else if (type == "nil") {
 					lua_pushnil(L);
 				}
+				else if (type == "LuaNetworkDebugMsg");//do nothing with debug message
 				else {
 					auto& name = type + "::PushToLua";
 					auto basicArgPtr = (BasicArguments*)&arg;
@@ -854,16 +868,31 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 						StaticFunctionReflector::ExecuteFunction<void>((name), L, basicArgPtr);
 					}
 					catch (NoSuchMethodException e) {
-						CUSTOMLOG("Received an null ptr fuction call with message: %s", NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall().c_str());
+						CUSTOMLOG("Received an unknown fuction call with message: %s, sent at line %d, file %s", 
+							e.what(), senderFileLine, senderFileName ? senderFileName : "Unknown");
 						NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+						lua_close(L);
 						return;
 					}
-					
+					catch (NetworkMessageNullPointerExceptopn e) {
+						CUSTOMLOG("Received an null pointer fuction call with message: %s, sent at line %d, file %s",
+							e.what(), senderFileLine, senderFileName ? senderFileName : "Unknown");
+						NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+						lua_close(L);
+						return;
+					}
+					//finally?
 				}
 			}
 			auto funcName = NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall();
 			//CUSTOMLOG("Try to execute received fuction call with function name: %s", funcName);
-			StaticFunctionReflector::ExecuteFunction<void>(funcName, L);
+			try {
+				StaticFunctionReflector::ExecuteFunction<void>(funcName, L);
+			}
+			catch (NoSuchMethodException e) {
+				CUSTOMLOG("Received an unknown fuction call with message: %s, sent at line %d, file %s",
+					e.what(), senderFileLine, senderFileName ? senderFileName : "Unknown");
+			}
 			lua_close(L);
 			NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
 			return;

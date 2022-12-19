@@ -167,7 +167,9 @@ void CvPlot::RegistStaticFunctions() {
 }
 
 CvPlot* CvPlot::Provide(int x, int y) {
-	return GC.getMap().plot(x, y);
+	auto rtn = GC.getMap().plot(x, y);
+	if (!rtn) throw NetworkMessageNullPointerExceptopn("CvPlot", x, y);
+	return rtn;
 }
 
 //////////////////////////////////////////////////////////////////////////

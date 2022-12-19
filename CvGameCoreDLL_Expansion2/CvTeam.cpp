@@ -75,6 +75,7 @@ void CvTeam::RegistStaticFunctions() {
 }
 
 CvTeam* CvTeam::Provide(TeamTypes team) {
+	if (team < 0 || team >= MAX_TEAMS) throw NetworkMessageNullPointerExceptopn("CvTeam", team);
 	return &getTeam(team);
 }
 

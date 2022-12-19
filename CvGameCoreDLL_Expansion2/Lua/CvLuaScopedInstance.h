@@ -195,17 +195,7 @@ int CvLuaScopedInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_S
 	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 2) < 0;
 	if (fault) return 0;
 	int time = GetTickCount();
-	lua_Debug dbg;
-	string errWhere = "";
-	int line = 0;
-	if (lua_getstack(L, 1, &dbg))
-	{
-		lua_getinfo(L, "sl", &dbg);
-		line = dbg.currentline;
-		errWhere += dbg.short_src;
-	}
-	
-	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time + line);
+	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
 	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
 	InvokeRecorder::pushInvoke(str);
 	gDLL->SendRenameCity(-str.length(), str);
