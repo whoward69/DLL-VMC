@@ -2,7 +2,7 @@
 #include "NetworkMessageUtil.h"
 #include "CvLuaScopedInstance.h"
 
-
+using namespace FunctionPointers;
 
 void NetworkMessageUtil::IClear(int* buffer) {
 	for (int i = 0; i < 16; i++) {
@@ -31,7 +31,7 @@ int NetworkMessageUtil::ProcessLuaArgForReflection(lua_State* L, int indexOfFunc
 			else if (type == LUA_TFUNCTION) {
 				try {
 					auto funcPtr = lua_tocfunction(L, i);
-					funcToCall = StaticFunctionReflector::GetFunctionPointerName(funcPtr);
+					funcToCall = staticFunctions.GetFunctionPointerName(funcPtr);
 				}
 				catch (NoSuchMethodException e) {
 					ReceiveLargeArgContainer.Clear();
