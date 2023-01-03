@@ -1142,6 +1142,11 @@ public:
 	bool TurnProcessed() const;
 	void SetTurnProcessed(bool bValue);
 
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	bool IsCannotBeRangedAttacked() const;
+	void SetCannotBeRangedAttacked(bool bNewValue);
+#endif
+
 	bool isPromotionReady() const;
 	void setPromotionReady(bool bNewValue);
 	void testPromotionReady();

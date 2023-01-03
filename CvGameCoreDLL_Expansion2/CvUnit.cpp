@@ -5450,6 +5450,20 @@ void CvUnit::SetTurnProcessed(bool bValue)
 	}
 }
 
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+bool CvUnit::IsCannotBeRangedAttacked() const
+{
+	VALIDATE_OBJECT
+	return m_bCannotBeRangedAttacked;
+}
+
+void CvUnit::SetCannotBeRangedAttacked(bool bNewValue)
+{
+	VALIDATE_OBJECT
+	m_bCannotBeRangedAttacked = bNewValue;
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 bool CvUnit::isUnderTacticalControl() const
 {
