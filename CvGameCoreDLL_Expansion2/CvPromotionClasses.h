@@ -257,6 +257,10 @@ public:
 	int GetOtherPromotionDefenseModifier(PromotionTypes other) const;
 #endif
 
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	bool IsCannotBeRangedAttacked() const;
+#endif
+
 protected:
 	int m_iLayerAnimationPath;
 	int m_iPrereqPromotion;
@@ -466,6 +470,10 @@ protected:
 	std::tr1::unordered_map<PromotionTypes, int> m_pPromotionModifiers; // key: other promotion type, value: modifier * 100
 	std::tr1::unordered_map<PromotionTypes, int> m_pPromotionAttackModifiers; // key: other promotion type, value: attack modifier * 100
 	std::tr1::unordered_map<PromotionTypes, int> m_pPromotionDefenseModifiers; // key: other promotion type, value: defense modifier * 100
+ #endif
+
+ #if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	bool m_bCannotBeRangedAttacked;
  #endif
 };
 

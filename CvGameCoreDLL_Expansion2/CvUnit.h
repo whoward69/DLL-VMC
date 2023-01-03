@@ -1142,6 +1142,11 @@ public:
 	bool TurnProcessed() const;
 	void SetTurnProcessed(bool bValue);
 
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	bool IsCannotBeRangedAttacked() const;
+	void SetCannotBeRangedAttacked(bool bNewValue);
+#endif
+
 	bool isPromotionReady() const;
 	void setPromotionReady(bool bNewValue);
 	void testPromotionReady();
@@ -1738,6 +1743,9 @@ protected:
 	FAutoVariable<bool, CvUnit> m_bSetUpForRangedAttack;
 	FAutoVariable<bool, CvUnit> m_bEmbarked;
 	FAutoVariable<bool, CvUnit> m_bAITurnProcessed;
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	FAutoVariable<bool, CvUnit> m_bCannotBeRangedAttacked;
+#endif
 
 	FAutoVariable<TacticalAIMoveTypes, CvUnit> m_eTacticalMove;
 	FAutoVariable<PlayerTypes, CvUnit> m_eCapturingPlayer;

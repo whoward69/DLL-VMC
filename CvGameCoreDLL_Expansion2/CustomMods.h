@@ -106,6 +106,8 @@
 
 #define MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS    gCustomMods.isAPI_PROMOTION_TO_PROMOTION_MODIFIERS()
 
+#define MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED      gCustomMods.isAPI_UNIT_CANNOT_BE_RANGED_ATTACKED()
+
 // Push various hard-coded values controlling the game out into XML - see DB/CONFIG/GameInXml.sql for specific values -->
 #define MOD_CONFIG_GAME_IN_XML                      gCustomMods.isCONFIG_GAME_IN_XML()
 // Push various hard-coded values controlling the AI out into XML - see DB/CONFIG/AiInXml.sql for specific values
@@ -1356,6 +1358,7 @@ public:
 	MOD_OPT_DECL(API_EXTENSIONS);
 	MOD_OPT_DECL(API_LUA_EXTENSIONS);
 	MOD_OPT_DECL(API_PROMOTION_TO_PROMOTION_MODIFIERS);
+	MOD_OPT_DECL(API_UNIT_CANNOT_BE_RANGED_ATTACKED);
 	MOD_OPT_DECL(API_MP_PLOT_SIGNAL);
 
 	MOD_OPT_DECL(CONFIG_GAME_IN_XML);

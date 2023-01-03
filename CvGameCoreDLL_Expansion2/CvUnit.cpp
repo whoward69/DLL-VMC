@@ -372,6 +372,9 @@ CvUnit::CvUnit() :
 	, m_bSetUpForRangedAttack("CvUnit::m_bSetUpForRangedAttack", m_syncArchive)
 	, m_bEmbarked("CvUnit::m_bEmbarked", m_syncArchive)
 	, m_bAITurnProcessed("CvUnit::m_bAITurnProcessed", m_syncArchive, false, true)
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	, m_bCannotBeRangedAttacked("CvUnit::m_bCannotBeRangedAttacked", m_syncArchive, false, false)
+#endif
 	, m_eTacticalMove("CvUnit::m_eTacticalMove", m_syncArchive)
 	, m_eOwner("CvUnit::m_eOwner", m_syncArchive)
 	, m_eOriginalOwner("CvUnit::m_eOriginalOwner", m_syncArchive)
@@ -1094,6 +1097,12 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_bSetUpForRangedAttack = false;
 	m_bEmbarked = false;
 	m_bAITurnProcessed = false;
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+{
+	m_bCannotBeRangedAttacked = false;
+}
+#endif
 	m_bWaitingForMove = false;
 	m_eTacticalMove = NO_TACTICAL_MOVE;
 
@@ -5440,6 +5449,20 @@ void CvUnit::SetTurnProcessed(bool bValue)
 		m_bAITurnProcessed = bValue;
 	}
 }
+
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+bool CvUnit::IsCannotBeRangedAttacked() const
+{
+	VALIDATE_OBJECT
+	return m_bCannotBeRangedAttacked;
+}
+
+void CvUnit::SetCannotBeRangedAttacked(bool bNewValue)
+{
+	VALIDATE_OBJECT
+	m_bCannotBeRangedAttacked = bNewValue;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 bool CvUnit::isUnderTacticalControl() const
@@ -21305,6 +21328,13 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 			gDLL->UnlockAchievement(ACHIEVEMENT_XP2_27);
 		}
 #endif
+
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	{
+		SetCannotBeRangedAttacked(IsCannotBeRangedAttacked() || thisPromotion.IsCannotBeRangedAttacked());
+	}
+#endif
 	}
 }
 
@@ -21979,6 +22009,11 @@ bool CvUnit::canRangeStrikeAt(int iX, int iY, bool bNeedWar, bool bNoncombatAllo
 						return false;
 					}
 				}
+#endif
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+			if (pDefender->IsCannotBeRangedAttacked()) {
+				return false;
+			}
 #endif
 		}
 		// We don't need to be at war (yet) with a Unit here, so let's try to find one

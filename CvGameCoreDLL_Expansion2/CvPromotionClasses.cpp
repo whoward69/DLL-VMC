@@ -340,6 +340,13 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_bSapper = kResults.GetBool("Sapper");
 	m_bCanHeavyCharge = kResults.GetBool("HeavyCharge");
 
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	{
+		m_bCannotBeRangedAttacked = kResults.GetBool("CannotBeRangedAttacked");
+	}
+#endif
+
 	m_iVisibilityChange = kResults.GetInt("VisibilityChange");
 #if defined(MOD_PROMOTIONS_VARIABLE_RECON)
 	m_iReconChange = kResults.GetInt("ReconChange");
@@ -1793,6 +1800,13 @@ bool CvPromotionEntry::ArePostCombatPromotionsExclusive() const
 {
 	return m_bPostCombatPromotionsExclusive;
 }
+
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+bool CvPromotionEntry::IsCannotBeRangedAttacked() const
+{
+	return m_bCannotBeRangedAttacked;
+}
+#endif
 
 /// Accessor: Sound to play when the promotion is gained
 const char* CvPromotionEntry::GetSound() const
