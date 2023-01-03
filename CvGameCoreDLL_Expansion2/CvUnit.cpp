@@ -372,6 +372,9 @@ CvUnit::CvUnit() :
 	, m_bSetUpForRangedAttack("CvUnit::m_bSetUpForRangedAttack", m_syncArchive)
 	, m_bEmbarked("CvUnit::m_bEmbarked", m_syncArchive)
 	, m_bAITurnProcessed("CvUnit::m_bAITurnProcessed", m_syncArchive, false, true)
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	, m_bCannotBeRangedAttacked("CvUnit::m_bCannotBeRangedAttacked", m_syncArchive, false, false)
+#endif
 	, m_eTacticalMove("CvUnit::m_eTacticalMove", m_syncArchive)
 	, m_eOwner("CvUnit::m_eOwner", m_syncArchive)
 	, m_eOriginalOwner("CvUnit::m_eOriginalOwner", m_syncArchive)
@@ -1094,6 +1097,12 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_bSetUpForRangedAttack = false;
 	m_bEmbarked = false;
 	m_bAITurnProcessed = false;
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+{
+	m_bCannotBeRangedAttacked = false;
+}
+#endif
 	m_bWaitingForMove = false;
 	m_eTacticalMove = NO_TACTICAL_MOVE;
 

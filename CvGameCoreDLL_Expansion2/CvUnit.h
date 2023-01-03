@@ -1738,6 +1738,9 @@ protected:
 	FAutoVariable<bool, CvUnit> m_bSetUpForRangedAttack;
 	FAutoVariable<bool, CvUnit> m_bEmbarked;
 	FAutoVariable<bool, CvUnit> m_bAITurnProcessed;
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	FAutoVariable<bool, CvUnit> m_bCannotBeRangedAttacked;
+#endif
 
 	FAutoVariable<TacticalAIMoveTypes, CvUnit> m_eTacticalMove;
 	FAutoVariable<PlayerTypes, CvUnit> m_eCapturingPlayer;
