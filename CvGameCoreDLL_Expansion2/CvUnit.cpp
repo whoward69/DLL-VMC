@@ -21328,6 +21328,13 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 			gDLL->UnlockAchievement(ACHIEVEMENT_XP2_27);
 		}
 #endif
+
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	{
+		SetCannotBeRangedAttacked(IsCannotBeRangedAttacked() || thisPromotion.IsCannotBeRangedAttacked());
+	}
+#endif
 	}
 }
 
