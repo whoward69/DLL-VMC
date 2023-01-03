@@ -473,7 +473,7 @@ protected:
  #endif
 
  #if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
-	bool m_pbCannotBeRangedAttacked;
+	bool m_bCannotBeRangedAttacked;
  #endif
 };
 
