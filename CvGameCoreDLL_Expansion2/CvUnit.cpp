@@ -22010,6 +22010,11 @@ bool CvUnit::canRangeStrikeAt(int iX, int iY, bool bNeedWar, bool bNoncombatAllo
 					}
 				}
 #endif
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+			if (pDefender->IsCannotBeRangedAttacked()) {
+				return false;
+			}
+#endif
 		}
 		// We don't need to be at war (yet) with a Unit here, so let's try to find one
 		else
