@@ -545,6 +545,10 @@ public:
 	int GetOtherPromotionDefenseModifier(PromotionTypes other) const;
 #endif
 
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+	bool IsCannotBeRangedAttacked() const;
+#endif
+
 private:
 
 	bool IsInUseByPlayer(PromotionTypes eIndex, PlayerTypes ePlayer); 
