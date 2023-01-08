@@ -2538,6 +2538,27 @@ int CvUnitPromotions::GetOtherPromotionDefenseModifier(PromotionTypes other) con
 }
 #endif
 
+#if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
+bool CvUnitPromotions::IsCannotBeRangedAttacked() const
+{
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes thisPromotionType = (PromotionTypes)iLoop;
+		CvPromotionEntry* thisPromotion = GC.getPromotionInfo(thisPromotionType);
+		if (thisPromotion == nullptr || !HasPromotion(thisPromotionType))
+		{
+			continue;
+		}
+
+		if (thisPromotion->IsCannotBeRangedAttacked())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+#endif
+
 // PRIVATE METHODS
 
 // Is this (post-combat) promotion already present for some unit of this player?
