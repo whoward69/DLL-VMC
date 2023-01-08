@@ -4,8 +4,8 @@
 #include <LaterFeatures.h>
 #include <ArgumentAdaptor.h>
 
-#define REGIST_INSTANCE_FUNCTION(T) FunctionPointers::instanceFunctions.RegistFunction(#T, &T);
-#define REGIST_STATIC_FUNCTION(T) FunctionPointers::staticFunctions.RegistFunction(#T, &T);
+#define REGIST_INSTANCE_FUNCTION(T) InstanceFunctionReflector::RegistFunction(#T, &T);
+#define REGIST_STATIC_FUNCTION(T) StaticFunctionReflector::RegistFunction(#T, &T);
 
 struct NoSuchMethodException :public std::exception
 {
@@ -22,13 +22,13 @@ class None {};
 class StaticFunctionReflector {
 public:
 	template<typename ReturnType, typename... Args>
-	void RegistFunction(std::string&& name, ReturnType(*func)(Args...)) {
+	static void RegistFunction(std::string&& name, ReturnType(*func)(Args...)) {
 		(*methods)[name] = std::make_pair((void(*)())func, sizeof...(Args));
 		(*names)[(void(*)())func] = name;
 	}
 
 	template<typename ReturnType, typename... Args>
-	const std::string& GetFunctionPointerName(ReturnType(*func)(Args...)) {
+	static const std::string& GetFunctionPointerName(ReturnType(*func)(Args...)) {
 		const auto& name = names->find((void(*)())func);
 		if (name == names->end()) throw NoSuchMethodException("Unknown function in arguments");
 		return name->second;
@@ -37,7 +37,7 @@ public:
 	Please use pass-by-value to pass pointers of objects instead of pass-by-reference.
 	*/
 	template<typename ReturnType, typename... Args>
-	ReturnType ExecuteFunction(std::string& name, Args&... args) {
+	static ReturnType ExecuteFunction(std::string& name, Args&... args) {
 		if (methods->find(name) == methods->end()) {
 			throw NoSuchMethodException(name);
 		}
@@ -46,7 +46,7 @@ public:
 	}
 
 	template<typename ReturnType, typename... Args>
-	ReturnType ExecuteFunction(const std::string& name, Args&... args) {
+	static ReturnType ExecuteFunction(const std::string& name, Args&... args) {
 		if (methods->find(name) == methods->end()) {
 			throw NoSuchMethodException(name);
 		}
@@ -57,7 +57,7 @@ public:
 	template<typename ReturnType,
 		typename... Args, size_t... Is,
 		typename later_std::enable_if<later_std::is_same<void, ReturnType>::value, int>::type = 0>
-	ReturnType Transmit(int i, index_sequence<Is...> seq, string& name, Args&... args)
+	static ReturnType Transmit(int i, index_sequence<Is...> seq, string& name, Args&... args)
 	{
 		int unused[] = { (i == Is ?
 			CallAdapterUnAssignableStatic<Is, ReturnType, typelist<>, typelist<Args..., void>>::Transmit(name, args...)
@@ -68,7 +68,7 @@ public:
 	template<typename ReturnType,
 		typename... Args, size_t... Is,
 		typename later_std::enable_if<!later_std::is_same<void, ReturnType>::value, int>::type = 0>
-	ReturnType Transmit(int i, index_sequence<Is...> seq, string& name, Args&... args)
+	static ReturnType Transmit(int i, index_sequence<Is...> seq, string& name, Args&... args)
 	{
 		ReturnType ret{};
 		int unused[] = { (i == Is ?
@@ -86,7 +86,7 @@ public:
 	instantiate the function with ReturnType set to "void".
 	***/
 	template<typename ReturnType, typename... Args>
-	ReturnType ExecuteFunctionWraps(std::string name, Args... args) {
+	static ReturnType ExecuteFunctionWraps(std::string name, Args... args) {
 		if (methods->find(name) == methods->end()) {
 			throw NoSuchMethodException(name);
 		}
@@ -98,28 +98,24 @@ public:
 	~StaticFunctionReflector() {
 		methods->clear();
 		delete methods;
-		if (names) {
-			names->clear();
-			delete names;
-		}
 	}
 private:
-	std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>* methods;
-	std::tr1::unordered_map<void(*)(), std::string>* names;
+	static std::tr1::unordered_map<std::string, std::pair<void(*)(), int>>* methods;
+	static std::tr1::unordered_map<void(*)(), std::string>* names;
 };
 
 
 class InstanceFunctionReflector {
 public:
 	template<typename ReturnType, typename ClassType, typename... Args>
-	void RegistFunction(std::string&& name, ReturnType(ClassType::* func)(Args...)) {
+	static void RegistFunction(std::string&& name, ReturnType(ClassType::* func)(Args...)) {
 		(*methods)[name] = std::make_pair((void(None::*)())func, sizeof...(Args));
 	}
 	/*
 	Please use pass-by-value to pass pointers of objects instead of pass-by-reference.
 	*/
 	template<typename ReturnType, typename ClassType, typename... Args>
-	ReturnType ExecuteFunction(ClassType& object, std::string& name, Args&... args) {
+	static ReturnType ExecuteFunction(ClassType& object, std::string& name, Args&... args) {
 		if (methods->find(name) == methods->end()) {
 			throw NoSuchMethodException(name);
 		}
@@ -128,7 +124,7 @@ public:
 	}
 
 	template<typename ReturnType, typename ClassType, typename... Args>
-	ReturnType ExecuteFunction(ClassType& object, const std::string& name, Args&... args) {
+	static ReturnType ExecuteFunction(ClassType& object, const std::string& name, Args&... args) {
 		if (methods->find(name) == methods->end()) {
 			throw NoSuchMethodException(name);
 		}
@@ -138,7 +134,7 @@ public:
 
 	template<typename ReturnType, typename ClassType, typename... Args, size_t... Is,
 		typename later_std::enable_if<later_std::is_same<void, ReturnType>::value, int>::type = 0>
-	ReturnType Transmit(int i, index_sequence<Is...> seq, ClassType& object, string& name, Args&... args)
+	static ReturnType Transmit(int i, index_sequence<Is...> seq, ClassType& object, string& name, Args&... args)
 	{
 		int unused[] = { (i == Is ?
 			CallAdapterUnAssignable<Is, ReturnType, ClassType, typelist<>, typelist<Args..., void>>::Transmit(object, name, args...)
@@ -148,7 +144,7 @@ public:
 
 	template<typename ReturnType, typename ClassType, typename... Args, size_t... Is,
 		typename later_std::enable_if<!later_std::is_same<void, ReturnType>::value, int>::type = 0>
-	ReturnType Transmit(int i, index_sequence<Is...> seq, ClassType& object, string& name, Args&... args)
+	static ReturnType Transmit(int i, index_sequence<Is...> seq, ClassType& object, string& name, Args&... args)
 	{
 		ReturnType ret{};
 		int unused[] = { (i == Is ?
@@ -166,7 +162,7 @@ public:
 	instantiate the function with ReturnType set to "void".
 	***/
 	template<typename ReturnType, typename ClassType, typename... Args>
-	ReturnType ExecuteFunctionWraps(ClassType& object, std::string name, Args... args) {
+	static ReturnType ExecuteFunctionWraps(ClassType& object, std::string name, Args... args) {
 		if (methods->find(name) == methods->end()) {
 			throw NoSuchMethodException(name);
 		}
@@ -181,7 +177,7 @@ public:
 	e.g. int, bool, float, object pointers, object references (if you pass its pointer instead).
 	***/
 	template<typename ReturnType, typename ClassType, size_t... Is>
-	ReturnType ExecuteFunctionWrapsWithIntegerArray(ClassType& object, std::string name, int* idx, index_sequence<Is...> seq) {
+	static ReturnType ExecuteFunctionWrapsWithIntegerArray(ClassType& object, std::string name, int* idx, index_sequence<Is...> seq) {
 		return ExecuteFunctionWraps<ReturnType>(object, name, idx[Is]...);
 	}
 
@@ -191,7 +187,7 @@ public:
 		delete methods;
 	}
 private:
-	std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>* methods;
+	static std::tr1::unordered_map<std::string, std::pair<void(None::*)(), int>>* methods;
 };
 namespace FunctionPointers {
 	extern InstanceFunctionReflector instanceFunctions;

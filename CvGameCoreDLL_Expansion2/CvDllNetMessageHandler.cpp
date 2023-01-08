@@ -15,8 +15,6 @@
 
 #include "NetworkMessageUtil.h"
 
-using namespace FunctionPointers;
-
 CvDllNetMessageHandler::CvDllNetMessageHandler()
 {
 }
@@ -867,7 +865,7 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 					auto& name = type + "::PushToLua";
 					auto basicArgPtr = (BasicArguments*)&arg;
 					try {
-						staticFunctions.ExecuteFunction<void>((name), L, basicArgPtr);
+						StaticFunctionReflector::ExecuteFunction<void>((name), L, basicArgPtr);
 					}
 					catch (NoSuchMethodException e) {
 						CUSTOMLOG("Received an unknown fuction call with message: %s, sent at line %d, file %s", 
@@ -877,7 +875,7 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 						return;
 					}
 					catch (NetworkMessageNullPointerExceptopn e) {
-						CUSTOMLOG("Received a null pointer fuction call with message: %s, sent at line %d, file %s",
+						CUSTOMLOG("Received an null pointer fuction call with message: %s, sent at line %d, file %s",
 							e.what(), senderFileLine, senderFileName ? senderFileName : "Unknown");
 						NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
 						lua_close(L);
@@ -886,10 +884,10 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 					//finally?
 				}
 			}
-			auto& funcName = NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall();
+			auto funcName = NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall();
 			//CUSTOMLOG("Try to execute received fuction call with function name: %s", funcName);
 			try {
-				staticFunctions.ExecuteFunction<void>(funcName, L);
+				StaticFunctionReflector::ExecuteFunction<void>(funcName, L);
 			}
 			catch (NoSuchMethodException e) {
 				CUSTOMLOG("Received an unknown fuction call with message: %s, sent at line %d, file %s",

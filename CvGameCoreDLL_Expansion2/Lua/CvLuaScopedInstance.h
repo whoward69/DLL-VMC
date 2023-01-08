@@ -12,8 +12,6 @@
 #include "CvLuaMethodWrapper.h"
 #include "NetworkMessageUtil.h"
 
-using namespace FunctionPointers;
-
 template<class Derived, class InstanceType>
 class CvLuaScopedInstance : public CvLuaMethodWrapper<Derived, InstanceType>
 {
@@ -203,7 +201,7 @@ int CvLuaScopedInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_S
 	gDLL->SendRenameCity(-str.length(), str);
 	auto rtn = 0;
 	try {
-		rtn = staticFunctions.ExecuteFunction<int>(NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall(), L);
+		rtn = StaticFunctionReflector::ExecuteFunction<int>(NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall(), L);
 	}
 	catch (NoSuchMethodException e) {
 		CUSTOMLOG(e.what());
