@@ -21332,7 +21332,7 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 #if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 	if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 	{
-		SetCannotBeRangedAttacked(IsCannotBeRangedAttacked() || thisPromotion.IsCannotBeRangedAttacked());
+		SetCannotBeRangedAttacked(m_Promotions.IsCannotBeRangedAttacked());
 	}
 #endif
 	}
