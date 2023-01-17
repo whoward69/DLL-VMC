@@ -377,10 +377,10 @@ void CvCombatInfo::setBattleUnitInfo(BattleUnitTypes unitType, int& iPlayerID, i
 int CvCombatInfo::getDamageInflicted(BattleUnitTypes unitType) const
 {
 	checkBattleUnitType(unitType);
-#if defined(MOD_EVENTS_BATTLES)
 	int iDamage = m_iDamageInflicted[unitType];
-
-	if (MOD_EVENTS_BATTLES_DAMAGE && MOD_EVENTS_BATTLES_CUSTOM_DAMAGE) {
+#ifdef MOD_EVENTS_BATTLES_DAMAGE
+#ifndef MOD_EVENTS_BATTLES_CUSTOM_DAMAGE
+	if (MOD_EVENTS_BATTLES_DAMAGE) {
 		int iValue = 0;
 		if (GAMEEVENTINVOKE_VALUE(iValue, GAMEEVENT_BattleDamageDelta, unitType, iDamage) == GAMEEVENTRETURN_VALUE) {
 			if (iValue != 0) {
@@ -419,6 +419,8 @@ int CvCombatInfo::getDamageInflicted(BattleUnitTypes unitType) const
 			}
 		}
 	}
+#endif
+#endif
 
 #ifdef MOD_EVENTS_BATTLES_CUSTOM_DAMAGE
 	if (MOD_EVENTS_BATTLES_CUSTOM_DAMAGE)
@@ -457,9 +459,6 @@ int CvCombatInfo::getDamageInflicted(BattleUnitTypes unitType) const
 #endif
 
 	return iDamage;
-#else
-	return m_iDamageInflicted[unitType];
-#endif
 }
 void CvCombatInfo::setDamageInflicted(BattleUnitTypes unitType, int iDamage)
 {
