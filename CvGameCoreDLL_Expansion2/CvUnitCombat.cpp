@@ -101,6 +101,7 @@ static CvCombatMemberEntry* AddCombatMember(CvCombatMemberEntry* pkArray, int* p
 void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, CvPlot& plot, CvCombatInfo* pkCombatInfo)
 {
 	BATTLE_STARTED(BATTLE_TYPE_MELEE, plot);
+	pkCombatInfo->setBattleType(BATTLE_TYPE_MELEE);
 #if defined(MOD_UNITS_MAX_HP)
 	int iAttackerMaxHP = kAttacker.GetMaxHitPoints();
 #else
@@ -649,6 +650,7 @@ void CvUnitCombat::ResolveMeleeCombat(const CvCombatInfo& kCombatInfo, uint uiPa
 void CvUnitCombat::GenerateRangedCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, CvPlot& plot, CvCombatInfo* pkCombatInfo)
 {
 	BATTLE_STARTED(BATTLE_TYPE_RANGED, plot);
+	pkCombatInfo->setBattleType(BATTLE_TYPE_RANGED);
 	pkCombatInfo->setUnit(BATTLE_UNIT_ATTACKER, &kAttacker);
 	pkCombatInfo->setUnit(BATTLE_UNIT_DEFENDER, pkDefender);
 	pkCombatInfo->setPlot(&plot);
@@ -786,6 +788,7 @@ void CvUnitCombat::GenerateRangedCombatInfo(CvUnit& kAttacker, CvUnit* pkDefende
 void CvUnitCombat::GenerateRangedCombatInfo(CvCity& kAttacker, CvUnit* pkDefender, CvPlot& plot, CvCombatInfo* pkCombatInfo)
 {
 	BATTLE_STARTED(BATTLE_TYPE_RANGED, plot);
+	pkCombatInfo->setBattleType(BATTLE_TYPE_RANGED);
 	pkCombatInfo->setCity(BATTLE_UNIT_ATTACKER, &kAttacker);
 	pkCombatInfo->setUnit(BATTLE_UNIT_DEFENDER, pkDefender);
 	pkCombatInfo->setPlot(&plot);
@@ -1371,6 +1374,7 @@ void CvUnitCombat::ResolveCityMeleeCombat(const CvCombatInfo& kCombatInfo, uint 
 void CvUnitCombat::GenerateAirCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, CvPlot& plot, CvCombatInfo* pkCombatInfo)
 {
 	BATTLE_STARTED(BATTLE_TYPE_AIR, plot);
+	pkCombatInfo->setBattleType(BATTLE_TYPE_AIR);
 	int iExperience = 0;
 
 	pkCombatInfo->setUnit(BATTLE_UNIT_ATTACKER, &kAttacker);
@@ -1885,6 +1889,7 @@ void CvUnitCombat::ResolveAirUnitVsCombat(const CvCombatInfo& kCombatInfo, uint 
 void CvUnitCombat::GenerateAirSweepCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, CvPlot& plot, CvCombatInfo* pkCombatInfo)
 {
 	BATTLE_STARTED(BATTLE_TYPE_SWEEP, plot);
+	pkCombatInfo->setBattleType(BATTLE_TYPE_SWEEP);
 #if defined(MOD_UNITS_MAX_HP)
 	int iAttackerMaxHP = kAttacker.GetMaxHitPoints();
 #else
@@ -2269,6 +2274,7 @@ void CvUnitCombat::ResolveAirSweep(const CvCombatInfo& kCombatInfo, uint uiParen
 void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, CvCombatInfo* pkCombatInfo)
 {
 	BATTLE_STARTED(BATTLE_TYPE_NUKE, plot);
+	pkCombatInfo->setBattleType(BATTLE_TYPE_NUKE);
 	pkCombatInfo->setUnit(BATTLE_UNIT_ATTACKER, &kAttacker);
 	pkCombatInfo->setUnit(BATTLE_UNIT_DEFENDER, NULL);
 	pkCombatInfo->setPlot(&plot);

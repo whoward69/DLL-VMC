@@ -673,6 +673,7 @@
 #define MOD_EVENTS_BATTLES                          gCustomMods.isEVENTS_BATTLES()
 //   GameEvents.BattleDamageDelta.Add(function(iRole, iBaseDamage) return 0 end)
 #define MOD_EVENTS_BATTLES_DAMAGE                   (MOD_EVENTS_BATTLES && gCustomMods.isEVENTS_BATTLES_DAMAGE())
+#define MOD_EVENTS_BATTLES_CUSTOM_DAMAGE            (MOD_EVENTS_BATTLES && gCustomMods.isEVENTS_BATTLES_CUSTOM_DAMAGE())
 
 // Minor bug fixes (missing catch-all else clauses, etc) (v30 onwards)
 #define MOD_BUGFIX_MINOR 							(true)
@@ -945,6 +946,12 @@ enum BattleTypeTypes
 #define GAMEEVENT_BarbariansCampGetSpawnUnit	"BarbariansCampGetSpawnUnit",	"iii"
 #define GAMEEVENT_BarbariansSpawnedUnit			"BarbariansSpawnedUnit",		"iii"
 #define GAMEEVENT_BattleDamageDelta				"BattleDamageDelta",			"ii"
+// BattleCustomDamage(iBattleUnitType, iBattleType,
+//                    iAttackPlayerID, iAttackUnitOrCityID, bAttackIsCity, iAttackDamage,
+//                    iDefensePlayerID, iDefenseUnitOrCityID, bDefenseIsCity, iDefenseDamage,
+//                    iInterceptorPlayerID, iInterceptorUnitOrCityID, bInterceptorIsCity, iInterceptorDamage,
+//                    ) -> iDamageDelta
+#define GAMEEVENT_BattleCustomDamage			"BattleCustomDamage",			"iiiibiiibiiibi"
 #define GAMEEVENT_BattleFinished				"BattleFinished",				""
 #define GAMEEVENT_BattleJoined					"BattleJoined",					"iiib"
 #define GAMEEVENT_BattleStarted					"BattleStarted",				"iii"
@@ -1345,6 +1352,7 @@ public:
 	MOD_OPT_DECL(EVENTS_CUSTOM_MISSIONS);
 	MOD_OPT_DECL(EVENTS_BATTLES);
 	MOD_OPT_DECL(EVENTS_BATTLES_DAMAGE);
+	MOD_OPT_DECL(EVENTS_BATTLES_CUSTOM_DAMAGE);
 
 	MOD_OPT_DECL(API_PLAYER_LOGS);
 	MOD_OPT_DECL(API_ESPIONAGE);
