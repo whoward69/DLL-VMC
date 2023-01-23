@@ -189,6 +189,9 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 
 	Method(GetExoticGoodsGoldAmount);
 	Method(GetExoticGoodsXPAmount);
+	Method(ChangeNumExoticGoods);
+	Method(GetNumExoticGoodsMax);
+	Method(GetNumExoticGoods);
 
 	Method(CanPillage);
 
@@ -1504,6 +1507,36 @@ int CvLuaUnit::lGetExoticGoodsXPAmount(lua_State* L)
 	lua_pushinteger(L, iValue);
 	return 1;
 }
+
+int CvLuaUnit::lChangeNumExoticGoods(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iValue = lua_tointeger(L, 2);
+
+	pkUnit->changeNumExoticGoods(iValue);
+
+	return 1;
+}
+
+int CvLuaUnit::lGetNumExoticGoodsMax(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iValue = pkUnit->getUnitInfo().GetNumExoticGoods();
+	lua_pushinteger(L, iValue);
+
+	return 1;
+}
+
+int CvLuaUnit::lGetNumExoticGoods(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int iValue = pkUnit->getNumExoticGoods();
+	lua_pushinteger(L, iValue);
+
+	return 1;
+}
+
 //------------------------------------------------------------------------------
 //bool canPillage(CyPlot* pPlot);
 int CvLuaUnit::lCanPillage(lua_State* L)
