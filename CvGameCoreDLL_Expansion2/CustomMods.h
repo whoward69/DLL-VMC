@@ -1043,6 +1043,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_PlayerCanTransitMinorCity		"PlayerCanTransitMinorCity",	"iiiii"
 #define GAMEEVENT_PlayerDoneTurn				"PlayerDoneTurn",				"i"
 #define GAMEEVENT_PlayerGifted					"PlayerGifted",					"iiiiii"
+#define GAMEEVENT_PlayerCompletedQuest			"PlayerCompletedQuest",			"iiiiii"
 #define GAMEEVENT_PlayerGoldenAge				"PlayerGoldenAge",				"ibi"
 #define GAMEEVENT_PlayerLiberated				"PlayerLiberated",				"iii"
 #define GAMEEVENT_PlayerPlunderedTradeRoute		"PlayerPlunderedTradeRoute",	"iiiiiiiii"

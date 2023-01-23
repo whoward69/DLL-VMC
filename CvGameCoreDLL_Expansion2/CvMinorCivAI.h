@@ -504,6 +504,8 @@ public:
 
 	int CalculateBullyMetric(PlayerTypes eBullyPlayer, bool bForUnit, CvString* sTooltipSink = NULL);
 
+	int GetBullyInfluenceLoss(PlayerTypes eBullyPlayer, int iOriginalLoss);
+
 	bool CanMajorBullyGold(PlayerTypes ePlayer);
 	bool CanMajorBullyGold(PlayerTypes ePlayer, int iSpecifiedBullyMetric);
 	CvString GetMajorBullyGoldDetails(PlayerTypes ePlayer);

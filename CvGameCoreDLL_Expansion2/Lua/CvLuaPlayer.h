@@ -581,6 +581,7 @@ protected:
 	static int lGetFriendshipChangePerTurnTimes100(lua_State* L);
 	static int lGetMinorCivFriendshipWithMajor(lua_State* L);
 	static int lChangeMinorCivFriendshipWithMajor(lua_State* L);
+	static int lGetMinorBullyInfluenceLoss(lua_State* L);
 	static int lGetMinorCivFriendshipAnchorWithMajor(lua_State* L);
 	static int lGetFriendshipNeededForNextLevel(lua_State* L);
 	static int lGetMinorCivFriendshipLevelWithMajor(lua_State* L);
@@ -731,6 +732,9 @@ protected:
 	static int lIsHasAccessToHurry(lua_State* L);
 	static int lIsCanHurry(lua_State* L);
 	static int lGetHurryGoldCost(lua_State* L);
+
+	static int lGetMinorFriendCount(lua_State* L);
+	static int lGetMinorAllyCount(lua_State* L);
 
 	static int lIsResearchingTech(lua_State* L);
 	static int lSetResearchingTech(lua_State* L);

@@ -3432,6 +3432,58 @@ int CvPlayer::GetNumWorkablePlots() const
 }
 #endif
 
+int CvPlayer::GetMinorFriendCount(const bool bExcludeNonAlive) const
+{
+	if (!isMajorCiv())
+	{
+		return 0;
+	}
+
+	int ret = 0;
+	for (int iMinorLoop = MAX_MAJOR_CIVS; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
+	{
+		PlayerTypes eMinor = (PlayerTypes)iMinorLoop;
+		CvPlayerAI& minor = GET_PLAYER(eMinor);
+		if (!minor.isAlive() && bExcludeNonAlive)
+		{
+			continue;
+		}
+
+		if (minor.GetMinorCivAI()->IsFriends(GetID()))
+		{
+			ret++;
+		}
+	}
+
+	return ret;
+}
+
+int CvPlayer::GetMinorAllyCount(const bool bExcludeNonAlive) const
+{
+	if (!isMajorCiv())
+	{
+		return 0;
+	}
+
+	int ret = 0;
+	for (int iMinorLoop = MAX_MAJOR_CIVS; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
+	{
+		PlayerTypes eMinor = (PlayerTypes)iMinorLoop;
+		CvPlayerAI& minor = GET_PLAYER(eMinor);
+		if (!minor.isAlive() && bExcludeNonAlive)
+		{
+			continue;
+		}
+
+		if (minor.GetMinorCivAI()->IsAllies(GetID()))
+		{
+			ret++;
+		}
+	}
+
+	return ret;
+}
+
 //	--------------------------------------------------------------------------------
 /// This player liberates iOldCityID and gives it back to ePlayer
 void CvPlayer::DoLiberatePlayer(PlayerTypes ePlayer, int iOldCityID)
@@ -9351,6 +9403,16 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 		}
 	}
 
+	if (pBuildingInfo->GetMinorFriendshipAnchorChange() > 0)
+	{
+		ChangeMinorFriendshipAnchorMod(pBuildingInfo->GetMinorFriendshipAnchorChange() * iChange);
+	}
+
+	if (pBuildingInfo->GetMinorQuestFriendshipMod() > 0)
+	{
+		changeMinorQuestFriendshipMod(pBuildingInfo->GetMinorQuestFriendshipMod() * iChange);
+	}
+
 	ChangeExtraLeagueVotes(pBuildingInfo->GetExtraLeagueVotes() * iChange);
 
 	// Loop through Cities
@@ -12396,6 +12458,52 @@ int CvPlayer::GetHappinessFromLuxury(ResourceTypes eResource) const
 	return false;
 }
 
+int CvPlayer::GetAdequateLuxuryKindCount(int threshold) const
+{
+	int iReturn = 0;
+	for (int iResourceLoop = 0; iResourceLoop < GC.getNumResourceInfos(); iResourceLoop++)
+	{
+		ResourceTypes eResource = (ResourceTypes) iResourceLoop;
+		CvResourceInfo* pkResourceInfo = GC.getResourceInfo(eResource);
+		if (!pkResourceInfo)
+		{
+			continue;
+		}
+
+		if (GC.getGame().GetGameLeagues()->IsLuxuryHappinessBanned(GetID(), eResource))
+		{
+			continue;
+		}
+
+		if (pkResourceInfo->getResourceUsage() != RESOURCEUSAGE_LUXURY)
+		{
+			continue;
+		}
+
+		if (getNumResourceAvailable(eResource, /*bIncludeImport*/ true) > threshold)
+		{
+			iReturn++;
+		}
+	}
+
+	return iReturn;
+}
+
+int CvPlayer::GetStrengthModifierFromAlly() const
+{
+	if (GetPlayerTraits()->GetAllyCityStateCombatModifier() == 0)
+	{
+		return 0;
+	}
+
+	int mod = GetMinorAllyCount(true) * GetPlayerTraits()->GetAllyCityStateCombatModifier();
+	if (GetPlayerTraits()->GetAllyCityStateCombatModifierMax() > -1 && mod > GetPlayerTraits()->GetAllyCityStateCombatModifierMax())
+	{
+		mod = GetPlayerTraits()->GetAllyCityStateCombatModifierMax();
+	}
+
+	return mod;
+}
 
 //	--------------------------------------------------------------------------------
 /// How much Unhappiness are Units producing?
@@ -16036,7 +16144,19 @@ void CvPlayer::changeLevelExperienceModifier(int iChange)
 //	--------------------------------------------------------------------------------
 int CvPlayer::getMinorQuestFriendshipMod() const
 {
-	return m_iMinorQuestFriendshipMod;
+	int iMod = 0;
+	if (GetPlayerTraits()->GetAdequateLuxuryCompleteQuestInfluenceModifier() > 0)
+	{
+		// Get the number of luxury resources we have where available number > 1
+		int luxuryCount = GetAdequateLuxuryKindCount(1);
+		iMod += luxuryCount * GetPlayerTraits()->GetAdequateLuxuryCompleteQuestInfluenceModifier();
+		if (iMod > GetPlayerTraits()->GetAdequateLuxuryCompleteQuestInfluenceModifierMax() && GetPlayerTraits()->GetAdequateLuxuryCompleteQuestInfluenceModifierMax() >= 0)
+		{
+			iMod = GetPlayerTraits()->GetAdequateLuxuryCompleteQuestInfluenceModifierMax();
+		}
+	}
+	
+	return m_iMinorQuestFriendshipMod + iMod;
 }
 
 

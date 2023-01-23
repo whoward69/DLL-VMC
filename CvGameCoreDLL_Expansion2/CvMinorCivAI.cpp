@@ -3917,10 +3917,17 @@ void CvMinorCivAI::DoCompletedQuestsForPlayer(PlayerTypes ePlayer, MinorCivQuest
 				int iOldFriendshipTimes100 = GetEffectiveFriendshipWithMajorTimes100(ePlayer);
 				bool bCompleted = itr_quest->DoFinishQuest();
 				int iNewFriendshipTimes100 = GetEffectiveFriendshipWithMajorTimes100(ePlayer);
-				
+
 				if (bCompleted)
 				{
-					GET_PLAYER(ePlayer).GetDiplomacyAI()->LogMinorCivQuestFinished(GetPlayer()->GetID(), iOldFriendshipTimes100, iNewFriendshipTimes100, itr_quest->GetType());
+					CvPlayer& eMajor = GET_PLAYER(ePlayer);
+					int iStartTurn = itr_quest->GetStartTurn();
+#if defined(MOD_EVENTS_MINORS_INTERACTION)
+					if (MOD_EVENTS_MINORS_INTERACTION) {
+						GAMEEVENTINVOKE_HOOK(GAMEEVENT_PlayerCompletedQuest, ePlayer, GetPlayer()->GetID(), itr_quest->GetType(), iStartTurn, iOldFriendshipTimes100, iNewFriendshipTimes100);
+					}
+#endif
+					eMajor.GetDiplomacyAI()->LogMinorCivQuestFinished(GetPlayer()->GetID(), iOldFriendshipTimes100, iNewFriendshipTimes100, itr_quest->GetType());
 				}
 			}
 		}
@@ -9323,6 +9330,18 @@ int CvMinorCivAI::CalculateBullyMetric(PlayerTypes eBullyPlayer, bool bForUnit, 
 	return iScore;
 }
 
+int CvMinorCivAI::GetBullyInfluenceLoss(PlayerTypes eBullyPlayer, int iOriginalLoss)
+{
+	int modifier = 100;
+	modifier += GET_PLAYER(eBullyPlayer).GetPlayerPolicies()->GetNumericModifier(POLICYMOD_MINOR_BULLY_INFLUENCE_LOSS_MODIFIER);
+	if (modifier < 0)
+	{
+		modifier = 0;
+	}
+
+	return iOriginalLoss * modifier / 100;
+}
+
 bool CvMinorCivAI::CanMajorBullyGold(PlayerTypes ePlayer)
 {
 	CvAssertMsg(ePlayer >= 0, "ePlayer is expected to be non-negative (invalid Index)");
@@ -9475,7 +9494,7 @@ void CvMinorCivAI::DoMajorBullyGold(PlayerTypes eBully, int iGold)
 		}
 
 		GET_PLAYER(eBully).GetTreasury()->ChangeGold(iGold);
-		DoBulliedByMajorReaction(eBully, GC.getMINOR_FRIENDSHIP_DROP_BULLY_GOLD_SUCCESS());
+		DoBulliedByMajorReaction(eBully, GetBullyInfluenceLoss(eBully, GC.getMINOR_FRIENDSHIP_DROP_BULLY_GOLD_SUCCESS()));
 		
 #if defined(MOD_EVENTS_MINORS_INTERACTION)
 		if (MOD_EVENTS_MINORS_INTERACTION) {
@@ -9527,7 +9546,7 @@ void CvMinorCivAI::DoMajorBullyUnit(PlayerTypes eBully, UnitTypes eUnitType)
 			if(GetPlayer()->getCapitalCity())
 				GetPlayer()->getCapitalCity()->addProductionExperience(pNewUnit);
 
-			DoBulliedByMajorReaction(eBully, GC.getMINOR_FRIENDSHIP_DROP_BULLY_WORKER_SUCCESS());
+			DoBulliedByMajorReaction(eBully, GetBullyInfluenceLoss(eBully, GC.getMINOR_FRIENDSHIP_DROP_BULLY_WORKER_SUCCESS()));
 			
 #if defined(MOD_EVENTS_MINORS_INTERACTION)
 			if (MOD_EVENTS_MINORS_INTERACTION) {

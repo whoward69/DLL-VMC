@@ -138,6 +138,7 @@ CvPolicyEntry::CvPolicyEntry(void):
 	m_iProtectedMinorPerTurnInfluence(0),
 	m_iAfraidMinorPerTurnInfluence(0),
 	m_iMinorBullyScoreModifier(0),
+	m_iMinorBullyInfluenceLossModifier(0),
 	m_iThemingBonusMultiplier(0),
 	m_iInternalTradeRouteYieldModifier(0),
 	m_iSharedReligionTourismModifier(0),
@@ -412,6 +413,7 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	m_iProtectedMinorPerTurnInfluence = kResults.GetInt("ProtectedMinorPerTurnInfluence");
 	m_iAfraidMinorPerTurnInfluence = kResults.GetInt("AfraidMinorPerTurnInfluence");
 	m_iMinorBullyScoreModifier = kResults.GetInt("MinorBullyScoreModifier");
+	m_iMinorBullyInfluenceLossModifier = kResults.GetInt("MinorBullyInfluenceLossModifier");
 	m_iThemingBonusMultiplier = kResults.GetInt("ThemingBonusMultiplier");
 	m_iInternalTradeRouteYieldModifier = kResults.GetInt("InternalTradeRouteYieldModifier");
 	m_iSharedReligionTourismModifier = kResults.GetInt("SharedReligionTourismModifier");
@@ -1605,6 +1607,11 @@ int CvPolicyEntry::GetAfraidMinorPerTurnInfluence() const
 int CvPolicyEntry::GetMinorBullyScoreModifier() const
 {
 	return m_iMinorBullyScoreModifier;
+}
+
+int CvPolicyEntry::GetMinorBullyInfluenceLossModifier() const
+{
+	return m_iMinorBullyInfluenceLossModifier;
 }
 
 /// Boost to museum theming
@@ -3152,6 +3159,9 @@ int CvPlayerPolicies::GetNumericModifier(PolicyModifierType eType)
 				break;
 			case POLICYMOD_MINOR_BULLY_SCORE_MODIFIER:
 				rtnValue += m_pPolicies->GetPolicyEntry(i)->GetMinorBullyScoreModifier();
+				break;
+			case POLICYMOD_MINOR_BULLY_INFLUENCE_LOSS_MODIFIER:
+				rtnValue += m_pPolicies->GetPolicyEntry(i)->GetMinorBullyInfluenceLossModifier();
 				break;
 			case POLICYMOD_THEMING_BONUS:
 				rtnValue += m_pPolicies->GetPolicyEntry(i)->GetThemingBonusMultiplier();

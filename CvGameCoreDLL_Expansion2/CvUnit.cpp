@@ -12494,6 +12494,8 @@ int CvUnit::GetGenericMaxStrengthModifier(const CvUnit* pOtherUnit, const CvPlot
 		}
 	}
 
+	CvPlayerAI& onwer = GET_PLAYER(getOwner());
+	iModifier += onwer.GetStrengthModifierFromAlly();
 	return iModifier;
 }
 
@@ -13191,6 +13193,9 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 	// Unit can't drop below 10% strength
 	if(iModifier < -90)
 		iModifier = -90;
+
+	CvPlayerAI& onwer = GET_PLAYER(getOwner());
+	iModifier += onwer.GetStrengthModifierFromAlly();
 
 	iCombat = (iStr * (iModifier + 100));
 

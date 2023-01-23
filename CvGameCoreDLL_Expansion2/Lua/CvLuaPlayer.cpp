@@ -455,6 +455,8 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetHappinessFromMinorCivs);
 	Method(GetHappinessFromMinor);
 
+
+
 	// END Happiness
 
 	Method(GetBarbarianCombatBonus);
@@ -681,6 +683,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetFriendshipChangePerTurnTimes100);
 	Method(GetMinorCivFriendshipWithMajor);
 	Method(ChangeMinorCivFriendshipWithMajor);
+	Method(GetMinorBullyInfluenceLoss);
 	Method(GetMinorCivFriendshipAnchorWithMajor);
 	Method(GetMinorCivFriendshipLevelWithMajor);
 	Method(GetActiveQuestForPlayer);
@@ -860,6 +863,9 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(Cities);
 	Method(GetNumCities);
 	Method(GetCityByID);
+
+	Method(GetMinorFriendCount);
+	Method(GetMinorAllyCount);
 #if defined(MOD_API_LUA_EXTENSIONS)
 	Method(GetNumPuppetCities);
 #endif
@@ -6613,6 +6619,19 @@ int CvLuaPlayer::lChangeMinorCivFriendshipWithMajor(lua_State* L)
 	pkPlayer->GetMinorCivAI()->ChangeFriendshipWithMajor(ePlayer, iChange);
 	return 1;
 }
+
+//void GetMinorBullyInfluenceLoss(PlayerTypes eMajor, int iOriginalLoss);
+int CvLuaPlayer::lGetMinorBullyInfluenceLoss(lua_State* L)
+{
+	CvPlayerAI* pMinor = GetInstance(L);
+	PlayerTypes eMajor = (PlayerTypes) lua_tointeger(L, 2);
+	int iOriginalLoss = lua_tointeger(L, 3);
+
+	int iResult = pMinor->GetMinorCivAI()->GetBullyInfluenceLoss(eMajor, iOriginalLoss);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
 //------------------------------------------------------------------------------
 //void GetMinorCivFriendshipAnchorWithMajor(PlayerTypes eMajor);
 int CvLuaPlayer::lGetMinorCivFriendshipAnchorWithMajor(lua_State* L)
@@ -12173,3 +12192,23 @@ int CvLuaPlayer::lDeactivateMilitaryStrategy(lua_State* L)
 	return 0;
 }
 #endif
+
+int CvLuaPlayer::lGetMinorFriendCount(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	bool bExcludeNonAlive = lua_toboolean(L, 2);
+
+	lua_pushinteger(L, pkPlayer->GetMinorFriendCount(bExcludeNonAlive));
+
+	return 1;
+}
+
+int CvLuaPlayer::lGetMinorAllyCount(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	bool bExcludeNonAlive = lua_toboolean(L, 2);
+
+	lua_pushinteger(L, pkPlayer->GetMinorAllyCount(bExcludeNonAlive));
+
+	return 1;
+}

@@ -149,6 +149,7 @@ public:
 	int GetProtectedMinorPerTurnInfluence() const;
 	int GetAfraidMinorPerTurnInfluence() const;
 	int GetMinorBullyScoreModifier() const;
+	int GetMinorBullyInfluenceLossModifier() const;
 	int GetThemingBonusMultiplier() const;
 	int GetInternalTradeRouteYieldModifier() const;
 	int GetSharedReligionTourismModifier() const;
@@ -378,6 +379,7 @@ private:
 	int m_iProtectedMinorPerTurnInfluence;
 	int m_iAfraidMinorPerTurnInfluence;
 	int m_iMinorBullyScoreModifier;
+	int m_iMinorBullyInfluenceLossModifier;
 	int m_iThemingBonusMultiplier;
 	int m_iInternalTradeRouteYieldModifier;
 	int m_iSharedReligionTourismModifier;
@@ -604,6 +606,7 @@ enum PolicyModifierType
 	POLICYMOD_PROTECTED_MINOR_INFLUENCE,
 	POLICYMOD_AFRAID_INFLUENCE,
 	POLICYMOD_MINOR_BULLY_SCORE_MODIFIER,
+	POLICYMOD_MINOR_BULLY_INFLUENCE_LOSS_MODIFIER,
 	POLICYMOD_STEAL_TECH_FASTER_MODIFIER,
 	POLICYMOD_THEMING_BONUS,
 	POLICYMOD_CITY_STATE_TRADE_CHANGE,
