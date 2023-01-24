@@ -203,6 +203,12 @@
 #define MOD_GLOBAL_PARATROOPS_AA_DAMAGE             gCustomMods.isGLOBAL_PARATROOPS_AA_DAMAGE()
 // Nukes will melt ice
 #define MOD_GLOBAL_NUKES_MELT_ICE                   gCustomMods.isGLOBAL_NUKES_MELT_ICE() 
+
+
+// Ability to add new natural wonder features with graphics
+#define MOD_PSEUDO_NATURAL_WONDER					gCustomMods.isPSEUDO_NATURAL_WONDER()
+
+
 // Great Works can generate different yields than just culture (v25)
 #define MOD_GLOBAL_GREATWORK_YIELDTYPES             gCustomMods.isGLOBAL_GREATWORK_YIELDTYPES() 
 // Great Artists, Writers and Musicians that do NOT create Great Works can be "reborn" (v84)
@@ -1219,6 +1225,9 @@ public:
 	MOD_OPT_DECL(GLOBAL_PARATROOPS_MOVEMENT);
 	MOD_OPT_DECL(GLOBAL_PARATROOPS_AA_DAMAGE);
 	MOD_OPT_DECL(GLOBAL_NUKES_MELT_ICE); 
+
+	MOD_OPT_DECL(PSEUDO_NATURAL_WONDER);
+
 	MOD_OPT_DECL(GLOBAL_GREATWORK_YIELDTYPES); 
 	MOD_OPT_DECL(GLOBAL_NO_LOST_GREATWORKS); 
 	MOD_OPT_DECL(GLOBAL_EXCLUDE_FROM_GIFTS);
