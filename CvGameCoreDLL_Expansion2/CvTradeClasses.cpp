@@ -1519,7 +1519,21 @@ bool CvGameTrade::StepUnit (int iIndex)
 	CvUnit *pkUnit = GetVis(iIndex);
 	if (pkUnit)
 	{
-		pkUnit->setXY(kTradeConnection.m_aPlotList[kTradeConnection.m_iTradeUnitLocationIndex].m_iX, kTradeConnection.m_aPlotList[kTradeConnection.m_iTradeUnitLocationIndex].m_iY, true, false, true, true);
+		const int x = kTradeConnection.m_aPlotList[kTradeConnection.m_iTradeUnitLocationIndex].m_iX;
+		const int y = kTradeConnection.m_aPlotList[kTradeConnection.m_iTradeUnitLocationIndex].m_iY;
+		pkUnit->setXY(x, y, true, false, true, true);
+
+#ifdef MOD_EVENTS_TRADE_ROUTE_MOVE
+		if (MOD_EVENTS_TRADE_ROUTE_MOVE)
+		{
+			CvCity* pOriginalCity = CvGameTrade::GetOriginCity(kTradeConnection);
+			CvCity* pDestCity = CvGameTrade::GetDestCity(kTradeConnection);
+			if (pOriginalCity && pDestCity)
+			{
+				GAMEEVENTINVOKE_HOOK(GAMEEVENT_TradeRouteMove, x, y, pkUnit->GetID(), pkUnit->getOwner(), pOriginalCity->getOwner(), pOriginalCity->GetID(), pDestCity->getOwner(), pDestCity->GetID());
+			}
+		}
+#endif
 	}
 
 	// auto-pillage when a trade unit moves under an enemy unit

@@ -681,6 +681,9 @@
 #define MOD_EVENTS_BATTLES_DAMAGE                   (MOD_EVENTS_BATTLES && gCustomMods.isEVENTS_BATTLES_DAMAGE())
 #define MOD_EVENTS_BATTLES_CUSTOM_DAMAGE            (MOD_EVENTS_BATTLES && gCustomMods.isEVENTS_BATTLES_CUSTOM_DAMAGE())
 
+//   GameEvents.TradeRouteMove.Add(function(iX, iY, iUnit, iOwner, iOriginalPlayer, iOriginalCity, iDestPlayer, iDestCity) end)
+#define MOD_EVENTS_TRADE_ROUTE_MOVE                 (gCustomMods.isEVENTS_TRADE_ROUTE_MOVE())
+
 // Minor bug fixes (missing catch-all else clauses, etc) (v30 onwards)
 #define MOD_BUGFIX_MINOR 							(true)
 // Minor bug fixes in the Lua API (v86 onwards)
@@ -1099,6 +1102,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_UnitPromoted					"UnitPromoted",					"iii"
 #define GAMEEVENT_UnitRangeAttackAt				"UnitRangeAttackAt",			"iiii"
 #define GAMEEVENT_UnitUpgraded					"UnitUpgraded",					"iiib"
+#define GAMEEVENT_TradeRouteMove                "TradeRouteMove",               "iiiiiiii"
 
 
 // Serialization wrappers
@@ -1363,7 +1367,8 @@ public:
 	MOD_OPT_DECL(EVENTS_BATTLES);
 	MOD_OPT_DECL(EVENTS_BATTLES_DAMAGE);
 	MOD_OPT_DECL(EVENTS_BATTLES_CUSTOM_DAMAGE);
-
+	MOD_OPT_DECL(EVENTS_TRADE_ROUTE_MOVE);
+	
 	MOD_OPT_DECL(API_PLAYER_LOGS);
 	MOD_OPT_DECL(API_ESPIONAGE);
 	MOD_OPT_DECL(API_TRADEROUTES);
