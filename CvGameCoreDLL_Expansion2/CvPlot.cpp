@@ -3796,7 +3796,7 @@ bool CvPlot::isFriendlyCityOrPassableImprovement(PlayerTypes ePlayer, bool, cons
 		// In friendly lands (ours, an allied CS or a major with open borders)
 
 #if defined(MOD_EVENTS_MINORS_INTERACTION)
-		if (MOD_EVENTS_MINORS_INTERACTION && GET_PLAYER(pPlotCity->getOwner()).isMinorCiv()) {
+		if (MOD_EVENTS_MINORS_INTERACTION && pPlotCity && GET_PLAYER(pPlotCity->getOwner()).isMinorCiv()) {
 			if (pUnit) {
 				if (GAMEEVENTINVOKE_TESTALL(GAMEEVENT_UnitCanTransitMinorCity, ePlayer, pUnit->GetID(), pPlotCity->getOwner(), pPlotCity->GetID(), getX(), getY()) == GAMEEVENTRETURN_FALSE) {
 					return false;
