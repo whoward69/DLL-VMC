@@ -9493,7 +9493,7 @@ int CvPlayer::GetBuildingClassYieldChange(BuildingClassTypes eBuildingClass, Yie
 		{
 			// Do we have this building anywhere in empire?
 			const int count = countNumBuildings((BuildingTypes)i);
-			if (countNumBuildings((BuildingTypes)i) > 0)
+			if (count > 0)
 			{
 				CvBuildingEntry* pEntry = pBuildings->GetEntry(i);
 				if(pEntry)
