@@ -9492,12 +9492,13 @@ int CvPlayer::GetBuildingClassYieldChange(BuildingClassTypes eBuildingClass, Yie
 		for(int i = 0; i < pBuildings->GetNumBuildings(); i++)
 		{
 			// Do we have this building anywhere in empire?
-			if(countNumBuildings((BuildingTypes)i) > 0)
+			const int count = countNumBuildings((BuildingTypes)i);
+			if (countNumBuildings((BuildingTypes)i) > 0)
 			{
 				CvBuildingEntry* pEntry = pBuildings->GetEntry(i);
 				if(pEntry)
 				{
-					rtnValue += pEntry->GetBuildingClassYieldChange(eBuildingClass, eYieldType);
+					rtnValue += pEntry->GetBuildingClassYieldChange(eBuildingClass, eYieldType) * count;
 				}
 			}
 		}
