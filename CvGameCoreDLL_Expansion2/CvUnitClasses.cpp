@@ -143,6 +143,10 @@ CvUnitEntry::CvUnitEntry(void) :
 	m_bUnitArtInfoCulturalVariation(false),
 	m_iUnitFlagIconOffset(0),
 	m_iUnitPortraitOffset(0)
+#ifdef MOD_BALANCE_CORE
+	,m_piScalingFromOwnedImprovements(NULL)
+	,m_iScaleFromNumGWs(0)
+#endif
 {
 }
 
@@ -168,6 +172,9 @@ CvUnitEntry::~CvUnitEntry(void)
 	SAFE_DELETE_ARRAY(m_paszUnitNames);
 	SAFE_DELETE_ARRAY(m_paeGreatWorks);
 
+#if defined(MOD_BALANCE_CORE)
+	SAFE_DELETE_ARRAY(m_piScalingFromOwnedImprovements);
+#endif
 }
 
 bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility)
@@ -370,6 +377,14 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	kUtility.PopulateArrayByExistence(m_pbGreatPeoples, "Specialists", "Unit_GreatPersons", "GreatPersonType", "UnitType", szUnitType);
 	kUtility.PopulateArrayByExistence(m_pbBuildings, "Buildings", "Unit_Buildings", "BuildingType", "UnitType", szUnitType);
 	kUtility.PopulateArrayByExistence(m_pbBuildingClassRequireds, "BuildingClasses", "Unit_BuildingClassRequireds", "BuildingClassType", "UnitType", szUnitType);
+
+#if defined(MOD_BALANCE_CORE)
+    if (MOD_BALANCE_CORE)
+	{
+		kUtility.PopulateArrayByValue(m_piScalingFromOwnedImprovements, "Improvements", "Unit_ScalingFromOwnedImprovements", "ImprovementType", "UnitType", szUnitType, "Amount");
+		m_iScaleFromNumGWs = kResults.GetInt("ScaleFromNumGWs");
+	}
+#endif
 
 	//TechTypes
 	{
@@ -1303,6 +1318,20 @@ int CvUnitEntry::GetPower() const
 {
 	return m_iCachedPower;
 }
+
+#ifdef MOD_BALANCE_CORE
+int CvUnitEntry::GetScalingFromOwnedImprovements(int i) const
+{
+	CvAssertMsg(i < GC.getNumImprovementInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piScalingFromOwnedImprovements ? m_piScalingFromOwnedImprovements[i] : -1;
+}
+
+int CvUnitEntry::GetScaleFromNumGWs() const
+{
+	return m_iScaleFromNumGWs;
+}
+#endif
 
 /// Update military Power
 void CvUnitEntry::DoUpdatePower()

@@ -5391,6 +5391,14 @@ int CvYieldInfo::getAIWeightPercent() const
 {
 	return m_iAIWeightPercent;
 }
+
+#ifdef MOD_BALANCE_CORE
+int CvYieldInfo::getGreakWorkYieldMod() const
+{
+	return m_iGreakWorkYieldMod;
+}
+#endif
+
 //------------------------------------------------------------------------------
 bool CvYieldInfo::CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility)
 {
@@ -5413,8 +5421,14 @@ bool CvYieldInfo::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	kResults.GetValue("GoldenAgeYieldMod", m_iGoldenAgeYieldMod);
 	kResults.GetValue("AIWeightPercent", m_iAIWeightPercent);
 
-	return true;
+#ifdef MOD_BALANCE_CORE
+	if (MOD_BALANCE_CORE)
+	{
+		kResults.GetValue("GreakWorkYieldMod", m_iGreakWorkYieldMod);
+	}
+#endif
 
+	return true;
 }
 
 //======================================================================================================

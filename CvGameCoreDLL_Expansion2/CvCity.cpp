@@ -10558,6 +10558,23 @@ int CvCity::getBaseYieldRateModifier(YieldTypes eIndex, int iExtra, CvString* to
 		}
 	}
 
+	// From the number of great work
+#ifdef MOD_BALANCE_CORE
+	if (MOD_BALANCE_CORE)
+	{
+		const int iNumGWs = GET_PLAYER(getOwner()).GetCulture()->GetNumGreatWorks();
+		const int iYieldModFromGws = GC.getYieldInfo(eIndex)->getGreakWorkYieldMod();
+		if (iYieldModFromGws != 0 && iNumGWs != 0)
+		{
+			iTempMod = iYieldModFromGws * iNumGWs;
+			iModifier += iTempMod;
+
+			if (toolTipSink)
+				GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_NUM_GREAT_WORK", iTempMod);
+		}
+	}
+#endif
+
 	// Religion Yield Rate Modifier
 	ReligionTypes eMajority = GetCityReligions()->GetReligiousMajority();
 	const CvReligion* pReligion = GC.getGame().GetGameReligions()->GetReligion(eMajority, getOwner());

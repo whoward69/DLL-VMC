@@ -1626,6 +1626,7 @@ public:
 	int getGoldenAgeYieldThreshold() const;
 	int getGoldenAgeYieldMod() const;
 	int getAIWeightPercent() const;
+	int getGreakWorkYieldMod() const;
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
@@ -1645,6 +1646,10 @@ protected:
 	int m_iGoldenAgeYieldThreshold;
 	int m_iGoldenAgeYieldMod;
 	int m_iAIWeightPercent;
+
+#ifdef MOD_BALANCE_CORE
+	int m_iGreakWorkYieldMod;
+#endif
 };
 
 

@@ -9078,6 +9078,44 @@ bool CvUnit::canDiscover(const CvPlot* /*pPlot*/, bool bTestVisible) const
 	return true;
 }
 
+#ifdef MOD_BALANCE_CORE
+int CvUnit::GetScaleAmount(int iAmountToScale) const
+{
+	int iScaleTotal = iAmountToScale;
+	int iExtra = 0;
+	CvPlayerAI& kPlayer = GET_PLAYER(getOwner());
+	for (int i = 0; i < GC.getNumImprovementInfos(); i++)
+	{
+		iExtra = 0;
+		ImprovementTypes eImprovement = (ImprovementTypes)i;
+		if (eImprovement == NO_IMPROVEMENT)
+			continue;
+
+		int iScaleAmount = getUnitInfo().GetScalingFromOwnedImprovements(eImprovement);
+		if (iScaleAmount <= 0)
+			continue;
+
+		// NOTE: In Community-Patch-DLL:
+		// int iOwned = GET_PLAYER(getOwner()).getImprovementCount(eImprovement, true);
+		// Currently, getImprovementCount do not have the second parameter.
+		int iOwned = kPlayer.getImprovementCount(eImprovement);
+		iExtra = (iOwned * iScaleAmount) * iAmountToScale;
+		iExtra /= 100;
+
+		iScaleTotal += iExtra;
+	}
+
+	const int scaleFromNumGWs = getUnitInfo().GetScaleFromNumGWs();
+	if (scaleFromNumGWs != 0)
+	{
+		const int iNumGWs = kPlayer.GetCulture()->GetNumGreatWorks();
+		iScaleTotal += iAmountToScale * iNumGWs * scaleFromNumGWs / 100;
+	}
+
+	return iScaleTotal;
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 int CvUnit::getDiscoverAmount()
 {
@@ -9097,6 +9135,13 @@ int CvUnit::getDiscoverAmount()
 				iValue += (iValue * pPlayer->GetGreatScientistBeakerMod()) / 100;
 				iValue = MAX(iValue, 0); // Cannot be negative
 			}
+
+#ifdef MOD_BALANCE_CORE
+			if (MOD_BALANCE_CORE)
+			{
+				iValue = GetScaleAmount(iValue);
+			}
+#endif
 
 			// Modify based on game speed
 			iValue *= GC.getGame().getGameSpeedInfo().getResearchPercent();
@@ -10092,6 +10137,12 @@ int CvUnit::GetGoldenAgeTurns() const
 		iGoldenAgeTurns = iGoldenAgeTurns * (100 + iLengthModifier) / 100;
 
 	// Game Speed mod
+#ifdef MOD_BALANCE_CORE
+	if (MOD_BALANCE_CORE)
+	{
+		iGoldenAgeTurns = GetScaleAmount(iGoldenAgeTurns);
+	}
+#endif
 
 	iGoldenAgeTurns *= GC.getGame().getGameSpeedInfo().getGoldenAgePercent();
 	iGoldenAgeTurns /= 100;
@@ -10139,6 +10190,13 @@ int CvUnit::getGivePoliciesCulture()
 			// Calculate boost
 			iValue = kPlayer.GetCultureYieldFromPreviousTurns(GC.getGame().getGameTurn(), iPreviousTurnsToCount);
 		}
+
+#ifdef MOD_BALANCE_CORE
+		if (MOD_BALANCE_CORE)
+		{
+			iValue = GetScaleAmount(iValue);
+		}
+#endif
 
 		// Modify based on game speed
 		iValue *= GC.getGame().getGameSpeedInfo().getCulturePercent();
@@ -10234,6 +10292,12 @@ int CvUnit::getBlastTourism()
 	}
 
 	int iTourismBlast = GetTourismBlastStrength();
+#ifdef MOD_BALANCE_CORE
+	if (MOD_BALANCE_CORE)
+	{
+		iTourismBlast = GetScaleAmount(iTourismBlast);
+	}
+#endif
 	iTourismBlast = iTourismBlast * GC.getGame().getGameSpeedInfo().getCulturePercent() / 100;
 
 	return iTourismBlast;
