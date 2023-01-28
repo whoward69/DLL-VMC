@@ -1831,6 +1831,14 @@ public:
 	std::string debugDump(const FAutoVariableBase&) const;
 	std::string stackTraceRemark(const FAutoVariableBase&) const;
 
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	int GetMinorsTradeRouteYieldRate(const YieldTypes eYieldType) const;
+	void ChangeMinorsTradeRouteYieldRate(const YieldTypes eYieldType, const int iChange);
+
+	int GetInternalTradeRouteDestYieldRate(const YieldTypes eYieldType) const;
+	void ChangeInternalTradeRouteDestYieldRate(const YieldTypes eYieldType, const int iChange);
+#endif
+
 #if !defined(NO_ACHIEVEMENTS)
 	CvPlayerAchievements& GetPlayerAchievements(){return m_kPlayerAchievements;}
 #endif
@@ -2228,6 +2236,11 @@ protected:
 	FAutoVariable< std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > >, CvPlayer> m_ppiBuildingClassYieldChange;
 #endif
 	FAutoVariable< std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > >, CvPlayer> m_ppaaiImprovementYieldChange;
+
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	Firaxis::Array<int, YieldTypes::NUM_YIELD_TYPES> m_piMinorsTradeRouteYieldRate;
+	Firaxis::Array<int, YieldTypes::NUM_YIELD_TYPES> m_piInternalTradeRouteDestYieldRate;
+#endif
 
 	// Obsolete: only used to read old saves
 	FAutoVariable< std::vector< Firaxis::Array< int, NUM_YIELD_TYPES > >, CvPlayer> m_ppaaiBuildingClassYieldMod;

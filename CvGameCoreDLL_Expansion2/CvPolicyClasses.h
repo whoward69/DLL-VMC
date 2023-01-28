@@ -262,6 +262,11 @@ public:
 
 	BuildingTypes GetFreeBuildingOnConquest() const;
 
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	int GetMinorsTradeRouteYieldRate(const YieldTypes eYieldType) const;
+	int GetInternalTradeRouteDestYieldRate(const YieldTypes eYieldType) const;
+#endif
+
 private:
 	int m_iTechPrereq;
 	int m_iCultureCost;
@@ -478,6 +483,11 @@ private:
 	int** m_ppiBuildingClassYieldModifiers;
 	int** m_ppiBuildingClassYieldChanges;
 	int* m_piFlavorValue;
+
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	Firaxis::Array<int, YieldTypes::NUM_YIELD_TYPES> m_piMinorsTradeRouteYieldRate;
+	Firaxis::Array<int, YieldTypes::NUM_YIELD_TYPES> m_piInternalTradeRouteDestYieldRate;
+#endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

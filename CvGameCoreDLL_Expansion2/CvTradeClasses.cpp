@@ -1977,16 +1977,18 @@ void CvPlayerTrade::MoveUnits (void)
 //	--------------------------------------------------------------------------------
 int CvPlayerTrade::GetTradeConnectionBaseValueTimes100(const TradeConnection& kTradeConnection, YieldTypes eYield, bool bAsOriginPlayer)
 {
+	int iResult = 0;
+	const CvPlayerAI& pOriginalPlayer = GET_PLAYER(kTradeConnection.m_eOriginOwner);
+	const CvPlayerAI& pDestPlayer = GET_PLAYER(kTradeConnection.m_eDestOwner);
+
 	if (bAsOriginPlayer)
 	{
 		if (GC.getGame().GetGameTrade()->IsConnectionInternational(kTradeConnection))
 		{
 			if (eYield == YIELD_GOLD)
 			{
-				int iResult = 0;
 				int iBase = GC.getINTERNATIONAL_TRADE_BASE();
-				iResult = iBase;
-				return iResult;
+				iResult += iBase;
 			}
 			else if (eYield == YIELD_SCIENCE)
 			{
@@ -2003,10 +2005,9 @@ int CvPlayerTrade::GetTradeConnectionBaseValueTimes100(const TradeConnection& kT
 				}
 
 				// Cultural influence bump
-				int iInfluenceBoost = GET_PLAYER(kTradeConnection.m_eOriginOwner).GetCulture()->GetInfluenceTradeRouteScienceBonus(kTradeConnection.m_eDestOwner);
+				int iInfluenceBoost = pOriginalPlayer.GetCulture()->GetInfluenceTradeRouteScienceBonus(kTradeConnection.m_eDestOwner);
 				iAdjustedTechDifference += iInfluenceBoost;
-
-				return iAdjustedTechDifference * 100;
+				iResult += iAdjustedTechDifference * 100;
 			}
 		}
 	}
@@ -2026,15 +2027,27 @@ int CvPlayerTrade::GetTradeConnectionBaseValueTimes100(const TradeConnection& kT
 				iAdjustedTechDifference = max(iCeilTechDifference, 1);
 			}
 
-			return  iAdjustedTechDifference * 100;
-		}
-		else
-		{
-			return 0;
+			iResult += iAdjustedTechDifference * 100;
 		}
 	}
 
-	return 0;
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	if (MOD_API_TRADE_ROUTE_YIELD_RATE)
+	{
+		// From City State
+		if (bAsOriginPlayer && pOriginalPlayer.isMajorCiv() && pDestPlayer.isMinorCiv())
+		{
+			const int iRate = pOriginalPlayer.GetMinorsTradeRouteYieldRate(eYield);
+			if (iRate != 0)
+			{
+				const CvCity* pDestCity = GC.getGame().GetGameTrade()->GetDestCity(kTradeConnection);
+				iResult += pDestCity->getYieldRateTimes100(eYield, true) * iRate / 100;
+			}
+		}
+	}
+#endif
+
+	return iResult;
 }
 
 //	--------------------------------------------------------------------------------
@@ -2495,6 +2508,7 @@ int CvPlayerTrade::GetTradeConnectionValueTimes100 (const TradeConnection& kTrad
 {
 	CvGameTrade* pTrade = GC.getGame().GetGameTrade();
 	int iValue = 0;
+	CvCity* pOriginCity = CvGameTrade::GetOriginCity(kTradeConnection);
 
 	if (bAsOriginPlayer)
 	{
@@ -2538,13 +2552,17 @@ int CvPlayerTrade::GetTradeConnectionValueTimes100 (const TradeConnection& kTrad
 				break;
 #if defined(MOD_API_UNIFIED_YIELDS)
 			case YIELD_CULTURE:
+				iValue += GetTradeConnectionBaseValueTimes100(kTradeConnection, eYield, bAsOriginPlayer);
 			case YIELD_FAITH:
+				iValue += GetTradeConnectionBaseValueTimes100(kTradeConnection, eYield, bAsOriginPlayer);
 #endif
 #if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
 			case YIELD_TOURISM:
+				iValue += GetTradeConnectionBaseValueTimes100(kTradeConnection, eYield, bAsOriginPlayer);
 #endif
 #if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
 			case YIELD_GOLDEN_AGE_POINTS:
+				iValue += GetTradeConnectionBaseValueTimes100(kTradeConnection, eYield, bAsOriginPlayer);
 #endif
 			case YIELD_SCIENCE:
 #if defined(MOD_API_UNIFIED_YIELDS)
@@ -2673,6 +2691,17 @@ int CvPlayerTrade::GetTradeConnectionValueTimes100 (const TradeConnection& kTrad
 					iValue *= iModifier;
 					iValue /= 100;
 				}
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+				if (MOD_API_TRADE_ROUTE_YIELD_RATE)
+				{
+					const CvPlayerAI& pOriginalPlayer = GET_PLAYER(kTradeConnection.m_eOriginOwner);
+					const int iRate = pOriginalPlayer.GetInternalTradeRouteDestYieldRate(eYield);
+					if (iRate != 0)
+					{
+						iValue += pOriginCity->getYieldRateTimes100(eYield, true) * iRate / 100;
+					}
+				}
+#endif
 				break;
 			case TRADE_CONNECTION_PRODUCTION:
 				if (eYield == YIELD_PRODUCTION)
@@ -2687,7 +2716,6 @@ int CvPlayerTrade::GetTradeConnectionValueTimes100 (const TradeConnection& kTrad
 					iValue += GetTradeConnectionOtherTraitValueTimes100(kTradeConnection, eYield, false);
 #endif
 #if defined(MOD_GLOBAL_INTERNAL_TRADE_ROUTE_BONUS_FROM_ORIGIN_CITY)
-					CvCity* pOriginCity = CvGameTrade::GetOriginCity(kTradeConnection);
 					if (MOD_GLOBAL_INTERNAL_TRADE_ROUTE_BONUS_FROM_ORIGIN_CITY) {
 						iValue += (pOriginCity->getYieldRate(YIELD_PRODUCTION, true) * GD_INT_GET(INTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_BASE_FROM_ORIGIN));
 					}
@@ -2708,6 +2736,18 @@ int CvPlayerTrade::GetTradeConnectionValueTimes100 (const TradeConnection& kTrad
 					iValue *= iModifier;
 					iValue /= 100;
 				}
+
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+				if (MOD_API_TRADE_ROUTE_YIELD_RATE)
+				{
+					const CvPlayerAI& pOriginalPlayer = GET_PLAYER(kTradeConnection.m_eOriginOwner);
+					const int iRate = pOriginalPlayer.GetInternalTradeRouteDestYieldRate(eYield);
+					if (iRate != 0)
+					{
+						iValue += pOriginCity->getYieldRateTimes100(eYield, true) * iRate / 100;
+					}
+				}
+#endif
 				break;
 			}
 		}

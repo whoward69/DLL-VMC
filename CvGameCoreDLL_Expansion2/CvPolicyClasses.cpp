@@ -929,6 +929,93 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	}
 #endif
 
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	if (MOD_API_TRADE_ROUTE_YIELD_RATE)
+	{
+		{
+			// Policy_MinorsTradeRouteYieldRate
+			const size_t iLength = m_piMinorsTradeRouteYieldRate.size();
+			for (size_t i = 0; i < iLength; i++)
+			{
+				m_piMinorsTradeRouteYieldRate[i] = 0;
+			}
+
+			std::string sqlKey = "m_piMinorsTradeRouteYieldRate";
+
+			Database::Results* pResults = kUtility.GetResults(sqlKey);
+			if (pResults == NULL)
+			{
+				const char* szSQL = "select Yields.ID, Policy_MinorsTradeRouteYieldRate.Rate \
+				from Policy_MinorsTradeRouteYieldRate \
+				inner join Yields \
+				on Policy_MinorsTradeRouteYieldRate.YieldType = Yields.Type \
+			where Policy_MinorsTradeRouteYieldRate.PolicyType = ?";
+				pResults = kUtility.PrepareResults(sqlKey, szSQL);
+			}
+
+			pResults->Bind(1, szPolicyType, false);
+
+			while (pResults->Step())
+			{
+				const YieldTypes eYieldType = static_cast<YieldTypes>(pResults->GetInt(0));
+				if (eYieldType >= iLength || eYieldType < 0)
+				{
+					continue;
+				}
+
+				const int iRate = pResults->GetInt(1);
+				if (iRate > 0)
+				{
+					m_piMinorsTradeRouteYieldRate[eYieldType] += iRate;
+				}
+			}
+
+			pResults->Reset();
+		}
+		{
+			// Policy_InternalTradeRouteDestYieldRate
+			const size_t iLength = m_piInternalTradeRouteDestYieldRate.size();
+			for (size_t i = 0; i < iLength; i++)
+			{
+				m_piInternalTradeRouteDestYieldRate[i] = 0;
+			}
+
+			std::string sqlKey = "m_piInternalTradeRouteDestYieldRate";
+
+			Database::Results* pResults = kUtility.GetResults(sqlKey);
+			if (pResults == NULL)
+			{
+				const char* szSQL = "select Yields.ID, Policy_InternalTradeRouteDestYieldRate.Rate \
+				from Policy_InternalTradeRouteDestYieldRate \
+				inner join Yields \
+				on Policy_InternalTradeRouteDestYieldRate.YieldType = Yields.Type \
+			where Policy_InternalTradeRouteDestYieldRate.PolicyType = ?";
+				pResults = kUtility.PrepareResults(sqlKey, szSQL);
+			}
+
+			pResults->Bind(1, szPolicyType, false);
+
+			while (pResults->Step())
+			{
+				const YieldTypes eYieldType = static_cast<YieldTypes>(pResults->GetInt(0));
+				if (eYieldType >= iLength || eYieldType < 0)
+				{
+					continue;
+				}
+
+				const int iRate = pResults->GetInt(1);
+				if (iRate > 0)
+				{
+					m_piInternalTradeRouteDestYieldRate[eYieldType] += iRate;
+				}
+			}
+
+			pResults->Reset();
+		}
+		
+	}
+#endif
+
 	return true;
 }
 
@@ -2299,6 +2386,22 @@ BuildingTypes CvPolicyEntry::GetFreeBuildingOnConquest() const
 {
 	return m_eFreeBuildingOnConquest;
 }
+
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+int CvPolicyEntry::GetMinorsTradeRouteYieldRate(const YieldTypes eYieldType) const
+{
+	CvAssertMsg(eYieldType < YieldTypes::NUM_YIELD_TYPES, "Index out of upper bounds");
+	CvAssertMsg(eYieldType > -1, "Index out of lower bounds");
+	return m_piMinorsTradeRouteYieldRate[eYieldType];
+}
+
+int CvPolicyEntry::GetInternalTradeRouteDestYieldRate(const YieldTypes eYieldType) const
+{
+	CvAssertMsg(eYieldType < YieldTypes::NUM_YIELD_TYPES, "Index out of upper bounds");
+	CvAssertMsg(eYieldType > -1, "Index out of lower bounds");
+	return m_piInternalTradeRouteDestYieldRate[eYieldType];
+}
+#endif
 
 //=====================================
 // CvPolicyBranchEntry

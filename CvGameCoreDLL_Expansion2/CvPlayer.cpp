@@ -1412,6 +1412,16 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 		{
 			m_ppiCityYieldFromUnimprovedFeature[i] = yield;
 		}
+
+		for (size_t i = 0; i < m_piMinorsTradeRouteYieldRate.size(); i++)
+		{
+			m_piMinorsTradeRouteYieldRate[i] = 0;
+		}
+
+		for (size_t i = 0; i < m_piInternalTradeRouteDestYieldRate.size(); i++)
+		{
+			m_piInternalTradeRouteDestYieldRate[i] = 0;
+		}
 		
 		m_piYieldFromKills.clear();
 		m_piYieldFromKills.resize(NUM_YIELD_TYPES, 0);
@@ -23930,6 +23940,14 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 		if(iMod != 0)
 			ChangeYieldChangeWorldWonder(eYield, iMod);
 #endif
+
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+		if (MOD_API_TRADE_ROUTE_YIELD_RATE)
+		{
+			ChangeMinorsTradeRouteYieldRate(eYield, pPolicy->GetMinorsTradeRouteYieldRate(eYield));
+			ChangeInternalTradeRouteDestYieldRate(eYield, pPolicy->GetInternalTradeRouteDestYieldRate(eYield));
+		}
+#endif
 	}
 
 	for(iI = 0; iI < GC.getNumUnitCombatClassInfos(); iI++)
@@ -25381,6 +25399,8 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_piGoldenAgeGreatPersonRateModifier;
 	kStream >> m_ppiUnimprovedFeatureYieldChange;
 	kStream >> m_ppiCityYieldFromUnimprovedFeature;
+	kStream >> m_piMinorsTradeRouteYieldRate;
+	kStream >> m_piInternalTradeRouteDestYieldRate;
 	kStream >> m_piYieldFromKills;
 	kStream >> m_piYieldFromBarbarianKills;
 	kStream >> m_piYieldChangeTradeRoute;
@@ -25894,6 +25914,8 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_piGoldenAgeGreatPersonRateModifier;
 	kStream << m_ppiUnimprovedFeatureYieldChange;
 	kStream << m_ppiCityYieldFromUnimprovedFeature;
+	kStream << m_piMinorsTradeRouteYieldRate;
+	kStream << m_piInternalTradeRouteDestYieldRate;
 	kStream << m_piYieldFromKills;
 	kStream << m_piYieldFromBarbarianKills;
 	kStream << m_piYieldChangeTradeRoute;
@@ -28775,5 +28797,41 @@ int CvPlayer::CountAllWorkedTerrain(TerrainTypes iTerrainType)
 	}
 	
 	return iCount;
+}
+#endif // end of MOD_API_EXTENSIONS
+
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+int CvPlayer::GetMinorsTradeRouteYieldRate(const YieldTypes eYieldType) const
+{
+	CvAssertMsg(eYieldType < YieldTypes::NUM_YIELD_TYPES, "Index out of upper bounds");
+	CvAssertMsg(eYieldType > -1, "Index out of lower bounds");
+	return m_piMinorsTradeRouteYieldRate[static_cast<int>(eYieldType)];
+}
+
+void CvPlayer::ChangeMinorsTradeRouteYieldRate(const YieldTypes eYieldType, const int iChange)
+{
+	CvAssertMsg(eYieldType < YieldTypes::NUM_YIELD_TYPES, "Index out of upper bounds");
+	CvAssertMsg(eYieldType > -1, "Index out of lower bounds");
+	if (iChange > 0)
+	{
+		m_piMinorsTradeRouteYieldRate[static_cast<int>(eYieldType)] += iChange;
+	}
+}
+
+int CvPlayer::GetInternalTradeRouteDestYieldRate(const YieldTypes eYieldType) const
+{
+	CvAssertMsg(eYieldType < YieldTypes::NUM_YIELD_TYPES, "Index out of upper bounds");
+	CvAssertMsg(eYieldType > -1, "Index out of lower bounds");
+	return m_piInternalTradeRouteDestYieldRate[static_cast<int>(eYieldType)];
+}
+
+void CvPlayer::ChangeInternalTradeRouteDestYieldRate(const YieldTypes eYieldType, const int iChange)
+{
+	CvAssertMsg(eYieldType < YieldTypes::NUM_YIELD_TYPES, "Index out of upper bounds");
+	CvAssertMsg(eYieldType > -1, "Index out of lower bounds");
+	if (iChange > 0)
+	{
+		m_piInternalTradeRouteDestYieldRate[static_cast<int>(eYieldType)] += iChange;
+	}
 }
 #endif
