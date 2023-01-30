@@ -549,7 +549,9 @@ protected:
 	static int lGetCultureFromSpecialist(lua_State* L);
 
 	static int lGetReligionCityRangeStrikeModifier(lua_State* L);
-
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	static int lGetBaseYieldRateFromOtherYield(lua_State* L);
+#endif
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(AddMessage, void, sMessage, iNotifyPlayer);
 #endif

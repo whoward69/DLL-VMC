@@ -622,6 +622,10 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(AddMessage);
 #endif
 
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	Method(GetBaseYieldRateFromOtherYield);
+#endif
+
 #if defined(MOD_API_LUA_EXTENSIONS)
 	Method(HasBelief);
 	Method(HasBuilding);
@@ -4469,6 +4473,12 @@ int CvLuaCity::lGetReligionCityRangeStrikeModifier(lua_State* L)
 
 	return 1;
 }
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+int CvLuaCity::lGetBaseYieldRateFromOtherYield(lua_State* L) {
+	return BasicLuaMethod(L, &CvCity::GetBaseYieldRateFromOtherYield);
+}
+#endif
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 //------------------------------------------------------------------------------
