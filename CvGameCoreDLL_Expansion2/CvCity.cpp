@@ -15534,6 +15534,11 @@ void CvCity::read(FDataStream& kStream)
 
 	CvInfosSerializationHelper::ReadHashedDataArray(kStream, m_paiFreePromotionCount.dirtyGet());
 
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	kStream >> m_ppiYieldFromOtherYield;
+	kStream >> m_bHasYieldFromOtherYield;
+#endif
+
 	UINT uLength;
 	kStream >> uLength;
 	for(UINT uIdx = 0; uIdx < uLength; ++uIdx)
@@ -15849,6 +15854,11 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_paiUnitCombatProductionModifier;
 
 	CvInfosSerializationHelper::WriteHashedDataArray<PromotionTypes, int>(kStream, m_paiFreePromotionCount);
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	kStream << m_ppiYieldFromOtherYield;
+	kStream << m_bHasYieldFromOtherYield;
+#endif
 
 	//  Write m_orderQueue
 	UINT uLength = (UINT)m_orderQueue.getLength();
