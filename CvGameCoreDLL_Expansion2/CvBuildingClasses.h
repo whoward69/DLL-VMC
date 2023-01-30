@@ -14,6 +14,14 @@
 
 #define MAX_THEMING_BONUSES 12
 
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+enum YieldFromYield {
+	IN_VALUE = 0,
+	OUT_VALUE,
+	LENGTH,
+};
+#endif
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //  class : CvThemingBonusInfo
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -333,6 +341,12 @@ public:
 	int GetNumAllowPurchaseUnitsByYieldType(YieldTypes iType);
 	std::pair<UnitClassTypes, int>* GetAllowPurchaseUnitsByYieldType(YieldTypes iType);
 #endif
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	int GetYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType) const;
+	bool HasYieldFromOtherYield() const;
+#endif
+
 private:
 	int m_iBuildingClassType;
 	const CvBuildingClassInfo* m_pkBuildingClassInfo;
@@ -558,6 +572,11 @@ private:
 
 	CvThemingBonusInfo* m_paThemingBonusInfo;
 	int m_iNumThemingBonuses;
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	int m_ppiYieldFromOtherYield[NUM_YIELD_TYPES][NUM_YIELD_TYPES][YieldFromYield::LENGTH];
+	bool m_bHasYieldFromOtherYield = false;
+#endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -727,8 +746,6 @@ private:
 
 	std::vector<BuildingYieldChange> m_aBuildingYieldChange;
 	std::vector<BuildingGreatWork> m_aBuildingGreatWork;
-
-	
 
 	CvBuildingXMLEntries* m_pBuildings;
 	CvCity* m_pCity;

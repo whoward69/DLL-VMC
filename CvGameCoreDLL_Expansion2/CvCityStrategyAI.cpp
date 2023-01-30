@@ -1179,7 +1179,7 @@ void CvCityStrategyAI::ChooseProduction(bool bUseAsyncRandom, BuildingTypes eIgn
 		if (!GET_PLAYER(m_pCity->getOwner()).isMinorCiv())
 		{
 			//I cannot use the yield rate since it adds in set process yield, which is what I am trying to set...
-			int iBaseYield = GetCity()->getBaseYieldRate(YIELD_PRODUCTION) * 100;
+			int iBaseYield = GetCity()->getBaseYieldRate(YIELD_PRODUCTION, false) * 100;
 			iBaseYield += (GetCity()->GetYieldPerPopTimes100(YIELD_PRODUCTION) * GetCity()->getPopulation());
 			int iModifiedYield = iBaseYield * GetCity()->getBaseYieldRateModifier(YIELD_PRODUCTION);
 			iModifiedYield /= 100;

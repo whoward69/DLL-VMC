@@ -1236,6 +1236,21 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 		}
 #endif
 	}
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	if (MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD)
+	{
+		m_bHasYieldFromOtherYield = false;
+		for (size_t i = 0; i < NUM_YIELD_TYPES; i++)
+		{
+			for (size_t j = 0; j < NUM_YIELD_TYPES; j++)
+			{
+				m_ppiYieldFromOtherYield[i][j][YieldFromYield::IN_VALUE] = 0;
+				m_ppiYieldFromOtherYield[i][j][YieldFromYield::OUT_VALUE] = 0;
+			}
+		}
+	}
+#endif
 }
 
 
@@ -2467,7 +2482,7 @@ int CvCity::findBaseYieldRateRank(YieldTypes eYield)
 	VALIDATE_OBJECT
 	if(!m_abBaseYieldRankValid[eYield])
 	{
-		int iRate = getBaseYieldRate(eYield);
+		int iRate = getBaseYieldRate(eYield, false);
 
 		int iRank = 1;
 
@@ -2475,8 +2490,8 @@ int CvCity::findBaseYieldRateRank(YieldTypes eYield)
 		CvCity* pLoopCity;
 		for(pLoopCity = GET_PLAYER(getOwner()).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(getOwner()).nextCity(&iLoop))
 		{
-			if((pLoopCity->getBaseYieldRate(eYield) > iRate) ||
-			        ((pLoopCity->getBaseYieldRate(eYield) == iRate) && (pLoopCity->GetID() < GetID())))
+			if((pLoopCity->getBaseYieldRate(eYield, false) > iRate) ||
+			        ((pLoopCity->getBaseYieldRate(eYield, false) == iRate) && (pLoopCity->GetID() < GetID())))
 			{
 				iRank++;
 			}
@@ -5882,7 +5897,7 @@ int CvCity::getProductionDifference(int /*iProductionNeeded*/, int /*iProduction
 	int iOverflow = ((bOverflow) ? (getOverflowProduction() + getFeatureProduction()) : 0);
 
 	// Sum up difference
-	int iBaseProduction = getBaseYieldRate(YIELD_PRODUCTION) * 100;
+	int iBaseProduction = getBaseYieldRate(YIELD_PRODUCTION, false) * 100;
 	iBaseProduction += (GetYieldPerPopTimes100(YIELD_PRODUCTION) * getPopulation());
 
 	int iModifiedProduction = iBaseProduction * getBaseYieldRateModifier(YIELD_PRODUCTION, iProductionModifier);
@@ -5933,7 +5948,7 @@ int CvCity::getProductionDifferenceTimes100(int /*iProductionNeeded*/, int /*iPr
 	int iOverflow = ((bOverflow) ? (getOverflowProductionTimes100() + getFeatureProduction() * 100) : 0);
 
 	// Sum up difference
-	int iBaseProduction = getBaseYieldRate(YIELD_PRODUCTION) * 100;
+	int iBaseProduction = getBaseYieldRate(YIELD_PRODUCTION, false) * 100;
 	iBaseProduction += (GetYieldPerPopTimes100(YIELD_PRODUCTION) * getPopulation());
 
 	int iModifiedProduction = iBaseProduction * getBaseYieldRateModifier(YIELD_PRODUCTION, iProductionModifier);
@@ -6923,6 +6938,28 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 
 		// Process for our team
 		owningTeam.processBuilding(eBuilding, iChange, bFirst);
+
+		if (pBuildingInfo->HasYieldFromOtherYield())
+		{
+			bool bNewHasYieldFromOtherYield = false;
+			for (size_t i = 0; i < NUM_YIELD_TYPES; i++)
+			{
+				for (size_t j = 0; j < NUM_YIELD_TYPES; j++)
+				{
+					const YieldTypes eOutYieldType = static_cast<YieldTypes>(i);
+					const YieldTypes eInYieldType = static_cast<YieldTypes>(j);
+					m_ppiYieldFromOtherYield[eOutYieldType][eInYieldType][IN_VALUE] += pBuildingInfo->GetYieldFromOtherYield(eInYieldType, eOutYieldType, IN_VALUE) * iChange;
+					m_ppiYieldFromOtherYield[eOutYieldType][eInYieldType][OUT_VALUE] += pBuildingInfo->GetYieldFromOtherYield(eInYieldType, eOutYieldType, OUT_VALUE) * iChange;
+
+					if (m_ppiYieldFromOtherYield[eOutYieldType][eInYieldType][IN_VALUE] != 0 && m_ppiYieldFromOtherYield[eOutYieldType][eInYieldType][OUT_VALUE] != 0)
+					{
+						bNewHasYieldFromOtherYield = true;
+					}
+				}
+			}
+
+			m_bHasYieldFromOtherYield = bNewHasYieldFromOtherYield;
+		}
 	}
 
 	if(!bObsolete)
@@ -8524,10 +8561,15 @@ int CvCity::GetBaseJONSCulturePerTurn() const
 
 #if defined(MOD_API_UNIFIED_YIELDS)
 	// Process production into culture
-	iCulturePerTurn += (getBasicYieldRateTimes100(YIELD_PRODUCTION, false) / 100) * getProductionToYieldModifier(YIELD_CULTURE) / 100;
+	iCulturePerTurn += (getBasicYieldRateTimes100(YIELD_PRODUCTION, false, true) / 100) * getProductionToYieldModifier(YIELD_CULTURE) / 100;
 
 	// Culture from having trade routes
 	iCulturePerTurn += GET_PLAYER(m_eOwner).GetTrade()->GetTradeValuesAtCityTimes100(this, YIELD_CULTURE) / 100;
+#endif
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	if (MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD)
+		iCulturePerTurn += GetBaseYieldRateFromOtherYield(YIELD_CULTURE);
 #endif
 
 	return iCulturePerTurn;
@@ -8667,7 +8709,7 @@ int CvCity::GetFaithPerTurn() const
 
 #if defined(MOD_API_UNIFIED_YIELDS)
 	// Process production into faith
-	iFaith += (getBasicYieldRateTimes100(YIELD_PRODUCTION, false) / 100) * getProductionToYieldModifier(YIELD_FAITH) / 100;
+	iFaith += (getBasicYieldRateTimes100(YIELD_PRODUCTION, false, false) / 100) * getProductionToYieldModifier(YIELD_FAITH) / 100;
 
 	// Faith from having trade routes
 	iFaith += GET_PLAYER(m_eOwner).GetTrade()->GetTradeValuesAtCityTimes100(this, YIELD_FAITH) / 100;
@@ -10717,7 +10759,7 @@ int CvCity::getYieldRateTimes100(YieldTypes eIndex, bool bIgnoreTrade) const
 	{
 #if defined(MOD_PROCESS_STOCKPILE)
 		// We want to process production to production and call it stockpiling!
-		iProcessYield = getBasicYieldRateTimes100(YIELD_PRODUCTION, false) * getProductionToYieldModifier(eIndex) / 100;
+		iProcessYield = getBasicYieldRateTimes100(YIELD_PRODUCTION, false, false) * getProductionToYieldModifier(eIndex) / 100;
 #else
 		CvAssertMsg(eIndex != YIELD_PRODUCTION, "GAMEPLAY: should not be trying to convert Production into Production via process.");
 
@@ -10726,15 +10768,15 @@ int CvCity::getYieldRateTimes100(YieldTypes eIndex, bool bIgnoreTrade) const
 	}
 
 #if defined(MOD_PROCESS_STOCKPILE)
-	int iYield = getBasicYieldRateTimes100(eIndex, bIgnoreTrade) + iProcessYield;
+	int iYield = getBasicYieldRateTimes100(eIndex, bIgnoreTrade, false) + iProcessYield;
 	return iYield;
 }
 
-int CvCity::getBasicYieldRateTimes100(YieldTypes eIndex, bool bIgnoreTrade) const
+int CvCity::getBasicYieldRateTimes100(const YieldTypes eIndex, const bool bIgnoreTrade, const bool bIgnoreFromOtherYield) const
 {
 #endif
 	// Sum up yield rate
-	int iBaseYield = getBaseYieldRate(eIndex) * 100;
+	int iBaseYield = getBaseYieldRate(eIndex, bIgnoreFromOtherYield) * 100;
 	iBaseYield += (GetYieldPerPopTimes100(eIndex) * getPopulation());
 	iBaseYield += (GetYieldPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers());
 
@@ -10756,7 +10798,7 @@ int CvCity::getBasicYieldRateTimes100(YieldTypes eIndex, bool bIgnoreTrade) cons
 
 
 //	--------------------------------------------------------------------------------
-int CvCity::getBaseYieldRate(YieldTypes eIndex) const
+int CvCity::getBaseYieldRate(YieldTypes eIndex, const bool bIgnoreFromOtherYield) const
 {
 	VALIDATE_OBJECT
 	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
@@ -10774,6 +10816,13 @@ int CvCity::getBaseYieldRate(YieldTypes eIndex) const
 	iValue += GetBaseYieldRateFromSpecialists(eIndex);
 	iValue += GetBaseYieldRateFromMisc(eIndex);
 	iValue += GetBaseYieldRateFromReligion(eIndex);
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	if (MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD && !bIgnoreFromOtherYield)
+	{
+		iValue += GetBaseYieldRateFromOtherYield(eIndex);
+	}
+#endif
 
 #if defined(MOD_API_UNIFIED_YIELDS)
 	if (IsRouteToCapitalConnected())
@@ -10956,6 +11005,47 @@ int CvCity::GetBaseYieldRateFromReligion(YieldTypes eIndex) const
 	return m_aiBaseYieldRateFromReligion[eIndex];
 #endif
 }
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+int CvCity::GetBaseYieldRateFromOtherYield(YieldTypes eYield) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
+	int iResult = 0;
+
+	if (!m_bHasYieldFromOtherYield)
+	{
+		return 0;
+	}
+
+	for (size_t iInYield = YIELD_FOOD; iInYield < NUM_YIELD_TYPES; iInYield++)
+	{
+		const YieldTypes eInYield = static_cast<YieldTypes>(iInYield);
+		if (eInYield == eYield)
+		{
+			// It is disabled to get yields from the yields
+			continue;
+		}
+
+		const int iInputThreshold = GetYieldFromOtherYield(eInYield, eYield, IN_VALUE);
+		if (iInputThreshold <= 0)
+		{
+			continue;
+		}
+
+		const int iInYieldValue = getBasicYieldRateTimes100(eInYield, false, true) / 100;
+		const int iInCount = iInYieldValue / iInputThreshold;
+		if (iInCount != 0)
+		{
+			const int iOutUnit = GetYieldFromOtherYield(eInYield, eYield, OUT_VALUE);
+			iResult += iInCount * iOutUnit;
+		}
+	}
+
+	return iResult;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 /// Base yield rate from Religion
@@ -11602,7 +11692,7 @@ int CvCity::getProcessProductionTimes100(ProcessTypes eIndex) const
 	CvAssertMsg(eIndex < GC.getNumProcessInfos(), "eIndex expected to be < GC.getNumProcessInfos()");
 	
 	if (eIndex == GC.getInfoTypeForString("PROCESS_STOCKPILE")) {
-		return getBasicYieldRateTimes100(YIELD_PRODUCTION, false);
+		return getBasicYieldRateTimes100(YIELD_PRODUCTION, false, false);
 	}
 
 	return 0;
@@ -18159,5 +18249,36 @@ int CvCity::CountWorkedTerrain(TerrainTypes iTerrainType) const
 	}
 
 	return iCount;
+}
+#endif
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+int CvCity::GetYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType) const
+{
+	VALIDATE_OBJECT
+		CvAssertMsg(eInType >= 0, "eInType expected to be >= 0");
+	CvAssertMsg(eInType < NUM_YIELD_TYPES, "eInType expected to be < NUM_YIELD_TYPES");
+	CvAssertMsg(eOutType >= 0, "eInType expected to be >= 0");
+	CvAssertMsg(eOutType < NUM_YIELD_TYPES, "eInType expected to be < NUM_YIELD_TYPES");
+	CvAssertMsg(eConvertType < YieldFromYield::LENGTH&& eConvertType >= 0, "eConvertType expected to be < YieldFromYield::LENGTH");
+
+	return m_ppiYieldFromOtherYield[eOutType][eInType][eConvertType];
+}
+
+void CvCity::ChangeYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType, const int iChange)
+{
+	VALIDATE_OBJECT
+		CvAssertMsg(eInType >= 0, "eInType expected to be >= 0");
+	CvAssertMsg(eInType < NUM_YIELD_TYPES, "eInType expected to be < NUM_YIELD_TYPES");
+	CvAssertMsg(eOutType >= 0, "eInType expected to be >= 0");
+	CvAssertMsg(eOutType < NUM_YIELD_TYPES, "eInType expected to be < NUM_YIELD_TYPES");
+	CvAssertMsg(eConvertType < YieldFromYield::LENGTH&& eConvertType >= 0, "eConvertType expected to be < YieldFromYield::LENGTH");
+
+	m_ppiYieldFromOtherYield[eOutType][eInType][eConvertType] += iChange;
+}
+
+bool CvCity::HasYieldFromOtherYield() const
+{
+	return m_bHasYieldFromOtherYield;
 }
 #endif

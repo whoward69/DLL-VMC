@@ -19,7 +19,7 @@
 #include "FStlContainerSerialization.h"
 #include "FAutoVariable.h"
 #include "FAutoVector.h"
-
+#include "CvBuildingClasses.h"
 #include "CvPreGame.h"
 
 // 0 = center of city, 1-6 = the edge of city on points, 7-12 = one tile out
@@ -645,15 +645,19 @@ public:
 	int GetYieldPerTurnFromReligion(ReligionTypes eReligion, YieldTypes eYield) const;
 #endif
 
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	int GetBaseYieldRateFromOtherYield(YieldTypes eYield) const;
+#endif
+
 	int getBaseYieldRateModifier(YieldTypes eIndex, int iExtra = 0, CvString* toolTipSink = NULL) const;
 	int getYieldRate(YieldTypes eIndex, bool bIgnoreTrade) const;
 	int getYieldRateTimes100(YieldTypes eIndex, bool bIgnoreTrade) const;
 #if defined(MOD_PROCESS_STOCKPILE)
-	int getBasicYieldRateTimes100(YieldTypes eIndex, bool bIgnoreTrade) const;
+	int getBasicYieldRateTimes100(const YieldTypes eIndex, const bool bIgnoreTrade, const bool bIgnoreFromOtherYield) const;
 #endif
 
 	// Base Yield
-	int getBaseYieldRate(YieldTypes eIndex) const;
+	int getBaseYieldRate(const YieldTypes eIndex, const bool bIgnoreFromOtherYield) const;
 
 #if defined(MOD_GLOBAL_GREATWORK_YIELDTYPES) || defined(MOD_API_UNIFIED_YIELDS)
 	int GetBaseYieldRateFromGreatWorks(YieldTypes eIndex) const;
@@ -969,6 +973,12 @@ public:
 	int CountWorkedTerrain(TerrainTypes iTerrainType) const;
 #endif
 
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	int GetYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType) const;
+	bool HasYieldFromOtherYield() const;
+	void ChangeYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType, const int iChange);
+#endif
+
 	int iScratch; // know the scope of your validity
 
 protected:
@@ -1180,6 +1190,11 @@ protected:
 	int getHurryGold(HurryTypes eHurry, int iHurryCost, int iFullCost) const;
 	bool canHurryUnit(HurryTypes eHurry, UnitTypes eUnit, bool bIgnoreNew) const;
 	bool canHurryBuilding(HurryTypes eHurry, BuildingTypes eBuilding, bool bIgnoreNew) const;
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	int m_ppiYieldFromOtherYield[NUM_YIELD_TYPES][NUM_YIELD_TYPES][YieldFromYield::LENGTH];
+	bool m_bHasYieldFromOtherYield;
+#endif
 };
 
 namespace FSerialization

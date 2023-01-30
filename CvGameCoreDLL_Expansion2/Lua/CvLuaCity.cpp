@@ -3296,7 +3296,7 @@ int CvLuaCity::lGetBaseYieldRate(lua_State* L)
 {
 	CvCity* pkCity = GetInstance(L);
 	const YieldTypes eIndex = (YieldTypes)lua_tointeger(L, 2);
-	const int iResult = pkCity->getBaseYieldRate(eIndex);
+	const int iResult = pkCity->getBaseYieldRate(eIndex, false);
 
 	lua_pushinteger(L, iResult);
 	return 1;
