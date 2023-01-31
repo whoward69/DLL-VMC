@@ -37,6 +37,16 @@ class CvCityEspionage;
 class CvCityCulture;
 class CvPlayer;
 
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+enum YieldFromYieldStruct {
+	IN_YIELD_TYPE = 0,
+	OUT_YIELD_TYPE,
+	IN_YIELD_VALUE,
+	OUT_YIELD_VALUE,
+	STRUCT_LENGTH,
+};
+#endif
+
 class CvCity : CvGameObjectExtractable
 {
 
@@ -974,9 +984,9 @@ public:
 #endif
 
 #ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
-	int GetYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType) const;
+	//int GetYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType) const;
 	bool HasYieldFromOtherYield() const;
-	void ChangeYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType, const int iChange);
+	//void ChangeYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType, const int iChange);
 #endif
 
 	int iScratch; // know the scope of your validity
@@ -1192,7 +1202,7 @@ protected:
 	bool canHurryBuilding(HurryTypes eHurry, BuildingTypes eBuilding, bool bIgnoreNew) const;
 
 #ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
-	int m_ppiYieldFromOtherYield[NUM_YIELD_TYPES][NUM_YIELD_TYPES][YieldFromYield::LENGTH];
+	std::vector<Firaxis::Array<int, YieldFromYieldStruct::STRUCT_LENGTH>> m_ppiYieldFromOtherYield;
 	bool m_bHasYieldFromOtherYield;
 #endif
 };
