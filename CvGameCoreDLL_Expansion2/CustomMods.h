@@ -1027,7 +1027,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_ParadropAt					"ParadropAt",					"iiiiii"
 #define GAMEEVENT_PlaceResource					"PlaceResource",				"iiiii"
 #define GAMEEVENT_PlayerBoughtOut				"PlayerBoughtOut",				"ii"
-#define GAMEEVENT_PlayerBuilding				"PlayerBuilding",				"iiiiib"
+#define GAMEEVENT_PlayerBuilding				"PlayerBuilding",				"iiiiibb"
 #define GAMEEVENT_PlayerBuilt					"PlayerBuilt",					"iiiii"
 #define GAMEEVENT_PlayerBullied					"PlayerBullied",				"iiiiii"
 #define GAMEEVENT_PlayerCanAdoptIdeology		"PlayerCanAdoptIdeology",		"ii"
