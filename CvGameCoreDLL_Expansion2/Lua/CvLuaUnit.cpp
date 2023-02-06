@@ -90,6 +90,7 @@ void CvLuaUnit::RegistStaticFunctions() {
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeExperience);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeLevel);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeMaxHitPointsBase);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeNumExoticGoods);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeExperienceTimes100);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeStatsKilled);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lChangeStatsTravelled);
