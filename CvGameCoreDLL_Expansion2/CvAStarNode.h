@@ -69,6 +69,10 @@ struct CvPathNodeCacheData
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	int	iUnitPlotLimit;
 #endif
+
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	bool bIsCity:1;
+#endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

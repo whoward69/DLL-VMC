@@ -146,6 +146,9 @@ CvTraitEntry::CvTraitEntry() :
 	m_bNoAnnexing(false),
 	m_bTechFromCityConquer(false),
 	m_bUniqueLuxuryRequiresNewArea(false),
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	m_bCanFoundMountainCity(false),
+#endif
 
 	m_paiExtraYieldThreshold(NULL),
 	m_paiYieldChange(NULL),
@@ -1223,6 +1226,13 @@ bool CvTraitEntry::NoTrain(UnitClassTypes eUnitClass)
 	}
 }
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+bool CvTraitEntry::IsCanFoundMountainCity() const
+{
+	return m_bCanFoundMountainCity;
+}
+#endif
+
 /// Load XML data
 bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility)
 {
@@ -1400,6 +1410,12 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	m_bTechBoostFromCapitalScienceBuildings = kResults.GetBool("TechBoostFromCapitalScienceBuildings");
 	m_bStaysAliveZeroCities = kResults.GetBool("StaysAliveZeroCities");
 	m_bFaithFromUnimprovedForest = kResults.GetBool("FaithFromUnimprovedForest");
+
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	if (MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY)
+		m_bCanFoundMountainCity = kResults.GetBool("CanFoundMountainCity");
+#endif
+
 #if defined(MOD_TRAITS_ANY_BELIEF)
 	if (MOD_TRAITS_ANY_BELIEF) {
 		m_bAnyBelief = kResults.GetBool("AnyBelief");
@@ -2147,6 +2163,12 @@ void CvPlayerTraits::InitPlayerTraits()
 			{
 				m_bAngerFreeIntrusionOfCityStates = true;
 			}
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+			if (MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY)
+			{
+				m_bCanFoundMountainCity = trait->IsCanFoundMountainCity();
+			}
+#endif
 
 			for(int iYield = 0; iYield < NUM_YIELD_TYPES; iYield++)
 			{
@@ -3610,6 +3632,13 @@ bool CvPlayerTraits::IsFreeMayaGreatPersonChoice() const
 	return ((int)m_aMayaBonusChoices.size() >= iNumGreatPeopleTypes);
 }
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+bool CvPlayerTraits::IsCanFoundMountainCity() const
+{
+	return m_bCanFoundMountainCity;
+}
+#endif
+
 // SERIALIZATION METHODS
 
 /// Serialization read
@@ -3922,6 +3951,10 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 		m_bAngerFreeIntrusionOfCityStates = false;
 	}
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	kStream >> m_bCanFoundMountainCity;
+#endif
+
 	kStream >> m_eCampGuardType;
 
 	kStream >> m_eCombatBonusImprovement;
@@ -4204,6 +4237,10 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_bUniqueLuxuryRequiresNewArea;
 	kStream << m_bRiverTradeRoad;
 	kStream << m_bAngerFreeIntrusionOfCityStates;
+
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	kStream << m_bCanFoundMountainCity;
+#endif
 
 	kStream << m_eCampGuardType;
 	kStream << m_eCombatBonusImprovement;

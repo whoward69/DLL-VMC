@@ -2186,7 +2186,9 @@ public:
 	bool isNoReligion() const;
 
 	// Arrays
-
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int GetMountainCityYieldChange(const YieldTypes eYield) const;
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
@@ -2236,6 +2238,10 @@ protected:
 	bool m_bNoReligion;
 
 	std::vector<CvString> m_vEraVOs;
+
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int m_iaMountainCityYieldChange[NUM_YIELD_TYPES];
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
 
 private:
 	CvEraInfo(const CvEraInfo&);

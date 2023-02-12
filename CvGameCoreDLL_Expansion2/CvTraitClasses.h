@@ -234,6 +234,10 @@ public:
 	bool IsEnabledByPolicy(PlayerTypes ePlayer);
 #endif
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	bool IsCanFoundMountainCity() const;
+#endif
+
 	bool NoTrain(UnitClassTypes eUnitClassType);
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
@@ -364,6 +368,9 @@ protected:
 	bool m_bUniqueLuxuryRequiresNewArea;
 	bool m_bRiverTradeRoad;
 	bool m_bAngerFreeIntrusionOfCityStates;
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	bool m_bCanFoundMountainCity;
+#endif
 
 	CvString m_strShortDescription;
 
@@ -1002,6 +1009,10 @@ public:
 	void SetUnitBaktun(UnitTypes eUnit);
 	bool IsFreeMayaGreatPersonChoice() const;
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	bool IsCanFoundMountainCity() const;
+#endif
+
 	// Serialization
 	void Read(FDataStream& kStream);
 	void Write(FDataStream& kStream);
@@ -1132,6 +1143,10 @@ private:
 	bool m_bUniqueLuxuryRequiresNewArea;
 	bool m_bRiverTradeRoad;
 	bool m_bAngerFreeIntrusionOfCityStates;
+
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	bool m_bCanFoundMountainCity;
+#endif
 
 	UnitTypes m_eCampGuardType;
 	unsigned int m_uiFreeUnitIndex;

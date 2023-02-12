@@ -8661,6 +8661,19 @@ int CvPlot::calculateYield(YieldTypes eYield, bool bDisplay)
 			iYield += iPerPopYield;
 		}
 
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+		//if (MOD_ERA_EFFECTS_EXTENSIONS)
+		if (MOD_ERA_EFFECTS_EXTENSIONS && pCity->plot()->isMountain() && GET_PLAYER(getOwner()).GetCanFoundMountainCity())
+		{
+			const EraTypes eEra = GET_PLAYER(getOwner()).GetCurrentEra();
+			const CvEraInfo* pEraInfo = GC.getEraInfo(eEra);
+			if (pEraInfo)
+			{
+				iYield += pEraInfo->GetMountainCityYieldChange(eYield);
+			}
+		}
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
+
 		iYield += (iTemp / 100);
 	}
 

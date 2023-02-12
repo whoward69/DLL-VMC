@@ -28053,6 +28053,13 @@ bool CvPlayer::hasTurnTimerExpired()
 	return GC.getGame().hasTurnTimerExpired(GetID());
 }
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+bool CvPlayer::GetCanFoundMountainCity() const
+{
+	return GetPlayerTraits()->IsCanFoundMountainCity();
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 void CvPlayer::doArmySize()
 {
