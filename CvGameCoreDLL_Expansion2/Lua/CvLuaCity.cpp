@@ -683,6 +683,13 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(CountTerrain);
 	Method(CountWorkedTerrain);
 #endif
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+	Method(GetMajorReligionPantheonBelief);
+	Method(IsHasMajorBelief);
+	Method(IsHasSecondaryBelief);
+	Method(IsSecondaryReligionActive);
+#endif
 }
 //------------------------------------------------------------------------------
 void CvLuaCity::HandleMissingInstance(lua_State* L)
@@ -4549,4 +4556,39 @@ LUAAPIIMPL(City, CountResource)
 LUAAPIIMPL(City, CountWorkedResource)
 LUAAPIIMPL(City, CountTerrain)
 LUAAPIIMPL(City, CountWorkedTerrain)
+#endif
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+int CvLuaCity::lGetMajorReligionPantheonBelief(lua_State* L)
+{
+	CvCity* pCity = GetInstance(L);
+	lua_pushinteger(L, pCity->GetCityReligions()->GetMajorReligionPantheonBelief());
+
+	return 1;
+}
+
+int CvLuaCity::lIsHasMajorBelief(lua_State* L)
+{
+	const BeliefTypes eBelief = static_cast<BeliefTypes>(lua_tointeger(L, 2));
+
+	CvCity* pCity = GetInstance(L);
+	lua_pushboolean(L, pCity->GetCityReligions()->IsHasMajorBelief(eBelief));
+	return 1;
+}
+
+int CvLuaCity::lIsHasSecondaryBelief(lua_State* L)
+{
+	const BeliefTypes eBelief = static_cast<BeliefTypes>(lua_tointeger(L, 2));
+
+	CvCity* pCity = GetInstance(L);
+	lua_pushboolean(L, pCity->GetCityReligions()->IsHasSecondaryBelief(eBelief));
+	return 1;
+}
+
+int CvLuaCity::lIsSecondaryReligionActive(lua_State* L)
+{
+	CvCity* pCity = GetInstance(L);
+	lua_pushboolean(L, pCity->GetCityReligions()->IsSecondaryReligionActive());
+	return 1;
+}
 #endif

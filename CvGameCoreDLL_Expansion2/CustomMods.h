@@ -68,6 +68,9 @@
 // Comment these lines out to remove the associated code from the DLL,
 // Alternatively, set the associated entries in the CustomModOptions table to disable(0) or enable(1) at load-time
 
+// Enable more belief APIs
+#define MOD_API_RELIGION_EXTENSIONS                     gCustomMods.isAPI_RELIGION_EXTENSIONS()
+
 // Enables the Player Logs API - AFFECTS SAVE GAME DATA FORMAT (v68)
 #define MOD_API_PLAYER_LOGS                         gCustomMods.isAPI_PLAYER_LOGS()
 // Enables the Espionage API - AFFECTS SAVE GAME DATA FORMAT
@@ -1375,6 +1378,7 @@ public:
 	MOD_OPT_DECL(EVENTS_BATTLES_CUSTOM_DAMAGE);
 	MOD_OPT_DECL(EVENTS_TRADE_ROUTE_MOVE);
 	
+	MOD_OPT_DECL(API_RELIGION_EXTENSIONS);
 	MOD_OPT_DECL(API_PLAYER_LOGS);
 	MOD_OPT_DECL(API_ESPIONAGE);
 	MOD_OPT_DECL(API_TRADEROUTES);

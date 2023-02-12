@@ -613,6 +613,13 @@ protected:
 	LUAAPIEXTN(CountTerrain, int, iTerrain);
 	LUAAPIEXTN(CountWorkedTerrain, int, iTerrain);
 #endif
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+	static int lGetMajorReligionPantheonBelief(lua_State* L);
+	static int lIsHasMajorBelief(lua_State* L);
+	static int lIsHasSecondaryBelief(lua_State* L);
+	static int lIsSecondaryReligionActive(lua_State* L);
+#endif
 };
 
 #endif //CVLUACITY_H

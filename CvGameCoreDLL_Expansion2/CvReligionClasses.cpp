@@ -3589,13 +3589,13 @@ bool CvCityReligions::IsDefendedAgainstSpread(ReligionTypes eReligion)
 }
 
 /// Is there a religion that at least half of the population follows?
-ReligionTypes CvCityReligions::GetReligiousMajority()
+ReligionTypes CvCityReligions::GetReligiousMajority() const
 {
 	int iTotalFollowers = 0;
 	int iMostFollowerPressure = 0;
 	int iMostFollowers = -1;
 	ReligionTypes eMostFollowers = NO_RELIGION;
-	ReligionInCityList::iterator religionIt;
+	ReligionInCityList::const_iterator religionIt;
 
 	for(religionIt = m_ReligionStatus.begin(); religionIt != m_ReligionStatus.end(); ++religionIt)
 	{
@@ -3651,13 +3651,13 @@ ReligionTypes CvCityReligions::GetSimulatedReligiousMajority()
 }
 
 /// What is the second most popular religion in this city with a majority religion?
-ReligionTypes CvCityReligions::GetSecondaryReligion()
+ReligionTypes CvCityReligions::GetSecondaryReligion() const
 {
 	int iMostFollowers = -1;
 	int iMostPressure = -1;
 	ReligionTypes eMajority = GetReligiousMajority();
 	ReligionTypes eMostFollowers = NO_RELIGION;
-	ReligionInCityList::iterator religionIt;
+	ReligionInCityList::const_iterator religionIt;
 
 	if (eMajority != NO_RELIGION)
 	{	
@@ -4396,6 +4396,91 @@ void CvCityReligions::ResetNumTradeRoutePressure()
 		it->m_iNumTradeRoutesApplyingPressure = 0;
 	}
 }
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+BeliefTypes CvCityReligions::GetMajorReligionPantheonBelief() const
+{
+	BeliefTypes eRtnValue = NO_BELIEF;
+
+	ReligionTypes eMajor = GetReligiousMajority();
+	if (eMajor == NO_RELIGION)
+	{
+		return NO_BELIEF;
+	}
+
+	const CvReligion* pReligion = GC.getGame().GetGameReligions()->GetReligion(eMajor, m_pCity->getOwner());
+	if (!pReligion)
+	{
+		return NO_BELIEF;
+	}
+
+	for (int iI = 0; iI < pReligion->m_Beliefs.GetNumBeliefs(); iI++)
+	{
+		const BeliefTypes eBelief = pReligion->m_Beliefs.GetBelief(iI);
+		CvBeliefEntry* pEntry = GC.GetGameBeliefs()->GetEntry((int)eBelief);
+		if (pEntry && pEntry->IsPantheonBelief())
+		{
+			return eBelief;
+		}
+	}
+
+	return NO_BELIEF;
+}
+
+bool CvCityReligions::IsHasMajorBelief(const BeliefTypes eBelief) const
+{
+	ReligionTypes eMajor = GetReligiousMajority();
+	if (eMajor == NO_RELIGION)
+	{
+		return false;
+	}
+
+	const CvReligion* pReligion = GC.getGame().GetGameReligions()->GetReligion(eMajor, m_pCity->getOwner());
+	if (!pReligion)
+	{
+		return false;
+	}
+
+	for (int iI = 0; iI < pReligion->m_Beliefs.GetNumBeliefs(); iI++)
+	{
+		if (pReligion->m_Beliefs.GetBelief(iI) == eBelief) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvCityReligions::IsHasSecondaryBelief(const BeliefTypes eBelief) const
+{
+	ReligionTypes eSecondary = GetSecondaryReligion();
+	if (eSecondary == NO_RELIGION)
+	{
+		return false;
+	}
+
+	const CvReligion* pReligion = GC.getGame().GetGameReligions()->GetReligion(eSecondary, m_pCity->getOwner());
+	if (!pReligion)
+	{
+		return false;
+	}
+
+	for (int iI = 0; iI < pReligion->m_Beliefs.GetNumBeliefs(); iI++)
+	{
+		if (pReligion->m_Beliefs.GetBelief(iI) == eBelief) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CvCityReligions::IsSecondaryReligionActive() const
+{
+	return GET_PLAYER(m_pCity->getOwner()).IsSecondReligionPantheon();
+}
+
+#endif // MOD_API_RELIGION_EXTENSIONS
 
 // PRIVATE METHODS
 

@@ -1249,6 +1249,11 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(ActivateMilitaryStrategy);
 	Method(DeactivateMilitaryStrategy);
 #endif
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+	Method(IsSecondReligionPantheon);
+#endif // MOD_API_RELIGION_EXTENSIONS
+
 }
 //------------------------------------------------------------------------------
 void CvLuaPlayer::HandleMissingInstance(lua_State* L)
@@ -12008,6 +12013,13 @@ int CvLuaPlayer::lAddMessage(lua_State* L)
 	return 0;
 }
 #endif
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+int CvLuaPlayer::lIsSecondReligionPantheon(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlayerAI::IsSecondReligionPantheon);
+}
+#endif // MOD_API_RELIGION_EXTENSIONS
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 LUAAPIIMPL(Player, HasBelief)

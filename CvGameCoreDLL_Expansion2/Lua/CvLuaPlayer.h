@@ -295,6 +295,10 @@ protected:
 	static int lHasReligionInMostCities(lua_State* L);
 	static int lDoesUnitPassFaithPurchaseCheck(lua_State* L);
 
+#ifdef MOD_API_RELIGION_EXTENSIONS
+	static int lIsSecondReligionPantheon(lua_State* L);
+#endif // MOD_API_RELIGION_EXTENSIONS
+
 	static int lGetHappiness(lua_State* L);
 	static int lSetHappiness(lua_State* L);
 
