@@ -4567,6 +4567,11 @@ int CvLuaPlayer::lGetTradeRoutes(lua_State* L)
 		lua_pushinteger(L, pToPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_SCIENCE, false));
 		lua_setfield(L, t, "ToScience");
 
+		lua_pushinteger(L, pkPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_CULTURE, true));
+		lua_setfield(L, t, "FromCulture");
+		lua_pushinteger(L, pToPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_CULTURE, false));
+		lua_setfield(L, t, "ToCulture");
+
 
 		ReligionTypes eToReligion = NO_RELIGION;
 		int iToPressure = 0;
@@ -4738,6 +4743,11 @@ int CvLuaPlayer::lGetTradeRoutesAvailable(lua_State* L)
 						lua_pushinteger(L, GET_PLAYER(eOtherPlayer).GetTrade()->GetTradeConnectionValueTimes100(kConnection, YIELD_SCIENCE, false));
 						lua_setfield(L, t, "ToScience");
 
+						lua_pushinteger(L, GET_PLAYER(eOtherPlayer).GetTrade()->GetTradeConnectionValueTimes100(kConnection, YIELD_CULTURE, true));
+						lua_setfield(L, t, "FromCulture");
+						lua_pushinteger(L, GET_PLAYER(eOtherPlayer).GetTrade()->GetTradeConnectionValueTimes100(kConnection, YIELD_CULTURE, false));
+						lua_setfield(L, t, "ToCulture");
+
 						ReligionTypes eToReligion = NO_RELIGION;
 						int iToPressure = 0;
 						ReligionTypes eFromReligion = NO_RELIGION;
@@ -4863,6 +4873,11 @@ int CvLuaPlayer::lGetTradeRoutesToYou(lua_State* L)
 		lua_setfield(L, t, "FromScience");
 		lua_pushinteger(L, pToPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_SCIENCE, false));
 		lua_setfield(L, t, "ToScience");
+
+		lua_pushinteger(L, pFromPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_CULTURE, true));
+		lua_setfield(L, t, "FromCulture");
+		lua_pushinteger(L, pToPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_CULTURE, false));
+		lua_setfield(L, t, "ToCulture");
 
 		ReligionTypes eToReligion = NO_RELIGION;
 		int iToPressure = 0;
