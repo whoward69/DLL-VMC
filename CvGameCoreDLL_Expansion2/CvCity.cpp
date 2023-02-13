@@ -11990,6 +11990,10 @@ void CvCity::updateStrengthValue()
 	{
 		m_iStrengthValue += /*3*/ GC.getCITY_STRENGTH_HILL_CHANGE();
 	}
+	if (plot()->isMountain())
+	{
+		m_iStrengthValue += GC.getCITY_STRENGTH_MOUNTAIN_CHANGE();
+	}
 
 	DLLUI->setDirty(CityInfo_DIRTY_BIT, true);
 }

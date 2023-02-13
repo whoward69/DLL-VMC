@@ -2702,7 +2702,7 @@ bool CvUnit::canEnterTerrain(const CvPlot& enterPlot, byte bMoveFlags) const
 	}
 
 #if defined(MOD_GLOBAL_ALPINE_PASSES)
-	bool bMountain = enterPlot.isMountain();
+	bool bMountain = enterPlot.isMountain() && !enterPlot.isCity();
 	if (bMountain && MOD_GLOBAL_ALPINE_PASSES && getDomainType() == DOMAIN_LAND && enterPlot.getRouteType() != NO_ROUTE) {
 		// Any land unit may travel over a mountain with a pass
 		bMountain = false;
@@ -3696,7 +3696,7 @@ bool CvUnit::jumpToNearestValidPlot()
 #endif
 				{
 					// Can only jump to a plot if we can enter the territory, and it's NOT enemy territory OR we're a barb
-					if(canEnterTerritory(pLoopPlot->getTeam()) && (isBarbarian() || !isEnemy(pLoopPlot->getTeam(), pLoopPlot)) && !pLoopPlot->isMountain())
+					if(canEnterTerritory(pLoopPlot->getTeam()) && (isBarbarian() || !isEnemy(pLoopPlot->getTeam(), pLoopPlot)) && !(pLoopPlot->isMountain() && !pLoopPlot->isCity()))
 					{
 						CvAssertMsg(!atPlot(*pLoopPlot), "atPlot(pLoopPlot) did not return false as expected");
 
@@ -6032,7 +6032,7 @@ void CvUnit::DoAttrition()
 	} else {
 #endif
 		// slewis - helicopters take attrition when ending their turn over mountains.
-		if(getDomainType() == DOMAIN_LAND && pPlot->isMountain() && !canMoveAllTerrain())
+		if(getDomainType() == DOMAIN_LAND && pPlot->isMountain() && !pPlot->isCity() && !canMoveAllTerrain())
 		{
 			strAppendText =  GetLocalizedText("TXT_KEY_MISC_YOU_UNIT_WAS_DAMAGED_ATTRITION");
 #if defined(MOD_API_UNIT_STATS)

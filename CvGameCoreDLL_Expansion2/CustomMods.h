@@ -257,6 +257,8 @@
 #define MOD_TRAITS_TRADE_ROUTE_BONUSES              gCustomMods.isTRAITS_TRADE_ROUTE_BONUSES()
 // Enables additional unit supply from traits (v78)
 #define MOD_TRAITS_EXTRA_SUPPLY                     gCustomMods.isTRAITS_EXTRA_SUPPLY()
+// Enables found cities on mountains from traits (v78)
+#define MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY          gCustomMods.isTRAITS_CAN_FOUND_MOUNTAIN_CITY()
 
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
 #define MOD_POLICIES_CITY_WORKING                   gCustomMods.isPOLICIES_CITY_WORKING()
@@ -778,6 +780,8 @@
 
 #define MOD_BALANCE_CORE                            gCustomMods.isBALANCE_CORE()
 
+#define MOD_ERA_EFFECTS_EXTENSIONS                  gCustomMods.isERA_EFFECTS_EXTENSIONS()
+
 #endif // ACHIEVEMENT_HACKS
 
 
@@ -1262,6 +1266,7 @@ public:
 	MOD_OPT_DECL(TRAITS_ANY_BELIEF);
 	MOD_OPT_DECL(TRAITS_TRADE_ROUTE_BONUSES);
 	MOD_OPT_DECL(TRAITS_EXTRA_SUPPLY);
+	MOD_OPT_DECL(TRAITS_CAN_FOUND_MOUNTAIN_CITY);
 
 	MOD_OPT_DECL(POLICIES_CITY_WORKING);
 	MOD_OPT_DECL(POLICIES_CITY_AUTOMATON_WORKERS);
@@ -1427,6 +1432,8 @@ public:
 	MOD_OPT_DECL(BUGFIX_EMBARKING_PATHFINDER);
 
 	MOD_OPT_DECL(BALANCE_CORE);
+
+	MOD_OPT_DECL(ERA_EFFECTS_EXTENSIONS);
 
 protected:
 	bool m_bInit;

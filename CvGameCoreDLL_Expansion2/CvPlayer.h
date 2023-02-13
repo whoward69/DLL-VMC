@@ -1845,6 +1845,10 @@ public:
 
 	bool hasTurnTimerExpired();
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	bool GetCanFoundMountainCity() const;
+#endif
+
 protected:
 	class ConqueredByBoolField
 	{
