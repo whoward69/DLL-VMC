@@ -2190,6 +2190,10 @@ public:
 	int GetMountainCityYieldChange(const YieldTypes eYield) const;
 #endif // MOD_ERA_EFFECTS_EXTENSIONS
 
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int GetCoastCityYieldChange(const YieldTypes eYield) const;
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
+
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
 protected:
@@ -2241,6 +2245,10 @@ protected:
 
 #ifdef MOD_ERA_EFFECTS_EXTENSIONS
 	int m_iaMountainCityYieldChange[NUM_YIELD_TYPES];
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
+
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int m_iaCoastCityYieldChange[NUM_YIELD_TYPES];
 #endif // MOD_ERA_EFFECTS_EXTENSIONS
 
 private:

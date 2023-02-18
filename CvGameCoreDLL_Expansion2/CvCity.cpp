@@ -15993,8 +15993,13 @@ bool CvCity::isValidBuildingLocation(BuildingTypes eBuilding) const
 	// Requires coast
 	if(pkBuildingInfo->IsWater())
 	{
-		if(!isCoastal(pkBuildingInfo->GetMinAreaSize()))
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+		if (!isCoastal(pkBuildingInfo->GetMinAreaSize()) && !plot()->isWater())
 			return false;
+#else
+		if (!isCoastal(pkBuildingInfo->GetMinAreaSize()))
+			return false;
+#endif
 	}
 
 	// Requires River

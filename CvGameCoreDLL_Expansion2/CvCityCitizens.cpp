@@ -1968,6 +1968,12 @@ bool CvCityCitizens::IsCanWork(CvPlot* pPlot) const
 		return false;
 	}
 
+	const int iIndex = GetCityIndexFromPlot(pPlot);
+	if (iIndex == CITY_HOME_PLOT)
+	{
+		return true;
+	}
+
 	CvAssertMsg(GetCityIndexFromPlot(pPlot) != -1, "GetCityIndexFromPlot(pPlot) is expected to be assigned (not -1)");
 
 	if(pPlot->plotCheck(PUF_canSiege, GetOwner()) != NULL)
@@ -2006,6 +2012,12 @@ bool CvCityCitizens::IsPlotBlockaded(CvPlot* pPlot) const
 	CvPlot* pNearbyPlot;
 
 	PlayerTypes ePlayer = m_pCity->getOwner();
+
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	if (MOD_TRAITS_CAN_FOUND_COAST_CITY && pPlot->isCity() && pPlot->getTerrainType() == TERRAIN_COAST) {
+		return false;
+	}
+#endif
 
 	// Might be a better way to do this that'd be slightly less CPU-intensive
 	for(iDX = -(iBlockadeDistance); iDX <= iBlockadeDistance; iDX++)

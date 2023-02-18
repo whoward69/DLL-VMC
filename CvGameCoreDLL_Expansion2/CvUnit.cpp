@@ -654,7 +654,12 @@ void CvUnit::initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitA
 	}
 
 	// Give embark promotion for free?
-	if(GET_TEAM(getTeam()).canEmbark() || kPlayer.GetPlayerTraits()->IsEmbarkedAllWater())
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	const bool bIsWaterCity = MOD_TRAITS_CAN_FOUND_COAST_CITY && plot()->isWater() && plot()->isCity();
+	if (GET_TEAM(getTeam()).canEmbark() || kPlayer.GetPlayerTraits()->IsEmbarkedAllWater() || bIsWaterCity)
+#else
+	if (GET_TEAM(getTeam()).canEmbark() || kPlayer.GetPlayerTraits()->IsEmbarkedAllWater())
+#endif
 	{
 		PromotionTypes ePromotionEmbarkation = kPlayer.GetEmbarkationPromotion();
 
@@ -671,9 +676,20 @@ void CvUnit::initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitA
 		if(!bGivePromotion && ::IsPromotionValidForUnitCombatType(ePromotionEmbarkation, getUnitType()))
 			bGivePromotion = true;
 
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+		if (!bGivePromotion && bIsWaterCity && getDomainType() == DOMAIN_LAND)
+			bGivePromotion = true;
+#endif
+
 		// Some case that gives us the promotion?
-		if(bGivePromotion)
+		if (bGivePromotion)
+		{
 			setHasPromotion(ePromotionEmbarkation, true);
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+			if (bIsWaterCity)
+				embark(plot());
+#endif // MOD_TRAITS_CAN_FOUND_COAST_CITY 
+		}
 	}
 	
 #if defined(MOD_PROMOTIONS_DEEP_WATER_EMBARKATION)
@@ -3219,11 +3235,19 @@ bool CvUnit::canMoveInto(const CvPlot& plot, byte bMoveFlags) const
 			{
 				return false;
 			}
-
+			
 			if(getDomainType() == DOMAIN_LAND && plot.isWater() && !canMoveAllTerrain() && !plot.IsAllowsWalkWater())
 			{
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+				if (!MOD_TRAITS_CAN_FOUND_COAST_CITY || !plot.isCity())
+				{
+					return false;
+				}
+#else
 				return false;
+#endif
 			}
+
 
 			if(!isHuman() || (plot.isVisible(getTeam())))
 			{

@@ -6918,6 +6918,15 @@ int CvEraInfo::GetMountainCityYieldChange(const YieldTypes eYield) const
 
 	return m_iaMountainCityYieldChange[eYield];
 }
+
+int CvEraInfo::GetCoastCityYieldChange(const YieldTypes eYield) const
+{
+	VALIDATE_OBJECT
+		CvAssertMsg(eYield >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eYield < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
+
+	return m_iaCoastCityYieldChange[eYield];
+}
 #endif // MOD_ERA_EFFECTS_EXTENSIONS
 
 //------------------------------------------------------------------------------
@@ -6995,31 +7004,60 @@ bool CvEraInfo::CacheResults(Database::Results& kResults, CvDatabaseUtility& kUt
 #ifdef MOD_ERA_EFFECTS_EXTENSIONS
 	if (MOD_ERA_EFFECTS_EXTENSIONS)
 	{
-		for (size_t i = 0; i < NUM_YIELD_TYPES; i++)
 		{
-			m_iaMountainCityYieldChange[i] = 0;
-		}
+			for (size_t i = 0; i < NUM_YIELD_TYPES; i++)
+			{
+				m_iaMountainCityYieldChange[i] = 0;
+			}
 
-		std::string strKey = "Era_MountainCityYieldChange";
-		Database::Results* pResults = kUtility.GetResults(strKey);
-		if (pResults == NULL)
-		{
-			pResults = kUtility.PrepareResults(strKey, "select Yields.ID, Era_MountainCityYieldChanges.Yield from Era_MountainCityYieldChanges \
+			std::string strKey = "Era_MountainCityYieldChange";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID, Era_MountainCityYieldChanges.Yield from Era_MountainCityYieldChanges \
 				inner join Eras on Era_MountainCityYieldChanges.EraType = Eras.Type \
 				inner join Yields on Era_MountainCityYieldChanges.YieldType = Yields.Type \
 				where EraType = ?");
-		}
-		pResults->Bind(1, GetType(), -1, false);
+			}
+			pResults->Bind(1, GetType(), -1, false);
 
-		while (pResults->Step())
+			while (pResults->Step())
+			{
+				m_vEraVOs.push_back(pResults->GetText(0));
+				const YieldTypes eYield = static_cast<YieldTypes>(pResults->GetInt(0));
+				const int iYield = pResults->GetInt(1);
+				m_iaMountainCityYieldChange[eYield] += iYield;
+			}
+
+			pResults->Reset();
+		}
 		{
-			m_vEraVOs.push_back(pResults->GetText(0));
-			const YieldTypes eYield = static_cast<YieldTypes>(pResults->GetInt(0));
-			const int iYield = pResults->GetInt(1);
-			m_iaMountainCityYieldChange[eYield] += iYield;
-		}
+			for (size_t i = 0; i < NUM_YIELD_TYPES; i++)
+			{
+				m_iaCoastCityYieldChange[i] = 0;
+			}
 
-		pResults->Reset();
+			std::string strKey = "Era_CoastCityYieldChanges";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID, Era_CoastCityYieldChanges.Yield from Era_CoastCityYieldChanges \
+				inner join Eras on Era_CoastCityYieldChanges.EraType = Eras.Type \
+				inner join Yields on Era_CoastCityYieldChanges.YieldType = Yields.Type \
+				where EraType = ?");
+			}
+			pResults->Bind(1, GetType(), -1, false);
+
+			while (pResults->Step())
+			{
+				m_vEraVOs.push_back(pResults->GetText(0));
+				const YieldTypes eYield = static_cast<YieldTypes>(pResults->GetInt(0));
+				const int iYield = pResults->GetInt(1);
+				m_iaCoastCityYieldChange[eYield] += iYield;
+			}
+
+			pResults->Reset();
+		}
 	}
 #endif
 

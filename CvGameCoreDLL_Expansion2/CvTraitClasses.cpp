@@ -149,6 +149,9 @@ CvTraitEntry::CvTraitEntry() :
 #ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
 	m_bCanFoundMountainCity(false),
 #endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	m_bCanFoundCoastCity(false),
+#endif
 
 	m_paiExtraYieldThreshold(NULL),
 	m_paiYieldChange(NULL),
@@ -1233,6 +1236,13 @@ bool CvTraitEntry::IsCanFoundMountainCity() const
 }
 #endif
 
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+bool CvTraitEntry::IsCanFoundCoastCity() const
+{
+	return m_bCanFoundCoastCity;
+}
+#endif
+
 /// Load XML data
 bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility)
 {
@@ -1414,6 +1424,11 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 #ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
 	if (MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY)
 		m_bCanFoundMountainCity = kResults.GetBool("CanFoundMountainCity");
+#endif
+
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	if (MOD_TRAITS_CAN_FOUND_COAST_CITY)
+		m_bCanFoundCoastCity = kResults.GetBool("CanFoundCoastCity");
 #endif
 
 #if defined(MOD_TRAITS_ANY_BELIEF)
@@ -2167,6 +2182,12 @@ void CvPlayerTraits::InitPlayerTraits()
 			if (MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY)
 			{
 				m_bCanFoundMountainCity = trait->IsCanFoundMountainCity();
+			}
+#endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+			if (MOD_TRAITS_CAN_FOUND_COAST_CITY)
+			{
+				m_bCanFoundCoastCity = trait->IsCanFoundCoastCity();
 			}
 #endif
 
@@ -3639,6 +3660,13 @@ bool CvPlayerTraits::IsCanFoundMountainCity() const
 }
 #endif
 
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+bool CvPlayerTraits::IsCanFoundCoastCity() const
+{
+	return m_bCanFoundCoastCity;
+}
+#endif
+
 // SERIALIZATION METHODS
 
 /// Serialization read
@@ -3954,6 +3982,9 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 #ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
 	kStream >> m_bCanFoundMountainCity;
 #endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	kStream >> m_bCanFoundCoastCity;
+#endif
 
 	kStream >> m_eCampGuardType;
 
@@ -4240,6 +4271,9 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 
 #ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
 	kStream << m_bCanFoundMountainCity;
+#endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	kStream << m_bCanFoundCoastCity;
 #endif
 
 	kStream << m_eCampGuardType;

@@ -1849,6 +1849,10 @@ public:
 	bool GetCanFoundMountainCity() const;
 #endif
 
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	bool GetCanFoundCoastCity() const;
+#endif
+
 protected:
 	class ConqueredByBoolField
 	{

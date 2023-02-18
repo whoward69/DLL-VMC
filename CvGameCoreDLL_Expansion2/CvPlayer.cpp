@@ -28060,6 +28060,13 @@ bool CvPlayer::GetCanFoundMountainCity() const
 }
 #endif
 
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+bool CvPlayer::GetCanFoundCoastCity() const
+{
+	return GetPlayerTraits()->IsCanFoundCoastCity();
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 void CvPlayer::doArmySize()
 {

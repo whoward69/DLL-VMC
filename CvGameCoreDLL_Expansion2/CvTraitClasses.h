@@ -237,6 +237,9 @@ public:
 #ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
 	bool IsCanFoundMountainCity() const;
 #endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	bool IsCanFoundCoastCity() const;
+#endif
 
 	bool NoTrain(UnitClassTypes eUnitClassType);
 
@@ -370,6 +373,9 @@ protected:
 	bool m_bAngerFreeIntrusionOfCityStates;
 #ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
 	bool m_bCanFoundMountainCity;
+#endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	bool m_bCanFoundCoastCity;
 #endif
 
 	CvString m_strShortDescription;
@@ -1013,6 +1019,10 @@ public:
 	bool IsCanFoundMountainCity() const;
 #endif
 
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	bool IsCanFoundCoastCity() const;
+#endif
+
 	// Serialization
 	void Read(FDataStream& kStream);
 	void Write(FDataStream& kStream);
@@ -1146,6 +1156,9 @@ private:
 
 #ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
 	bool m_bCanFoundMountainCity;
+#endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	bool m_bCanFoundCoastCity;
 #endif
 
 	UnitTypes m_eCampGuardType;
