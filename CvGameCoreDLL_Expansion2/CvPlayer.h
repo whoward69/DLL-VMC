@@ -690,6 +690,14 @@ public:
 	int getGoldenAgeModifier() const;
 	void changeGoldenAgeModifier(int iChange);
 
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+	int CvPlayer::GetGoldenAgeUnitCombatModifier() const;
+
+	void CvPlayer::SetGoldenAgeUnitCombatModifier(int iValue);
+
+	void CvPlayer::ChangeGoldenAgeUnitCombatModifier(int iValue);
+#endif
+
 	// Great People Stuff
 #if defined(MOD_GLOBAL_TRULY_FREE_GP)
 	void createGreatGeneral(UnitTypes eGreatPersonUnit, int iX, int iY, bool bIsFree);
@@ -1956,6 +1964,7 @@ protected:
 	int m_iCultureBonusTurns;
 	int m_iTourismBonusTurns;
 	FAutoVariable<int, CvPlayer> m_iGoldenAgeProgressMeter;
+	FAutoVariable<int, CvPlayer> m_iGoldenAgeUnitCombatModifier;
 	FAutoVariable<int, CvPlayer> m_iGoldenAgeMeterMod;
 	FAutoVariable<int, CvPlayer> m_iNumGoldenAges;
 	FAutoVariable<int, CvPlayer> m_iGoldenAgeTurns;

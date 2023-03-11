@@ -347,6 +347,11 @@ public:
 	bool HasYieldFromOtherYield() const;
 #endif
 
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+	int GetGoldenAgeUnitCombatModifier() const;
+	int GetGoldenAgeMeterMod() const;
+#endif
+
 private:
 	int m_iBuildingClassType;
 	const CvBuildingClassInfo* m_pkBuildingClassInfo;
@@ -456,6 +461,11 @@ private:
 	int m_iExtraSpies;
 	int m_iSpyRankChange;
 	int m_iInstantSpyRankChange;
+
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+	int m_iGoldenAgeUnitCombatModifier;
+	int m_iGoldenAgeMeterMod;
+#endif
 
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	int m_iConversionModifier;

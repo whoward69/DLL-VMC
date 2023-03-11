@@ -12584,6 +12584,13 @@ int CvUnit::GetGenericMaxStrengthModifier(const CvUnit* pOtherUnit, const CvPlot
 
 	CvPlayerAI& onwer = GET_PLAYER(getOwner());
 	iModifier += onwer.GetStrengthModifierFromAlly();
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+	if (MOD_BUILDINGS_GOLDEN_AGE_EXTEND && onwer.isGoldenAge())
+	{
+		iModifier += onwer.GetGoldenAgeUnitCombatModifier();
+	}
+#endif // MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+
 	return iModifier;
 }
 
@@ -13284,6 +13291,12 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 
 	CvPlayerAI& onwer = GET_PLAYER(getOwner());
 	iModifier += onwer.GetStrengthModifierFromAlly();
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+	if (MOD_BUILDINGS_GOLDEN_AGE_EXTEND && onwer.isGoldenAge())
+	{
+		iModifier += onwer.GetGoldenAgeUnitCombatModifier();
+	}
+#endif // MOD_BUILDINGS_GOLDEN_AGE_EXTEND
 
 	iCombat = (iStr * (iModifier + 100));
 

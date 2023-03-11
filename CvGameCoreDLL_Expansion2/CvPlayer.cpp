@@ -212,6 +212,7 @@ CvPlayer::CvPlayer() :
 	, m_iTourismBonusTurns(0)
 	, m_iGoldenAgeProgressMeter("CvPlayer::m_iGoldenAgeProgressMeter", m_syncArchive, true)
 	, m_iGoldenAgeMeterMod("CvPlayer::m_iGoldenAgeMeterMod", m_syncArchive)
+	, m_iGoldenAgeUnitCombatModifier("CvPlayer::m_iGoldenAgeUnitCombatModifier", m_syncArchive)
 	, m_iNumGoldenAges("CvPlayer::m_iNumGoldenAges", m_syncArchive)
 	, m_iGoldenAgeTurns("CvPlayer::m_iGoldenAgeTurns", m_syncArchive)
 	, m_iNumUnitGoldenAges("CvPlayer::m_iNumUnitGoldenAges", m_syncArchive)
@@ -906,6 +907,7 @@ void CvPlayer::uninit()
 	m_iTourismBonusTurns = 0;
 	m_iGoldenAgeProgressMeter = 0;
 	m_iGoldenAgeMeterMod = 0;
+	m_iGoldenAgeUnitCombatModifier = 0;
 	m_iNumGoldenAges = 0;
 	m_iGoldenAgeTurns = 0;
 	m_iNumUnitGoldenAges = 0;
@@ -9376,6 +9378,13 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 	recomputeGreatPeopleModifiers();
 
 	changeGoldenAgeModifier(pBuildingInfo->GetGoldenAgeModifier() * iChange);
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+	if (MOD_BUILDINGS_GOLDEN_AGE_EXTEND)
+	{
+		ChangeGoldenAgeMeterMod(pBuildingInfo->GetGoldenAgeMeterMod()* iChange);
+		ChangeGoldenAgeUnitCombatModifier(pBuildingInfo->GetGoldenAgeUnitCombatModifier()* iChange);
+	}
+#endif
 	changeFreeExperienceFromBldgs(pBuildingInfo->GetGlobalFreeExperience() * iChange);
 	changeWorkerSpeedModifier(pBuildingInfo->GetWorkerSpeedModifier() * iChange);
 	ChangeSpecialistCultureChange(pBuildingInfo->GetSpecialistExtraCulture() * iChange);
@@ -13794,7 +13803,12 @@ int CvPlayer::GetGoldenAgeProgressThreshold() const
 
 	if(GetGoldenAgeMeterMod() != 0)
 	{
-		iThreshold *= (100 + GetGoldenAgeMeterMod());
+		int iMod = GetGoldenAgeMeterMod();
+		if (iMod < -99)
+		{
+			iMod = -99;
+		}
+		iThreshold *= (100 + iMod);
 		iThreshold /= 100;
 	}
 
@@ -13858,6 +13872,25 @@ void CvPlayer::ChangeGoldenAgeMeterMod(int iChange)
 {
 	SetGoldenAgeMeterMod(GetGoldenAgeMeterMod() + iChange);
 }
+
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+//	--------------------------------------------------------------------------------
+int CvPlayer::GetGoldenAgeUnitCombatModifier() const
+{
+	return m_iGoldenAgeUnitCombatModifier;
+}
+
+//	--------------------------------------------------------------------------------
+void CvPlayer::SetGoldenAgeUnitCombatModifier(int iValue)
+{
+	m_iGoldenAgeUnitCombatModifier = iValue;
+}
+
+void CvPlayer::ChangeGoldenAgeUnitCombatModifier(int iChange)
+{
+	SetGoldenAgeUnitCombatModifier(GetGoldenAgeUnitCombatModifier() + iChange);
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 /// How many GAs have we had in this game?
@@ -24952,6 +24985,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	}
 	kStream >> m_iGoldenAgeProgressMeter;
 	kStream >> m_iGoldenAgeMeterMod;
+	kStream >> m_iGoldenAgeUnitCombatModifier;
 	kStream >> m_iNumGoldenAges;
 	kStream >> m_iGoldenAgeTurns;
 	kStream >> m_iNumUnitGoldenAges;
@@ -25569,6 +25603,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iTourismBonusTurns;
 	kStream << m_iGoldenAgeProgressMeter;
 	kStream << m_iGoldenAgeMeterMod;
+	kStream << m_iGoldenAgeUnitCombatModifier;
 	kStream << m_iNumGoldenAges;
 	kStream << m_iGoldenAgeTurns;
 	kStream << m_iNumUnitGoldenAges;

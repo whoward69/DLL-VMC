@@ -117,6 +117,10 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iTradeRouteLandDistanceModifier(0),
 	m_iTradeRouteLandGoldBonus(0),
 	m_iCityStateTradeRouteProductionModifier(0),
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+	m_iGoldenAgeUnitCombatModifier(0),
+	m_iGoldenAgeMeterMod(0),
+#endif
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	m_iConversionModifier(0),
 	m_iGlobalConversionModifier(0),
@@ -403,6 +407,10 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iTradeRouteLandDistanceModifier = kResults.GetInt("TradeRouteLandDistanceModifier");
 	m_iTradeRouteLandGoldBonus = kResults.GetInt("TradeRouteLandGoldBonus");
 	m_iCityStateTradeRouteProductionModifier = kResults.GetInt("CityStateTradeRouteProductionModifier");
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+	m_iGoldenAgeUnitCombatModifier = kResults.GetInt("GoldenAgeUnitCombatModifier");
+	m_iGoldenAgeMeterMod = kResults.GetInt("GoldenAgeMeterMod");
+#endif
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	m_iConversionModifier = kResults.GetInt("ConversionModifier");
 	m_iGlobalConversionModifier = kResults.GetInt("GlobalConversionModifier");
@@ -2312,6 +2320,17 @@ std::pair<UnitClassTypes, int>* CvBuildingEntry::GetAllowPurchaseUnitsByYieldTyp
 	CvAssertMsg(iType < NUM_YIELD_TYPES, "Index out of bounds");
 	CvAssertMsg(iType > -1, "Index out of bounds");
 	return m_piAllowPurchaseUnits[iType];
+}
+#endif
+
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+int CvBuildingEntry::GetGoldenAgeUnitCombatModifier() const
+{
+	return this->m_iGoldenAgeUnitCombatModifier;
+}
+int CvBuildingEntry::GetGoldenAgeMeterMod() const
+{
+	return this->m_iGoldenAgeMeterMod;
 }
 #endif
 

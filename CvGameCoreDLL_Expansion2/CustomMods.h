@@ -311,6 +311,8 @@
 
 #define MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD        gCustomMods.isBUILDINGS_YIELD_FROM_OTHER_YIELD()
 
+#define MOD_BUILDINGS_GOLDEN_AGE_EXTEND             gCustomMods.isBUILDINGS_GOLDEN_AGE_EXTEND()
+
 // Scales trade routes based on map size and game speed (v52)
 #define MOD_TRADE_ROUTE_SCALING                     gCustomMods.isTRADE_ROUTE_SCALING()
 
@@ -735,7 +737,7 @@
 #define MOD_BUGFIX_MOVE_AFTER_PURCHASE              gCustomMods.isBUGFIX_MOVE_AFTER_PURCHASE()
 // Fixes the issues caused by using UNIT_XYZ instead of UNITCLASS_XYZ (v26)
 #define MOD_BUGFIX_UNITCLASS_NOT_UNIT               gCustomMods.isBUGFIX_UNITCLASS_NOT_UNIT()
-// Fixes the issues caused by using BUILDING_XYZ instead of BUILDINGCLASS_XYZ (v26)
+// Fixes the issues caused by using BUILDING_XYZ instead of INGCLASS_XYZ (v26)
 #define MOD_BUGFIX_BUILDINGCLASS_NOT_BUILDING       gCustomMods.isBUGFIX_BUILDINGCLASS_NOT_BUILDING()
 // Fixes the NumCitiesFreeFoodBuilding (policy finisher) bug where the civilization has a UB for the Aqueduct - AFFECTS SAVE GAME DATA FORMAT
 #define MOD_BUGFIX_FREE_FOOD_BUILDING               gCustomMods.isBUGFIX_FREE_FOOD_BUILDING()
@@ -1297,6 +1299,7 @@ public:
 	MOD_OPT_DECL(BUILDINGS_CITY_WORKING);
 	MOD_OPT_DECL(BUILDINGS_CITY_AUTOMATON_WORKERS);
 	MOD_OPT_DECL(BUILDINGS_YIELD_FROM_OTHER_YIELD);
+	MOD_OPT_DECL(BUILDINGS_GOLDEN_AGE_EXTEND);
 
 	MOD_OPT_DECL(TRADE_ROUTE_SCALING);
 	MOD_OPT_DECL(TRADE_WONDER_RESOURCE_ROUTES);
