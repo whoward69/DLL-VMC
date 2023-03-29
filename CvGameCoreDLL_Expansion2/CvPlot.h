@@ -857,6 +857,13 @@ public:
 #if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
 	int CvPlot::ComputeYieldFromOtherAdjacentImprovement(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
 #endif
+
+#if defined(MOD_ROG_CORE)
+	int CvPlot::ComputeYieldFromAdjacentTerrain(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
+	int CvPlot::ComputeYieldFromAdjacentResource(CvImprovementEntry& kImprovement, YieldTypes eYield, TeamTypes eTeam) const;
+	int CvPlot::ComputeYieldFromAdjacentFeature(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
+#endif
+
 protected:
 	class PlotBoolField
 	{

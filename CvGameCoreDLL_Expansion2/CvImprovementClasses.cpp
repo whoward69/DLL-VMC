@@ -160,6 +160,14 @@ CvImprovementEntry::CvImprovementEntry(void):
 #if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
 	m_ppiAdjacentImprovementYieldChanges(NULL),
 #endif
+
+#if defined(MOD_ROG_CORE)
+	m_ppiAdjacentTerrainYieldChanges(NULL),
+	m_ppiAdjacentResourceYieldChanges(NULL),
+	m_ppiAdjacentFeatureYieldChanges(NULL),
+	m_ppiFeatureYieldChanges(NULL),
+#endif
+
 	m_ppiTechYieldChanges(NULL),
 	m_ppiTechNoFreshWaterYieldChanges(NULL),
 	m_ppiTechFreshWaterYieldChanges(NULL),
@@ -194,6 +202,26 @@ CvImprovementEntry::~CvImprovementEntry(void)
 		CvDatabaseUtility::SafeDelete2DArray(m_ppiAdjacentImprovementYieldChanges);
 	}
 #endif
+
+#if defined(MOD_ROG_CORE)
+	if (m_ppiAdjacentResourceYieldChanges != nullptr)
+	{
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiAdjacentResourceYieldChanges);
+	}
+	if (m_ppiAdjacentTerrainYieldChanges != nullptr)
+	{
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiAdjacentTerrainYieldChanges);
+	}
+	if (m_ppiAdjacentFeatureYieldChanges != nullptr)
+	{
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiAdjacentFeatureYieldChanges);
+	}
+	if (m_ppiFeatureYieldChanges != nullptr)
+	{
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiFeatureYieldChanges);
+	}
+#endif
+
 
 	if(m_paImprovementResource != NULL)
 	{
@@ -466,6 +494,135 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 		}
 #endif
 	}
+
+
+
+#if defined(MOD_ROG_CORE)
+	if (MOD_ROG_CORE) {
+		//m_ppiAdjacentResourceYieldChanges
+		{
+			const int iNumResources = kUtility.MaxRows("Resources");
+			CvAssertMsg(iNumResources > 0, "Num Resource Infos <= 0");
+			kUtility.Initialize2DArray(m_ppiAdjacentResourceYieldChanges, iNumResources, iNumYields);
+
+			std::string strKey = "Improvements - AdjacentResourceYieldChanges";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Resources.ID as ResourceID, Yield from Improvement_AdjacentResourceYieldChanges inner join Yields on YieldType = Yields.Type inner join Resources on ResourceType = Resources.Type where ImprovementType = ?");
+			}
+
+			pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+			while (pResults->Step())
+			{
+				const int yield_idx = pResults->GetInt(0);
+				CvAssert(yield_idx > -1);
+
+				const int resource_idx = pResults->GetInt(1);
+				CvAssert(resource_idx > -1);
+
+				const int yield = pResults->GetInt(2);
+
+				m_ppiAdjacentResourceYieldChanges[resource_idx][yield_idx] = yield;
+			}
+
+			pResults->Reset();
+		}
+		//m_ppiAdjacentTerrainYieldChanges
+		{
+			const int iNumTerrains = kUtility.MaxRows("Terrains");
+			CvAssertMsg(iNumTerrains > 0, "Num Terrain Infos <= 0");
+			kUtility.Initialize2DArray(m_ppiAdjacentTerrainYieldChanges, iNumTerrains, iNumYields);
+
+			std::string strKey = "Terrains - AdjacentTerrainYieldChanges";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Terrains.ID as TerrainID, Yield from Improvement_AdjacentTerrainYieldChanges inner join Yields on YieldType = Yields.Type inner join Terrains on TerrainType = Terrains.Type where ImprovementType = ?");
+			}
+
+			pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+			while (pResults->Step())
+			{
+				const int yield_idx = pResults->GetInt(0);
+				CvAssert(yield_idx > -1);
+
+				const int terrain_idx = pResults->GetInt(1);
+				CvAssert(terrain_idx > -1);
+
+				const int yield = pResults->GetInt(2);
+
+				m_ppiAdjacentTerrainYieldChanges[terrain_idx][yield_idx] = yield;
+			}
+
+			pResults->Reset();
+		}
+
+		//m_ppiAdjacentFeatureYieldChanges
+		{
+			const int iNumFeatures = kUtility.MaxRows("Features");
+			CvAssertMsg(iNumFeatures > 0, "Num Feature Infos <= 0");
+			kUtility.Initialize2DArray(m_ppiAdjacentFeatureYieldChanges, iNumFeatures, iNumYields);
+
+			std::string strKey = "Features - AdjacentFeatureYieldChanges";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Features.ID as FeatureID, Yield from Improvement_AdjacentFeatureYieldChanges inner join Yields on YieldType = Yields.Type inner join Features on FeatureType = Features.Type where ImprovementType = ?");
+			}
+
+			pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+			while (pResults->Step())
+			{
+				const int yield_idx = pResults->GetInt(0);
+				CvAssert(yield_idx > -1);
+
+				const int feature_idx = pResults->GetInt(1);
+				CvAssert(feature_idx > -1);
+
+				const int yield = pResults->GetInt(2);
+
+				m_ppiAdjacentFeatureYieldChanges[feature_idx][yield_idx] = yield;
+			}
+
+			pResults->Reset();
+		}
+
+		//m_ppiFeatureYieldChanges
+		{
+			const int iNumFeatures = kUtility.MaxRows("Features");
+			CvAssertMsg(iNumFeatures > 0, "Num Feature Infos <= 0");
+			kUtility.Initialize2DArray(m_ppiFeatureYieldChanges, iNumFeatures, iNumYields);
+
+			std::string strKey = "Features - FeatureYieldChanges";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Features.ID as FeatureID, Yield from Improvement_FeatureYieldChanges inner join Yields on YieldType = Yields.Type inner join Features on FeatureType = Features.Type where ImprovementType = ?");
+			}
+
+			pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+			while (pResults->Step())
+			{
+				const int yield_idx = pResults->GetInt(0);
+				CvAssert(yield_idx > -1);
+
+				const int feature_idx = pResults->GetInt(1);
+				CvAssert(feature_idx > -1);
+
+				const int yield = pResults->GetInt(2);
+
+				m_ppiFeatureYieldChanges[feature_idx][yield_idx] = yield;
+			}
+
+			pResults->Reset();
+		}
+	}
+#endif
 
 	//TechYieldChanges
 	{
@@ -1163,6 +1320,54 @@ int CvImprovementEntry::GetAdjacentImprovementYieldChanges(int i, int j) const
 	CvAssertMsg(j > -1, "Index out of bounds");
 	return m_ppiAdjacentImprovementYieldChanges[i][j];
 }
+#endif
+
+
+/// How much an improvement yields if built next to a resource
+#if defined(MOD_ROG_CORE)
+int CvImprovementEntry::GetAdjacentResourceYieldChanges(int i, int j) const
+{
+	if (!MOD_ROG_CORE) return 0;
+	CvAssertMsg(i < GC.getNumResourceInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiAdjacentResourceYieldChanges[i][j];
+}
+
+
+int CvImprovementEntry::GetAdjacentTerrainYieldChanges(int i, int j) const
+{
+	if (!MOD_ROG_CORE) return 0;
+	CvAssertMsg(i < GC.getNumTerrainInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiAdjacentTerrainYieldChanges[i][j];
+}
+
+
+int CvImprovementEntry::GetAdjacentFeatureYieldChanges(int i, int j) const
+{
+	if (!MOD_ROG_CORE) return 0;
+	CvAssertMsg(i < GC.getNumPlotInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiAdjacentFeatureYieldChanges[i][j];
+}
+
+
+int CvImprovementEntry::GetFeatureYieldChanges(int i, int j) const
+{
+	if (!MOD_ROG_CORE) return 0;
+	CvAssertMsg(i < GC.getNumFeatureInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiFeatureYieldChanges[i][j];
+}
+
 #endif
 
 /// How much a tech improves the yield of this improvement

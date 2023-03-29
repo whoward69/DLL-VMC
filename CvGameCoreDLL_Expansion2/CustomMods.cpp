@@ -510,6 +510,8 @@ int CustomMods::getOption(string sOption, int defValue) {
 
 		MOD_OPT_CACHE(ERA_EFFECTS_EXTENSIONS);
 
+
+		MOD_OPT_CACHE(ROG_CORE);
 		m_bInit = true;
 	}
 
