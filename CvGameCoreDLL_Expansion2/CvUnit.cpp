@@ -2137,6 +2137,17 @@ void CvUnit::doTurn()
 	ActivityTypes eActivityType = GetActivityType();
 	bool bHoldCheck = (eActivityType == ACTIVITY_HOLD) && (isHuman() || !getFortifyTurns());
 	bool bHealCheck = (eActivityType == ACTIVITY_HEAL) && (!isHuman() || IsAutomated() || !IsHurt());
+
+
+#if defined(MOD_EVENTS_UNIT_DO_TURN)
+	if ((MOD_EVENTS_UNIT_DO_TURN) && (getOwner() != NO_PLAYER)) 
+	{
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_UnitDoTurn, getOwner(), GetID(), getX(), getY());
+	}
+#endif
+	
+
+
 #if defined(MOD_BUGFIX_UNITS_AWAKE_IN_DANGER)
 	if (MOD_BUGFIX_UNITS_AWAKE_IN_DANGER) {
 		// Healing units will awaken if they can see an enemy unit
@@ -3679,6 +3690,12 @@ void CvUnit::move(CvPlot& targetPlot, bool bShow)
 			}
 		}
 	}
+
+#if defined(MOD_EVENTS_UNIT_MOVE)
+	if (MOD_EVENTS_UNIT_MOVE) {
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_UnitMoveInto, getOwner(), GetID(), iMoveCost, pOldPlot->getX(), pOldPlot->getY(), targetPlot.getX(), targetPlot.getY());
+	}
+#endif
 
 	if(bShouldDeductCost)
 		changeMoves(-iMoveCost);
@@ -7365,6 +7382,16 @@ bool CvUnit::createGreatWork()
 			}
 		}
 
+#if defined(MOD_EVENTS_GREAT_WORK_CREATED)
+		CvGameCulture* pCulture = GC.getGame().GetGameCulture();
+		if (pCulture != NULL)
+		{
+			int iValue = (int)eGreatWorkType;
+			GAMEEVENTINVOKE_HOOK(GAMEEVENT_GreatWorkCreated, getOwner(), GetID(), iValue);
+		}
+#endif
+
+
 		return true;
 	}
 
@@ -8741,6 +8768,12 @@ bool CvUnit::DoSpreadReligion()
 				}
 			}
 
+#if defined(MOD_EVENTS_GREAT_PEOPLE_BOOST)
+			{
+				GAMEEVENTINVOKE_HOOK(GAMEEVENT_FaithDiscover, getOwner(), GetID(), getX(), getY(), IsGreatPerson());
+			 }
+#endif
+
 			if(IsGreatPerson())
 			{
 				pCity->GetCityReligions()->AddProphetSpread(eReligion, iConversionStrength, getOwner());
@@ -9227,6 +9260,14 @@ bool CvUnit::discover()
 		gDLL->GameplayUnitActivate(pDllUnit.get());
 	}
 
+
+#if defined(MOD_EVENTS_GREAT_PEOPLE_BOOST)
+	{
+		//int iBeakersBonus = getDiscoverAmount();
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_ScienceDiscover, getOwner(), GetID(), getX(), getY(), IsGreatPerson());
+	}
+#endif
+
 	if(IsGreatPerson())
 	{
 #if defined(MOD_EVENTS_GREAT_PEOPLE)
@@ -9443,6 +9484,15 @@ bool CvUnit::hurry()
 #endif
 	}
 
+
+
+#if defined(MOD_EVENTS_GREAT_PEOPLE_BOOST)
+	{
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_ProductionDiscover, getOwner(), GetID(), getX(), getY(), IsGreatPerson());
+	}
+#endif
+
+
 	if(IsGreatPerson())
 	{
 		CvPlayer& kPlayer = GET_PLAYER(getOwner());
@@ -9567,6 +9617,13 @@ bool CvUnit::trade()
 		auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(this));
 		gDLL->GameplayUnitActivate(pDllUnit.get());
 	}
+
+#if defined(MOD_EVENTS_GREAT_PEOPLE_BOOST)
+	{
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_GoldDiscover, getOwner(), GetID(), getX(), getY(), IsGreatPerson());
+	}
+#endif
+
 
 	if(IsGreatPerson())
 	{
@@ -9921,7 +9978,11 @@ bool CvUnit::DoCultureBomb()
 			auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(this));
 			gDLL->GameplayUnitActivate(pDllUnit.get());
 		}
-
+#if defined(MOD_EVENTS_GREAT_PEOPLE_BOOST)
+		{
+			GAMEEVENTINVOKE_HOOK(GAMEEVENT_CultureBombDiscover, getOwner(), GetID(), getX(), getY(), IsGreatPerson());
+		}
+#endif
 		if(IsGreatPerson())
 		{
 #if defined(MOD_EVENTS_GREAT_PEOPLE)
@@ -10123,6 +10184,12 @@ bool CvUnit::goldenAge()
 		gDLL->GameplayUnitActivate(pDllUnit.get());
 	}
 
+#if defined(MOD_EVENTS_GREAT_PEOPLE_BOOST)
+	{
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_GoldenAgeDiscover, getOwner(), GetID(), getX(), getY(), IsGreatPerson());
+	}
+#endif
+
 	if(IsGreatPerson())
 	{
 #if defined(MOD_EVENTS_GREAT_PEOPLE)
@@ -10262,6 +10329,13 @@ bool CvUnit::givePolicies()
 		gDLL->GameplayUnitActivate(pDllUnit.get());
 	}
 
+
+#if defined(MOD_EVENTS_GREAT_PEOPLE_BOOST)
+	{
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_CultureDiscover, getOwner(), GetID(), getX(), getY(), IsGreatPerson());
+	}
+#endif
+
 	if(IsGreatPerson())
 	{
 #if defined(MOD_EVENTS_GREAT_PEOPLE)
@@ -10366,6 +10440,12 @@ bool CvUnit::blastTourism()
 		auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(this));
 		gDLL->GameplayUnitActivate(pDllUnit.get());
 	}
+
+#if defined(MOD_EVENTS_GREAT_PEOPLE_BOOST)
+	{
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_TourismDiscover, getOwner(), GetID(), getX(), getY(), IsGreatPerson());
+	}
+#endif
 
 	if(IsGreatPerson())
 	{
@@ -22183,6 +22263,14 @@ bool CvUnit::canRangeStrikeAt(int iX, int iY, bool bNeedWar, bool bNoncombatAllo
 				if (MOD_EVENTS_UNIT_RANGEATTACK) {
 					if (GAMEEVENTINVOKE_TESTANY(GAMEEVENT_UnitCanRangeAttackAt, getOwner(), GetID(), iX, iY, bNeedWar) == GAMEEVENTRETURN_TRUE) {
 						return true;
+					}
+				}
+#endif
+
+#if defined(MOD_EVENTS_UNIT_CAN_RANGEATTACK)
+				if (MOD_EVENTS_UNIT_CAN_RANGEATTACK) {
+					if (GAMEEVENTINVOKE_TESTANY(GAMEEVENT_UnitCanRangeAttackPlot, getOwner(), GetID(), iX, iY, bNeedWar) == GAMEEVENTRETURN_FALSE) {
+						return false;
 					}
 				}
 #endif

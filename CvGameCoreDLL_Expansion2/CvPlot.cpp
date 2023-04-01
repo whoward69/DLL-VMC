@@ -5700,6 +5700,11 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 #endif
 			}
 
+#if defined(MOD_EVENTS_TILE_SET_OWNER)
+			if (MOD_EVENTS_TILE_SET_OWNER) {
+				GAMEEVENTINVOKE_HOOK(GAMEEVENT_TileSetOwnership, getX(), getY(), eOldOwner, eNewValue);
+			}
+#endif
 			pUnitNode = headUnitNode();
 
 			for(iI = 0; iI < MAX_TEAMS; ++iI)
@@ -7356,6 +7361,12 @@ void CvPlot::SetImprovementPillaged(bool bPillaged)
 #if defined(MOD_EVENTS_TILE_IMPROVEMENTS)
 		if (bEvents && MOD_EVENTS_TILE_IMPROVEMENTS) {
 			GAMEEVENTINVOKE_HOOK(GAMEEVENT_TileImprovementChanged, getX(), getY(), getOwner(), getImprovementType(), getImprovementType(), IsImprovementPillaged());
+		}
+#endif
+
+#if defined(MOD_EVENTS_IMPROVEMENTS_PILLAGED)
+		if (MOD_EVENTS_IMPROVEMENTS_PILLAGED) {
+			GAMEEVENTINVOKE_HOOK(GAMEEVENT_TileImprovementPillaged, getX(), getY(), getOwner(), getImprovementType(), IsImprovementPillaged());
 		}
 #endif
 	}

@@ -9771,6 +9771,9 @@ void CvCity::SetPuppet(bool bValue)
 	VALIDATE_OBJECT
 	if(IsPuppet() != bValue)
 	{
+#if defined(MOD_EVENTS_CITY_PUPPETED)
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_CityPuppeted, getOwner(), GetID());
+#endif
 		m_bPuppet = bValue;
 	}
 }
@@ -10299,9 +10302,32 @@ int CvCity::GetWeLoveTheKingDayCounter() const
 
 //	--------------------------------------------------------------------------------
 ///Sets number of turns left in WLTKD
+//void CvCity::SetWeLoveTheKingDayCounter(int iValue)
+//{
+	//VALIDATE_OBJECT
+	//m_iWeLoveTheKingDayCounter = iValue;
+//}
+
 void CvCity::SetWeLoveTheKingDayCounter(int iValue)
 {
 	VALIDATE_OBJECT
+
+		bool bNewWLTKD = false;
+	if (m_iWeLoveTheKingDayCounter <= 0 && iValue > 0)
+		bNewWLTKD = true;
+
+	if (bNewWLTKD)
+	{
+#if defined(MOD_EVENTS_WLKD_DAY)
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_CityBeginsWLTKD, getOwner(), getX(), getY(), iValue);
+#endif
+	}
+	else if (iValue == 0)
+	{
+#if defined(MOD_EVENTS_WLKD_DAY)
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_CityEndsWLTKD, getOwner(), getX(), getY(), iValue);
+#endif
+	}
 	m_iWeLoveTheKingDayCounter = iValue;
 }
 

@@ -813,6 +813,55 @@
 #endif
 
 
+
+
+//   GameEvents.GreatWorkCreated.Add(function(iPlayer, iUnit, iGreatWork) end)
+#define MOD_EVENTS_GREAT_WORK_CREATED                 gCustomMods.isEVENTS_GREAT_WORK_CREATED()
+
+//   GameEvents.ScienceDiscover.Add(function(iPlayer,iUnit,iX,iY,bIsGreatPerson) end) 
+//   GameEvents.CultureDiscover.Add(function(iPlayer, iUnit, iX, iY, bIsGreatPerson) end)
+//   GameEvents.TourismDiscover.Add(function(iPlayer, iUnit, iX, iY, bIsGreatPerson) end)
+//   GameEvents.ProductionDiscover.Add(function(iPlayer, iUnit, iX, iY, bIsGreatPerson) end)
+//   GameEvents.GoldDiscover.Add(function(iPlayer, iUnit, iX, iY, bIsGreatPerson) end)
+//   GameEvents.GoldenAgeDiscover.Add(function(iPlayer, iUnit, iX, iY, bIsGreatPerson) end)
+//   GameEvents.CultureBombDiscover.Add(function(iPlayer, iUnit, iX, iY, bIsGreatPerson) end)
+//   GameEvents.FaithDiscover.Add(function(iPlayer, iUnit, iX, iY, bIsGreatPerson) end)
+#define MOD_EVENTS_GREAT_PEOPLE_BOOST                 gCustomMods.isEVENTS_GREAT_PEOPLE_BOOST()
+
+//   GameEvents.CityPuppeted.Add(function(playerID, cityID) end) 
+#define MOD_EVENTS_CITY_PUPPETED                      gCustomMods.isEVENTS_CITY_PUPPETED()
+
+//  GameEvents.TileSetOwnership.Add(iPlotX, iPlotY, iOldOwner,iNewOwner) end)
+#define MOD_EVENTS_TILE_SET_OWNER                gCustomMods.isEVENTS_TILE_SET_OWNER()
+
+//   GameEvents.TileImprovementPillaged.Add(iPlotX, iPlotY, iOwner,iImprovement,bPillaged) end)
+#define MOD_EVENTS_IMPROVEMENTS_PILLAGED          gCustomMods.isEVENTS_IMPROVEMENTS_PILLAGED()  
+
+// Event sent when a city is fired
+//   GameEvents.CityBeginsWLTKD.Add(iPlayer, iPlotX, iPlotY, iChange) end)
+//   GameEvents.CityEndsWLTKD.Add(iPlayer, iPlotX, iPlotY) end)
+#define MOD_EVENTS_WLKD_DAY                 gCustomMods.isEVENTS_WLKD_DAY()
+
+// Event sent when a city is wlkd
+//   GameEvents.CityRangedStrike.Add(function(iPlayer,iCity, iX, iY) end)
+#define MOD_EVENTS_CITY_RANGE_STRIKE                 gCustomMods.isEVENTS_CITY_RANGE_STRIKE()
+
+// Event sent to ascertain if a unit can perform a ranged attack on a tile (v90)
+//   GameEvents.UnitCanRangeAttackPlot.Add(function(iPlayer, iUnit, iPlotX, iPlotY, bNeedWar) return false end)
+#define MOD_EVENTS_UNIT_CAN_RANGEATTACK           gCustomMods.isEVENTS_UNIT_CAN_RANGEATTACK()
+
+
+// Event sent to ascertain if a unit can move into a given plot - VERY, VERY CPU INTENSIVE!!!
+//   GameEvents.UnitMoveInto.Add(function(iPlayer, iUnit, iPlotX, iPlotY, bAttack, bDeclareWar) return true end)
+#define MOD_EVENTS_UNIT_MOVE                    gCustomMods.isEVENTS_UNIT_MOVE()
+
+
+// Event sent to ascertain if a unit can move into a given plot - VERY, VERY CPU INTENSIVE!!!
+//   GameEvents.UnitDoTurn.Add(function(iPlayer, iUnit, iPlotX, iPlotY) end)
+#define MOD_EVENTS_UNIT_DO_TURN                    gCustomMods.isEVENTS_UNIT_DO_TURN()
+
+
+
 // SOME BASE FOUNCTION
 #define MOD_ROG_CORE             gCustomMods.isROG_CORE()
 
@@ -1036,7 +1085,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_MinorFriendsChanged			"MinorFriendsChanged",			"iibii"
 #define GAMEEVENT_MinorGift						"MinorGift",					"iiiiibbs"
 #define GAMEEVENT_NaturalWonderDiscovered		"NaturalWonderDiscovered",		"iiiibii"
-#define GAMEEVENT_NuclearDetonation				"NuclearDetonation",			"iiibb"
+//#define GAMEEVENT_NuclearDetonation				"NuclearDetonation",			"iiibb"
 #define GAMEEVENT_PantheonFounded				"PantheonFounded",				"iiii"
 #define GAMEEVENT_ParadropAt					"ParadropAt",					"iiiiii"
 #define GAMEEVENT_PlaceResource					"PlaceResource",				"iiiii"
@@ -1122,6 +1171,27 @@ enum BattleTypeTypes
 #define GAMEEVENT_UnitRangeAttackAt				"UnitRangeAttackAt",			"iiii"
 #define GAMEEVENT_UnitUpgraded					"UnitUpgraded",					"iiib"
 #define GAMEEVENT_TradeRouteMove                "TradeRouteMove",               "iiiiiiii"
+
+
+#define GAMEEVENT_NuclearDetonation				"NuclearDetonation",			"iiiibb"
+#define GAMEEVENT_GreatWorkCreated              "GreatWorkCreated",             "iii"
+#define GAMEEVENT_ScienceDiscover			    "ScienceDiscover",		        "iiiib"
+#define GAMEEVENT_CultureDiscover			    "CultureDiscover",		        "iiiib"
+#define GAMEEVENT_TourismDiscover			    "TourismDiscover",		        "iiiib"
+#define GAMEEVENT_ProductionDiscover			"ProductionDiscover",		    "iiiib"
+#define GAMEEVENT_GoldDiscover			        "GoldDiscover",		            "iiiib"
+#define GAMEEVENT_GoldenAgeDiscover			    "GoldenAgeDiscover",		    "iiiib"
+#define GAMEEVENT_CultureBombDiscover			"CultureBombDiscover",		    "iiiib"
+#define GAMEEVENT_FaithDiscover			        "FaithDiscover",		        "iiiib"
+#define GAMEEVENT_CityPuppeted					"CityPuppeted",					"ii"
+#define GAMEEVENT_CityBeginsWLTKD			    "CityBeginsWLTKD",              "iiii"
+#define GAMEEVENT_CityEndsWLTKD				    "CityEndsWLTKD",                "iiii"
+#define GAMEEVENT_CityRangedStrike				"CityRangedStrike",			    "iiiiii"
+#define GAMEEVENT_TileImprovementPillaged		"TileImprovementPillaged",		"iiiib"
+#define GAMEEVENT_TileSetOwnership			    "TileSetOwnership",			    "iiii"
+#define GAMEEVENT_UnitCanRangeAttackPlot		"UnitCanRangeAttackPlot",		"iiiib"
+#define GAMEEVENT_UnitMoveInto					"UnitMoveInto",					"iiiiiii"
+#define GAMEEVENT_UnitDoTurn					"UnitDoTurn",					"iiii"
 
 
 // Serialization wrappers
@@ -1445,6 +1515,17 @@ public:
 	MOD_OPT_DECL(ERA_EFFECTS_EXTENSIONS);
 
 	MOD_OPT_DECL(ROG_CORE);
+
+	MOD_OPT_DECL(EVENTS_TILE_SET_OWNER);
+	MOD_OPT_DECL(EVENTS_IMPROVEMENTS_PILLAGED);
+	MOD_OPT_DECL(EVENTS_GREAT_WORK_CREATED);
+	MOD_OPT_DECL(EVENTS_GREAT_PEOPLE_BOOST);
+	MOD_OPT_DECL(EVENTS_CITY_PUPPETED);
+	MOD_OPT_DECL(EVENTS_WLKD_DAY);
+	MOD_OPT_DECL(EVENTS_CITY_RANGE_STRIKE);
+	MOD_OPT_DECL(EVENTS_UNIT_CAN_RANGEATTACK);
+	MOD_OPT_DECL(EVENTS_UNIT_MOVE);
+	MOD_OPT_DECL(EVENTS_UNIT_DO_TURN);
 protected:
 	bool m_bInit;
 	std::map<std::string, int> m_options;

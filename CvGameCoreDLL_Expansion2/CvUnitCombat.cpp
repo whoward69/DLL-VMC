@@ -831,6 +831,30 @@ void CvUnitCombat::GenerateRangedCombatInfo(CvCity& kAttacker, CvUnit* pkDefende
 		FAssertMsg(false, "City vs. City not supported.");	// Don't even think about it Jon....
 	}
 
+
+	if (MOD_EVENTS_CITY_RANGE_STRIKE)
+	{
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_CityRangedStrike, kAttacker.getOwner(), kAttacker.GetID(), pkDefender->getOwner(), pkDefender->GetID(), plot.getX(), plot.getY());
+	}
+	else
+	{
+		ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
+		if (pkScriptSystem)
+		{
+			CvLuaArgsHandle args;
+
+			args->Push(kAttacker.getOwner());
+			args->Push(kAttacker.GetID());
+			args->Push(pkDefender->getOwner());
+			args->Push(pkDefender->GetID());
+			args->Push(plot.getX());
+			args->Push(plot.getY());
+
+			bool bResult = false;
+			LuaSupport::CallHook(pkScriptSystem, "CityRangedStrike", args.get(), bResult);
+		}
+	}
+
 	//////////////////////////////////////////////////////////////////////
 
 	pkCombatInfo->setFinalDamage(BATTLE_UNIT_ATTACKER, 0);				// Total damage to the unit
@@ -2331,7 +2355,7 @@ void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, Cv
 
 #if defined(MOD_EVENTS_NUCLEAR_DETONATION)
 	if (MOD_EVENTS_NUCLEAR_DETONATION) {
-		GAMEEVENTINVOKE_HOOK(GAMEEVENT_NuclearDetonation, kAttacker.getOwner(), plot.getX(), plot.getY(), bWar, bBystander);
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_NuclearDetonation, kAttacker.getOwner(), kAttacker.GetID(), plot.getX(), plot.getY(), bWar, bBystander);
 	} else {
 #endif
 	ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
@@ -2340,6 +2364,7 @@ void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, Cv
 		CvLuaArgsHandle args;
 
 		args->Push(kAttacker.getOwner());
+		args->Push(kAttacker.GetID());
 		args->Push(plot.getX());
 		args->Push(plot.getY());
 		args->Push(bWar);
