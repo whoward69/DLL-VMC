@@ -92,6 +92,36 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iMaxHitPointsChange(0),
 	m_iMaxHitPointsModifier(0),
 #endif
+
+#if defined(MOD_ROG_CORE)
+	m_iMoveLfetAttackMod(0),
+	m_iMoveUsedAttackMod(0),
+	m_iGoldenAgeMod(0),
+	m_iRangedSupportFireMod(0),
+#endif
+
+#if defined(MOD_ROG_CORE)
+	m_iAoEDamageOnMove(0),
+	m_iForcedDamageValue(0),
+	m_iChangeDamageValue(0),
+	m_iAttackFullyHealedMod(0),
+	m_iAttackAboveHealthMod(0),
+	m_iAttackBelowHealthMod(0),
+	m_bStrongerDamaged(false),
+	m_bFightWellDamaged(false),
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+	m_iNearbyUnitClassBonus(0),
+	m_iNearbyUnitClassBonusRange(0),
+	m_iCombatBonusFromNearbyUnitClass(NO_UNITCLASS),
+#endif
+
+
+
+
+
 	m_iUpgradeDiscount(0),
 	m_iExperiencePercent(0),
 	m_iAdjacentMod(0),
@@ -201,6 +231,11 @@ CvPromotionEntry::CvPromotionEntry():
 	m_pbTerrainHalfMove(NULL),
 	m_pbFeatureHalfMove(NULL),
 #endif
+
+	m_piDomainAttackPercent(NULL),
+	m_piDomainDefensePercent(NULL),
+
+
 	m_pbTerrainImpassable(NULL),
 	m_piTerrainPassableTech(NULL),
 	m_pbFeatureImpassable(NULL),
@@ -236,6 +271,11 @@ CvPromotionEntry::~CvPromotionEntry(void)
 	SAFE_DELETE_ARRAY(m_pbTerrainHalfMove);
 	SAFE_DELETE_ARRAY(m_pbFeatureHalfMove);
 #endif
+
+	SAFE_DELETE_ARRAY(m_piDomainAttackPercent);
+	SAFE_DELETE_ARRAY(m_piDomainDefensePercent);
+
+
 	SAFE_DELETE_ARRAY(m_pbTerrainImpassable);
 	SAFE_DELETE_ARRAY(m_piTerrainPassableTech);
 	SAFE_DELETE_ARRAY(m_pbFeatureImpassable);
@@ -287,6 +327,18 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 		}
 	}
 #endif
+
+#if defined(MOD_ROG_CORE)
+	if (MOD_ROG_CORE) {
+		m_iNearbyUnitClassBonus = kResults.GetInt("NearbyUnitClassBonus");
+		m_iNearbyUnitClassBonusRange = kResults.GetInt("NearbyUnitClassBonusRange");
+		const char* szTextVal = kResults.GetText("CombatBonusFromNearbyUnitClass");
+		if (szTextVal) {
+			m_iCombatBonusFromNearbyUnitClass = (UnitClassTypes)GC.getInfoTypeForString(szTextVal, true);
+		}
+	}
+#endif
+
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	if (MOD_PROMOTIONS_CROSS_MOUNTAINS) {
 		m_bCanCrossMountains = kResults.GetBool("CanCrossMountains");
@@ -307,6 +359,29 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 		m_bGGFromBarbarians = kResults.GetBool("GGFromBarbarians");
 	}
 #endif
+
+#if defined(MOD_ROG_CORE)
+	m_iAoEDamageOnMove = kResults.GetInt("AoEDamageOnMove");
+	m_iForcedDamageValue = kResults.GetInt("ForcedDamageValue");
+	m_iChangeDamageValue = kResults.GetInt("ChangeDamageValue");
+	m_iAttackFullyHealedMod = kResults.GetInt("AttackFullyHealedMod");
+	m_iAttackAboveHealthMod = kResults.GetInt("AttackAbove50HealthMod");
+	m_iAttackBelowHealthMod = kResults.GetInt("AttackBelowEqual50HealthMod");
+	m_bStrongerDamaged = kResults.GetBool("StrongerDamaged");
+	m_bFightWellDamaged = kResults.GetBool("FightWellDamaged");
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+	if (MOD_ROG_CORE) {
+		m_iMoveLfetAttackMod = kResults.GetInt("MoveLfetAttackMod");
+		m_iMoveUsedAttackMod = kResults.GetInt("MoveUsedAttackMod");
+		m_iGoldenAgeMod = kResults.GetInt("GoldenAgeMod");
+		m_iRangedSupportFireMod = kResults.GetInt("RangedSupportFireMod");
+	}
+#endif
+
+
 	m_bRoughTerrainEndsTurn = kResults.GetBool("RoughTerrainEndsTurn");
 	m_bHoveringUnit = kResults.GetBool("HoveringUnit");
 	m_bFlatMovementCost = kResults.GetBool("FlatMovementCost");
@@ -682,35 +757,45 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 		pResults->Reset();
 	}
 
+
 	//UnitPromotions_Domains
 	{
 		kUtility.InitializeArray(m_piDomainModifierPercent, NUM_DOMAIN_TYPES, 0);
+		kUtility.InitializeArray(m_piDomainAttackPercent, NUM_DOMAIN_TYPES, 0);
+		kUtility.InitializeArray(m_piDomainDefensePercent, NUM_DOMAIN_TYPES, 0);
 
-		std::string sqlKey = "m_piDomainModifierPercent";
+		std::string sqlKey = "UnitPromotions_Domains";
 		Database::Results* pResults = kUtility.GetResults(sqlKey);
-		if(pResults == NULL)
+		if (pResults == NULL)
 		{
-			const char* szSQL = "select Domains.ID, Modifier from UnitPromotions_Domains inner join Domains on DomainType = Domains.Type where PromotionType = ?;";
+			const char* szSQL = "select Domains.ID, Modifier, Attack, Defense from UnitPromotions_Domains inner join Domains on DomainType = Domains.Type where PromotionType = ?;";
 			pResults = kUtility.PrepareResults(sqlKey, szSQL);
 		}
 
 		CvAssert(pResults);
-		if(!pResults) return false;
+		if (!pResults) return false;
 
 		pResults->Bind(1, szPromotionType);
 
-		while(pResults->Step())
+		while (pResults->Step())
 		{
 			const int iDomainID = pResults->GetInt(0);
 			CvAssert(iDomainID > -1 && iDomainID < iNumDomains);
 
-			const int iDomainMod = pResults->GetInt(1);
-			if (iDomainID > -1 && iDomainID < NUM_DOMAIN_TYPES)
-				m_piDomainModifierPercent[iDomainID] = iDomainMod;
+			const int iDomainMod = pResults->GetInt("Modifier");
+			m_piDomainModifierPercent[iDomainID] = iDomainMod;
+
+			const int iAttack = pResults->GetInt("Attack");
+			m_piDomainAttackPercent[iDomainID] = iAttack;
+
+			const int iDefense = pResults->GetInt("Defense");
+			m_piDomainDefensePercent[iDomainID] = iDefense;
 		}
 
 		pResults->Reset();
 	}
+
+
 
 	//UnitPromotions_UnitCombatMods
 	{
@@ -1270,6 +1355,93 @@ int CvPromotionEntry::GetAuraEffectChange() const
 	return m_iAuraEffectChange;
 }
 #endif
+
+
+
+#if defined(MOD_ROG_CORE)
+int CvPromotionEntry::GetAttackFullyHealedMod() const
+{
+	return m_iAttackFullyHealedMod;
+}
+
+int CvPromotionEntry::GetAttackAboveHealthMod() const
+{
+	return m_iAttackAboveHealthMod;
+}
+int CvPromotionEntry::GetAttackBelowHealthMod() const
+{
+	return m_iAttackBelowHealthMod;
+}
+#endif
+
+#if defined(MOD_ROG_CORE)
+bool CvPromotionEntry::IsStrongerDamaged() const
+{
+	return m_bStrongerDamaged;
+}
+bool CvPromotionEntry::IsFightWellDamaged() const
+{
+	return m_bFightWellDamaged;
+}
+
+int CvPromotionEntry::GetAoEDamageOnMove() const
+{
+	return m_iAoEDamageOnMove;
+}
+int CvPromotionEntry::ForcedDamageValue() const
+{
+	return m_iForcedDamageValue;
+}
+int CvPromotionEntry::ChangeDamageValue() const
+{
+	return m_iChangeDamageValue;
+}
+
+#endif
+
+#if defined(MOD_ROG_CORE)
+
+int CvPromotionEntry::GetMoveLfetAttackMod() const
+{
+	return m_iMoveLfetAttackMod;
+}
+
+
+int CvPromotionEntry::GetMoveUsedAttackMod() const
+{
+	return m_iMoveUsedAttackMod;
+}
+
+int CvPromotionEntry::GetGoldenAgeMod() const
+{
+	return m_iGoldenAgeMod;
+}
+
+int CvPromotionEntry::GetRangedSupportFireMod() const
+{
+	return m_iRangedSupportFireMod;
+}
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+/// Get the UnitClass we want to receive the bonus from.
+UnitClassTypes CvPromotionEntry::GetCombatBonusFromNearbyUnitClass() const
+{
+	return m_iCombatBonusFromNearbyUnitClass;
+}
+/// Distance from this UnitClass
+int CvPromotionEntry::GetNearbyUnitClassBonusRange() const
+{
+	return m_iNearbyUnitClassBonusRange;
+}
+/// Bonus from this UnitClass
+int CvPromotionEntry::GetNearbyUnitClassBonus() const
+{
+	return m_iNearbyUnitClassBonus;
+}
+#endif
+
 
 /// Accessor: Increase in rate of great general creation
 int CvPromotionEntry::GetGreatGeneralModifier() const
@@ -1948,6 +2120,35 @@ int CvPromotionEntry::GetDomainModifierPercent(int i) const
 	return -1;
 }
 
+
+
+int CvPromotionEntry::GetDomainAttackPercent(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+
+	if (i > -1 && i < NUM_DOMAIN_TYPES && m_piDomainAttackPercent)
+	{
+		return m_piDomainAttackPercent[i];
+	}
+
+	return -1;
+}
+
+
+int CvPromotionEntry::GetDomainDefensePercent(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+
+	if (i > -1 && i < NUM_DOMAIN_TYPES && m_piDomainDefensePercent)
+	{
+		return m_piDomainDefensePercent[i];
+	}
+
+	return -1;
+}
+
 /// Percentage bonus when attacking a specific unit class
 int CvPromotionEntry::GetUnitClassAttackModifier(int i) const
 {
@@ -2448,6 +2649,39 @@ int CvUnitPromotions::GetUnitClassDefenseMod(UnitClassTypes eUnitClass) const
 	}
 	return iSum;
 }
+
+/// returns the advantage percent when attacking the specified unit Domain
+int CvUnitPromotions::GetDomainAttackPercentMod(DomainTypes eDomain) const
+{
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes ePromotion = (PromotionTypes)iLoop;
+		CvPromotionEntry* promotion = GC.getPromotionInfo(ePromotion);
+		if (promotion && HasPromotion(ePromotion))
+		{
+			iSum += promotion->GetDomainAttackPercent(eDomain);
+		}
+	}
+	return iSum;
+}
+
+/// returns the advantage percent when defending against the specified unit Domain
+int CvUnitPromotions::GetDomainDefensePercentMod(DomainTypes eDomain) const
+{
+	int iSum = 0;
+	for (int iLoop = 0; iLoop < GC.getNumPromotionInfos(); iLoop++)
+	{
+		PromotionTypes ePromotion = (PromotionTypes)iLoop;
+		CvPromotionEntry* promotion = GC.getPromotionInfo(ePromotion);
+		if (promotion && HasPromotion(ePromotion))
+		{
+			iSum += promotion->GetDomainDefensePercent(eDomain);
+		}
+	}
+	return iSum;
+}
+
 
 // Swap to a new promotion after a combat - returns new promotion we switched to
 PromotionTypes CvUnitPromotions::ChangePromotionAfterCombat(PromotionTypes eIndex)

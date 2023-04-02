@@ -283,6 +283,25 @@ CvUnit::CvUnit() :
 	, m_iNearbyImprovementBonusRange("CvUnit::m_iNearbyImprovementBonusRange", m_syncArchive)
 	, m_eCombatBonusImprovement("CvUnit::m_eCombatBonusImprovement", m_syncArchive)
 #endif
+
+#if defined(MOD_ROG_CORE)
+		, m_iCombatBonusFromNearbyUnitClass("CvUnit::m_iCombatBonusFromNearbyUnitClass", m_syncArchive)
+		, m_iNearbyUnitClassBonusRange("CvUnit::m_iNearbyUnitClassBonusRange", m_syncArchive)
+		, m_iNearbyUnitClassBonus("CvUnit::m_iNearbyUnitClassBonus", m_syncArchive)
+#endif
+		, m_iStrongerDamaged("CvUnit::m_iStrongerDamaged", m_syncArchive)
+		, m_iFightWellDamaged("CvUnit::m_iFightWellDamaged", m_syncArchive)
+
+#if defined(MOD_ROG_CORE)
+		, m_iAoEDamageOnMove("CvUnit::m_iAoEDamageOnMove", m_syncArchive)
+		, m_iForcedDamage("CvUnit::m_iForcedDamage", m_syncArchive)
+		, m_iChangeDamage("CvUnit::m_iChangeDamage", m_syncArchive)
+		, m_iExtraAttackAboveHealthMod("CvUnit::m_iExtraAttackAboveHealthMod", m_syncArchive)
+		, m_iExtraAttackBelowHealthMod("CvUnit::m_iExtraAttackBelowHealthMod", m_syncArchive)
+		, m_iExtraFullyHealedMod("CvUnit::m_iExtraFullyHealedMod", m_syncArchive)
+#endif
+
+
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	, m_iCanCrossMountainsCount("CvUnit::m_iCanCrossMountainsCount", m_syncArchive)
 #endif
@@ -346,6 +365,14 @@ CvUnit::CvUnit() :
 #if defined(MOD_PROMOTIONS_DEEP_WATER_EMBARKATION)
 	, m_iEmbarkedDeepWaterCount(0)
 #endif
+
+#if defined(MOD_ROG_CORE)
+		, m_iMoveLfetAttackMod(0)
+		, m_iMoveUsedAttackMod(0)
+		, m_iGoldenAgeMod(0)
+		, m_iRangedSupportFireMod(0)
+#endif
+
 	, m_iEmbarkExtraVisibility(0)
 	, m_iEmbarkDefensiveModifier(0)
 	, m_iCapitalDefenseModifier(0)
@@ -1032,6 +1059,33 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iNearbyImprovementBonusRange = 0;
 	m_eCombatBonusImprovement = NO_IMPROVEMENT;
 #endif
+
+#if defined(MOD_ROG_CORE)
+	m_iNearbyUnitClassBonus = 0;
+	m_iNearbyUnitClassBonusRange = 0;
+	m_iCombatBonusFromNearbyUnitClass = NO_UNITCLASS;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	m_iAoEDamageOnMove = 0;
+	m_iForcedDamage = 0;
+	m_iChangeDamage = 0;
+	m_iExtraFullyHealedMod = 0;
+	m_iExtraAttackAboveHealthMod = 0;
+	m_iExtraAttackBelowHealthMod = 0;
+#endif
+
+	m_iStrongerDamaged = 0;
+	m_iFightWellDamaged = 0;
+
+#if defined(MOD_ROG_CORE)
+	m_iMoveLfetAttackMod = 0;
+	m_iMoveUsedAttackMod = 0;
+	m_iGoldenAgeMod = 0;
+	m_iRangedSupportFireMod = 0;
+#endif
+
+
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	m_iCanCrossMountainsCount = 0;
 #endif
@@ -5416,6 +5470,59 @@ int CvUnit::GetCapitalDefenseFalloff() const
 {
 	return m_iCapitalDefenseFalloff;
 }
+
+
+
+#if defined(MOD_ROG_CORE)
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeMoveLfetAttackMod(int iValue)
+{
+	m_iMoveLfetAttackMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetMoveLfetAttackMod() const
+{
+	return m_iMoveLfetAttackMod;
+}
+
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeMoveUsedAttackMod(int iValue)
+{
+	m_iMoveUsedAttackMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetMoveUsedAttackMod() const
+{
+	return m_iMoveUsedAttackMod;
+}
+
+void CvUnit::ChangeGoldenAgeMod(int iValue)
+{
+	m_iGoldenAgeMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetGoldenAgeMod() const
+{
+	return m_iGoldenAgeMod;
+}
+
+void CvUnit::ChangeRangedSupportFireMod(int iValue)
+{
+	m_iRangedSupportFireMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetRangedSupportFireMod() const
+{
+	return m_iRangedSupportFireMod;
+}
+#endif
+
+
 
 //	--------------------------------------------------------------------------------
 void CvUnit::ChangeCityAttackPlunderModifier(int iValue)
@@ -12377,6 +12484,34 @@ int CvUnit::GetBaseCombatStrength(bool bIgnoreEmbarked) const
 	return m_iBaseCombat;
 }
 
+
+
+int CvUnit::GetDamageCombatModifier(bool bForDefenseAgainstRanged, int iAssumedDamage) const
+{
+	int iDamageValueToUse = iAssumedDamage > 0 ? iAssumedDamage : getDamage();
+	int iWoundedDamageMultiplier = /*33*/ GD_INT_GET(WOUNDED_DAMAGE_MULTIPLIER);
+	int iRtnValue = iDamageValueToUse > 0 ? GET_PLAYER(getOwner()).GetWoundedUnitDamageMod() * -1 : 0; // usually 0, +25% with vanilla Elite Forces if wounded
+
+	// Unit is stronger when damaged (Tenacity)
+	if (iDamageValueToUse > 0 && IsStrongerDamaged())
+	{
+		iRtnValue += (iDamageValueToUse * iWoundedDamageMultiplier) / GetMaxHitPoints();
+
+		return iRtnValue;
+	}
+
+
+
+	// How much does damage weaken the effectiveness of the Unit?
+	if (iDamageValueToUse > 0 && !IsFightWellDamaged() && !GET_PLAYER(getOwner()).GetPlayerTraits()->IsFightWellDamaged())
+	{
+		iRtnValue -= (iDamageValueToUse * iWoundedDamageMultiplier) / GetMaxHitPoints();
+	}
+
+	return iRtnValue;
+}
+
+
 //	--------------------------------------------------------------------------------
 int CvUnit::GetBaseCombatStrengthConsideringDamage() const
 {
@@ -12697,6 +12832,47 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 	iTempModifier = getAttackModifier();
 	iModifier += iTempModifier;
 
+#if defined(MOD_ROG_CORE)
+	// Move Lfet modifier always applies for melee attack
+	int imovesLeft;
+	int iMoveLfetAttackModValue;
+	if (movesLeft() > 0)
+	{
+		imovesLeft = movesLeft() / GC.getMOVE_DENOMINATOR();
+		iMoveLfetAttackModValue = GetMoveLfetAttackMod();
+		iTempModifier = (imovesLeft * iMoveLfetAttackModValue);
+		iModifier += iTempModifier;
+	}
+#endif
+
+#if defined(MOD_ROG_CORE)
+	// Move Lfet modifier always applies for melee attack
+	int imovesUsed;
+	int iMoveUsedAttackModValue;
+	if (maxMoves() > movesLeft())
+	{
+		imovesUsed = (maxMoves() - movesLeft()) / GC.getMOVE_DENOMINATOR();
+		iMoveUsedAttackModValue = GetMoveUsedAttackMod();
+		iTempModifier = (imovesUsed * iMoveUsedAttackModValue);
+		iModifier += iTempModifier;
+	}
+#endif
+
+#if defined(MOD_ROG_CORE)
+	// GoldenAge modifier always applies for attack
+	CvPlayerAI& kPlayer = GET_PLAYER(getOwner());
+	if (kPlayer.isGoldenAge())
+	{
+		iTempModifier = GetGoldenAgeMod();
+		iModifier += iTempModifier;
+	}
+#endif
+
+
+	// Damage modifier always applies for melee attack
+	iModifier += GetDamageCombatModifier();
+
+
 	// Kamikaze attack
 	if(getKamikazePercent() != 0)
 	{
@@ -12829,6 +13005,9 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 		iTempModifier = unitClassAttackModifier(pDefender->getUnitClassType());
 		iModifier += iTempModifier;
 
+		// Promotion-domain Attack 
+		iModifier += domainAttack(pDefender->getDomainType());
+
 		// Promotion-Promotion Modifier
 #if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
 		if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
@@ -12842,8 +13021,20 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 			iModifier += attackFortifiedModifier();
 
 		// Bonus VS wounded
-		if(pDefender->getDamage() > 0)
+		if (pDefender->getDamage() > 0)
 			iModifier += attackWoundedModifier();
+		else
+			iModifier += attackFullyHealedModifier();
+
+#if defined(MOD_ROG_CORE)
+		if (MOD_ROG_CORE)
+			//More than half?
+			if (pDefender->getDamage() < (pDefender->GetMaxHitPoints() / 2))
+				iModifier += attackAbove50HealthModifier();
+			else
+				iModifier += attackBelow50HealthModifier();
+
+#endif
 	}
 
 	// Unit can't drop below 10% strength
@@ -12881,6 +13072,20 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 	// Defense against Ranged
 	if(bFromRangedAttack)
 		iModifier += rangedDefenseModifier();
+
+
+	// this may be always zero for defense against ranged
+	iModifier += GetDamageCombatModifier(bFromRangedAttack);
+
+
+#if defined(MOD_ROG_CORE)
+	// GoldenAge modifier always applies for defense
+	CvPlayerAI& kPlayer = GET_PLAYER(getOwner());
+	if (kPlayer.isGoldenAge())
+	{
+		iModifier += GetGoldenAgeMod();
+	}
+#endif
 
 	////////////////////////
 	// KNOWN DEFENSE PLOT
@@ -12959,6 +13164,26 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 		// Unit Class Defense Modifier
 		iTempModifier = unitClassDefenseModifier(pAttacker->getUnitClassType());
 		iModifier += iTempModifier;
+
+
+		iModifier += domainDefense(pAttacker->getDomainType());
+
+		// Bonus VS wounded
+		if (pAttacker->getDamage() > 0)
+			iModifier += attackWoundedModifier();
+		else
+			iModifier += attackFullyHealedModifier();
+
+#if defined(MOD_ROG_CORE)
+		if (MOD_ROG_CORE)
+		{
+			//More than half (integer division accounting for possible odd Max HP)?
+			if (pAttacker->getDamage() < ((pAttacker->GetMaxHitPoints() + 1) / 2))
+				iModifier += attackAbove50HealthModifier();
+			else
+				iModifier += attackBelow50HealthModifier();
+		}
+#endif
 
 		// Promotion-Promotion Modifier
 #if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
@@ -13083,7 +13308,10 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 	CvGameReligions* pReligions = GC.getGame().GetGameReligions();
 	ReligionTypes eFoundedReligion = pReligions->GetFounderBenefitsReligion(kPlayer.GetID());
 
-	int iStr = isRangedSupportFire() ? GetBaseCombatStrength() / 2 : GetBaseRangedCombatStrength();
+	//int iStr = isRangedSupportFire() ? GetBaseCombatStrength() / 2 : GetBaseRangedCombatStrength();
+
+	//fix wrong SupportFire damage
+	int iStr = isRangedSupportFire() ? GetBaseCombatStrength() * (1 + GetRangedSupportFireMod() / 100) / 2 : GetBaseRangedCombatStrength();
 
 	if(iStr == 0)
 	{
@@ -13185,6 +13413,19 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		// Bonus VS wounded
 		if(pOtherUnit->getDamage() > 0)
 			iModifier += attackWoundedModifier();
+		else
+			iModifier += attackFullyHealedModifier();
+
+#if defined(MOD_ROG_CORE)
+		if (MOD_ROG_CORE)
+		{
+			//More than half (integer division accounting for possible odd Max HP)?
+			if (pOtherUnit->getDamage() < ((pOtherUnit->GetMaxHitPoints() + 1) / 2))
+				iModifier += attackAbove50HealthModifier();
+			else
+				iModifier += attackBelow50HealthModifier();
+		}
+#endif
 
 		// Bonus against city states?
 		if(GET_PLAYER(pOtherUnit->getOwner()).isMinorCiv())
@@ -13226,6 +13467,9 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 			// Unit Class Attack Mod
 			iModifier += unitClassAttackModifier(pOtherUnit->getUnitClassType());
 
+
+			iModifier += domainAttack(pOtherUnit->getDomainType());
+
 			// Promotion-Promotion Modifier
 #if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
 		if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
@@ -13239,6 +13483,49 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 			////////////////////////
 
 			CvPlot* pTargetPlot = pOtherUnit->plot();
+
+
+/////new range effect
+			// Attacking into Hills
+			if (pTargetPlot->isHills())
+			{
+				iTempModifier = hillsAttackModifier();
+				iModifier += iTempModifier;
+			}
+
+			// Attacking into Open Ground
+			if (pTargetPlot->isOpenGround())
+			{
+				iTempModifier = openAttackModifier();
+				iModifier += iTempModifier;
+			}
+
+			// Attacking into Rough Ground
+			if (pTargetPlot->isRoughGround())
+			{
+				iTempModifier = roughAttackModifier();
+				iModifier += iTempModifier;
+			}
+
+			// Attacking into a Feature
+			if (pTargetPlot->getFeatureType() != NO_FEATURE)
+			{
+				iTempModifier = featureAttackModifier(pTargetPlot->getFeatureType());
+				iModifier += iTempModifier;
+			}
+			// No Feature - Use Terrain Attack Mod
+			//else
+			//{
+			iTempModifier = terrainAttackModifier(pTargetPlot->getTerrainType());
+			iModifier += iTempModifier;
+
+			// Tack on Hills Attack Mod
+			if (pTargetPlot->isHills())
+			{
+				iTempModifier = terrainAttackModifier(TERRAIN_HILL);
+				iModifier += iTempModifier;
+			}
+/////end
 
 			// Open Ground
 			if(pTargetPlot->isOpenGround())
@@ -13307,6 +13594,9 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 			// Unit Class Defense Mod
 			iModifier += unitClassDefenseModifier(pOtherUnit->getUnitClassType());
 
+			iModifier += domainDefense(pOtherUnit->getDomainType());
+
+
 			// Promotion-Promotion Modifier
 #if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
 			if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
@@ -13351,6 +13641,42 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 	if(bAttacking)
 	{
 		iModifier += getAttackModifier();
+
+
+#if defined(MOD_ROG_CORE)
+		// Move Lfet modifier always applies for Ranged attack
+		int imovesLeft;
+		int iMoveLfetAttackModValue;
+		if (movesLeft() > 0)
+		{
+			imovesLeft = movesLeft() / GC.getMOVE_DENOMINATOR();
+			iMoveLfetAttackModValue = GetMoveLfetAttackMod();
+			iTempModifier = (imovesLeft * iMoveLfetAttackModValue);
+			iModifier += iTempModifier;
+		}
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+		// Move Lfet modifier always applies for Ranged attack
+		int imovesUsed;
+		int iMoveUsedAttackModValue;
+		if (maxMoves() > movesLeft())
+		{
+			imovesUsed = (maxMoves() - movesLeft()) / GC.getMOVE_DENOMINATOR();
+			iMoveUsedAttackModValue = GetMoveUsedAttackMod();
+			iTempModifier = (imovesUsed * iMoveUsedAttackModValue);
+			iModifier += iTempModifier;
+		}
+#endif
+
+#if defined(MOD_ROG_CORE)
+		if (kPlayer.isGoldenAge())
+		{
+			iTempModifier = GetGoldenAgeMod();
+			iModifier += iTempModifier;
+		}
+#endif
 	}
 	// This Unit on defense
 	else
@@ -13362,8 +13688,80 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		if(!noDefensiveBonus() || iTempModifier < 0)
 			iModifier += iTempModifier;
 
+
+/////new range defense effect
+
+		// Fortification
+		iTempModifier = fortifyModifier();
+		iModifier += iTempModifier;
+
+		// City Defense
+		if (plot()->isCity())
+		{
+			iTempModifier = cityDefenseModifier();
+			iModifier += iTempModifier;
+		}
+
+		// Hill Defense
+		if (plot()->isHills())
+		{
+			iTempModifier = hillsDefenseModifier();
+			iModifier += iTempModifier;
+		}
+
+		// Open Ground Defense
+		if (plot()->isOpenGround())
+		{
+			iTempModifier = openDefenseModifier();
+			iModifier += iTempModifier;
+		}
+
+		// Rough Ground Defense
+		if (plot()->isRoughGround())
+		{
+			iTempModifier = roughDefenseModifier();
+			iModifier += iTempModifier;
+		}
+
+		// Feature Defense
+		if (plot()->getFeatureType() != NO_FEATURE)
+		{
+			iTempModifier = featureDefenseModifier(plot()->getFeatureType());
+			iModifier += iTempModifier;
+		}
+
+		// No Feature - use Terrain Defense Mod
+		//else
+		//{
+		iTempModifier = terrainDefenseModifier(plot()->getTerrainType());
+		iModifier += iTempModifier;
+
+		// Tack on Hills Defense Mod
+		if (plot()->isHills())
+		{
+			iTempModifier = terrainDefenseModifier(TERRAIN_HILL);
+			iModifier += iTempModifier;
+		}
+		//}
+/////end
+
 		iModifier += getDefenseModifier();
 	}
+
+
+
+	//this may be always zero when defending (on defense -> fewer targets, harder to hit)
+	iModifier += GetDamageCombatModifier(!bAttacking);
+
+
+#if defined(MOD_ROG_CORE)
+	// GoldenAge modifier always applies for attack
+	//CvPlayerAI& kPlayer = GET_PLAYER(getOwner());
+	if (kPlayer.isGoldenAge())
+	{
+		iModifier += GetGoldenAgeMod();
+	}
+#endif
 
 	// Unit can't drop below 10% strength
 	if(iModifier < -90)
@@ -13548,6 +13946,11 @@ int CvUnit::GetRangeCombatDamage(const CvUnit* pDefender, CvCity* pCity, bool bI
 		{
 			iDefenderStrength = pDefender->GetMaxRangedCombatStrength(this, /*pCity*/ NULL, false, /*bForRangedAttack*/ false);
 
+
+			//hack. we modify defender strength again by the modifier for assumed extra damage
+			iDefenderStrength += (pDefender->GetDamageCombatModifier(true, iAssumeExtraDamage) * iDefenderStrength) / 100;
+
+
 			// Ranged units take less damage from one another
 			iDefenderStrength *= /*125*/ GC.getRANGE_ATTACK_RANGED_DEFENDER_MOD();
 			iDefenderStrength /= 100;
@@ -13555,6 +13958,11 @@ int CvUnit::GetRangeCombatDamage(const CvUnit* pDefender, CvCity* pCity, bool bI
 		else
 		{
 			iDefenderStrength = pDefender->GetMaxDefenseStrength(pDefender->plot(), this, /*bFromRangedAttack*/ true);
+
+
+			//hack. we modify defender strength again by the modifier for assumed extra damage
+			iDefenderStrength += (pDefender->GetDamageCombatModifier(true, iAssumeExtraDamage) * iDefenderStrength) / 100;
+
 		}
 	}
 	// City is Defender
@@ -14354,6 +14762,166 @@ bool CvUnit::ignoreBuildingDefense() const
 }
 
 
+
+
+// No penalty when wounded, on top of that gain a combat bonus the more wounded the unit is
+//	--------------------------------------------------------------------------------
+bool CvUnit::IsStrongerDamaged() const
+{
+	return m_iStrongerDamaged > 0;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeIsStrongerDamaged(int iChange)
+{
+	m_iStrongerDamaged += iChange;
+}
+
+// No penalty from being wounded, no combat bonus
+//	--------------------------------------------------------------------------------
+bool CvUnit::IsFightWellDamaged() const
+{
+	return m_iFightWellDamaged > 0;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeIsFightWellDamaged(int iChange)
+{
+	m_iFightWellDamaged += iChange;
+}
+
+
+#if defined(MOD_ROG_CORE)
+
+//	--------------------------------------------------------------------------------
+int CvUnit::getAoEDamageOnMove() const
+{
+	VALIDATE_OBJECT
+		return m_iAoEDamageOnMove;
+}
+//	--------------------------------------------------------------------------------
+int CvUnit::attackFullyHealedModifier() const
+{
+	VALIDATE_OBJECT
+		return (getExtraAttackFullyHealedMod());
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::attackAbove50HealthModifier() const
+{
+	VALIDATE_OBJECT
+		return (getExtraAttackAboveHealthMod());
+}
+//	--------------------------------------------------------------------------------
+int CvUnit::attackBelow50HealthModifier() const
+{
+	VALIDATE_OBJECT
+		return (getExtraAttackBelowHealthMod());
+}
+//	--------------------------------------------------------------------------------
+
+//	--------------------------------------------------------------------------------
+int CvUnit::getExtraAttackFullyHealedMod() const
+{
+	VALIDATE_OBJECT
+		return m_iExtraFullyHealedMod;
+}
+
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeExtraAttackFullyHealedMod(int iChange)
+{
+	VALIDATE_OBJECT
+		if (iChange != 0)
+		{
+			m_iExtraFullyHealedMod = (m_iExtraFullyHealedMod + iChange);
+
+			setInfoBarDirty(true);
+		}
+}
+
+
+//	--------------------------------------------------------------------------------
+int CvUnit::getExtraAttackAboveHealthMod() const
+{
+	VALIDATE_OBJECT
+		return m_iExtraAttackAboveHealthMod;
+}
+
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeExtraAttackAboveHealthMod(int iChange)
+{
+	VALIDATE_OBJECT
+		if (iChange != 0)
+		{
+			m_iExtraAttackAboveHealthMod = (m_iExtraAttackAboveHealthMod + iChange);
+
+			setInfoBarDirty(true);
+		}
+}
+
+
+//	--------------------------------------------------------------------------------
+int CvUnit::getExtraAttackBelowHealthMod() const
+{
+	VALIDATE_OBJECT
+		return m_iExtraAttackBelowHealthMod;
+}
+
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeExtraAttackBelowHealthMod(int iChange)
+{
+	VALIDATE_OBJECT
+		if (iChange != 0)
+		{
+			m_iExtraAttackBelowHealthMod = (m_iExtraAttackBelowHealthMod + iChange);
+
+			setInfoBarDirty(true);
+		}
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeAoEDamageOnMove(int iChange)
+{
+	VALIDATE_OBJECT
+		m_iAoEDamageOnMove = (m_iAoEDamageOnMove + iChange);
+	CvAssert(getAoEDamageOnMove() >= 0);
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeForcedDamageValue(int iChange)
+{
+	VALIDATE_OBJECT
+		if (iChange != 0)
+		{
+			m_iForcedDamage += iChange;
+		}
+}
+//	--------------------------------------------------------------------------------
+int CvUnit::getForcedDamageValue()
+{
+	VALIDATE_OBJECT
+		return m_iForcedDamage;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeChangeDamageValue(int iChange)
+{
+	VALIDATE_OBJECT
+		if (iChange != 0)
+		{
+			m_iChangeDamage += iChange;
+		}
+}
+//	--------------------------------------------------------------------------------
+int CvUnit::getChangeDamageValue()
+{
+	VALIDATE_OBJECT
+		return m_iChangeDamage;
+}
+
+#endif
+
 //	--------------------------------------------------------------------------------
 bool CvUnit::ignoreTerrainCost() const
 {
@@ -14510,6 +15078,40 @@ ImprovementTypes CvUnit::GetCombatBonusImprovement() const
 void CvUnit::SetCombatBonusImprovement(ImprovementTypes eImprovement)
 {
 	m_eCombatBonusImprovement = eImprovement;
+}
+#endif
+
+
+
+#if defined(MOD_ROG_CORE)
+int CvUnit::getNearbyUnitClassBonus() const
+{
+	return m_iNearbyUnitClassBonus;
+}
+
+void CvUnit::SetNearbyUnitClassBonus(int iCombatBonus)
+{
+	m_iNearbyUnitClassBonus = iCombatBonus;
+}
+
+int CvUnit::getNearbyUnitClassBonusRange() const
+{
+	return m_iNearbyUnitClassBonusRange;
+}
+
+void CvUnit::SetNearbyUnitClassBonusRange(int iBonusRange)
+{
+	m_iNearbyUnitClassBonusRange = iBonusRange;
+}
+
+UnitClassTypes CvUnit::getCombatBonusFromNearbyUnitClass() const
+{
+	return (UnitClassTypes)m_iCombatBonusFromNearbyUnitClass;
+}
+
+void CvUnit::SetCombatBonusFromNearbyUnitClass(UnitClassTypes eUnitClass)
+{
+	m_iCombatBonusFromNearbyUnitClass = eUnitClass;
 }
 #endif
 
@@ -15631,6 +16233,31 @@ int CvUnit::domainModifier(DomainTypes eDomain) const
 	return (getExtraDomainModifier(eDomain));
 }
 
+
+
+//	--------------------------------------------------------------------------------
+int CvUnit::domainAttack(DomainTypes eDomain) const
+{
+	VALIDATE_OBJECT
+		CvAssertMsg(eDomain >= 0, "eDomain is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eDomain < NUM_DOMAIN_TYPES, "eDomain is expected to be within maximum bounds (invalid Index)");
+	//return (getExtraDomainAttack(eDomain));
+	return m_Promotions.GetDomainAttackPercentMod(eDomain);
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::domainDefense(DomainTypes eDomain) const
+{
+	VALIDATE_OBJECT
+		CvAssertMsg(eDomain >= 0, "eDomain is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eDomain < NUM_DOMAIN_TYPES, "eDomain is expected to be within maximum bounds (invalid Index)");
+	//return (getExtraDomainDefense(eDomain));
+	return m_Promotions.GetDomainDefensePercentMod(eDomain);
+}
+
+
+
+
 #if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
 int CvUnit::otherPromotionModifier(PromotionTypes other) const
 {
@@ -16448,6 +17075,30 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 
 			if(pAdjacentPlot != NULL)
 			{
+#if defined(MOD_ROG_CORE)
+				if (getAoEDamageOnMove() != 0)
+				{
+					//bool bIsCity = pAdjacentPlot->isCity();
+					if (!pAdjacentPlot->isCity())
+					{
+						for (int iJ = 0; iJ < pAdjacentPlot->getNumUnits(); iJ++)
+						{
+							CvUnit* pEnemyUnit = pAdjacentPlot->getUnitByIndex(iJ);
+
+							if (pEnemyUnit != NULL && pEnemyUnit->isEnemy(getTeam()))
+							{
+								if (getAoEDamageOnMove() + pEnemyUnit->getDamage() >= pEnemyUnit->GetMaxHitPoints())
+								{
+									// Earn bonuses for kills?
+									CvPlayer& kAttackingPlayer = GET_PLAYER(getOwner());
+									kAttackingPlayer.DoYieldsFromKill(this, pEnemyUnit, pNewPlot->getX(), pNewPlot->getY(), 0.5f);
+								}
+								pEnemyUnit->changeDamage(getAoEDamageOnMove(), getOwner());
+							}
+						}
+					}
+				}
+#endif
 				// Owned by someone
 				if(pAdjacentPlot->getTeam() != NO_TEAM)
 				{
@@ -19328,10 +19979,63 @@ int CvUnit::GetNearbyImprovementModifier()const
 	return 0;
 }
 
+
+#if defined(MOD_ROG_CORE)
+int CvUnit::GetNearbyUnitClassModifierFromUnitClass() const
+{
+	return GetNearbyUnitClassModifier(getCombatBonusFromNearbyUnitClass(), getNearbyUnitClassBonusRange(), getNearbyUnitClassBonus());
+}
+
+int CvUnit::GetNearbyUnitClassModifier(UnitClassTypes eUnitClass, int iUnitClassRange, int iUnitClassModifier) const
+{
+	if (iUnitClassModifier != 0)
+	{
+
+
+		CvPlot* pLoopPlot;
+		//CvPlot* pLoopPlot = NULL;
+		// 
+		// Look around this Unit to see if there's a nearby UnitClass that will give us the modifier
+		for (int iX = -iUnitClassRange; iX <= iUnitClassRange; iX++)
+		{
+			for (int iY = -iUnitClassRange; iY <= iUnitClassRange; iY++)
+			{
+				pLoopPlot = plotXYWithRangeCheck(getX(), getY(), iX, iY, iUnitClassRange);
+				if (pLoopPlot != NULL && pLoopPlot->getNumUnits() != 0)
+				{
+					for (int iK = 0; iK < pLoopPlot->getNumUnits(); iK++)
+					{
+						CvUnit* pLoopUnit = pLoopPlot->getUnitByIndex(iK);
+						if (pLoopUnit != NULL)
+						{
+							if (pLoopUnit->getUnitClassType() == eUnitClass)
+							{
+								if (GET_PLAYER(pLoopUnit->getOwner()).getTeam() == GET_PLAYER(getOwner()).getTeam())
+								{
+									return iUnitClassModifier;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+#endif
+
+
 //	--------------------------------------------------------------------------------
 bool CvUnit::IsGreatGeneral() const
 {
 	VALIDATE_OBJECT
+
+	if (IsCombatUnit())
+			return false;
+	if (getUnitInfo().GetUnitAIType(UNITAI_GENERAL))
+		return true;
+
 	return GetGreatGeneralCount() > 0;
 }
 
@@ -21310,6 +22014,39 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 			}
 		}
 #endif
+
+#if defined(MOD_ROG_CORE)
+		if (MOD_ROG_CORE) {	
+			changeAoEDamageOnMove(thisPromotion.GetAoEDamageOnMove() * iChange);
+			ChangeForcedDamageValue((thisPromotion.ForcedDamageValue()) * iChange);
+			ChangeChangeDamageValue((thisPromotion.ChangeDamageValue()) * iChange);
+			changeExtraAttackFullyHealedMod(thisPromotion.GetAttackFullyHealedMod() * iChange);
+			changeExtraAttackAboveHealthMod(thisPromotion.GetAttackAboveHealthMod() * iChange);
+			changeExtraAttackBelowHealthMod(thisPromotion.GetAttackBelowHealthMod() * iChange);
+		}
+#endif
+
+		ChangeIsStrongerDamaged(thisPromotion.IsStrongerDamaged() ? iChange : 0);
+		ChangeIsFightWellDamaged(thisPromotion.IsFightWellDamaged() ? iChange : 0);
+
+#if defined(MOD_ROG_CORE)
+		if (MOD_ROG_CORE) {
+			if (thisPromotion.GetNearbyUnitClassBonus() > 0) {
+				SetNearbyUnitClassBonus(thisPromotion.GetNearbyUnitClassBonus());
+				SetNearbyUnitClassBonusRange(thisPromotion.GetNearbyUnitClassBonusRange());
+				SetCombatBonusFromNearbyUnitClass(thisPromotion.GetCombatBonusFromNearbyUnitClass());
+			}
+		}
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+		ChangeMoveLfetAttackMod(thisPromotion.GetMoveLfetAttackMod() * iChange);
+		ChangeMoveUsedAttackMod(thisPromotion.GetMoveUsedAttackMod() * iChange);
+		ChangeGoldenAgeMod(thisPromotion.GetGoldenAgeMod() * iChange);
+		ChangeRangedSupportFireMod(thisPromotion.GetRangedSupportFireMod() * iChange);
+#endif
+
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 		if (MOD_PROMOTIONS_CROSS_MOUNTAINS) {
 			changeCanCrossMountainsCount((thisPromotion.CanCrossMountains()) ? iChange : 0);
@@ -24868,6 +25605,9 @@ int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
 	int iFlavorNaval = pFlavorMgr->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_NAVAL"));
 	int iFlavorAir = pFlavorMgr->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_AIR"));
 
+	int iFlavorNavalRecon = range(pFlavorMgr->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_NAVAL_RECON")), 1, 20);
+	int iFlavorAntiAir = range(pFlavorMgr->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_ANTIAIR")), 1, 20);
+	int iFlavorCityDefense = range(pFlavorMgr->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_CITY_DEFENSE")), 1, 20);
 #if defined(MOD_AI_SMART_V3)
 	if (MOD_AI_SMART_V3)
 	{

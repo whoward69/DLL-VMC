@@ -121,6 +121,35 @@ public:
 	int  GetMaxHitPointsModifier() const;
 #endif
 
+#if defined(MOD_ROG_CORE)
+	int GetMoveLfetAttackMod() const;
+	int GetMoveUsedAttackMod() const;
+	int GetGoldenAgeMod() const;
+	int GetRangedSupportFireMod() const;
+#endif
+
+#if defined(MOD_ROG_CORE)	
+	int GetAoEDamageOnMove() const;
+	int ForcedDamageValue() const;
+	int ChangeDamageValue() const;
+	int  GetAttackFullyHealedMod() const;
+	int  GetAttackAboveHealthMod() const;
+	int  GetAttackBelowHealthMod() const;
+	bool IsStrongerDamaged() const;
+	bool IsFightWellDamaged() const;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	UnitClassTypes GetCombatBonusFromNearbyUnitClass() const;
+	int GetNearbyUnitClassBonusRange() const;
+	int GetNearbyUnitClassBonus() const;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int GetDomainAttackPercent(int i) const;
+	int GetDomainDefensePercent(int i) const;
+#endif
+
 	int GetUpgradeDiscount() const;
 	int GetExperiencePercent() const;
 	int GetAdjacentMod() const;
@@ -358,6 +387,37 @@ protected:
 	int m_iTradeMissionInfluenceModifier;
 	int m_iTradeMissionGoldModifier;
 
+#if defined(MOD_ROG_CORE)
+	int m_iMoveLfetAttackMod;
+	int m_iMoveUsedAttackMod;
+	int m_iGoldenAgeMod;
+
+	int m_iRangedSupportFireMod;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int m_iNearbyUnitClassBonus;
+	int m_iNearbyUnitClassBonusRange;
+	UnitClassTypes m_iCombatBonusFromNearbyUnitClass;
+#endif
+
+
+#if defined(MOD_ROG_CORE)	
+	int m_iAoEDamageOnMove;
+	int m_iForcedDamageValue;
+	int m_iChangeDamageValue;
+	int m_iAttackFullyHealedMod;
+	int m_iAttackAboveHealthMod;
+	int m_iAttackBelowHealthMod;
+	bool m_bStrongerDamaged;
+	bool m_bFightWellDamaged;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int* m_piDomainAttackPercent;
+	int* m_piDomainDefensePercent;
+#endif
+
 	bool m_bCannotBeChosen;
 	bool m_bLostWithUpgrade;
 	bool m_bNotWithUpgrade;
@@ -538,6 +598,12 @@ public:
 	int GetUnitClassDefenseMod(UnitClassTypes eUnitClass) const;
 
 	PromotionTypes ChangePromotionAfterCombat(PromotionTypes eIndex);
+
+
+#if defined(MOD_ROG_CORE)
+	int GetDomainAttackPercentMod(DomainTypes eDomain) const;
+	int GetDomainDefensePercentMod(DomainTypes eDomain) const;
+#endif
 
 #if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
 	int GetOtherPromotionModifier(PromotionTypes other) const;

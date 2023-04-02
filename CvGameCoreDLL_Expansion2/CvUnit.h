@@ -543,6 +543,12 @@ public:
 #if defined(MOD_API_EXTENSIONS)
 	void SetBaseRangedCombatStrength(int iStrength);
 #endif 
+
+#if defined(MOD_ROG_CORE)
+	int GetDamageCombatModifier(bool bForDefenseAgainstRanged = false, int iAssumedDamage = 0) const;
+#endif 
+
+
 	int GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* pCity, bool bAttacking, bool bForRangedAttack) const;
 
 	int GetAirCombatDamage(const CvUnit* pDefender, CvCity* pCity, bool bIncludeRand, int iAssumeExtraDamage = 0) const;
@@ -613,6 +619,15 @@ public:
 	void SetNearbyImprovementBonusRange(int iBonusRange);
 	ImprovementTypes GetCombatBonusImprovement() const;
 	void SetCombatBonusImprovement(ImprovementTypes eImprovement);
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int getNearbyUnitClassBonus() const;
+	void SetNearbyUnitClassBonus(int iCombatBonus);
+	int getNearbyUnitClassBonusRange() const;
+	void SetNearbyUnitClassBonusRange(int iBonusRange);
+	UnitClassTypes getCombatBonusFromNearbyUnitClass() const;
+	void SetCombatBonusFromNearbyUnitClass(UnitClassTypes eUnitClass);
 #endif
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
@@ -746,6 +761,9 @@ public:
 	int unitCombatModifier(UnitCombatTypes eUnitCombat) const;
 	int domainModifier(DomainTypes eDomain) const;
 
+	int domainAttack(DomainTypes eDomain) const;
+	int domainDefense(DomainTypes eDomain) const;
+
 #if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
 	int otherPromotionModifier(PromotionTypes other) const;
 	int otherPromotionAttackModifier(PromotionTypes other) const;
@@ -877,6 +895,39 @@ public:
 	int getBlitzCount() const;
 	bool isBlitz() const;
 	void changeBlitzCount(int iChange);
+
+
+#if defined(MOD_ROG_CORE)
+	int attackFullyHealedModifier() const;
+	int attackAbove50HealthModifier() const;
+	int attackBelow50HealthModifier() const;
+
+	//int DoAdjacentPlotDamage(CvPlot* pWhere, int iValue, const char* chTextKey = NULL);
+
+	int getForcedDamageValue();
+	void ChangeForcedDamageValue(int iChange);
+
+	int getChangeDamageValue();
+	void ChangeChangeDamageValue(int iChange);
+
+	int getExtraAttackFullyHealedMod() const;
+	void changeExtraAttackFullyHealedMod(int iChange);
+
+	int getExtraAttackAboveHealthMod() const;
+	void changeExtraAttackAboveHealthMod(int iChange);
+
+	int getExtraAttackBelowHealthMod() const;
+	void changeExtraAttackBelowHealthMod(int iChange);
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int getAoEDamageOnMove() const;
+	void changeAoEDamageOnMove(int iChange);
+	bool IsStrongerDamaged() const;
+	void ChangeIsStrongerDamaged(int iChange);
+	bool IsFightWellDamaged() const;
+	void ChangeIsFightWellDamaged(int iChange);
+#endif
 
 	int getAmphibCount() const;
 	bool isAmphib() const;
@@ -1046,6 +1097,11 @@ public:
 	int GetNearbyImprovementModifierFromTraits() const;
 	int GetNearbyImprovementModifierFromPromotions() const;
 	int GetNearbyImprovementModifier(ImprovementTypes eBonusImprovement, int iImprovementRange, int iImprovementModifier) const;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int GetNearbyUnitClassModifierFromUnitClass() const;
+	int GetNearbyUnitClassModifier(UnitClassTypes eUnitClass, int iUnitClassRange, int iUnitClassModifierconst) const;
 #endif
 
 	bool IsGreatGeneral() const;
@@ -1468,6 +1524,22 @@ public:
 	void ChangeCapitalDefenseFalloff(int iValue);
 	int GetCapitalDefenseFalloff() const;
 
+
+#if defined(MOD_ROG_CORE)
+	void ChangeMoveLfetAttackMod(int iValue);
+	int GetMoveLfetAttackMod() const;
+
+	void ChangeMoveUsedAttackMod(int iValue);
+	int GetMoveUsedAttackMod() const;
+
+	void ChangeGoldenAgeMod(int iValue);
+	int GetGoldenAgeMod() const;
+
+	void ChangeRangedSupportFireMod(int iValue);
+	int GetRangedSupportFireMod() const;
+#endif
+
+
 	void ChangeCityAttackPlunderModifier(int iValue);
 	int GetCityAttackPlunderModifier() const;
 
@@ -1672,6 +1744,26 @@ protected:
 	FAutoVariable<int, CvUnit> m_iNearbyImprovementBonusRange;
 	FAutoVariable<ImprovementTypes, CvUnit> m_eCombatBonusImprovement;
 #endif
+
+
+#if defined(MOD_ROG_CORE)
+	FAutoVariable<int, CvUnit> m_iAoEDamageOnMove;
+	FAutoVariable<int, CvUnit> m_iForcedDamage;
+	FAutoVariable<int, CvUnit> m_iChangeDamage;
+	FAutoVariable<int, CvUnit> m_iExtraFullyHealedMod;
+	FAutoVariable<int, CvUnit> m_iExtraAttackAboveHealthMod;
+	FAutoVariable<int, CvUnit> m_iExtraAttackBelowHealthMod;
+	FAutoVariable<int, CvUnit> m_iFightWellDamaged;
+	FAutoVariable<int, CvUnit> m_iStrongerDamaged;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	FAutoVariable<int, CvUnit> m_iNearbyUnitClassBonus;
+	FAutoVariable<int, CvUnit> m_iNearbyUnitClassBonusRange;
+	FAutoVariable<UnitClassTypes, CvUnit>  m_iCombatBonusFromNearbyUnitClass;
+#endif
+
+
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	FAutoVariable<int, CvUnit> m_iCanCrossMountainsCount;
 #endif
@@ -1812,6 +1904,15 @@ protected:
 #if defined(MOD_PROMOTIONS_DEEP_WATER_EMBARKATION)
 	int m_iEmbarkedDeepWaterCount;
 #endif
+
+#if defined(MOD_ROG_CORE)
+	int m_iMoveLfetAttackMod;
+	int m_iMoveUsedAttackMod;
+	int m_iGoldenAgeMod;
+	int m_iRangedSupportFireMod;
+#endif
+
+
 	int m_iEmbarkExtraVisibility;
 	int m_iEmbarkDefensiveModifier;
 	int m_iCapitalDefenseModifier;

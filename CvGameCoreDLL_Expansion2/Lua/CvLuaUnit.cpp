@@ -384,6 +384,35 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(ExtraTerrainDamage);
 	Method(ExtraFeatureDamage);
 #endif
+
+#if defined(MOD_ROG_CORE)
+	Method(GetZOCStatus);
+#endif
+
+	Method(DomainAttack);
+	Method(DomainDefense);
+	Method(GetDamageCombatModifier);
+
+#if defined(MOD_ROG_CORE)
+	if (MOD_ROG_CORE)
+	{
+		Method(AttackFullyHealedModifier);
+		Method(AttackAbove50Modifier);
+		Method(AttackBelow50Modifier);
+
+
+		Method(MoveLfetAttackMod);
+		Method(MoveUsedAttackMod);
+
+		Method(GoldenAgeMod);
+
+		Method(GetForcedDamageValue);
+		Method(GetChangeDamageValue);
+
+		Method(GetNearbyUnitClassModifierFromUnitClass);
+	}
+#endif
+
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_PROMOTIONS_IMPROVEMENT_BONUS)
 	Method(GetNearbyImprovementCombatBonus);
 	Method(GetNearbyImprovementBonusRange);
@@ -3163,6 +3192,35 @@ int CvLuaUnit::lExtraFeatureDamage(lua_State* L)
 	return 1;
 }
 #endif
+
+
+#if defined(MOD_ROG_CORE)
+int CvLuaUnit::lGetZOCStatus(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	if (pkUnit == NULL)
+	{
+		lua_pushstring(L, "");
+		return 1;
+	}
+
+	if (pkUnit->IsIgnoreZOC())
+	{
+		Localization::String strMessage = Localization::Lookup("TXT_KEY_UNIT_IGNORE_ZOC");
+
+		lua_pushstring(L, strMessage.toUTF8());
+		return 1;
+	}
+
+	lua_pushstring(L, "");
+	return 1;
+}
+
+#endif
+
+
+
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_PROMOTIONS_IMPROVEMENT_BONUS)
 //------------------------------------------------------------------------------
 int CvLuaUnit::lGetNearbyImprovementCombatBonus(lua_State* L)
@@ -3353,6 +3411,73 @@ int CvLuaUnit::lGetDefenseModifier(lua_State* L)
 	lua_pushinteger(L, iResult);
 	return 1;
 }
+
+#if defined(MOD_ROG_CORE)
+//int getForcedDamageValue();
+int CvLuaUnit::lGetForcedDamageValue(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getForcedDamageValue();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetChangeDamageValue(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getChangeDamageValue();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+#endif
+
+
+//------------------------------------------------------------------------------
+int CvLuaUnit::lGetDamageCombatModifier(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const bool bRanged = luaL_optbool(L, 2, false);
+	const int iDamage = luaL_optint(L, 3, 0);
+	const int iResult = pkUnit->GetDamageCombatModifier(bRanged, iDamage);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+
+#if defined(MOD_ROG_CORE)
+
+
+int CvLuaUnit::lAttackFullyHealedModifier(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->attackFullyHealedModifier();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaUnit::lAttackAbove50Modifier(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->attackAbove50HealthModifier();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaUnit::lAttackBelow50Modifier(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->attackBelow50HealthModifier();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+#endif
+
+
 //------------------------------------------------------------------------------
 //int GetRangedAttackModifier();
 int CvLuaUnit::lGetRangedAttackModifier(lua_State* L)
@@ -3581,6 +3706,60 @@ int CvLuaUnit::lDomainModifier(lua_State* L)
 	lua_pushinteger(L, iResult);
 	return 1;
 }
+
+//------------------------------------------------------------------------------
+//int unitClassAttackModifier(int /*UnitClassTypes*/ eUnitClass);
+int CvLuaUnit::lDomainAttack(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const DomainTypes eDomain = (DomainTypes)lua_tointeger(L, 2);
+
+	const int iResult = pkUnit->domainAttack(eDomain);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+//------------------------------------------------------------------------------
+//int unitClassDefenseModifier(int /*UnitClassTypes*/ eUnitClass);
+int CvLuaUnit::lDomainDefense(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const DomainTypes eDomain = (DomainTypes)lua_tointeger(L, 2);
+
+	const int iResult = pkUnit->domainDefense(eDomain);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+
+
+#if defined(MOD_ROG_CORE)
+int CvLuaUnit::lGoldenAgeMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetGoldenAgeMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+//------------------------------------------------------------------------------
+int CvLuaUnit::lMoveLfetAttackMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetMoveLfetAttackMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+//------------------------------------------------------------------------------
+int CvLuaUnit::lMoveUsedAttackMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetMoveUsedAttackMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+#endif
+
 //------------------------------------------------------------------------------
 int CvLuaUnit::lGetStrategicResourceCombatPenalty(lua_State* L)
 {
@@ -4885,6 +5064,17 @@ int CvLuaUnit::lIsNearSapper(lua_State* L)
 	lua_pushboolean(L, bResult);
 	return 1;
 }
+
+#if defined(MOD_ROG_CORE)
+//bool GetNearbyUnitClassModifierFromUnitClass();
+int CvLuaUnit::lGetNearbyUnitClassModifierFromUnitClass(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetNearbyUnitClassModifierFromUnitClass();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+#endif
 //------------------------------------------------------------------------------
 //bool GetNearbyImprovementModifier();
 int CvLuaUnit::lGetNearbyImprovementModifier(lua_State* L)

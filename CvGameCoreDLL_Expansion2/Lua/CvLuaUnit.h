@@ -326,6 +326,11 @@ protected:
 	LUAAPIEXTN(GetNearbyImprovementBonusRange, int);
 	LUAAPIEXTN(GetCombatBonusImprovement, int);
 #endif
+
+#if defined(MOD_ROG_CORE)
+	LUAAPIEXTN(GetZOCStatus, int);
+#endif
+
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	LUAAPIEXTN(CanCrossMountains, bool);
 #endif
@@ -385,6 +390,22 @@ protected:
 	static int lOtherPromotionAttackModifier(lua_State* L);
 	static int lOtherPromotionDefenseModifier(lua_State* L);
 #endif
+
+#if defined(MOD_ROG_CORE)
+	static int lAttackFullyHealedModifier(lua_State* L);
+	static int lAttackAbove50Modifier(lua_State* L);
+	static int lAttackBelow50Modifier(lua_State* L);
+	static int lMoveUsedAttackMod(lua_State* L);
+	static int lMoveLfetAttackMod(lua_State* L);
+	static int lGoldenAgeMod(lua_State* L);
+	static int lGetForcedDamageValue(lua_State* L);
+	static int lGetChangeDamageValue(lua_State* L);
+	static int lGetNearbyUnitClassModifierFromUnitClass(lua_State* L);
+#endif
+
+	static int lGetDamageCombatModifier(lua_State* L);
+	static int lDomainAttack(lua_State* L);
+	static int lDomainDefense(lua_State* L);
 
 	static int lSpecialCargo(lua_State* L);
 	static int lDomainCargo(lua_State* L);

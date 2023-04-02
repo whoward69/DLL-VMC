@@ -126,6 +126,20 @@ void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender
 		int iAttackerDamageInflicted = kAttacker.getCombatDamage(iAttackerStrength, iDefenderStrength, kAttacker.getDamage(), /*bIncludeRand*/ true, /*bAttackerIsCity*/ false, /*bDefenderIsCity*/ true);
 		int iDefenderDamageInflicted = kAttacker.getCombatDamage(iDefenderStrength, iAttackerStrength, pkCity->getDamage(), /*bIncludeRand*/ true, /*bAttackerIsCity*/ true, /*bDefenderIsCity*/ false);
 
+#if defined(MOD_ROG_CORE)
+		if (kAttacker.getForcedDamageValue() != 0)
+		{
+			iDefenderDamageInflicted = kAttacker.getForcedDamageValue();
+		}
+		if (kAttacker.getChangeDamageValue() != 0)
+		{
+			iDefenderDamageInflicted += kAttacker.getChangeDamageValue();
+			if (iDefenderDamageInflicted <= 0)
+				iDefenderDamageInflicted = 0;
+		}
+#endif
+
+
 		int iAttackerTotalDamageInflicted = iAttackerDamageInflicted + pkCity->getDamage();
 		int iDefenderTotalDamageInflicted = iDefenderDamageInflicted + kAttacker.getDamage();
 
@@ -209,6 +223,30 @@ void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender
 			iAttackerDamageInflicted /= 2;
 			iDefenderDamageInflicted /= 3;
 		}
+
+#if defined(MOD_ROG_CORE)
+		if (kAttacker.getForcedDamageValue() != 0)
+		{
+			iDefenderDamageInflicted = kAttacker.getForcedDamageValue();
+		}
+		if (pkDefender->getForcedDamageValue() != 0)
+		{
+			iAttackerDamageInflicted = pkDefender->getForcedDamageValue();
+		}
+		if (kAttacker.getChangeDamageValue() != 0)
+		{
+			iDefenderDamageInflicted += kAttacker.getChangeDamageValue();
+			if (iDefenderDamageInflicted <= 0)
+				iDefenderDamageInflicted = 0;
+		}
+		if (pkDefender->getChangeDamageValue() != 0)
+		{
+			iAttackerDamageInflicted += pkDefender->getChangeDamageValue();
+			if (iAttackerDamageInflicted <= 0)
+				iAttackerDamageInflicted = 0;
+		}
+#endif
+
 
 		int iAttackerTotalDamageInflicted = iAttackerDamageInflicted + pkDefender->getDamage();
 		int iDefenderTotalDamageInflicted = iDefenderDamageInflicted + kAttacker.getDamage();
@@ -678,6 +716,19 @@ void CvUnitCombat::GenerateRangedCombatInfo(CvUnit& kAttacker, CvUnit* pkDefende
 
 		iDamage = kAttacker.GetRangeCombatDamage(pkDefender, /*pCity*/ NULL, /*bIncludeRand*/ true);
 
+#if defined(MOD_ROG_CORE)
+		if (pkDefender->getForcedDamageValue() != 0)
+		{
+			iDamage = pkDefender->getForcedDamageValue();
+		}
+		if (pkDefender->getChangeDamageValue() != 0)
+		{
+			iDamage += pkDefender->getChangeDamageValue();
+			if (iDamage <= 0)
+				iDamage = 0;
+		}
+#endif
+
 #if defined(MOD_UNITS_MAX_HP)
 		if(iDamage + pkDefender->getDamage() > kAttacker.GetMaxHitPoints())
 		{
@@ -811,6 +862,20 @@ void CvUnitCombat::GenerateRangedCombatInfo(CvCity& kAttacker, CvUnit* pkDefende
 		//CvAssert(pkDefender->IsCanDefend());
 
 		iDamage = kAttacker.rangeCombatDamage(pkDefender);
+
+
+#if defined(MOD_ROG_CORE)
+		if (pkDefender->getForcedDamageValue() != 0)
+		{
+			iDamage = pkDefender->getForcedDamageValue();
+		}
+		if (pkDefender->getChangeDamageValue() != 0)
+		{
+			iDamage += pkDefender->getChangeDamageValue();
+			if (iDamage <= 0)
+				iDamage = 0;
+		}
+#endif
 
 #if defined(MOD_UNITS_MAX_HP)
 		if(iDamage + pkDefender->getDamage() > pkDefender->GetMaxHitPoints())
@@ -1456,6 +1521,21 @@ void CvUnitCombat::GenerateAirCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, 
 		// Calculate attacker damage
 		iAttackerDamageInflicted = kAttacker.GetAirCombatDamage(pkDefender, /*pCity*/ NULL, /*bIncludeRand*/ true, iInterceptionDamage);
 
+
+#if defined(MOD_ROG_CORE)
+		if (pkDefender->getForcedDamageValue() != 0)
+		{
+			iAttackerDamageInflicted = pkDefender->getForcedDamageValue();
+		}
+		if (pkDefender->getChangeDamageValue() != 0)
+		{
+			iAttackerDamageInflicted += pkDefender->getChangeDamageValue();
+			if (iAttackerDamageInflicted <= 0)
+				iAttackerDamageInflicted = 0;
+		}
+#endif
+
+
 #if defined(MOD_UNITS_MAX_HP)
 		if(iAttackerDamageInflicted + pkDefender->getDamage() > pkDefender->GetMaxHitPoints())
 		{
@@ -1472,6 +1552,19 @@ void CvUnitCombat::GenerateAirCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, 
 
 		// Calculate defense damage
 		iDefenderDamageInflicted = pkDefender->GetAirStrikeDefenseDamage(&kAttacker);
+
+#if defined(MOD_ROG_CORE)
+		if (kAttacker.getForcedDamageValue() != 0)
+		{
+			iDefenderDamageInflicted = kAttacker.getForcedDamageValue();
+		}
+		if (kAttacker.getChangeDamageValue() != 0)
+		{
+			iDefenderDamageInflicted += kAttacker.getChangeDamageValue();
+			if (iDefenderDamageInflicted <= 0)
+				iDefenderDamageInflicted = 0;
+		}
+#endif
 
 #if defined(MOD_UNITS_MAX_HP)
 		if(iDefenderDamageInflicted + kAttacker.getDamage() > kAttacker.GetMaxHitPoints())
