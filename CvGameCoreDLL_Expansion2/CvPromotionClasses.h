@@ -145,10 +145,12 @@ public:
 	int GetNearbyUnitClassBonus() const;
 #endif
 
-#if defined(MOD_ROG_CORE)
+
+
 	int GetDomainAttackPercent(int i) const;
 	int GetDomainDefensePercent(int i) const;
-#endif
+
+
 
 	int GetUpgradeDiscount() const;
 	int GetExperiencePercent() const;
@@ -413,10 +415,12 @@ protected:
 	bool m_bFightWellDamaged;
 #endif
 
-#if defined(MOD_ROG_CORE)
+
+
 	int* m_piDomainAttackPercent;
 	int* m_piDomainDefensePercent;
-#endif
+
+
 
 	bool m_bCannotBeChosen;
 	bool m_bLostWithUpgrade;
@@ -600,10 +604,11 @@ public:
 	PromotionTypes ChangePromotionAfterCombat(PromotionTypes eIndex);
 
 
-#if defined(MOD_ROG_CORE)
+
+
 	int GetDomainAttackPercentMod(DomainTypes eDomain) const;
 	int GetDomainDefensePercentMod(DomainTypes eDomain) const;
-#endif
+
 
 #if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
 	int GetOtherPromotionModifier(PromotionTypes other) const;

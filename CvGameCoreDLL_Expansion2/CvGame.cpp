@@ -4413,7 +4413,8 @@ int CvGame::getNumSequentialHumans(PlayerTypes ignorePlayer)
 }
 
 //	------------------------------------------------------------------------------------------------
-int CvGame::getGameTurn()
+//int CvGame::getGameTurn()
+int CvGame::getGameTurn() const
 {
 	return CvPreGame::gameTurn();
 }
@@ -9270,6 +9271,60 @@ int CvGame::getAsyncRandNum(int iNum, const char* pszLog)
 	return GC.getASyncRand().get(iNum, pszLog);
 #endif
 }
+
+
+
+//	--------------------------------------------------------------------------------
+// Get a fake random number which depends only on game state
+// for small numbers (e.g. direction rolls) this should be good enough
+// most importantly, it should reduce desyncs in multiplayer
+
+//this is the pcg hash function which is supposed to be better than wang or jenkins; not that it matters much ...
+unsigned long hash32(uint input)
+{
+	unsigned long state = input * 747796405u + 2891336453u;
+	unsigned long word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+	return (word >> 22u) ^ word;
+}
+
+static unsigned long giLastState = 0;
+
+int CvGame::getSmallFakeRandNum(int iNum, const CvPlot& input) const
+{
+	//do not use turnslice here, it changes after reload!
+	unsigned long iState = input.getX() * 17 + input.getY() * 23 + getGameTurn() * 37 + getActivePlayer() * 73;
+
+	int iResult = 0;
+	if (iNum > 0)
+		iResult = hash32(iState) % iNum;
+	else if (iNum < 0)
+		iResult = -int(hash32(iState) % (-iNum));
+
+	return iResult;
+}
+
+int CvGame::getSmallFakeRandNum(int iNum, int iExtraSeed) const
+{
+	//do not use turnslice here, it changes after reload!
+	unsigned long iState = getGameTurn() * 11 + getActivePlayer() * 19 + abs(iExtraSeed);
+
+	/*
+	//safety check
+	if (iState == giLastState)
+		OutputDebugString("warning rng seed repeated\n");
+	giLastState = iState;
+	*/
+
+	int iResult = 0;
+	if (iNum > 0)
+		iResult = hash32(iState) % iNum;
+	else if (iNum < 0)
+		iResult = -int(hash32(iState) % (-iNum));
+
+	return iResult;
+}
+
+
 
 //	--------------------------------------------------------------------------------
 int CvGame::calculateSyncChecksum()

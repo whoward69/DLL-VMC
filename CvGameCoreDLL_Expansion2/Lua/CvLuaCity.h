@@ -226,6 +226,8 @@ protected:
 	LUAAPIEXTN(SetAutomatons, void, iAutomatons, bReassignPop);
 #endif
 
+
+
 	static int lGetHighestPopulation(lua_State* L);
 	static int lSetHighestPopulation(lua_State* L);
 	//static int lGetWorkingPopulation(lua_State* L);

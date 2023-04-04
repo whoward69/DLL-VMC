@@ -177,6 +177,46 @@ public:
 	int GetGlobalCityAutomatonWorkersChange() const;
 	int GetCityAutomatonWorkersChange() const;
 #endif
+
+#if defined(MOD_ROG_CORE)
+	int GetGreatWorkYieldChange(int i) const;
+	int* GetGreatWorkYieldChangeArray() const;
+
+	int GetYieldChangePerPopInEmpire(int i) const;
+#endif
+
+	int  GetExtraAttacks() const;
+	int GetNukeInterceptionChance() const;
+
+#if defined(MOD_ROG_CORE)
+	int GetExtraDamageHeal() const;
+	int CityRangedStrikeModifier() const;
+	int GetPopulationChange() const;
+
+	int GetGlobalCityStrengthMod() const;
+	int GetGlobalRangedStrikeModifier() const;
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+	int GetResourceQuantityFromPOP(int i) const;
+	int GetYieldChangeWorldWonder(int i) const;
+	int GetYieldChangeWorldWonderGlobal(int i) const;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int GetResourceYieldChangeGlobal(int iResource, int iYieldType) const;
+	int GetImprovementYieldChange(int i, int j) const;
+	int* GetImprovementYieldChangeArray(int i) const;
+
+	int GetImprovementYieldChangeGlobal(int i, int j) const;
+	int* GetImprovementYieldChangeGlobalArray(int i) const;
+	int GetSpecialistYieldChangeLocal(int i, int j) const;
+	int* GetSpecialistYieldChangeLocalArray(int i) const;
+
+	int GetBuildingClassYieldModifier(int i, int j) const;
+#endif
+
 	int GetMinAreaSize() const;
 	int GetConquestProbability() const;
 	int GetHealRateChange() const;
@@ -427,6 +467,44 @@ private:
 	int m_iGlobalCityAutomatonWorkersChange;
 	int m_iCityAutomatonWorkersChange;
 #endif
+
+#if defined(MOD_ROG_CORE)
+	int* m_piGreatWorkYieldChange;
+
+	int m_iExtraDamageHeal;
+	int m_iRangedStrikeModifier;
+	int m_iPopulationChange;
+
+
+	int m_iGlobalCityStrengthMod;
+	int m_iGlobalRangedStrikeModifier;
+#endif
+
+	int m_iNukeInterceptionChance;
+	int m_iExtraAttacks;
+
+#if defined(MOD_ROG_CORE)
+	std::map<int, std::map<int, int>> m_ppiResourceYieldChangeGlobal;
+
+	std::map<int, int> m_piYieldChangePerPopInEmpire;
+
+	int** m_ppaiImprovementYieldChange;
+	int** m_ppaiImprovementYieldChangeGlobal;
+	int** m_ppaiSpecialistYieldChangeLocal;
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+	int* m_piYieldChangeWorldWonder;
+	int* m_piYieldChangeWorldWonderGlobal;
+
+	int* m_piResourceQuantityFromPOP;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int** m_ppiBuildingClassYieldModifiers;
+#endif
+
 	int m_iMinAreaSize;
 	int m_iConquestProbability;
 	int m_iHealRateChange;
@@ -734,6 +812,11 @@ public:
 	bool CheckForAllWondersBuilt();
 	bool CheckForSevenAncientWondersBuilt();
 
+#if defined(MOD_ROG_CORE)
+	const std::vector<BuildingTypes>& GetAllBuildingsHere() const { return m_buildingsThatExistAtLeastOnce; }
+#endif
+
+
 private:
 	void NotifyNewBuildingStarted(BuildingTypes eIndex);
 
@@ -753,6 +836,10 @@ private:
 	int* m_paiBuildingOriginalTime;
 	int* m_paiNumRealBuilding;
 	int* m_paiNumFreeBuilding;
+
+#if defined(MOD_ROG_CORE)
+	std::vector<BuildingTypes> m_buildingsThatExistAtLeastOnce;
+#endif
 
 	std::vector<BuildingYieldChange> m_aBuildingYieldChange;
 	std::vector<BuildingGreatWork> m_aBuildingGreatWork;

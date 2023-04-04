@@ -1083,6 +1083,10 @@ public:
 	// Citadel
 	bool IsNearEnemyCitadel(int& iCitadelDamage);
 
+#if defined(MOD_ROG_CORE)
+	bool IsNearOurCitadel(int& iCitadelHeal);
+#endif
+
 	// Great General Stuff
 #if defined(MOD_PROMOTIONS_AURA_CHANGE)
 	bool IsNearGreatGeneral(int& iAuraEffectChange) const;

@@ -147,7 +147,9 @@ public:
 	int getNumHumansInHumanWars(PlayerTypes ignorePlayer = NO_PLAYER);
 	int getNumSequentialHumans(PlayerTypes ignorePlayer = NO_PLAYER);
 
-	int getGameTurn();
+	//int getGameTurn();
+	int getGameTurn() const;
+
 	void setGameTurn(int iNewValue);
 	void incrementGameTurn();
 	int getTurnYear(int iGameTurn);
@@ -430,6 +432,13 @@ public:
 	int getJonRandNum(int iNum, const char* pszLog);
 	int getJonRandNumVA(int iNum, const char* pszLog, ...);
 	int getAsyncRandNum(int iNum, const char* pszLog);
+
+
+#if defined(MOD_ROG_CORE)
+	//get random number from gamestate without a seed in the generator
+	int	getSmallFakeRandNum(int iNum, const CvPlot& input) const;
+	int	getSmallFakeRandNum(int iNum, int iExtraSeed) const;
+#endif
 
 	int calculateSyncChecksum();
 	int calculateOptionsChecksum();

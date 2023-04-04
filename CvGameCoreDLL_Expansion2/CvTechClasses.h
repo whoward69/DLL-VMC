@@ -104,6 +104,11 @@ public:
 	int GetPrereqOrTechs(int i) const;
 	int GetPrereqAndTechs(int i) const;
 
+
+#if defined(MOD_ROG_CORE)
+	int GetTechYieldChanges(int i, int j) const;
+#endif
+
 private:
 	int m_iAIWeight;
 	int m_iAITradeModifier;
@@ -160,6 +165,10 @@ private:
 	CvString m_wstrQuote;
 	CvString m_strSound;
 	CvString m_strSoundMP;
+
+#if defined(MOD_ROG_CORE)
+	int** m_ppiTechYieldChanges;
+#endif
 
 	// Arrays
 	int* m_piDomainExtraMoves;

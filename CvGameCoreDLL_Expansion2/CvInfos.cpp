@@ -3742,6 +3742,11 @@ CvBuildInfo::CvBuildInfo() :
 	m_iCost(0),
 	m_iCostIncreasePerImprovement(0),
 	m_iTechPrereq(NO_TECH),
+
+#if defined(MOD_ROG_CORE)
+	m_iTechObsolete(NO_TECH),
+#endif
+
 	m_iImprovement(NO_IMPROVEMENT),
 	m_iRoute(NO_ROUTE),
 	m_iEntityEvent(ENTITY_EVENT_NONE),
@@ -3797,6 +3802,15 @@ int CvBuildInfo::getTechPrereq() const
 {
 	return m_iTechPrereq;
 }
+
+#if defined(MOD_ROG_CORE)
+//------------------------------------------------------------------------------
+int CvBuildInfo::getTechObsolete() const
+{
+	return m_iTechObsolete;
+}
+#endif
+
 //------------------------------------------------------------------------------
 int CvBuildInfo::getImprovement() const
 {
@@ -3923,6 +3937,12 @@ bool CvBuildInfo::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 
 	const char* szPrereqTech = kResults.GetText("PrereqTech");
 	m_iTechPrereq = GC.getInfoTypeForString(szPrereqTech, true);
+
+#if defined(MOD_ROG_CORE)
+	const char* szObsoleteTech = kResults.GetText("ObsoleteTech");
+	m_iTechObsolete = GC.getInfoTypeForString(szObsoleteTech, true);
+#endif
+
 
 	const char* szImprovementType = kResults.GetText("ImprovementType");
 	m_iImprovement = GC.getInfoTypeForString(szImprovementType, true);
@@ -6412,6 +6432,9 @@ FDataStream& operator>>(FDataStream& loadFrom, CvSeaLevelInfo& writeTo)
 //======================================================================================================
 CvProcessInfo::CvProcessInfo() :
 	m_iTechPrereq(NO_TECH),
+#if defined(MOD_ROG_CORE)
+	m_iDefenseValue(0),
+#endif
 	m_paiProductionToYieldModifier(NULL),
 	m_paiFlavorValue(NULL)
 {
@@ -6427,6 +6450,14 @@ int CvProcessInfo::getTechPrereq() const
 {
 	return m_iTechPrereq;
 }
+
+#if defined(MOD_ROG_CORE)
+//------------------------------------------------------------------------------
+int CvProcessInfo::getDefenseValue() const
+{
+	return m_iDefenseValue;
+}
+#endif
 
 //------------------------------------------------------------------------------
 int CvProcessInfo::getProductionToYieldModifier(int i) const
@@ -6453,6 +6484,10 @@ bool CvProcessInfo::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 
 	const char* szTechPrereq = kResults.GetText("TechPrereq");
 	m_iTechPrereq = GC.getInfoTypeForString(szTechPrereq, true);
+
+#if defined(MOD_ROG_CORE)
+	m_iDefenseValue = kResults.GetInt("DefenseValue");
+#endif
 
 	const char* szProcessType = GetType();
 

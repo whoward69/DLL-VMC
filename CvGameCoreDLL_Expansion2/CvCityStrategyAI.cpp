@@ -2982,7 +2982,8 @@ bool CityStrategyAIHelpers::IsTestCityStrategy_UnderBlockade(CvCity* pCity)
 }
 
 /// "Is Puppet" City Strategy: build gold buildings and not military training buildings
-bool CityStrategyAIHelpers::IsTestCityStrategy_IsPuppet(CvCity* pCity)
+//bool CityStrategyAIHelpers::IsTestCityStrategy_IsPuppet(CvCity* pCity)
+bool CityStrategyAIHelpers::IsTestCityStrategy_IsPuppet(const CvCity* pCity)
 {
 	if(pCity->IsPuppet())
 	{

@@ -86,6 +86,10 @@ public:
 	int GetRequiresXAdjacentWater() const;
 #endif
 
+#if defined(MOD_ROG_CORE)
+	int GetNearbyFriendHeal() const;
+#endif
+
 #if defined(MOD_GLOBAL_RELOCATION)
 	bool IsAllowsRebaseTo() const;
 	bool IsAllowsAirliftFrom() const;
@@ -242,6 +246,10 @@ protected:
 	int m_iRequiresXAdjacentLand;
 #if defined(MOD_API_EXTENSIONS)
 	int m_iRequiresXAdjacentWater;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int m_iNearbyFriendHeal;
 #endif
 
 #if defined(MOD_GLOBAL_RELOCATION)

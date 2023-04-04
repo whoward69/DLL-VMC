@@ -140,6 +140,7 @@ void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender
 #endif
 
 
+
 		int iAttackerTotalDamageInflicted = iAttackerDamageInflicted + pkCity->getDamage();
 		int iDefenderTotalDamageInflicted = iDefenderDamageInflicted + kAttacker.getDamage();
 
@@ -762,6 +763,9 @@ void CvUnitCombat::GenerateRangedCombatInfo(CvUnit& kAttacker, CvUnit* pkDefende
 		iMaxXP = 1000;
 
 		iDamage = kAttacker.GetRangeCombatDamage(/*pDefender*/ NULL, pCity, /*bIncludeRand*/ true);
+
+
+
 
 		// Cities can't be knocked to less than 1 HP
 		if(iDamage + pCity->getDamage() >= pCity->GetMaxHitPoints())
@@ -1605,6 +1609,9 @@ void CvUnitCombat::GenerateAirCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, 
 
 		iAttackerDamageInflicted = kAttacker.GetAirCombatDamage(/*pUnit*/ NULL, pCity, /*bIncludeRand*/ true, iInterceptionDamage);
 
+
+
+
 		// Cities can't be knocked to less than 1 HP
 		if(iAttackerDamageInflicted + pCity->getDamage() >= pCity->GetMaxHitPoints())
 		{
@@ -2408,12 +2415,57 @@ void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, Cv
 	}
 #endif
 
+
+
+
+#if defined(MOD_ROG_CORE)
+
+	// Any interception to be done?
+	CvCity* pInterceptionCity = plot.GetNukeInterceptor(kAttacker.getOwner());
+	bool bInterceptionSuccess = false, bPartialInterception = false;
+	CvPlot* pInterceptionCityPlot = NULL;
+
+	if (pInterceptionCity != NULL)
+	{
+		pInterceptionCityPlot = pInterceptionCity->plot();
+		if (pInterceptionCityPlot)
+		{
+			BATTLE_JOINED(plot.getPlotCity(), BATTLE_UNIT_DEFENDER, true);
+			pkCombatInfo->setCity(BATTLE_UNIT_DEFENDER, pInterceptionCity);
+
+			if (GC.getGame().getSmallFakeRandNum(100, plot.GetPlotIndex() + kAttacker.GetID()) <= pInterceptionCity->getNukeInterceptionChance())
+			{
+				bInterceptionSuccess = true;
+			}
+			if (bInterceptionSuccess)
+			{
+				if (kAttacker.GetNukeDamageLevel() <= 2) // Atomic Bombs are destroyed outright
+				{
+					pkCombatInfo->setDamageInflicted(BATTLE_UNIT_INTERCEPTOR, kAttacker.GetCurrHitPoints());
+					kAttacker.kill(true, pInterceptionCity->getOwner());
+				}
+
+				else if (kAttacker.GetNukeDamageLevel() == 3) // Icbm Missiles are converted to Atomic Bombs
+				{
+					bPartialInterception = true;
+				}
+
+				else // anti Missiles are immue
+				{
+					bInterceptionSuccess = false;
+				}
+			}
+		}
+	}
+#endif
+
+
 	//////////////////////////////////////////////////////////////////////
 
 	CvString strBuffer;
 	bool abTeamsAffected[MAX_TEAMS];
 	int iI;
-	for(iI = 0; iI < MAX_TEAMS; iI++)
+	for (iI = 0; iI < MAX_TEAMS; iI++)
 	{
 		abTeamsAffected[iI] = kAttacker.isNukeVictim(&plot, ((TeamTypes)iI));
 	}
@@ -2422,11 +2474,11 @@ void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, Cv
 	bool bWar = false;
 	bool bBystander = false;
 
-	for(iI = 0; iI < MAX_TEAMS; iI++)
+	for (iI = 0; iI < MAX_TEAMS; iI++)
 	{
-		if(abTeamsAffected[iI])
+		if (abTeamsAffected[iI])
 		{
-			if(!kAttacker.isEnemy((TeamTypes)iI))
+			if (!kAttacker.isEnemy((TeamTypes)iI))
 			{
 #if defined(MOD_EVENTS_WAR_AND_PEACE)
 				GET_TEAM(kAttacker.getTeam()).declareWar(((TeamTypes)iI), false, kAttacker.getOwner());
@@ -2434,11 +2486,11 @@ void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, Cv
 				GET_TEAM(kAttacker.getTeam()).declareWar(((TeamTypes)iI));
 #endif
 
-				if (iPlotTeam == iI) 
+				if (iPlotTeam == iI)
 				{
 					bWar = true;
-				} 
-				else 
+				}
+				else
 				{
 					bBystander = true;
 				}
@@ -2449,23 +2501,25 @@ void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, Cv
 #if defined(MOD_EVENTS_NUCLEAR_DETONATION)
 	if (MOD_EVENTS_NUCLEAR_DETONATION) {
 		GAMEEVENTINVOKE_HOOK(GAMEEVENT_NuclearDetonation, kAttacker.getOwner(), kAttacker.GetID(), plot.getX(), plot.getY(), bWar, bBystander);
-	} else {
-#endif
-	ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
-	if (pkScriptSystem) 
-	{	
-		CvLuaArgsHandle args;
-
-		args->Push(kAttacker.getOwner());
-		args->Push(kAttacker.GetID());
-		args->Push(plot.getX());
-		args->Push(plot.getY());
-		args->Push(bWar);
-		args->Push(bBystander);
-
-		bool bResult;
-		LuaSupport::CallHook(pkScriptSystem, "NuclearDetonation", args.get(), bResult);
 	}
+	else {
+#endif
+		ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
+		if (pkScriptSystem)
+		{
+			CvLuaArgsHandle args;
+
+			args->Push(kAttacker.getOwner());
+			args->Push(kAttacker.GetID());
+			args->Push(plot.getX());
+			args->Push(plot.getY());
+			args->Push(bWar);
+			args->Push(bBystander);
+
+
+			bool bResult;
+			LuaSupport::CallHook(pkScriptSystem, "NuclearDetonation", args.get(), bResult);
+		}
 #if defined(MOD_EVENTS_NUCLEAR_DETONATION)
 	}
 #endif
@@ -2495,17 +2549,118 @@ void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, Cv
 	pkCombatInfo->setInBorders(BATTLE_UNIT_DEFENDER, plot.getOwner() == kAttacker.getOwner());
 	pkCombatInfo->setUpdateGlobal(BATTLE_UNIT_DEFENDER, false);
 
+
+
+	if (bInterceptionSuccess)
+	{
+		// Send out notifications to the world
+		for (int iPlayerLoop = 0; iPlayerLoop < MAX_PLAYERS; iPlayerLoop++)
+		{
+			PlayerTypes eLoopPlayer = (PlayerTypes)iPlayerLoop;
+
+			if (GET_PLAYER(eLoopPlayer).isObserver() || (GET_PLAYER(eLoopPlayer).isHuman() && GET_PLAYER(eLoopPlayer).isAlive()))
+			{
+				if (!GET_PLAYER(eLoopPlayer).isObserver())
+				{
+					if (!GET_TEAM(GET_PLAYER(eLoopPlayer).getTeam()).isHasMet(GET_PLAYER(pInterceptionCity->getOwner()).getTeam()))
+						continue;
+
+					if (!GET_TEAM(GET_PLAYER(eLoopPlayer).getTeam()).isHasMet(GET_PLAYER(kAttacker.getOwner()).getTeam()))
+						continue;
+				}
+
+				CvNotifications* pNotifications = GET_PLAYER(eLoopPlayer).GetNotifications();
+				if (pNotifications)
+				{
+					if (!bPartialInterception)
+					{
+						if (eLoopPlayer == kAttacker.getOwner())
+						{
+							Localization::String strSummary = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED_US_S");
+							Localization::String strBuffer = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED_US");
+							strBuffer << pInterceptionCity->getNameKey();
+							pNotifications->Add(NOTIFICATION_UNIT_DIED, strBuffer.toUTF8(), strSummary.toUTF8(), pInterceptionCity->getX(), pInterceptionCity->getY(), (int)kAttacker.getUnitType(), pInterceptionCity->getOwner());
+						}
+						else if (GET_PLAYER(eLoopPlayer).isObserver() || pInterceptionCityPlot->isRevealed(GET_PLAYER(eLoopPlayer).getTeam()))
+						{
+							Localization::String strSummary = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED_S");
+							Localization::String strBuffer = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED");
+							strBuffer << GET_PLAYER(kAttacker.getOwner()).getCivilizationAdjectiveKey();
+							strBuffer << pInterceptionCity->getNameKey();
+							pNotifications->Add(NOTIFICATION_UNIT_DIED, strBuffer.toUTF8(), strSummary.toUTF8(), pInterceptionCity->getX(), pInterceptionCity->getY(), (int)kAttacker.getUnitType(), pInterceptionCity->getOwner());
+						}
+						else
+						{
+							Localization::String strSummary = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED_S");
+							Localization::String strBuffer = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED");
+							strBuffer << GET_PLAYER(kAttacker.getOwner()).getCivilizationShortDescription();
+							strBuffer << pInterceptionCity->getNameKey();
+							pNotifications->Add(NOTIFICATION_UNIT_DIED, strBuffer.toUTF8(), strSummary.toUTF8(), -1, -1, (int)kAttacker.getUnitType(), pInterceptionCity->getOwner());
+						}
+						}
+					else
+					{
+						if (eLoopPlayer == kAttacker.getOwner())
+						{
+							Localization::String strSummary = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED_US_S");
+							Localization::String strBuffer = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED_US");
+							strBuffer << pInterceptionCity->getNameKey();
+							pNotifications->Add(NOTIFICATION_UNIT_DIED, strBuffer.toUTF8(), strSummary.toUTF8(), pInterceptionCity->getX(), pInterceptionCity->getY(), (int)kAttacker.getUnitType(), pInterceptionCity->getOwner());
+						}
+						else if (GET_PLAYER(eLoopPlayer).isObserver() || pInterceptionCityPlot->isRevealed(GET_PLAYER(eLoopPlayer).getTeam()))
+						{
+							Localization::String strSummary = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED_S");
+							Localization::String strBuffer = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED");
+							strBuffer << GET_PLAYER(kAttacker.getOwner()).getCivilizationAdjectiveKey();
+							strBuffer << pInterceptionCity->getNameKey();
+							pNotifications->Add(NOTIFICATION_UNIT_DIED, strBuffer.toUTF8(), strSummary.toUTF8(), pInterceptionCity->getX(), pInterceptionCity->getY(), (int)kAttacker.getUnitType(), pInterceptionCity->getOwner());
+						}
+						else
+						{
+							Localization::String strSummary = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED_S");
+							Localization::String strBuffer = Localization::Lookup("TXT_KEY_NUKE_INTERCEPTED");
+							strBuffer << GET_PLAYER(kAttacker.getOwner()).getCivilizationShortDescription();
+							strBuffer << pInterceptionCity->getNameKey();
+							pNotifications->Add(NOTIFICATION_UNIT_DIED, strBuffer.toUTF8(), strSummary.toUTF8(), -1, -1, (int)kAttacker.getUnitType(), pInterceptionCity->getOwner());
+						}
+					}
+					}
+				}
+			}
+
+		// If completely intercepted, apply diplomacy penalty and end here.
+		if (!bPartialInterception)
+		{
+			if (GET_PLAYER(pInterceptionCity->getOwner()).isMajorCiv() && GET_PLAYER(kAttacker.getOwner()).isMajorCiv())
+				GET_PLAYER(pInterceptionCity->getOwner()).GetDiplomacyAI()->ChangeNumTimesNuked(kAttacker.getOwner(), 1);
+
+			return;
+		}
+		}
+
+	int iNukeDamageLevel = bPartialInterception ? 1 : kAttacker.GetNukeDamageLevel();
+
+
+
+
+
+
+
+
 	pkCombatInfo->setAttackIsBombingMission(true);
 	pkCombatInfo->setDefenderRetaliates(false);
-	pkCombatInfo->setAttackNuclearLevel(kAttacker.GetNukeDamageLevel() + 1);
+	pkCombatInfo->setAttackNuclearLevel(iNukeDamageLevel + 1);
+	//pkCombatInfo->setAttackNuclearLevel(kAttacker.GetNukeDamageLevel() + 1);
+
 
 	// Set all of the units in the blast radius to defenders and calculate their damage
 	int iDamageMembers = 0;
-	GenerateNuclearExplosionDamage(&plot, kAttacker.GetNukeDamageLevel(), &kAttacker, pkCombatInfo->getDamageMembers(), &iDamageMembers, pkCombatInfo->getMaxDamageMemberCount());
+	GenerateNuclearExplosionDamage(&plot, iNukeDamageLevel, &kAttacker, pkCombatInfo->getDamageMembers(), &iDamageMembers, pkCombatInfo->getMaxDamageMemberCount());
+	//GenerateNuclearExplosionDamage(&plot, kAttacker.GetNukeDamageLevel(), &kAttacker, pkCombatInfo->getDamageMembers(), &iDamageMembers, pkCombatInfo->getMaxDamageMemberCount());
 	pkCombatInfo->setDamageMemberCount(iDamageMembers);
 
 	GC.GetEngineUserInterface()->setDirty(UnitInfo_DIRTY_BIT, true);
-}
+	}
 
 //	-------------------------------------------------------------------------------------
 uint CvUnitCombat::ApplyNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDamageLevel, CvUnit* /* pkAttacker = NULL*/)
@@ -2520,26 +2675,26 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDamage
 uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDamageArray, int iDamageMembers, CvUnit* pkAttacker, CvPlot* pkTargetPlot, int iDamageLevel)
 {
 	uint uiOpposingDamageCount = 0;
-	PlayerTypes eAttackerOwner = pkAttacker?pkAttacker->getOwner():NO_PLAYER;
+	PlayerTypes eAttackerOwner = pkAttacker ? pkAttacker->getOwner() : NO_PLAYER;
 
 	// Do all the units first
-	for(int i = 0; i < iDamageMembers; ++i)
+	for (int i = 0; i < iDamageMembers; ++i)
 	{
 		const CvCombatMemberEntry& kEntry = pkDamageArray[i];
-		if(kEntry.IsUnit())
+		if (kEntry.IsUnit())
 		{
 			CvUnit* pkUnit = GET_PLAYER(kEntry.GetPlayer()).getUnit(kEntry.GetUnitID());
-			if(pkUnit)
+			if (pkUnit)
 			{
 				// Apply the damage
 				pkUnit->setCombatUnit(NULL);
 				pkUnit->ClearMissionQueue();
 				pkUnit->SetAutomateType(NO_AUTOMATE); // kick unit out of automation
 
-				if((eAttackerOwner == NO_PLAYER || pkUnit->getOwner() != eAttackerOwner) && !pkUnit->isBarbarian())
+				if ((eAttackerOwner == NO_PLAYER || pkUnit->getOwner() != eAttackerOwner) && !pkUnit->isBarbarian())
 					uiOpposingDamageCount++;	// Count the number of non-barbarian opposing units
 
-				if(pkUnit->IsCombatUnit() || pkUnit->IsCanAttackRanged())
+				if (pkUnit->IsCombatUnit() || pkUnit->IsCanAttackRanged())
 				{
 #if defined(MOD_API_UNIT_STATS)
 					pkUnit->changeDamage(kEntry.GetDamage(), eAttackerOwner, pkAttacker ? pkAttacker->GetID() : -1);
@@ -2547,7 +2702,7 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDama
 					pkUnit->changeDamage(kEntry.GetDamage(), eAttackerOwner);
 #endif
 				}
-				else if(kEntry.GetDamage() >= /*6*/ GC.getNUKE_NON_COMBAT_DEATH_THRESHOLD())
+				else if (kEntry.GetDamage() >= /*6*/ GC.getNUKE_NON_COMBAT_DEATH_THRESHOLD())
 				{
 					pkUnit->kill(false, eAttackerOwner);
 				}
@@ -2560,29 +2715,30 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDama
 	// Then the terrain effects
 	int iBlastRadius = GC.getNUKE_BLAST_RADIUS();
 
-	for(int iDX = -(iBlastRadius); iDX <= iBlastRadius; iDX++)
+	for (int iDX = -(iBlastRadius); iDX <= iBlastRadius; iDX++)
 	{
-		for(int iDY = -(iBlastRadius); iDY <= iBlastRadius; iDY++)
+		for (int iDY = -(iBlastRadius); iDY <= iBlastRadius; iDY++)
 		{
 			CvPlot* pLoopPlot = plotXYWithRangeCheck(pkTargetPlot->getX(), pkTargetPlot->getY(), iDX, iDY, iBlastRadius);
 
-			if(pLoopPlot != NULL)
+			if (pLoopPlot != NULL)
 			{
 				// if we remove roads, don't remove them on the city... XXX
 				CvCity* pLoopCity = pLoopPlot->getPlotCity();
 
-				if(pLoopCity == NULL)
+				if (pLoopCity == NULL)
 				{
-					if(!(pLoopPlot->isWater()) && !(pLoopPlot->isImpassable()))
+					if (!(pLoopPlot->isWater()) && !(pLoopPlot->isImpassable()))
 					{
-						if(pLoopPlot->getFeatureType() != NO_FEATURE)
+						if (pLoopPlot->getFeatureType() != NO_FEATURE)
 						{
 							CvFeatureInfo* pkFeatureInfo = GC.getFeatureInfo(pLoopPlot->getFeatureType());
-							if(pkFeatureInfo && !pkFeatureInfo->isNukeImmune())
+							if (pkFeatureInfo && !pkFeatureInfo->isNukeImmune())
 							{
-								if(pLoopPlot == pkTargetPlot || GC.getGame().getJonRandNum(100, "Nuke Fallout") < GC.getNUKE_FALLOUT_PROB())
+								if (pLoopPlot == pkTargetPlot || GC.getGame().getSmallFakeRandNum(100, *pLoopPlot) < GC.getNUKE_FALLOUT_PROB())
+									///if(pLoopPlot == pkTargetPlot || GC.getGame().getJonRandNum(100, "Nuke Fallout") < GC.getNUKE_FALLOUT_PROB())
 								{
-									if(pLoopPlot->getImprovementType() != NO_IMPROVEMENT)
+									if (pLoopPlot->getImprovementType() != NO_IMPROVEMENT)
 									{
 										pLoopPlot->SetImprovementPillaged(true);
 									}
@@ -2592,9 +2748,10 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDama
 						}
 						else
 						{
-							if(pLoopPlot == pkTargetPlot || GC.getGame().getJonRandNum(100, "Nuke Fallout") < GC.getNUKE_FALLOUT_PROB())
+							if (pLoopPlot == pkTargetPlot || GC.getGame().getSmallFakeRandNum(100, *pLoopPlot) < GC.getNUKE_FALLOUT_PROB())
+								//if(pLoopPlot == pkTargetPlot || GC.getGame().getJonRandNum(100, "Nuke Fallout") < GC.getNUKE_FALLOUT_PROB())
 							{
-								if(pLoopPlot->getImprovementType() != NO_IMPROVEMENT)
+								if (pLoopPlot->getImprovementType() != NO_IMPROVEMENT)
 								{
 									pLoopPlot->SetImprovementPillaged(true);
 								}
@@ -2602,8 +2759,10 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDama
 							}
 						}
 #if defined(MOD_GLOBAL_NUKES_MELT_ICE)
-					} else if (MOD_GLOBAL_NUKES_MELT_ICE && pLoopPlot->getFeatureType() == FEATURE_ICE) {
-						if (pLoopPlot == pkTargetPlot || GC.getGame().getJonRandNum(100, "Nuke Fallout") < GC.getNUKE_FALLOUT_PROB()) {
+					}
+					else if (MOD_GLOBAL_NUKES_MELT_ICE && pLoopPlot->getFeatureType() == FEATURE_ICE) {
+						if (pLoopPlot == pkTargetPlot || GC.getGame().getSmallFakeRandNum(100, *pLoopPlot) < GC.getNUKE_FALLOUT_PROB()) {
+							///if (pLoopPlot == pkTargetPlot || GC.getGame().getJonRandNum(100, "Nuke Fallout") < GC.getNUKE_FALLOUT_PROB()) {
 							pLoopPlot->setFeatureType(NO_FEATURE);
 						}
 #endif
@@ -2614,20 +2773,20 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDama
 	}
 
 	// Then the cities
-	for(int i = 0; i < iDamageMembers; ++i)
+	for (int i = 0; i < iDamageMembers; ++i)
 	{
 		const CvCombatMemberEntry& kEntry = pkDamageArray[i];
-		if(kEntry.IsCity())
+		if (kEntry.IsCity())
 		{
 			CvCity* pkCity = GET_PLAYER(kEntry.GetPlayer()).getCity(kEntry.GetCityID());
-			if(pkCity)
+			if (pkCity)
 			{
 				pkCity->setCombatUnit(NULL);
 
-				if(eAttackerOwner == NO_PLAYER || pkCity->getOwner() != eAttackerOwner)
+				if (eAttackerOwner == NO_PLAYER || pkCity->getOwner() != eAttackerOwner)
 					uiOpposingDamageCount++;
 
-				if(kEntry.GetFinalDamage() >= pkCity->GetMaxHitPoints() && !pkCity->IsOriginalCapital())
+				if (kEntry.GetFinalDamage() >= pkCity->GetMaxHitPoints() && !pkCity->IsOriginalCapital())
 				{
 					auto_ptr<ICvCity1> pkDllCity(new CvDllCity(pkCity));
 					gDLL->GameplayCitySetDamage(pkDllCity.get(), 0, pkCity->getDamage()); // to stop the fires
@@ -2646,17 +2805,21 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDama
 					// It can be moved into the pre-calculated damage array if needed.
 					int iBaseDamage, iRandDamage1, iRandDamage2;
 					// How much destruction is unleashed on nearby Cities?
-					if(iDamageLevel == 1)
+					if (iDamageLevel == 1)
 					{
 						iBaseDamage = /*30*/ GC.getNUKE_LEVEL1_POPULATION_DEATH_BASE();
-						iRandDamage1 = GC.getGame().getJonRandNum(/*20*/ GC.getNUKE_LEVEL1_POPULATION_DEATH_RAND_1(), "Population Nuked 1");
-						iRandDamage2 = GC.getGame().getJonRandNum(/*20*/ GC.getNUKE_LEVEL1_POPULATION_DEATH_RAND_2(), "Population Nuked 2");
+						iRandDamage1 = GC.getGame().getSmallFakeRandNum(/*20*/ GD_INT_GET(NUKE_LEVEL1_POPULATION_DEATH_RAND_1), pkCity->getPopulation() + i);
+						iRandDamage2 = GC.getGame().getSmallFakeRandNum(/*20*/ GD_INT_GET(NUKE_LEVEL1_POPULATION_DEATH_RAND_2), pkCity->GetPower() + i);
+						//iRandDamage1 = GC.getGame().getJonRandNum(/*20*/ GC.getNUKE_LEVEL1_POPULATION_DEATH_RAND_1(), "Population Nuked 1");
+						//iRandDamage2 = GC.getGame().getJonRandNum(/*20*/ GC.getNUKE_LEVEL1_POPULATION_DEATH_RAND_2(), "Population Nuked 2");
 					}
 					else
 					{
 						iBaseDamage = /*60*/ GC.getNUKE_LEVEL2_POPULATION_DEATH_BASE();
-						iRandDamage1 = GC.getGame().getJonRandNum(/*10*/ GC.getNUKE_LEVEL2_POPULATION_DEATH_RAND_1(), "Population Nuked 1");
-						iRandDamage2 = GC.getGame().getJonRandNum(/*10*/ GC.getNUKE_LEVEL2_POPULATION_DEATH_RAND_2(), "Population Nuked 2");
+						iRandDamage1 = GC.getGame().getSmallFakeRandNum(/*10*/ GD_INT_GET(NUKE_LEVEL2_POPULATION_DEATH_RAND_1), pkCity->getPopulation() + i);
+						iRandDamage2 = GC.getGame().getSmallFakeRandNum(/*10*/ GD_INT_GET(NUKE_LEVEL2_POPULATION_DEATH_RAND_2), pkCity->GetPower() + i);
+						//iRandDamage1 = GC.getGame().getJonRandNum(/*10*/ GC.getNUKE_LEVEL2_POPULATION_DEATH_RAND_1(), "Population Nuked 1");
+						//iRandDamage2 = GC.getGame().getJonRandNum(/*10*/ GC.getNUKE_LEVEL2_POPULATION_DEATH_RAND_2(), "Population Nuked 2");
 					}
 
 					int iNukedPopulation = pkCity->getPopulation() * (iBaseDamage + iRandDamage1 + iRandDamage2) / 100;
@@ -2670,12 +2833,12 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDama
 					pkCity->setDamage(kEntry.GetFinalDamage());
 
 					GET_PLAYER(pkCity->getOwner()).GetDiplomacyAI()->ChangeNumTimesNuked(pkAttacker->getOwner(), 1);
+					}
 				}
 			}
 		}
-	}
 	return uiOpposingDamageCount;
-}
+	}
 
 //	-------------------------------------------------------------------------------------
 //	Generate nuclear explosion damage for all the units and cities in the radius of the specified plot.
@@ -2698,22 +2861,22 @@ void CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDam
 	}
 #endif
 
-	*piDamageMembers = 0;
+	* piDamageMembers = 0;
 
-	for(int iDX = -(iBlastRadius); iDX <= iBlastRadius; iDX++)
+	for (int iDX = -(iBlastRadius); iDX <= iBlastRadius; iDX++)
 	{
-		for(int iDY = -(iBlastRadius); iDY <= iBlastRadius; iDY++)
+		for (int iDY = -(iBlastRadius); iDY <= iBlastRadius; iDY++)
 		{
 			CvPlot* pLoopPlot = plotXYWithRangeCheck(pkTargetPlot->getX(), pkTargetPlot->getY(), iDX, iDY, iBlastRadius);
 
-			if(pLoopPlot != NULL)
+			if (pLoopPlot != NULL)
 			{
 				CvCity* pLoopCity = pLoopPlot->getPlotCity();
 
 				FFastSmallFixedList<IDInfo, 25, true, c_eCiv5GameplayDLL > oldUnits;
 				IDInfo* pUnitNode = pLoopPlot->headUnitNode();
 
-				while(pUnitNode != NULL)
+				while (pUnitNode != NULL)
 				{
 					oldUnits.insertAtEnd(pUnitNode);
 					pUnitNode = pLoopPlot->nextUnitNode(pUnitNode);
@@ -2721,20 +2884,20 @@ void CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDam
 
 				pUnitNode = oldUnits.head();
 
-				while(pUnitNode != NULL)
+				while (pUnitNode != NULL)
 				{
 					CvUnit* pLoopUnit = ::getUnit(*pUnitNode);
 					pUnitNode = oldUnits.next(pUnitNode);
 
-					if(pLoopUnit != NULL)
+					if (pLoopUnit != NULL)
 					{
-						if(pLoopUnit != pkAttacker)
+						if (pLoopUnit != pkAttacker)
 						{
-							if(!pLoopUnit->isNukeImmune() && !pLoopUnit->isDelayedDeath())
+							if (!pLoopUnit->isNukeImmune() && !pLoopUnit->isDelayedDeath())
 							{
 								int iNukeDamage;
 								// How much destruction is unleashed on nearby Units?
-								if(iDamageLevel == 1 && pLoopPlot != pkTargetPlot)	// Nuke level 1, but NOT the plot that got hit directly (units there are killed)
+								if (iDamageLevel == 1 && pLoopPlot != pkTargetPlot)	// Nuke level 1, but NOT the plot that got hit directly (units there are killed)
 								{
 									iNukeDamage = (/*3*/ GC.getNUKE_UNIT_DAMAGE_BASE() + /*4*/ GC.getGame().getJonRandNum(GC.getNUKE_UNIT_DAMAGE_RAND_1(), "Nuke Damage 1") + /*4*/ GC.getGame().getJonRandNum(GC.getNUKE_UNIT_DAMAGE_RAND_2(), "Nuke Damage 2"));
 								}
@@ -2748,14 +2911,14 @@ void CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDam
 #endif
 								}
 
-								if(pLoopCity != NULL)
+								if (pLoopCity != NULL)
 								{
 									iNukeDamage *= std::max(0, (pLoopCity->getNukeModifier() + 100));
 									iNukeDamage /= 100;
 								}
 
 								CvCombatMemberEntry* pkDamageEntry = AddCombatMember(pkDamageArray, piDamageMembers, iMaxDamageMembers, pLoopUnit);
-								if(pkDamageEntry)
+								if (pkDamageEntry)
 								{
 #if defined(MOD_EVENTS_BATTLES)
 									if (pLoopUnit != pDefenderUnit)
@@ -2771,32 +2934,32 @@ void CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDam
 									pkDamageEntry->SetFinalDamage(std::min(iNukeDamage + pLoopUnit->getDamage(), GC.getMAX_HIT_POINTS()));
 									pkDamageEntry->SetMaxHitPoints(GC.getMAX_HIT_POINTS());
 #endif
-									if(pkAttacker)
+									if (pkAttacker)
 										pLoopUnit->setCombatUnit(pkAttacker);
 								}
 								else
 								{
 									CvAssertMsg(*piDamageMembers < iMaxDamageMembers, "Ran out of entries for the nuclear damage array");
 								}
+									}
+								}
 							}
 						}
-					}
-				}
 
-				if(pLoopCity != NULL)
+				if (pLoopCity != NULL)
 				{
 					bool bKillCity = false;
 
 					// Is the city wiped out? - no capitals!
-					if(!pLoopCity->IsOriginalCapital())
+					if (!pLoopCity->IsOriginalCapital())
 					{
-						if(iDamageLevel > 2)
+						if (iDamageLevel > 2)
 						{
 							bKillCity = true;
 						}
-						else if(iDamageLevel > 1)
+						else if (iDamageLevel > 1)
 						{
-							if(pLoopCity->getPopulation() < /*5*/ GC.getNUKE_LEVEL2_ELIM_POPULATION_THRESHOLD())
+							if (pLoopCity->getPopulation() < /*5*/ GC.getNUKE_LEVEL2_ELIM_POPULATION_THRESHOLD())
 							{
 								bKillCity = true;
 							}
@@ -2804,7 +2967,7 @@ void CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDam
 					}
 
 					int iTotalDamage;
-					if(bKillCity)
+					if (bKillCity)
 					{
 						iTotalDamage = pLoopCity->GetMaxHitPoints();
 					}
@@ -2821,7 +2984,7 @@ void CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDam
 					}
 
 					CvCombatMemberEntry* pkDamageEntry = AddCombatMember(pkDamageArray, piDamageMembers, iMaxDamageMembers, pLoopCity);
-					if(pkDamageEntry)
+					if (pkDamageEntry)
 					{
 #if defined(MOD_EVENTS_BATTLES)
 						if (pLoopCity != pDefenderCity)
@@ -2833,7 +2996,7 @@ void CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDam
 						pkDamageEntry->SetFinalDamage(iTotalDamage);
 						pkDamageEntry->SetMaxHitPoints(pLoopCity->GetMaxHitPoints());
 
-						if(pkAttacker)
+						if (pkAttacker)
 							pLoopCity->setCombatUnit(pkAttacker);
 					}
 					else
@@ -2841,10 +3004,10 @@ void CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDam
 						CvAssertMsg(*piDamageMembers < iMaxDamageMembers, "Ran out of entries for the nuclear damage array");
 					}
 				}
+					}
+				}
 			}
 		}
-	}
-}
 
 //	---------------------------------------------------------------------------
 //	Function: ResolveNuclearCombat
@@ -2863,25 +3026,25 @@ void CvUnitCombat::ResolveNuclearCombat(const CvCombatInfo& kCombatInfo, uint ui
 
 	GC.getGame().changeNukesExploded(1);
 
-	if(pkAttacker)
+	if (pkAttacker && !pkAttacker->isDelayedDeath())
 	{
 		// Make sure we are disconnected from any unit transporting the attacker (i.e. its a missile)
 		pkAttacker->setTransportUnit(NULL);
 
-		if(pkTargetPlot)
+		if (pkTargetPlot)
 		{
-			if(ApplyNuclearExplosionDamage(kCombatInfo.getDamageMembers(), kCombatInfo.getDamageMemberCount(), pkAttacker, pkTargetPlot, kCombatInfo.getAttackNuclearLevel() - 1) > 0)
+			if (ApplyNuclearExplosionDamage(kCombatInfo.getDamageMembers(), kCombatInfo.getDamageMemberCount(), pkAttacker, pkTargetPlot, kCombatInfo.getAttackNuclearLevel() - 1) > 0)
 			{
 #if !defined(NO_ACHIEVEMENTS)
-				if(pkAttacker->getOwner() == GC.getGame().getActivePlayer())
+				if (pkAttacker->getOwner() == GC.getGame().getActivePlayer())
 				{
 					// Must damage someone to get the achievement.
 					gDLL->UnlockAchievement(ACHIEVEMENT_DROP_NUKE);
 
-					if(GC.getGame().getGameTurnYear() == 2012)
+					if (GC.getGame().getGameTurnYear() == 2012)
 					{
 						CvPlayerAI& kPlayer = GET_PLAYER(GC.getGame().getActivePlayer());
-						if(strncmp(kPlayer.getCivilizationTypeKey(), "CIVILIZATION_MAYA", 32) == 0)
+						if (strncmp(kPlayer.getCivilizationTypeKey(), "CIVILIZATION_MAYA", 32) == 0)
 						{
 							gDLL->UnlockAchievement(ACHIEVEMENT_XP1_36);
 						}
@@ -2899,7 +3062,7 @@ void CvUnitCombat::ResolveNuclearCombat(const CvCombatInfo& kCombatInfo, uint ui
 		}
 
 		// Suicide Unit (currently all nuclear attackers are)
-		if(pkAttacker->isSuicide())
+		if (pkAttacker->isSuicide())
 		{
 			pkAttacker->setCombatUnit(NULL);	// Must clear this if doing a delayed kill, should this be part of the kill method?
 			pkAttacker->setAttackPlot(NULL, false);
@@ -2918,7 +3081,7 @@ void CvUnitCombat::ResolveNuclearCombat(const CvCombatInfo& kCombatInfo, uint ui
 			pkAttacker->changeMoves(-GC.getMOVE_DENOMINATOR());
 
 			// Can't move or attack again
-			if(!pkAttacker->canMoveAfterAttacking())
+			if (!pkAttacker->canMoveAfterAttacking())
 			{
 				pkAttacker->finishMoves();
 			}
@@ -2927,7 +3090,7 @@ void CvUnitCombat::ResolveNuclearCombat(const CvCombatInfo& kCombatInfo, uint ui
 		// Report that combat is over in case we want to queue another attack
 		GET_PLAYER(pkAttacker->getOwner()).GetTacticalAI()->CombatResolved(pkAttacker, true);
 	}
-	
+
 	BATTLE_FINISHED();
 }
 

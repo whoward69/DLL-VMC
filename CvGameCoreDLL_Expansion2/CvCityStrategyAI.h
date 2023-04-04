@@ -265,7 +265,10 @@ bool IsTestCityStrategy_FirstGoldBuilding(CvCity* pCity);
 bool IsTestCityStrategy_FirstFaithBuilding(CvCity* pCity);
 bool IsTestCityStrategy_FirstProductionBuilding(CvCity* pCity);
 bool IsTestCityStrategy_UnderBlockade(CvCity* pCity);
-bool IsTestCityStrategy_IsPuppet(CvCity* pCity);
+
+//bool IsTestCityStrategy_IsPuppet(CvCity* pCity);
+bool IsTestCityStrategy_IsPuppet(const CvCity* pCity);
+
 bool IsTestCityStrategy_MediumCityHighDifficulty(CvCity* pCity);
 bool IsTestCityStrategy_OriginalCapital(CvCity* pCity);
 bool IsTestCityStrategy_RiverCity(CvCity* pCity);

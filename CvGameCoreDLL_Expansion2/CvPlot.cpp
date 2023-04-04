@@ -3023,6 +3023,37 @@ const UnitHandle CvPlot::getBestDefender(PlayerTypes eOwner, PlayerTypes eAttack
 	return pBestUnit;
 }
 
+
+CvCity* CvPlot::GetNukeInterceptor(PlayerTypes eAttackingPlayer) const
+{
+	if (eAttackingPlayer == NO_PLAYER)
+		return NULL;
+
+	//CvCity* pCity = getOwningCity();
+
+	CvCity* pCity = getWorkingCity();
+
+	if (pCity == NULL)
+	{
+		CvCity* pCity = getPlotCity();
+
+		if (pCity == NULL)
+		{
+			return NULL;
+		}
+	}
+
+	CvPlayerAI& kPlayer = GET_PLAYER(pCity->getOwner());
+	if (kPlayer.isMinorCiv() || kPlayer.isBarbarian())
+		return NULL;
+
+	if (pCity->getNukeInterceptionChance() <= 0)
+		return NULL;
+
+	return pCity;
+}
+
+
 //	--------------------------------------------------------------------------------
 CvUnit* CvPlot::getSelectedUnit()
 {
@@ -8858,7 +8889,22 @@ int CvPlot::calculateYield(YieldTypes eYield, bool bDisplay)
 			}
 		}
 
+#if defined(MOD_ROG_CORE)
+		if (ePlayer != NO_PLAYER)
+		{
+			if (eImprovement != NO_IMPROVEMENT && !IsImprovementPillaged())
+			{
+				//pWorkingCity = getWorkingCity();
 
+				if (NULL != pWorkingCity)
+				{
+					// Extra yield for improvements
+					iYield += pWorkingCity->GetImprovementExtraYield(eImprovement, eYield);
+					iYield += GET_PLAYER(ePlayer).GetImprovementExtraYield(eImprovement, eYield);
+				}
+			}
+		}
+#endif
 
 
 

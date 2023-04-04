@@ -215,6 +215,31 @@ bool CvTechEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 		pResults->Reset();
 	}
 
+
+#if defined(MOD_ROG_CORE)
+	{
+		kUtility.Initialize2DArray(m_ppiTechYieldChanges, "Specialists", "Yields");
+
+		std::string strKey("Tech_SpecialistYieldChanges");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Specialists.ID as SpecialistID, Yields.ID as YieldID, Yield from Tech_SpecialistYieldChanges inner join Specialists on Specialists.Type = SpecialistType inner join Yields on Yields.Type = YieldType where TechType = ?");
+		}
+
+		pResults->Bind(1, szTechType);
+
+		while (pResults->Step())
+		{
+			const int SpecialistID = pResults->GetInt(0);
+			const int YieldID = pResults->GetInt(1);
+			const int yield = pResults->GetInt(2);
+
+			m_ppiTechYieldChanges[SpecialistID][YieldID] = yield;
+		}
+	}
+#endif
+
 	return true;
 }
 
@@ -563,6 +588,18 @@ int CvTechEntry::GetPrereqAndTechs(int i) const
 {
 	return m_piPrereqAndTechs ? m_piPrereqAndTechs[i] : -1;
 }
+
+#if defined(MOD_ROG_CORE)
+//------------------------------------------------------------------------------
+int CvTechEntry::GetTechYieldChanges(int i, int j) const
+{
+	CvAssertMsg(i < GC.getNumSpecialistInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiTechYieldChanges[i][j];
+}
+#endif
 
 //=====================================
 // CvTechXMLEntries

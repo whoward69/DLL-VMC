@@ -12092,6 +12092,12 @@ bool CvUnit::canBuildRoute() const
 				{
 					return true;
 				}
+#if defined(MOD_ROG_CORE)
+				if (thisBuildInfo->getTechObsolete() != NO_TECH && !pTeamTechs->HasTech((TechTypes)(thisBuildInfo->getTechObsolete())))
+				{
+					return true;
+				}
+#endif
 			}
 		}
 	}
@@ -19651,6 +19657,57 @@ bool CvUnit::IsNearEnemyCitadel(int& iCitadelDamage)
 	return false;
 }
 
+
+#if defined(MOD_ROG_CORE)
+//	--------------------------------------------------------------------------------
+// Citadel
+bool CvUnit::IsNearOurCitadel(int& iCitadelHeal)
+{
+	VALIDATE_OBJECT
+
+		int iCitadelRange = 1;
+
+	CvPlot* pLoopPlot;
+
+	ImprovementTypes eImprovement;
+	int iHeal;
+
+	// Look around this Unit to see if there's an adjacent Citadel
+	for (int iX = -iCitadelRange; iX <= iCitadelRange; iX++)
+	{
+		for (int iY = -iCitadelRange; iY <= iCitadelRange; iY++)
+		{
+			pLoopPlot = plotXYWithRangeCheck(getX(), getY(), iX, iY, iCitadelRange);
+
+			if (pLoopPlot != NULL)
+			{
+				eImprovement = pLoopPlot->getImprovementType();
+
+				// Citadel here?
+				if (eImprovement != NO_IMPROVEMENT && !pLoopPlot->IsImprovementPillaged())
+				{
+					iHeal = GC.getImprovementInfo(eImprovement)->GetNearbyFriendHeal();
+					if (iHeal != 0)
+					{
+						if (pLoopPlot->getOwner() != NO_PLAYER)
+						{
+							if (getTeam() == pLoopPlot->getTeam())
+							{
+								iCitadelHeal = iHeal;
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return false;
+}
+#endif
+
+
 //	--------------------------------------------------------------------------------
 /// Great General close enough to give us a bonus?
 #if defined(MOD_PROMOTIONS_AURA_CHANGE)
@@ -25856,6 +25913,30 @@ int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
 			iValue = GetPromotionValue(iTemp, getDomainType() == DOMAIN_SEA ? 1 : 0, iFlavorOffDef, lowPriority);
 		}
 
+		if (iValue == 0)
+		{
+			iTemp = 0;
+
+			for (iI = 0; iI < NUM_DOMAIN_TYPES; iI++)
+			{
+				iTemp += pkPromotionInfo->GetDomainAttackPercent(iI);
+			}
+
+			iValue = GetPromotionValue(iTemp, getDomainType() == DOMAIN_SEA ? 1 : 0, iFlavorOffDef, lowPriority);
+		}
+
+		if (iValue == 0)
+		{
+			iTemp = 0;
+
+			for (iI = 0; iI < NUM_DOMAIN_TYPES; iI++)
+			{
+				iTemp += pkPromotionInfo->GetDomainDefensePercent(iI);
+			}
+
+			iValue = GetPromotionValue(iTemp, getDomainType() == DOMAIN_SEA ? 1 : 0, iFlavorOffDef, lowPriority);
+		}
+
 		// Unknown promotion? Always give at least a random priority with some flavor
 		if (iValue == 0)
 		{
@@ -26259,6 +26340,8 @@ int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
 		iValue += iTemp + iFlavorDefense * 2;
 	}
 
+
+
 	for(iI = 0; iI < GC.getNumTerrainInfos(); iI++)
 	{
 		const TerrainTypes eTerrain = static_cast<TerrainTypes>(iI);
@@ -26477,6 +26560,43 @@ int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
 		}
 		else if((AI_getUnitAIType() == UNITAI_ATTACK) ||
 		        (AI_getUnitAIType() == UNITAI_DEFENSE))
+		{
+			iValue += iTemp;
+		}
+		else
+		{
+			iValue += (iTemp / 2);
+		}
+	}
+
+
+	for (iI = 0; iI < NUM_DOMAIN_TYPES; iI++)
+	{
+		iTemp = pkPromotionInfo->GetDomainAttackPercent(iI);
+		if (AI_getUnitAIType() == UNITAI_COUNTER)
+		{
+			iValue += (iTemp * 2);
+		}
+		else if ((AI_getUnitAIType() == UNITAI_ATTACK) ||
+			(AI_getUnitAIType() == UNITAI_DEFENSE))
+		{
+			iValue += iTemp;
+		}
+		else
+		{
+			iValue += (iTemp / 2);
+		}
+	}
+
+	for (iI = 0; iI < NUM_DOMAIN_TYPES; iI++)
+	{
+		iTemp = pkPromotionInfo->GetDomainDefensePercent(iI);
+		if (AI_getUnitAIType() == UNITAI_COUNTER)
+		{
+			iValue += (iTemp * 2);
+		}
+		else if ((AI_getUnitAIType() == UNITAI_ATTACK) ||
+			(AI_getUnitAIType() == UNITAI_DEFENSE))
 		{
 			iValue += iTemp;
 		}

@@ -854,6 +854,14 @@ int CvImprovementEntry::GetDefenseModifier() const
 	return m_iDefenseModifier;
 }
 
+#if defined(MOD_ROG_CORE)
+/// heal done to nearby our units
+int CvImprovementEntry::GetNearbyFriendHeal() const
+{
+	return m_iNearbyFriendHeal;
+}
+#endif
+
 /// Damage done to nearby enemy units
 int CvImprovementEntry::GetNearbyEnemyDamage() const
 {

@@ -194,6 +194,8 @@ public:
 	}
 #endif
 
+	CvCity* GetNukeInterceptor(PlayerTypes eAttackingPlayer) const;
+
 	int getExtraMovePathCost() const;
 	void changeExtraMovePathCost(int iChange);
 

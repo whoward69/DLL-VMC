@@ -187,6 +187,8 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(GetProcessProductionTurnsLeft);
 #endif
 
+
+
 	Method(CreateApolloProgram);
 
 	Method(IsCanPurchase);
@@ -4444,7 +4446,11 @@ int CvLuaCity::lGetSpecialistYield(lua_State* L)
 
 	const PlayerTypes ePlayer = pkCity->getOwner();
 
+#if defined(MOD_ROG_CORE) && defined(MOD_ROG_CORE)
+	const int iValue = (GET_PLAYER(ePlayer).specialistYield(eSpecialist, eYield) + pkCity->getSpecialistExtraYield(eSpecialist, eYield));
+#else
 	const int iValue = GET_PLAYER(ePlayer).specialistYield(eSpecialist, eYield);
+#endif
 
 	lua_pushinteger(L, iValue);
 
@@ -4480,6 +4486,9 @@ int CvLuaCity::lGetReligionCityRangeStrikeModifier(lua_State* L)
 
 	return 1;
 }
+
+
+
 
 #ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
 int CvLuaCity::lGetBaseYieldRateFromOtherYield(lua_State* L) {

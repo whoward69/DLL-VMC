@@ -1124,6 +1124,11 @@ public:
 	int getMissionType() const;
 	void setMissionType(int iNewType);
 
+#if defined(MOD_ROG_CORE)
+	int getTechObsolete() const;
+#endif
+
+
 	bool isKill() const;
 	bool isRepair() const;
 	bool IsRemoveRoute() const;
@@ -1154,6 +1159,10 @@ protected:
 	int m_iRoute;
 	int m_iEntityEvent;
 	int m_iMissionType;
+
+#if defined(MOD_ROG_CORE)
+	int m_iTechObsolete;
+#endif
 
 	bool m_bKill;
 	bool m_bRepair;
@@ -2038,6 +2047,9 @@ public:
 
 	int getTechPrereq() const;
 
+#if defined(MOD_ROG_CORE)
+	int getDefenseValue() const;
+#endif
 	// Arrays
 	int getProductionToYieldModifier(int i) const;
 	int GetFlavorValue(int i) const;
@@ -2046,6 +2058,10 @@ public:
 
 protected:
 	int m_iTechPrereq;
+
+#if defined(MOD_ROG_CORE)
+	int m_iDefenseValue;
+#endif
 
 	// Arrays
 	int* m_paiProductionToYieldModifier;

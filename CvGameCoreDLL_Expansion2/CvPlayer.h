@@ -297,6 +297,13 @@ public:
 	int getProductionModifier(SpecialistTypes eSpecialist, CvString* toolTipSink = NULL) const;
 	int getProductionModifier(ProcessTypes eProcess, CvString* toolTipSink = NULL) const;
 
+#if defined(MOD_ROG_CORE)
+	int GetWorldWonderYieldChange(int iYield);
+
+	int GetBuildingClassYieldModifier(BuildingClassTypes eBuildingClass, YieldTypes eYieldType);
+	int GetBuildingClassYieldModifier(BuildingClassTypes eBuildingClass, YieldTypes eYieldType, const vector<int>& preexistingBuildingsCount);
+#endif
+
 	int getBuildingClassPrereqBuilding(BuildingTypes eBuilding, BuildingClassTypes ePrereqBuildingClass, int iExtra = 0) const;
 	void removeBuildingClass(BuildingClassTypes eBuildingClass);
 	void processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, CvArea* pArea);
@@ -1237,6 +1244,11 @@ public:
 	int getExtraYieldThreshold(YieldTypes eIndex) const;
 	void updateExtraYieldThreshold(YieldTypes eIndex);
 
+#if defined(MOD_ROG_CORE)
+	int GetImprovementExtraYield(ImprovementTypes eImprovement, YieldTypes eYield) const;
+	void ChangeImprovementExtraYield(ImprovementTypes eImprovement, YieldTypes eYield, int iChange);
+#endif
+
 	// Science
 
 	int GetScience() const;
@@ -1536,6 +1548,16 @@ public:
 	void SetCityStrengthMod(int iValue);
 	void ChangeCityStrengthMod(int iChange);
 
+#if defined(MOD_ROG_CORE)
+	int GetGlobalCityStrengthMod() const;
+	void SetGlobalCityStrengthMod(int iValue);
+	void ChangeGlobalCityStrengthMod(int iChange);
+
+	int GetGlobalRangedStrikeModifier() const;
+	void SetGlobalRangedStrikeModifier(int iValue);
+	void ChangeGlobalRangedStrikeModifier(int iChange);
+#endif
+
 	int GetCityGrowthMod() const;
 	void SetCityGrowthMod(int iValue);
 	void ChangeCityGrowthMod(int iChange);
@@ -1633,6 +1655,10 @@ public:
 
 	void DoAnnounceReligionAdoption();
 	// End New Religion Stuff
+
+#if defined(MOD_ROG_CORE)
+	std::vector<int> GetTotalBuildingCount(bool bIncludePuppets = false) const;
+#endif
 
 	int GetNumFreeTechs() const;
 	void SetNumFreeTechs(int iValue);
@@ -2121,6 +2147,12 @@ protected:
 	FAutoVariable<int, CvPlayer> m_iCapitalGrowthMod;
 	FAutoVariable<int, CvPlayer> m_iNumPlotsBought;
 	FAutoVariable<int, CvPlayer> m_iPlotGoldCostMod;
+
+#if defined(MOD_ROG_CORE)
+	FAutoVariable<int, CvPlayer> m_iGlobalCityStrengthMod;
+	FAutoVariable<int, CvPlayer> m_iGlobalRangedStrikeModifier;
+#endif
+
 #if defined(MOD_TRAITS_CITY_WORKING) || defined(MOD_BUILDINGS_CITY_WORKING) || defined(MOD_POLICIES_CITY_WORKING) || defined(MOD_TECHS_CITY_WORKING)
 	int m_iCityWorkingChange;
 #endif
@@ -2235,6 +2267,11 @@ protected:
 #if defined(MOD_API_UNIFIED_YIELDS) && defined(MOD_API_PLOT_YIELDS)
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppiPlotYieldChange;
 #endif
+
+#if defined(MOD_ROG_CORE)
+	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppiImprovementYieldChange;
+#endif
+
 #if defined(MOD_API_UNIFIED_YIELDS)
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppiFeatureYieldChange;
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppiResourceYieldChange;

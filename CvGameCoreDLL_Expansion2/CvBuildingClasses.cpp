@@ -142,6 +142,40 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_bAddsFreshWater(false),
 	m_bPurchaseOnly(false),
 #endif
+
+#if defined(MOD_ROG_CORE)
+	m_piGreatWorkYieldChange(NULL),
+
+	m_iExtraDamageHeal(0),
+	m_iRangedStrikeModifier(0),
+	m_iPopulationChange(0),
+
+
+	m_iGlobalCityStrengthMod(0),
+	m_iGlobalRangedStrikeModifier(0),
+#endif
+
+	m_iNukeInterceptionChance(0),
+	m_iExtraAttacks(0),
+
+#if defined(MOD_ROG_CORE)
+	m_piResourceQuantityFromPOP(NULL),
+
+
+	m_ppiResourceYieldChangeGlobal(),
+	m_ppaiImprovementYieldChange(NULL),
+	m_ppaiImprovementYieldChangeGlobal(NULL),
+	m_ppaiSpecialistYieldChangeLocal(NULL),
+
+	m_piYieldChangeWorldWonder(NULL),
+	m_piYieldChangeWorldWonderGlobal(NULL),
+
+	m_ppiBuildingClassYieldModifiers(NULL),
+
+	m_piYieldChangePerPopInEmpire(),
+#endif
+
+
 	m_bMountain(false),
 	m_bHill(false),
 	m_bFlat(false),
@@ -261,11 +295,29 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	SAFE_DELETE_ARRAY(m_paiBuildingClassHappiness);
 	SAFE_DELETE_ARRAY(m_paThemingBonusInfo);
 
+#if defined(MOD_ROG_CORE)
+	SAFE_DELETE_ARRAY(m_piResourceQuantityFromPOP);
+	SAFE_DELETE_ARRAY(m_piGreatWorkYieldChange);
+	SAFE_DELETE_ARRAY(m_piYieldChangeWorldWonder);
+	SAFE_DELETE_ARRAY(m_piYieldChangeWorldWonderGlobal);
+#endif
+
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiResourceYieldChange);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiFeatureYieldChange);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiSpecialistYieldChange);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiResourceYieldModifier);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiTerrainYieldChange);
+
+#if defined(MOD_ROG_CORE)
+	m_piYieldChangePerPopInEmpire.clear();
+	m_ppiResourceYieldChangeGlobal.clear();
+	CvDatabaseUtility::SafeDelete2DArray(m_ppaiImprovementYieldChange);
+	CvDatabaseUtility::SafeDelete2DArray(m_ppaiImprovementYieldChangeGlobal);
+	CvDatabaseUtility::SafeDelete2DArray(m_ppaiSpecialistYieldChangeLocal);
+	CvDatabaseUtility::SafeDelete2DArray(m_ppiBuildingClassYieldModifiers);
+#endif
+
+
 #if defined(MOD_API_UNIFIED_YIELDS) && defined(MOD_API_PLOT_YIELDS)
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiPlotYieldChange);
 #endif
@@ -300,6 +352,21 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 		m_bPurchaseOnly = kResults.GetBool("PurchaseOnly");
 	}
 #endif
+
+#if defined(MOD_ROG_CORE)
+	m_iExtraDamageHeal = kResults.GetInt("ExtraDamageHeal");
+	m_iRangedStrikeModifier = kResults.GetInt("RangedStrikeModifier");
+	m_iPopulationChange = kResults.GetInt("PopulationChange");
+
+
+	m_iGlobalCityStrengthMod = kResults.GetInt("GlobalCityStrengthMod");
+	m_iGlobalRangedStrikeModifier = kResults.GetInt("GlobalRangedStrikeModifier");
+#endif
+
+	m_iNukeInterceptionChance = kResults.GetInt("NukeInterceptionChance");
+	m_iExtraAttacks = kResults.GetInt("ExtraAttacks");
+
+
 	m_bMountain = kResults.GetBool("Mountain");
 	m_bHill = kResults.GetBool("Hill");
 	m_bFlat = kResults.GetBool("Flat");
@@ -553,6 +620,13 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	kUtility.PopulateArrayByExistence(m_piLocalResourceAnds, "Resources", "Building_LocalResourceAnds", "ResourceType", "BuildingType", szBuildingType);
 	kUtility.PopulateArrayByExistence(m_piLocalResourceOrs, "Resources", "Building_LocalResourceOrs", "ResourceType", "BuildingType", szBuildingType);
 
+#if defined(MOD_ROG_CORE)
+	kUtility.SetYields(m_piGreatWorkYieldChange, "Building_GreatWorkYieldChanges", "BuildingType", szBuildingType);
+	kUtility.SetYields(m_piYieldChangeWorldWonder, "Building_YieldChangeWorldWonder", "BuildingType", szBuildingType);
+	kUtility.SetYields(m_piYieldChangeWorldWonderGlobal, "Building_YieldChangeWorldWonderGlobal", "BuildingType", szBuildingType);
+	kUtility.PopulateArrayByValue(m_piResourceQuantityFromPOP, "Resources", "Building_ResourceQuantityFromPOP", "ResourceType", "BuildingType", szBuildingType, "Modifier");
+#endif
+
 	//ResourceYieldChanges
 	{
 		kUtility.Initialize2DArray(m_ppaiResourceYieldChange, "Resources", "Yields");
@@ -598,6 +672,132 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 			m_ppaiFeatureYieldChange[FeatureID][YieldID] = yield;
 		}
 	}
+
+
+#if defined(MOD_ROG_CORE)
+	//SpecialistYieldChangesLocal
+	{
+		kUtility.Initialize2DArray(m_ppaiSpecialistYieldChangeLocal, "Specialists", "Yields");
+
+		std::string strKey("Building_SpecialistYieldChangesLocal");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Specialists.ID as SpecialistID, Yields.ID as YieldID, Yield from Building_SpecialistYieldChangesLocal inner join Specialists on Specialists.Type = SpecialistType inner join Yields on Yields.Type = YieldType where BuildingType = ?");
+		}
+
+		pResults->Bind(1, szBuildingType);
+
+		while (pResults->Step())
+		{
+			const int SpecialistID = pResults->GetInt(0);
+			const int YieldID = pResults->GetInt(1);
+			const int yield = pResults->GetInt(2);
+
+			m_ppaiSpecialistYieldChangeLocal[SpecialistID][YieldID] = yield;
+		}
+	}
+
+	//ImprovementYieldChanges
+	{
+		kUtility.Initialize2DArray(m_ppaiImprovementYieldChange, "Improvements", "Yields");
+
+		std::string strKey("Building_ImprovementYieldChanges");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Improvements.ID as ImprovementID, Yields.ID as YieldID, Yield from Building_ImprovementYieldChanges inner join Improvements on Improvements.Type = ImprovementType inner join Yields on Yields.Type = YieldType where BuildingType = ?");
+		}
+
+		pResults->Bind(1, szBuildingType);
+
+		while (pResults->Step())
+		{
+			const int ImprovementID = pResults->GetInt(0);
+			const int YieldID = pResults->GetInt(1);
+			const int yield = pResults->GetInt(2);
+
+			m_ppaiImprovementYieldChange[ImprovementID][YieldID] = yield;
+		}
+	}
+	//ImprovementYieldChangesGlobal
+	{
+		kUtility.Initialize2DArray(m_ppaiImprovementYieldChangeGlobal, "Improvements", "Yields");
+
+		std::string strKey("Building_ImprovementYieldChangesGlobal");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Improvements.ID as ImprovementID, Yields.ID as YieldID, Yield from Building_ImprovementYieldChangesGlobal inner join Improvements on Improvements.Type = ImprovementType inner join Yields on Yields.Type = YieldType where BuildingType = ?");
+		}
+
+		pResults->Bind(1, szBuildingType);
+
+		while (pResults->Step())
+		{
+			const int ImprovementID = pResults->GetInt(0);
+			const int YieldID = pResults->GetInt(1);
+			const int yield = pResults->GetInt(2);
+
+			m_ppaiImprovementYieldChangeGlobal[ImprovementID][YieldID] = yield;
+		}
+	}
+
+
+	//Building_YieldChangesPerPopInEmpire
+	{
+		std::string strKey("Building_YieldChangesPerPopInEmpire");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Yield from Building_YieldChangesPerPopInEmpire inner join Yields on Yields.Type = YieldType where BuildingType = ?");
+		}
+
+		pResults->Bind(1, szBuildingType);
+
+		while (pResults->Step())
+		{
+			const int iYieldType = pResults->GetInt(0);
+			const int iYield = pResults->GetInt(1);
+
+			m_piYieldChangePerPopInEmpire[iYieldType] += iYield;
+		}
+
+		pResults->Reset();
+
+		//Trim extra memory off container since this is mostly read-only.
+		std::map<int, int>(m_piYieldChangePerPopInEmpire).swap(m_piYieldChangePerPopInEmpire);
+	}
+
+	//Building_ResourceYieldChangesGlobal
+	{
+		std::string strKey("Building_ResourceYieldChangesGlobal");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Resources.ID as ResourceID, Yields.ID as YieldID, Yield from Building_ResourceYieldChangesGlobal inner join Resources on Resources.Type = ResourceType inner join Yields on Yields.Type = YieldType where BuildingType = ?");
+		}
+
+		pResults->Bind(1, szBuildingType);
+
+		while (pResults->Step())
+		{
+			const int iResource = pResults->GetInt(0);
+			const int iYieldType = pResults->GetInt(1);
+			const int iYield = pResults->GetInt(2);
+
+			m_ppiResourceYieldChangeGlobal[iResource][iYieldType] += iYield;
+		}
+
+		pResults->Reset();
+
+		//Trim extra memory off container since this is mostly read-only.
+		std::map<int, std::map<int, int>>(m_ppiResourceYieldChangeGlobal).swap(m_ppiResourceYieldChangeGlobal);
+	}
+
+
+
+#endif
 
 #ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
 	//Buildings enable city to purchase units.
@@ -770,6 +970,32 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 			m_ppiBuildingClassYieldChanges[BuildingClassID][iYieldID] = iYieldChange;
 		}
 	}
+
+
+#if defined(MOD_ROG_CORE)
+	//BuildingClassYieldModifiers
+	{
+		kUtility.Initialize2DArray(m_ppiBuildingClassYieldModifiers, "BuildingClasses", "Yields");
+
+		std::string strKey("Building_BuildingClassYieldModifiers");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select BuildingClasses.ID as BuildingClassID, Yields.ID as YieldID, Modifier from Building_BuildingClassYieldModifiers inner join BuildingClasses on BuildingClasses.Type = BuildingClassType inner join Yields on Yields.Type = YieldType where BuildingType = ?");
+		}
+
+		pResults->Bind(1, szBuildingType);
+
+		while (pResults->Step())
+		{
+			const int BuildingClassID = pResults->GetInt(0);
+			const int iYieldID = pResults->GetInt(1);
+			const int iYieldModifier = pResults->GetInt(2);
+
+			m_ppiBuildingClassYieldModifiers[BuildingClassID][iYieldID] = iYieldModifier;
+		}
+	}
+#endif
 
 	{
 		//Initialize Theming Bonuses
@@ -1301,6 +1527,44 @@ int CvBuildingEntry::GetHealRateChange() const
 	return m_iHealRateChange;
 }
 
+
+#if defined(MOD_ROG_CORE)
+int CvBuildingEntry::GetGlobalCityStrengthMod() const
+{
+	return m_iGlobalCityStrengthMod;
+}
+
+int CvBuildingEntry::GetGlobalRangedStrikeModifier() const
+{
+	return m_iGlobalRangedStrikeModifier;
+}
+
+/// Does this Building allow us to Range Strike?
+int CvBuildingEntry::CityRangedStrikeModifier() const
+{
+	return m_iRangedStrikeModifier;
+}
+
+int CvBuildingEntry::GetExtraDamageHeal() const
+{
+	return m_iExtraDamageHeal;
+}
+
+
+int CvBuildingEntry::GetPopulationChange() const
+{
+	return m_iPopulationChange;
+}
+#endif
+
+
+int CvBuildingEntry::GetExtraAttacks() const
+{
+	return m_iExtraAttacks;
+}
+
+
+
 /// Happiness provided by this building
 int CvBuildingEntry::GetHappiness() const
 {
@@ -1620,6 +1884,23 @@ bool CvBuildingEntry::IsPurchaseOnly() const
 }
 #endif
 
+
+
+#if defined(MOD_ROG_CORE)
+/// Change to Great Work yield by type
+int CvBuildingEntry::GetGreatWorkYieldChange(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piGreatWorkYieldChange ? m_piGreatWorkYieldChange[i] : -1;
+}
+/// Array of yield changes to Great Works
+int* CvBuildingEntry::GetGreatWorkYieldChangeArray() const
+{
+	return m_piGreatWorkYieldChange;
+}
+#endif
+
 /// Must this be built in a city next to Mountain?
 bool CvBuildingEntry::IsMountain() const
 {
@@ -1660,6 +1941,12 @@ bool CvBuildingEntry::IsBorderObstacle() const
 bool CvBuildingEntry::IsPlayerBorderObstacle() const
 {
 	return m_bPlayerBorderObstacle;
+}
+
+
+int CvBuildingEntry::GetNukeInterceptionChance() const
+{
+	return m_iNukeInterceptionChance;
 }
 
 /// Does this trigger drawing a wall around the city
@@ -1863,6 +2150,24 @@ int* CvBuildingEntry::GetYieldChangePerPopArray() const
 {
 	return m_piYieldChangePerPop;
 }
+
+
+#if defined(MOD_ROG_CORE)
+/// Change to yield by type
+int CvBuildingEntry::GetYieldChangePerPopInEmpire(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+
+	std::map<int, int>::const_iterator it = m_piYieldChangePerPopInEmpire.find(i);
+	if (it != m_piYieldChangePerPopInEmpire.end()) // find returns the iterator to map::end if the key i is not present in the map
+	{
+		return it->second;
+	}
+
+	return 0;
+}
+#endif
 
 /// Change to yield by type
 int CvBuildingEntry::GetYieldChangePerReligion(int i) const
@@ -2125,6 +2430,125 @@ int CvBuildingEntry::GetHurryModifier(int i) const
 	CvAssertMsg(i > -1, "Index out of bounds");
 	return m_paiHurryModifier ? m_paiHurryModifier[i] : -1;
 }
+
+
+#if defined(MOD_ROG_CORE)
+// Resource provided by Population
+int CvBuildingEntry::GetResourceQuantityFromPOP(int i) const
+{
+	CvAssertMsg(i < GC.getNumResourceInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piResourceQuantityFromPOP ? m_piResourceQuantityFromPOP[i] : -1;
+}
+#endif
+
+#if defined(MOD_ROG_CORE)
+int CvBuildingEntry::GetYieldChangeWorldWonder(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piYieldChangeWorldWonder ? m_piYieldChangeWorldWonder[i] : 0;
+}
+int CvBuildingEntry::GetYieldChangeWorldWonderGlobal(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piYieldChangeWorldWonderGlobal ? m_piYieldChangeWorldWonderGlobal[i] : 0;
+}
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+/// Change to Improvement yield by type
+int CvBuildingEntry::GetImprovementYieldChange(int i, int j) const
+{
+	CvAssertMsg(i < GC.getNumImprovementInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppaiImprovementYieldChange ? m_ppaiImprovementYieldChange[i][j] : -1;
+}
+
+/// Array of changes to Improvement yield
+int* CvBuildingEntry::GetImprovementYieldChangeArray(int i) const
+{
+	CvAssertMsg(i < GC.getNumImprovementInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_ppaiImprovementYieldChange[i];
+}
+
+
+
+/// Change to Improvement yield by type
+int CvBuildingEntry::GetImprovementYieldChangeGlobal(int i, int j) const
+{
+	CvAssertMsg(i < GC.getNumImprovementInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppaiImprovementYieldChangeGlobal ? m_ppaiImprovementYieldChangeGlobal[i][j] : -1;
+}
+
+/// Array of changes to Improvement yield
+int* CvBuildingEntry::GetImprovementYieldChangeGlobalArray(int i) const
+{
+	CvAssertMsg(i < GC.getNumFeatureInfos(), "Index out of bounds");
+	//CvAssertMsg(i < GC.getNumImprovementInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_ppaiImprovementYieldChangeGlobal[i];
+}
+
+/// Change to specialist yield by type
+int CvBuildingEntry::GetSpecialistYieldChangeLocal(int i, int j) const
+{
+	CvAssertMsg(i < GC.getNumSpecialistInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppaiSpecialistYieldChangeLocal ? m_ppaiSpecialistYieldChangeLocal[i][j] : -1;
+}
+/// Array of changes to specialist yield
+int* CvBuildingEntry::GetSpecialistYieldChangeLocalArray(int i) const
+{
+	CvAssertMsg(i < GC.getNumSpecialistInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_ppaiSpecialistYieldChangeLocal[i];
+}
+
+/// Change to Resource yield by type
+int CvBuildingEntry::GetResourceYieldChangeGlobal(int iResource, int iYieldType) const
+{
+	CvAssertMsg(iResource < GC.getNumResourceInfos(), "Index out of bounds");
+	CvAssertMsg(iResource > -1, "Index out of bounds");
+	CvAssertMsg(iYieldType < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(iYieldType > -1, "Index out of bounds");
+	std::map<int, std::map<int, int>>::const_iterator itResource = m_ppiResourceYieldChangeGlobal.find(iResource);
+	if (itResource != m_ppiResourceYieldChangeGlobal.end()) // find returns the iterator to map::end if the key iResource is not present in the map
+	{
+		std::map<int, int>::const_iterator itYield = itResource->second.find(iYieldType);
+		if (itYield != itResource->second.end()) // find returns the iterator to map::end if the key iYield is not present in the map
+		{
+			return itYield->second;
+		}
+	}
+
+	return 0;
+}
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+/// Yield change for a specific BuildingClass by yield type
+int CvBuildingEntry::GetBuildingClassYieldModifier(int i, int j) const
+{
+	CvAssertMsg(i < GC.getNumBuildingClassInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiBuildingClassYieldModifiers[i][j];
+}
+#endif
+
 
 /// Can it only built if there is a building of this class in the city?
 bool CvBuildingEntry::IsBuildingClassNeededInCity(int i) const

@@ -162,6 +162,14 @@ public:
 	int GetTerrainExtraYield(TerrainTypes eTerrain, YieldTypes eYield) const;
 	void ChangeTerrainExtraYield(TerrainTypes eTerrain, YieldTypes eYield, int iChange);
 
+#if defined(MOD_ROG_CORE)
+	int GetImprovementExtraYield(ImprovementTypes eImprovement, YieldTypes eYield) const;
+	void ChangeImprovementExtraYield(ImprovementTypes eImprovement, YieldTypes eYield, int iChange);
+
+	int getSpecialistExtraYield(SpecialistTypes eIndex1, YieldTypes eIndex2) const;
+	void changeSpecialistExtraYield(SpecialistTypes eIndex1, YieldTypes eIndex2, int iChange);
+#endif
+
 #if defined(MOD_API_UNIFIED_YIELDS) && defined(MOD_API_PLOT_YIELDS)
 	int GetPlotExtraYield(PlotTypes ePlot, YieldTypes eYield) const;
 	void ChangePlotExtraYield(PlotTypes ePlot, YieldTypes eYield, int iChange);
@@ -689,11 +697,33 @@ public:
 	void ChangeBaseYieldRateFromReligion(YieldTypes eIndex, int iChange);
 	// END Base Yield
 
+	
+
 	int GetYieldPerPopTimes100(YieldTypes eIndex) const;
 	void ChangeYieldPerPopTimes100(YieldTypes eIndex, int iChange);
 
 	int GetYieldPerReligionTimes100(YieldTypes eIndex) const;
 	void ChangeYieldPerReligionTimes100(YieldTypes eIndex, int iChange);
+
+
+	void changeNukeInterceptionChance(int iValue);
+	int getNukeInterceptionChance() const;
+
+#if defined(MOD_ROG_CORE)
+	int GetResourceQuantityFromPOP(ResourceTypes eResource) const;
+	void ChangeResourceQuantityFromPOP(ResourceTypes eResource, int iChange);
+	//void SetResourceQuantityFromPOP(ResourceTypes eResource, int iValue);
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int GetYieldPerPopInEmpireTimes100(YieldTypes eIndex) const;
+	void ChangeYieldPerPopInEmpireTimes100(YieldTypes eIndex, int iChange);
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int getLocalBuildingClassYield(BuildingClassTypes eIndex1, YieldTypes eIndex2)	const;
+	void changeLocalBuildingClassYield(BuildingClassTypes eIndex1, YieldTypes eIndex2, int iChange);
+#endif
 
 	int getYieldRateModifier(YieldTypes eIndex) const;
 	void changeYieldRateModifier(YieldTypes eIndex, int iChange);
@@ -801,6 +831,21 @@ public:
 	int getBombardRange(bool& bIndirectFireAllowed) const;
 	int getBombardRange() const;
 #endif
+
+#if defined(MOD_ROG_CORE)
+	int getExtraDamageHeal() const;
+	void changeExtraDamageHeal(int iChange);
+
+	int getCityBuildingRangeStrikeModifier() const;
+	void changeCityBuildingRangeStrikeModifier(int iValue);
+
+	int getResetDamageValue()const;
+	void changeResetDamageValue(int iChange);
+
+#endif
+
+	void changeExtraAttacks(int iChange);
+
 
 	bool canRangeStrike() const;
 	bool CanRangeStrikeNow() const;
@@ -1076,6 +1121,17 @@ protected:
 	int m_iConversionModifier;
 #endif
 
+#if defined(MOD_ROG_CORE)
+	FAutoVariable<int, CvCity> m_iExtraDamageHeal;
+	FAutoVariable<int, CvCity> m_iCityBuildingRangeStrikeModifier;
+
+#endif
+
+	int m_iNukeInterceptionChance;
+	FAutoVariable<int, CvCity> m_iNumAttacks;
+	FAutoVariable<int, CvCity> m_iAttacksMade;
+
+
 	OperationSlot m_unitBeingBuiltForOperation;
 
 	FAutoVariable<bool, CvCity> m_bNeverLost;
@@ -1106,6 +1162,14 @@ protected:
 	std::vector<int> m_aiBaseYieldRateFromReligion;
 	FAutoVariable<std::vector<int>, CvCity> m_aiYieldRateModifier;
 	FAutoVariable<std::vector<int>, CvCity> m_aiYieldPerPop;
+
+#if defined(MOD_ROG_CORE)
+	std::map<int, int> m_aiYieldPerPopInEmpire;
+
+	FAutoVariable<std::vector<int>, CvCity> m_aiResourceQuantityFromPOP;
+#endif
+
+
 	std::vector<int> m_aiYieldPerReligion;
 	FAutoVariable<std::vector<int>, CvCity> m_aiPowerYieldRateModifier;
 	FAutoVariable<std::vector<int>, CvCity> m_aiResourceYieldRateModifier;
@@ -1156,6 +1220,12 @@ protected:
 	int** m_ppaiTerrainYieldChange;
 #if defined(MOD_API_UNIFIED_YIELDS) && defined(MOD_API_PLOT_YIELDS)
 	int** m_ppaiPlotYieldChange;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int** m_ppaaiImprovementYieldChange;
+	int** m_ppiSpecialistYieldChange;
+
 #endif
 
 	CvCityBuildings* m_pCityBuildings;

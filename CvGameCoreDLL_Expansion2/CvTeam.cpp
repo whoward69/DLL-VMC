@@ -6692,6 +6692,28 @@ void CvTeam::processTech(TechTypes eTech, int iChange)
 		}
 	}
 
+
+#if defined(MOD_ROG_CORE)
+	for (iI = 0; iI < MAX_PLAYERS; iI++)
+	{
+		CvPlayer& kPlayer = GET_PLAYER((PlayerTypes)iI);
+		if (kPlayer.getTeam() == GetID() && kPlayer.isEverAlive())
+		{
+			for (int iL = 0; iL < GC.getNumSpecialistInfos(); iL++)
+			{
+				CvSpecialistInfo* pSpecialistInfo = GC.getSpecialistInfo((SpecialistTypes)iL);
+				if (pSpecialistInfo)
+				{
+					for (iJ = 0; iJ < NUM_YIELD_TYPES; iJ++)
+					{
+						kPlayer.changeSpecialistExtraYield(((SpecialistTypes)iL), ((YieldTypes)iJ), (pTech->GetTechYieldChanges((SpecialistTypes)iL, (YieldTypes)iJ) * iChange));
+					}
+				}
+			}
+		}
+	}
+#endif
+
 	CvPlot* pNewUnitPlot;
 	for(iI = 0; iI < MAX_PLAYERS; iI++)
 	{

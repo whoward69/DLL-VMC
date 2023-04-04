@@ -10337,6 +10337,9 @@ int CvLuaPlayer::lGetPolicyBuildingClassYieldModifier(lua_State* L)
 	if(pkPlayer)
 	{
 		int modifier = pkPlayer->GetPlayerPolicies()->GetBuildingClassYieldModifier(eBuildingClass, eYieldType);
+#if defined(MOD_ROG_CORE)
+		modifier += pkPlayer->GetBuildingClassYieldModifier(eBuildingClass, eYieldType);
+#endif
 		lua_pushinteger(L, modifier);
 
 		return 1;

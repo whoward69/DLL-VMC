@@ -349,6 +349,12 @@ CvPlayer::CvPlayer() :
 	, m_iLifetimeCombatExperienceTimes100(0)
 	, m_iNavalCombatExperienceTimes100(0)
 #endif
+
+#if defined(MOD_ROG_CORE)
+	, m_iGlobalCityStrengthMod("CvPlayer::m_iGlobalCityStrengthMod", m_syncArchive)
+	, m_iGlobalRangedStrikeModifier("CvPlayer::m_iGlobalRangedStrikeModifier", m_syncArchive)
+#endif
+
 	, m_iPopRushHurryCount("CvPlayer::m_iPopRushHurryCount", m_syncArchive)
 	, m_iTotalImprovementsBuilt("CvPlayer::m_iTotalImprovementsBuilt", m_syncArchive)
 	, m_iNextOperationID("CvPlayer::m_iNextOperationID", m_syncArchive)
@@ -830,6 +836,11 @@ void CvPlayer::uninit()
 	m_piYieldFromBarbarianKills.clear();
 	m_ppiBuildingClassYieldChange.clear();
 #endif
+
+#if defined(MOD_ROG_CORE)
+	m_ppiImprovementYieldChange.clear();
+#endif
+
 	m_ppaaiImprovementYieldChange.clear();
 	m_ppaaiBuildingClassYieldMod.clear();
 
@@ -1050,6 +1061,12 @@ void CvPlayer::uninit()
 	m_iLifetimeCombatExperienceTimes100 = 0;
 	m_iNavalCombatExperienceTimes100 = 0;
 #endif
+
+#if defined(MOD_ROG_CORE)
+	m_iGlobalCityStrengthMod = 0;
+	m_iGlobalRangedStrikeModifier = 0;
+#endif
+
 	m_iBorderObstacleCount = 0;
 	m_iPopRushHurryCount = 0;
 	m_uiStartTime = 0;
@@ -1352,6 +1369,15 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 		for(unsigned int i = 0; i < m_ppiPlotYieldChange.size(); ++i)
 		{
 			m_ppiPlotYieldChange[i] = yield;
+		}
+#endif
+
+#if defined(MOD_ROG_CORE) && defined(MOD_ROG_CORE)
+		m_ppiImprovementYieldChange.clear();
+		m_ppiImprovementYieldChange.resize(GC.getNumImprovementInfos());
+		for (unsigned int i = 0; i < m_ppiImprovementYieldChange.size(); ++i)
+		{
+			m_ppiImprovementYieldChange[i] = yield;
 		}
 #endif
 
@@ -5172,6 +5198,19 @@ void CvPlayer::DoUnitReset()
 			pLoopUnit->changeDamage(iCitadelDamage, NO_PLAYER, /*fAdditionalTextDelay*/ 0.5f);
 #endif
 		}
+
+#if defined(MOD_ROG_CORE)
+		int iCitadelHeal;
+		if (pLoopUnit->IsNearOurCitadel(iCitadelHeal))
+		{
+#if defined(MOD_API_UNIT_STATS)
+			pLoopUnit->changeDamage(-iCitadelHeal, NO_PLAYER, -1, /*fAdditionalTextDelay*/ 0.5f);
+#else
+			pLoopUnit->changeDamage(-iCitadelHeal, NO_PLAYER, /*fAdditionalTextDelay*/ 0.5f);
+#endif
+		}
+#endif
+
 
 		// Finally (now that healing is done), restore movement points
 		pLoopUnit->setMoves(pLoopUnit->maxMoves());
@@ -9317,6 +9356,11 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 		}
 	}
 
+#if defined(MOD_ROG_CORE)
+	ChangeCityStrengthMod(pBuildingInfo->GetGlobalCityStrengthMod()* iChange);
+	ChangeGlobalRangedStrikeModifier(pBuildingInfo->GetGlobalRangedStrikeModifier()* iChange);
+#endif
+
 	if(pBuildingInfo->GetFreeBuildingClass() != NO_BUILDINGCLASS)
 	{
 		BuildingTypes eFreeBuilding = (BuildingTypes)getCivilizationInfo().getCivilizationBuildings(pBuildingInfo->GetFreeBuildingClass());
@@ -9396,7 +9440,44 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 	{
 		pArea->changeYieldRateModifier(GetID(), ((YieldTypes)iI), (pBuildingInfo->GetAreaYieldModifier(iI) * iChange));
 		changeYieldRateModifier(((YieldTypes)iI), (pBuildingInfo->GetGlobalYieldModifier(iI) * iChange));
+
+
+
+#if defined(MOD_ROG_CORE)
+
+		int iMod = pBuildingInfo->GetGreatWorkYieldChange(iI) * iChange;
+		if (iMod != 0)
+		{
+			ChangeGreatWorkYieldChange((YieldTypes)iI, iMod);
+		}
+
+		for (iJ = 0; iJ < GC.getNumResourceInfos(); iJ++)
+		{
+			changeResourceYieldChange(((ResourceTypes)iJ), ((YieldTypes)iI), (pBuildingInfo->GetResourceYieldChangeGlobal((ResourceTypes)iJ, (YieldTypes)iI) * iChange));
+		}
+#endif
 	}
+
+
+
+#if defined(MOD_ROG_CORE)
+	for (iJ = 0; iJ < NUM_YIELD_TYPES; iJ++)
+	{
+		YieldTypes eYield = (YieldTypes)iJ;
+		for (int iK = 0; iK < GC.getNumImprovementInfos(); iK++)
+		{
+			ImprovementTypes eImprovement = (ImprovementTypes)iK;
+			if (eImprovement != NO_IMPROVEMENT)
+			{
+				int iYieldChange = pBuildingInfo->GetImprovementYieldChangeGlobal(eImprovement, eYield);
+				if (iYieldChange != 0)
+				{
+					ChangeImprovementExtraYield(eImprovement, eYield, (iYieldChange * iChange));
+				}
+			}
+		}
+	}
+#endif
 
 	for(iI = 0; iI < GC.getNumSpecialistInfos(); iI++)
 	{
@@ -9442,6 +9523,11 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 	{
 		// Building modifiers
 		BuildingClassTypes eBuildingClass;
+
+#if defined(MOD_ROG_CORE)
+		CvCityBuildings* pLoopCityBuildings = pLoopCity->GetCityBuildings();
+#endif
+
 		for(iI = 0; iI < GC.getNumBuildingClassInfos(); iI++)
 		{
 			eBuildingClass = (BuildingClassTypes) iI;
@@ -9457,6 +9543,11 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 			if(eBuilding != NO_BUILDING)
 			{
 				CvBuildingEntry* pkBuilding = GC.getBuildingInfo(eBuilding);
+
+#if defined(MOD_ROG_CORE)
+				CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo(eBuildingClass);
+#endif
+
 				if(pkBuilding)
 				{
 					iBuildingCount = pLoopCity->GetCityBuildings()->GetNumRealBuilding(eBuilding);
@@ -9488,6 +9579,22 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 								{
 									pLoopCity->ChangeBaseYieldRateFromBuildings(eYield, iYieldChange * iBuildingCount * iChange);
 								}
+
+#if defined(MOD_ROG_CORE)
+								int iWonderYieldChange = pBuildingInfo->GetYieldChangeWorldWonderGlobal(eYield);
+								if (iWonderYieldChange > 0 && isWorldWonderClass(*pkBuildingClassInfo))
+								{
+									pLoopCityBuildings->ChangeBuildingYieldChange(eBuildingClass, eYield, (iWonderYieldChange * iBuildingCount * iChange));
+								}
+
+								//////////////////////////////////////////////////////////////////////////////////////
+
+								int iYieldMod = pBuildingInfo->GetBuildingClassYieldModifier(eBuildingClass, eYield);
+								if (iYieldMod != 0)
+								{
+									pLoopCity->changeYieldRateModifier(eYield, iYieldMod * iBuildingCount * iChange);
+								}
+#endif
 							}
 							}
 						}
@@ -9496,7 +9603,22 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 			}
 		}
 	}
+
+#if defined(MOD_ROG_CORE)
+	//Refresh cache data.
+	countNumBuildings(eBuilding);
+#endif
 }
+
+
+#if defined(MOD_ROG_CORE)
+//	--------------------------------------------------------------------------------
+/// Get yield change from buildings for a specific building class
+int CvPlayer::GetBuildingClassYieldModifier(BuildingClassTypes eBuildingClass, YieldTypes eYieldType)
+{
+	return GetBuildingClassYieldModifier(eBuildingClass, eYieldType, GetTotalBuildingCount());
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 /// Get yield change from buildings for a specific building class
@@ -9526,6 +9648,64 @@ int CvPlayer::GetBuildingClassYieldChange(BuildingClassTypes eBuildingClass, Yie
 	return rtnValue;
 }
 
+
+
+#if defined(MOD_ROG_CORE)
+//	--------------------------------------------------------------------------------
+int CvPlayer::GetBuildingClassYieldModifier(BuildingClassTypes eBuildingClass, YieldTypes eYieldType, const vector<int>& preexistingBuildingsCount)
+{
+	int rtnValue = 0;
+
+	CvBuildingXMLEntries* pBuildings = GC.GetGameBuildings();
+
+	if (pBuildings)
+	{
+		for (int i = 0; i < pBuildings->GetNumBuildings(); i++)
+		{
+			// Do we have this building anywhere in empire?
+			int iNum = preexistingBuildingsCount[i];
+			if (iNum > 0)
+			{
+				CvBuildingEntry* pEntry = pBuildings->GetEntry(i);
+				if (pEntry)
+				{
+					rtnValue += (pEntry->GetBuildingClassYieldModifier(eBuildingClass, eYieldType) * iNum);
+				}
+			}
+		}
+	}
+
+	return rtnValue;
+}
+
+/// Get yield change from buildings for wonders
+int CvPlayer::GetWorldWonderYieldChange(int iYield)
+{
+	int rtnValue = 0;
+
+	CvBuildingXMLEntries* pBuildings = GC.GetGameBuildings();
+
+	if (pBuildings)
+	{
+		for (int i = 0; i < pBuildings->GetNumBuildings(); i++)
+		{
+			// Do we have this building anywhere in empire?
+			int iNum = countNumBuildings((BuildingTypes)i);
+
+			if (iNum > 0)
+			{
+				CvBuildingEntry* pEntry = pBuildings->GetEntry(i);
+				if (pEntry)
+				{
+					rtnValue += (pEntry->GetYieldChangeWorldWonderGlobal(iYield) * iNum);
+				}
+			}
+		}
+	}
+	return rtnValue;
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 /// Can we eBuild on pPlot?
 bool CvPlayer::canBuild(const CvPlot* pPlot, BuildTypes eBuild, bool bTestEra, bool bTestVisible, bool bTestGold, bool bTestPlotOwner) const
@@ -9545,6 +9725,17 @@ bool CvPlayer::canBuild(const CvPlot* pPlot, BuildTypes eBuild, bool bTestEra, b
 			}
 		}
 	}
+
+
+#if defined(MOD_ROG_CORE)
+	if (MOD_ROG_CORE && GC.getBuildInfo(eBuild)->getTechObsolete() != NO_TECH)
+	{
+		if ((GET_TEAM(getTeam()).GetTeamTechs()->HasTech((TechTypes)GC.getBuildInfo(eBuild)->getTechObsolete())))
+		{
+			return false;
+		}
+	}
+#endif
 
 	// Is this an improvement that is only useable by a specific civ?
 	ImprovementTypes eImprovement = (ImprovementTypes)GC.getBuildInfo(eBuild)->getImprovement();
@@ -18790,6 +18981,39 @@ void CvPlayer::setTeam(TeamTypes eTeam)
 	GET_TEAM(getTeam()).changeTotalLand(getTotalLand());
 }
 
+
+#if defined(MOD_ROG_CORE)
+//	--------------------------------------------------------------------------------
+/// Extra yield for a improvement this city is working?
+int CvPlayer::GetImprovementExtraYield(ImprovementTypes eImprovement, YieldTypes eYield) const
+{
+	CvAssertMsg(eImprovement >= 0, "eIndex1 is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eImprovement < GC.getNumFeatureInfos(), "eIndex1 is expected to be within maximum bounds (invalid Index)");
+	CvAssertMsg(eYield >= 0, "eIndex2 is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eYield < NUM_YIELD_TYPES, "eIndex2 is expected to be within maximum bounds (invalid Index)");
+	return m_ppiImprovementYieldChange[eImprovement][eYield];
+}
+
+//	--------------------------------------------------------------------------------
+void CvPlayer::ChangeImprovementExtraYield(ImprovementTypes eImprovement, YieldTypes eYield, int iChange)
+{
+	CvAssertMsg(eImprovement >= 0, "eIndex1 is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eImprovement < GC.getNumImprovementInfos(), "eIndex1 is expected to be within maximum bounds (invalid Index)");
+	CvAssertMsg(eYield >= 0, "eIndex2 is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eYield < NUM_YIELD_TYPES, "eIndex2 is expected to be within maximum bounds (invalid Index)");
+
+	if (iChange != 0)
+	{
+		Firaxis::Array<int, NUM_YIELD_TYPES> yields = m_ppiImprovementYieldChange[eImprovement];
+		yields[eYield] = (m_ppiImprovementYieldChange[eImprovement][eYield] + iChange);
+		m_ppiImprovementYieldChange[eImprovement] = yields;
+		CvAssert(GetImprovementExtraYield(eImprovement, eYield) >= 0);
+
+		updateYield();
+	}
+}
+#endif
+
 //	--------------------------------------------------------------------------------
 bool CvPlayer::IsAITeammateOfHuman() const
 {
@@ -20031,6 +20255,28 @@ int CvPlayer::getNumResourceTotal(ResourceTypes eIndex, bool bIncludeImport) con
 
 	if(pkResource->getResourceUsage() == RESOURCEUSAGE_STRATEGIC)
 	{
+
+#if defined(MOD_ROG_CORE)
+		const CvCity* pLoopCity = NULL;
+		int iLoop = 0;
+		int iCityPOPResource = 0;
+		for (pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
+		{
+			if (pLoopCity != NULL)
+			{
+				if (pLoopCity->GetResourceQuantityFromPOP(eIndex) > 0)
+				{
+					iCityPOPResource += (pLoopCity->getPopulation() * pLoopCity->GetResourceQuantityFromPOP(eIndex));
+				}
+			}
+		}
+
+		iTotalNumResource += iCityPOPResource / 100;
+#endif
+
+
+
+
 		if(GetStrategicResourceMod() != 0)
 		{
 			iTotalNumResource *= GetStrategicResourceMod();
@@ -25422,6 +25668,12 @@ void CvPlayer::Read(FDataStream& kStream)
 	// MOD_SERIALIZE_READ - v57/v58/v59 broke the save format  couldn't be helped, but don't make a habit of it!!!
 	kStream >> m_ppiPlotYieldChange;
 #endif
+
+#if defined(MOD_ROG_CORE)
+	// MOD_SERIALIZE_READ - v57/v58/v59 and v61 broke the save format  couldn't be helped, but don't make a habit of it!!!
+	kStream >> m_ppiImprovementYieldChange;
+#endif
+
 #if defined(MOD_API_UNIFIED_YIELDS)
 	// MOD_SERIALIZE_READ - v57/v58/v59 and v61 broke the save format  couldn't be helped, but don't make a habit of it!!!
 	kStream >> m_ppiFeatureYieldChange;
@@ -25938,6 +26190,12 @@ void CvPlayer::Write(FDataStream& kStream) const
 	// MOD_SERIALIZE_WRITE - v57/v58/v59 broke the save format  couldn't be helped, but don't make a habit of it!!!
 	kStream << m_ppiPlotYieldChange;
 #endif
+
+#if defined(MOD_ROG_CORE)
+	// MOD_SERIALIZE_READ - v57/v58/v59 and v61 broke the save format  couldn't be helped, but don't make a habit of it!!!
+	kStream << m_ppiImprovementYieldChange;
+#endif
+
 #if defined(MOD_API_UNIFIED_YIELDS)
 	// MOD_SERIALIZE_WRITE - v57/v58/v59 and v61 broke the save format  couldn't be helped, but don't make a habit of it!!!
 	kStream << m_ppiFeatureYieldChange;
@@ -26605,6 +26863,60 @@ int CvPlayer::GetNumPlots() const
 
 	return iNumPlots;
 }
+
+
+
+#if defined(MOD_ROG_CORE)
+//	--------------------------------------------------------------------------------
+int CvPlayer::GetGlobalCityStrengthMod() const
+{
+	return m_iGlobalCityStrengthMod;
+}
+
+void CvPlayer::SetGlobalCityStrengthMod(int iValue)
+{
+	CvAssert(iValue >= 0);
+	m_iGlobalCityStrengthMod = iValue;
+
+	// Loop through all Cities and update their strength
+	CvCity* pLoopCity;
+	int iLoop;
+
+	for (pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
+	{
+		pLoopCity->updateStrengthValue();
+	}
+}
+
+void CvPlayer::ChangeGlobalCityStrengthMod(int iChange)
+{
+	if (iChange != 0)
+	{
+		SetGlobalCityStrengthMod(GetGlobalCityStrengthMod() + iChange);
+	}
+}
+
+
+//	--------------------------------------------------------------------------------
+int CvPlayer::GetGlobalRangedStrikeModifier() const
+{
+	return m_iGlobalRangedStrikeModifier;
+}
+
+void CvPlayer::SetGlobalRangedStrikeModifier(int iValue)
+{
+	CvAssert(iValue >= 0);
+	m_iGlobalRangedStrikeModifier = iValue;
+}
+
+void CvPlayer::ChangeGlobalRangedStrikeModifier(int iChange)
+{
+	if (iChange != 0)
+	{
+		SetGlobalRangedStrikeModifier(GetGlobalRangedStrikeModifier() + iChange);
+	}
+}
+#endif
 
 
 //	--------------------------------------------------------------------------------
@@ -27306,6 +27618,26 @@ void CvPlayer::ChangeNumGreatPeople(int iValue)
 		m_iNumGreatPeople += iValue;
 	}
 }
+
+
+#if defined(MOD_ROG_CORE)
+std::vector<int> CvPlayer::GetTotalBuildingCount(bool bIncludePuppets) const
+{
+	std::vector<int> vTotalBuildingCount(GC.getNumBuildingInfos(), 0);
+	int iLoop;
+	for (const CvCity* pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
+	{
+		if (bIncludePuppets || !CityStrategyAIHelpers::IsTestCityStrategy_IsPuppet(pLoopCity))
+		{
+			const std::vector<BuildingTypes>& vBuildings = pLoopCity->GetCityBuildings()->GetAllBuildingsHere();
+			for (size_t i = 0; i < vBuildings.size(); i++)
+				vTotalBuildingCount[vBuildings[i]]++;
+		}
+	}
+
+	return vTotalBuildingCount;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 /// Special ability where city-states gift great people
