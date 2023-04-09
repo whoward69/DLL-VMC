@@ -444,6 +444,12 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(GetAdjacentModifier);
 	Method(GetAttackModifier);
 	Method(GetDefenseModifier);
+
+#if defined(MOD_ROG_CORE)
+	Method(GetMeleeDefenseModifier);
+	Method(GetRangedDefenseModifier);
+#endif
+
 	Method(GetRangedAttackModifier);
 	Method(CityAttackModifier);
 	Method(CityDefenseModifier);
@@ -3413,6 +3419,24 @@ int CvLuaUnit::lGetDefenseModifier(lua_State* L)
 }
 
 #if defined(MOD_ROG_CORE)
+int CvLuaUnit::lGetMeleeDefenseModifier(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getMeleeDefenseModifier();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetRangedDefenseModifier(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->rangedDefenseModifier();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
 //int getForcedDamageValue();
 int CvLuaUnit::lGetForcedDamageValue(lua_State* L)
 {

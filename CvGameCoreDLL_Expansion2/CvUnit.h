@@ -898,6 +898,9 @@ public:
 
 
 #if defined(MOD_ROG_CORE)
+	int getMeleeDefenseModifier() const;
+	void changeMeleeDefenseModifier(int iValue);
+
 	int attackFullyHealedModifier() const;
 	int attackAbove50HealthModifier() const;
 	int attackBelow50HealthModifier() const;
@@ -1762,6 +1765,8 @@ protected:
 #endif
 
 #if defined(MOD_ROG_CORE)
+	FAutoVariable<int, CvUnit> m_iMeleeDefenseModifier;
+
 	FAutoVariable<int, CvUnit> m_iNearbyUnitClassBonus;
 	FAutoVariable<int, CvUnit> m_iNearbyUnitClassBonusRange;
 	FAutoVariable<UnitClassTypes, CvUnit>  m_iCombatBonusFromNearbyUnitClass;

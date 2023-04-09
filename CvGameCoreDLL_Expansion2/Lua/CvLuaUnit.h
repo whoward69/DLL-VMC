@@ -356,6 +356,12 @@ protected:
 	static int lGetAdjacentModifier(lua_State* L);
 	static int lGetAttackModifier(lua_State* L);
 	static int lGetDefenseModifier(lua_State* L);
+
+#if defined(MOD_ROG_CORE)
+	static int lGetMeleeDefenseModifier(lua_State* L);
+	static int lGetRangedDefenseModifier(lua_State* L);
+#endif
+
 	static int lGetRangedAttackModifier(lua_State* L);
 	static int lCityAttackModifier(lua_State* L);
 	static int lCityDefenseModifier(lua_State* L);

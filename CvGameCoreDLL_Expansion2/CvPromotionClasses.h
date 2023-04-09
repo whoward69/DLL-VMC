@@ -126,6 +126,9 @@ public:
 	int GetMoveUsedAttackMod() const;
 	int GetGoldenAgeMod() const;
 	int GetRangedSupportFireMod() const;
+
+
+	int GetMeleeDefenseMod() const;
 #endif
 
 #if defined(MOD_ROG_CORE)	
@@ -395,6 +398,8 @@ protected:
 	int m_iGoldenAgeMod;
 
 	int m_iRangedSupportFireMod;
+
+	int m_iMeleeDefenseMod;
 #endif
 
 #if defined(MOD_ROG_CORE)

@@ -98,6 +98,8 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iMoveUsedAttackMod(0),
 	m_iGoldenAgeMod(0),
 	m_iRangedSupportFireMod(0),
+
+	m_iMeleeDefenseMod(0),
 #endif
 
 #if defined(MOD_ROG_CORE)
@@ -369,6 +371,8 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iAttackBelowHealthMod = kResults.GetInt("AttackBelowEqual50HealthMod");
 	m_bStrongerDamaged = kResults.GetBool("StrongerDamaged");
 	m_bFightWellDamaged = kResults.GetBool("FightWellDamaged");
+
+	m_iMeleeDefenseMod = kResults.GetInt("MeleeDefenseMod");
 #endif
 
 
@@ -1359,6 +1363,11 @@ int CvPromotionEntry::GetAuraEffectChange() const
 
 
 #if defined(MOD_ROG_CORE)
+int CvPromotionEntry::GetMeleeDefenseMod() const
+{
+	return m_iMeleeDefenseMod;
+}
+
 int CvPromotionEntry::GetAttackFullyHealedMod() const
 {
 	return m_iAttackFullyHealedMod;

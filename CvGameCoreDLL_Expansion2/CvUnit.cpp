@@ -293,6 +293,8 @@ CvUnit::CvUnit() :
 		, m_iFightWellDamaged("CvUnit::m_iFightWellDamaged", m_syncArchive)
 
 #if defined(MOD_ROG_CORE)
+		, m_iMeleeDefenseModifier("CvUnit::m_iMeleeDefenseModifier", m_syncArchive)
+
 		, m_iAoEDamageOnMove("CvUnit::m_iAoEDamageOnMove", m_syncArchive)
 		, m_iForcedDamage("CvUnit::m_iForcedDamage", m_syncArchive)
 		, m_iChangeDamage("CvUnit::m_iChangeDamage", m_syncArchive)
@@ -1067,6 +1069,8 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 #endif
 
 #if defined(MOD_ROG_CORE)
+	m_iMeleeDefenseModifier = 0;
+
 	m_iAoEDamageOnMove = 0;
 	m_iForcedDamage = 0;
 	m_iChangeDamage = 0;
@@ -13079,6 +13083,10 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 	if(bFromRangedAttack)
 		iModifier += rangedDefenseModifier();
 
+#if defined(MOD_ROG_CORE)
+	if (!bFromRangedAttack)
+		iModifier += getMeleeDefenseModifier();
+#endif 
 
 	// this may be always zero for defense against ranged
 	iModifier += GetDamageCombatModifier(bFromRangedAttack);
@@ -16066,6 +16074,26 @@ void CvUnit::changeDefenseModifier(int iValue)
 		m_iDefenseModifier += iValue;
 	}
 }
+
+#if defined(MOD_ROG_CORE)
+//	--------------------------------------------------------------------------------
+int CvUnit::getMeleeDefenseModifier() const
+{
+	VALIDATE_OBJECT
+		return m_iMeleeDefenseModifier;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeMeleeDefenseModifier(int iValue)
+{
+	VALIDATE_OBJECT
+		if (iValue != 0)
+		{
+			m_iMeleeDefenseModifier += iValue;
+		}
+}
+#endif
+
 
 //	--------------------------------------------------------------------------------
 int CvUnit::cityAttackModifier() const
@@ -22102,6 +22130,8 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeMoveUsedAttackMod(thisPromotion.GetMoveUsedAttackMod() * iChange);
 		ChangeGoldenAgeMod(thisPromotion.GetGoldenAgeMod() * iChange);
 		ChangeRangedSupportFireMod(thisPromotion.GetRangedSupportFireMod() * iChange);
+
+		changeMeleeDefenseModifier(thisPromotion.GetMeleeDefenseMod() * iChange);
 #endif
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
@@ -25862,6 +25892,13 @@ int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
 			iValue = GetPromotionValue(pkPromotionInfo->GetDefenseMod(), getDefenseModifier(), iFlavorDefense, lowPriority);
 		}
 
+#if defined(MOD_ROG_CORE)
+		if (iValue == 0)
+		{
+			iValue = GetPromotionValue(pkPromotionInfo->GetMeleeDefenseMod(), getMeleeDefenseModifier(), iFlavorDefense, lowPriority);
+		}
+#endif
+
 		if (iValue == 0)
 		{
 			iValue = GetPromotionValue(pkPromotionInfo->GetFlankAttackModifier(), maxMoves() > 2 ? 1 : 0, iFlavorMobile, lowPriority);
@@ -26339,6 +26376,29 @@ int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
 		iTemp /= 100;
 		iValue += iTemp + iFlavorDefense * 2;
 	}
+
+
+#if defined(MOD_ROG_CORE)
+	iTemp = pkPromotionInfo->GetMeleeDefenseMod();
+	if (iTemp != 0)
+	{
+		iExtra = getMeleeDefenseModifier() * 2;
+		iTemp *= (100 + iExtra);
+		iTemp /= 100;
+		// likely not a ranged unit
+		if ((AI_getUnitAIType() == UNITAI_DEFENSE) || (AI_getUnitAIType() == UNITAI_RANGED) || (AI_getUnitAIType() == UNITAI_ATTACK))
+		{
+			iTemp *= 2;
+		}
+		// a slow unit
+		if (maxMoves() / GC.getMOVE_DENOMINATOR() <= 2)
+		{
+			iTemp *= 2;
+		}
+		iValue += iTemp + iFlavorDefense * 2;
+	}
+#endif
+
 
 
 

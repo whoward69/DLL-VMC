@@ -3135,13 +3135,14 @@ int CvPlot::defenseModifier(TeamTypes eDefender, bool, bool bHelp) const
 		iModifier = /*25*/ GC.getHILLS_EXTRA_DEFENSE();
 	}
 	// Feature
-	else if(getFeatureType() != NO_FEATURE)
+	//else if(getFeatureType() != NO_FEATURE)
+	if (getFeatureType() != NO_FEATURE)
 	{
 		iModifier = GC.getFeatureInfo(getFeatureType())->getDefenseModifier();
 	}
 	// Terrain
-	else
-	{
+	//else
+	//{
 		iModifier = GC.getTerrainInfo(getTerrainType())->getDefenseModifier();
 
 		// Flat land gives defensive PENALTY
@@ -3149,7 +3150,7 @@ int CvPlot::defenseModifier(TeamTypes eDefender, bool, bool bHelp) const
 		{
 			iModifier += /*-25*/ GC.getFLAT_LAND_EXTRA_DEFENSE();
 		}
-	}
+	//}
 
 	if(bHelp)
 	{
