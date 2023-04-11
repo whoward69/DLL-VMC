@@ -5457,6 +5457,19 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 					{
 						GET_PLAYER(getOwner()).GetTreasury()->ChangeBaseImprovementGoldMaintenance(-GC.getImprovementInfo(getImprovementType())->GetGoldMaintenance());
 					}
+
+
+
+#if defined(MOD_ROG_CORE)
+					//Resource from improvement - change ownership if needed.
+					ResourceTypes eResourceFromImprovement = (ResourceTypes)pImprovementInfo->GetResourceFromImprovement();
+					int iQuantity = pImprovementInfo->GetResourceQuantityFromImprovement();
+
+					if (eOldOwner != NO_PLAYER && eResourceFromImprovement != NO_RESOURCE)
+					{
+						GET_PLAYER(getOwner()).changeNumResourceTotal(eResourceFromImprovement, (-1 * iQuantity));
+					}
+#endif
 				}
 
 				// Route is here
@@ -5634,6 +5647,22 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 					{
 						GET_PLAYER(eNewValue).GetTreasury()->ChangeBaseImprovementGoldMaintenance(GC.getImprovementInfo(getImprovementType())->GetGoldMaintenance());
 					}
+
+
+#if defined(MOD_ROG_CORE)
+					if (!IsImprovementPillaged())
+					{
+						//Resource from improvement - change ownership if needed.
+						ResourceTypes eResourceFromImprovement = (ResourceTypes)pImprovementInfo->GetResourceFromImprovement();
+						int iQuantity = pImprovementInfo->GetResourceQuantityFromImprovement();
+
+						if (eResourceFromImprovement != NO_RESOURCE)
+						{
+							GET_PLAYER(eNewValue).changeNumResourceTotal(eResourceFromImprovement, iQuantity);
+							//setResourceType(eResourceFromImprovement, iQuantity);
+						}
+					}
+#endif
 				}
 
 				// Route is here
@@ -7087,6 +7116,18 @@ void CvPlot::setImprovementType(ImprovementTypes eNewValue, PlayerTypes eBuilder
 						owningPlayer.changeNumResourceUsed((ResourceTypes) iResourceLoop, -oldImprovementEntry.GetResourceQuantityRequirement(iResourceLoop));
 					}
 				}
+
+#if defined(MOD_ROG_CORE)
+				//Resource from improvement - change ownership if needed.
+				ResourceTypes eResourceFromImprovement = (ResourceTypes)oldImprovementEntry.GetResourceFromImprovement();
+				int iQuantity = oldImprovementEntry.GetResourceQuantityFromImprovement();
+
+				if (eResourceFromImprovement != NO_RESOURCE && !IsImprovementPillaged())
+				{
+					owningPlayer.changeNumResourceTotal(eResourceFromImprovement, -iQuantity);
+				}
+#endif
+
 			}
 
 			// Someone had built something here in an unowned plot, remove effects of the old improvement
@@ -7227,6 +7268,18 @@ void CvPlot::setImprovementType(ImprovementTypes eNewValue, PlayerTypes eBuilder
 					}
 				}
 
+
+#if defined(MOD_ROG_CORE)
+				//Resource from improvement - change ownership if needed.
+				ResourceTypes eResourceFromImprovement = (ResourceTypes)newImprovementEntry.GetResourceFromImprovement();
+				int iQuantity = newImprovementEntry.GetResourceQuantityFromImprovement();
+
+				if (eResourceFromImprovement != NO_RESOURCE && !IsImprovementPillaged())
+				{
+					owningPlayer.changeNumResourceTotal(eResourceFromImprovement, iQuantity);
+				}
+#endif
+
 				// Add Resource Quantity to total
 				if(getResourceType() != NO_RESOURCE)
 				{
@@ -7296,6 +7349,27 @@ void CvPlot::setImprovementType(ImprovementTypes eNewValue, PlayerTypes eBuilder
 						}
 					}
 				}
+
+#if defined(MOD_ROG_CORE)
+				//Resource from improvement - change ownership if needed.
+				ResourceTypes eResourceFromImprovement = (ResourceTypes)GC.getImprovementInfo(eOldImprovement)->GetResourceFromImprovement();
+				int iQuantity = (ResourceTypes)GC.getImprovementInfo(eOldImprovement)->GetResourceQuantityFromImprovement();
+
+				if (eResourceFromImprovement != NO_RESOURCE && eNewValue != NO_IMPROVEMENT)
+				{
+
+					if (eOldImprovement != NO_IMPROVEMENT)
+					{
+						owningPlayer.changeNumResourceTotal(eResourceFromImprovement, (-1 * iQuantity));
+					}
+					else
+					{
+						owningPlayer.changeNumResourceTotal(eResourceFromImprovement, (-1 * iQuantity), true);
+					}
+				}
+#endif
+
+
 			}
 		}
 
@@ -7389,6 +7463,28 @@ void CvPlot::SetImprovementPillaged(bool bPillaged)
 				}
 			}
 		}
+
+
+#if defined(MOD_ROG_CORE)
+		// Quantified Resource changes for improvements
+		if (getImprovementType() != NO_IMPROVEMENT)
+		{
+			//Resource from improvement - change ownership if needed.
+			ResourceTypes eResourceFromImprovement = (ResourceTypes)GC.getImprovementInfo(getImprovementType())->GetResourceFromImprovement();
+			int iQuantity = GC.getImprovementInfo(getImprovementType())->GetResourceQuantityFromImprovement();
+
+			if (bPillaged && (eResourceFromImprovement != NO_RESOURCE))
+			{
+				GET_PLAYER(getOwner()).changeNumResourceTotal(eResourceFromImprovement, (-1 * iQuantity), true);
+			}
+			else if (!bPillaged && (eResourceFromImprovement != NO_RESOURCE))
+			{
+				GET_PLAYER(getOwner()).changeNumResourceTotal(eResourceFromImprovement, iQuantity, true);
+			}
+
+		}
+#endif
+
 		
 #if defined(MOD_EVENTS_TILE_IMPROVEMENTS)
 		if (bEvents && MOD_EVENTS_TILE_IMPROVEMENTS) {

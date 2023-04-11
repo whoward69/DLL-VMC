@@ -150,6 +150,8 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iRangedStrikeModifier(0),
 	m_iPopulationChange(0),
 
+	m_iResetDamageValue(0),
+	m_iReduceDamageValue(0),
 
 	m_iGlobalCityStrengthMod(0),
 	m_iGlobalRangedStrikeModifier(0),
@@ -358,6 +360,8 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iRangedStrikeModifier = kResults.GetInt("RangedStrikeModifier");
 	m_iPopulationChange = kResults.GetInt("PopulationChange");
 
+	m_iResetDamageValue = kResults.GetInt("ResetDamageValue");
+	m_iReduceDamageValue = kResults.GetInt("ReduceDamageValue");
 
 	m_iGlobalCityStrengthMod = kResults.GetInt("GlobalCityStrengthMod");
 	m_iGlobalRangedStrikeModifier = kResults.GetInt("GlobalRangedStrikeModifier");
@@ -1555,6 +1559,17 @@ int CvBuildingEntry::GetPopulationChange() const
 {
 	return m_iPopulationChange;
 }
+
+int CvBuildingEntry::GetResetDamageValue() const
+{
+	return m_iResetDamageValue;
+}
+
+int CvBuildingEntry::GetReduceDamageValue() const
+{
+	return m_iReduceDamageValue;
+}
+
 #endif
 
 

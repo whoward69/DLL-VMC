@@ -84,6 +84,15 @@ CvImprovementEntry::CvImprovementEntry(void):
 	m_iFreshWaterUpgradeMod(0),
 	m_iDefenseModifier(0),
 	m_iNearbyEnemyDamage(0),
+
+#if defined(MOD_ROG_CORE)
+	m_iNearbyFriendHeal(0),
+
+	m_iImprovementResource(NO_RESOURCE),
+	m_iImprovementResourceQuantity(0),
+#endif
+
+
 	m_iPillageGold(0),
 	m_iResourceExtractionMod(0),
 	m_iLuxuryCopiesSiphonedFromMinor(0),
@@ -327,6 +336,17 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 	m_iFreshWaterUpgradeMod = kResults.GetInt("FreshWaterUpgradeMod");
 	m_iDefenseModifier = kResults.GetInt("DefenseModifier");
 	m_iNearbyEnemyDamage = kResults.GetInt("NearbyEnemyDamage");
+
+
+#if defined(MOD_ROG_CORE)
+	m_iNearbyFriendHeal = kResults.GetInt("NearbyFriendHeal");
+
+	const char* szImprovementResource = kResults.GetText("ImprovementResource");
+	m_iImprovementResource = (ResourceTypes)GC.getInfoTypeForString(szImprovementResource, true);
+	m_iImprovementResourceQuantity = kResults.GetInt("ImprovementResourceQuantity");
+#endif
+
+
 	m_iPillageGold = kResults.GetInt("PillageGold");
 	m_bOutsideBorders = kResults.GetBool("OutsideBorders");
 	m_bInAdjacentFriendly = kResults.GetBool("InAdjacentFriendly");
@@ -859,6 +879,18 @@ int CvImprovementEntry::GetDefenseModifier() const
 int CvImprovementEntry::GetNearbyFriendHeal() const
 {
 	return m_iNearbyFriendHeal;
+}
+
+
+// Does this improvement create a resource when construced?
+int CvImprovementEntry::GetResourceFromImprovement() const
+{
+	return m_iImprovementResource;
+}
+// Does this improvement create a resource when construced?
+int CvImprovementEntry::GetResourceQuantityFromImprovement() const
+{
+	return m_iImprovementResourceQuantity;
 }
 #endif
 

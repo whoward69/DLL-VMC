@@ -88,6 +88,9 @@ public:
 
 #if defined(MOD_ROG_CORE)
 	int GetNearbyFriendHeal() const;
+
+	int GetResourceFromImprovement() const;
+	int GetResourceQuantityFromImprovement() const;
 #endif
 
 #if defined(MOD_GLOBAL_RELOCATION)
@@ -250,6 +253,9 @@ protected:
 
 #if defined(MOD_ROG_CORE)
 	int m_iNearbyFriendHeal;
+
+	int m_iImprovementResource;
+	int m_iImprovementResourceQuantity;
 #endif
 
 #if defined(MOD_GLOBAL_RELOCATION)

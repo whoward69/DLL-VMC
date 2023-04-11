@@ -842,6 +842,9 @@ public:
 	int getResetDamageValue()const;
 	void changeResetDamageValue(int iChange);
 
+	int getReduceDamageValue()const;
+	void changeReduceDamageValue(int iChange);
+
 #endif
 
 	void changeExtraAttacks(int iChange);
@@ -1125,6 +1128,8 @@ protected:
 	FAutoVariable<int, CvCity> m_iExtraDamageHeal;
 	FAutoVariable<int, CvCity> m_iCityBuildingRangeStrikeModifier;
 
+	FAutoVariable<int, CvCity> m_iResetDamageValue;
+	FAutoVariable<int, CvCity> m_iReduceDamageValue;
 #endif
 
 	int m_iNukeInterceptionChance;

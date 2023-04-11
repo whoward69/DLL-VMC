@@ -139,6 +139,18 @@ void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender
 		}
 #endif
 
+#if defined(MOD_ROG_CORE)
+		if (pkCity->getResetDamageValue() != 0)
+		{
+			iAttackerDamageInflicted = pkCity->getResetDamageValue();
+		}
+		if (pkCity->getReduceDamageValue() != 0)
+		{
+			iAttackerDamageInflicted += pkCity->getReduceDamageValue();
+			if (iAttackerDamageInflicted <= 0)
+				iAttackerDamageInflicted = 0;
+		}
+#endif
 
 
 		int iAttackerTotalDamageInflicted = iAttackerDamageInflicted + pkCity->getDamage();
@@ -764,6 +776,18 @@ void CvUnitCombat::GenerateRangedCombatInfo(CvUnit& kAttacker, CvUnit* pkDefende
 
 		iDamage = kAttacker.GetRangeCombatDamage(/*pDefender*/ NULL, pCity, /*bIncludeRand*/ true);
 
+#if defined(MOD_ROG_CORE)
+		if (pCity->getResetDamageValue() != 0)
+		{
+			iDamage = pCity->getResetDamageValue();
+		}
+		if (pCity->getReduceDamageValue() != 0)
+		{
+			iDamage += pCity->getReduceDamageValue();
+			if (iDamage <= 0)
+				iDamage = 0;
+		}
+#endif
 
 
 
@@ -1609,7 +1633,18 @@ void CvUnitCombat::GenerateAirCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, 
 
 		iAttackerDamageInflicted = kAttacker.GetAirCombatDamage(/*pUnit*/ NULL, pCity, /*bIncludeRand*/ true, iInterceptionDamage);
 
-
+#if defined(MOD_ROG_CORE)
+		if (pCity->getResetDamageValue() != 0)
+		{
+			iAttackerDamageInflicted = pCity->getResetDamageValue();
+		}
+		if (pCity->getReduceDamageValue() != 0)
+		{
+			iAttackerDamageInflicted += pCity->getReduceDamageValue();
+			if (iAttackerDamageInflicted <= 0)
+				iAttackerDamageInflicted = 0;
+		}
+#endif
 
 
 		// Cities can't be knocked to less than 1 HP

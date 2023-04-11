@@ -195,6 +195,9 @@ public:
 
 	int GetGlobalCityStrengthMod() const;
 	int GetGlobalRangedStrikeModifier() const;
+
+	int GetResetDamageValue() const;
+	int GetReduceDamageValue() const;
 #endif
 
 
@@ -475,6 +478,8 @@ private:
 	int m_iRangedStrikeModifier;
 	int m_iPopulationChange;
 
+	int m_iResetDamageValue;
+	int m_iReduceDamageValue;
 
 	int m_iGlobalCityStrengthMod;
 	int m_iGlobalRangedStrikeModifier;

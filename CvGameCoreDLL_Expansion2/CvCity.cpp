@@ -156,6 +156,8 @@ CvCity::CvCity() :
 	, m_iExtraDamageHeal("CvCity::m_iExtraDamageHeal", m_syncArchive)
 	, m_iCityBuildingRangeStrikeModifier("CvCity::m_iCityBuildingRangeStrikeModifier", m_syncArchive)
 
+	, m_iResetDamageValue("CvCity::m_iResetDamageValue", m_syncArchive)
+	, m_iReduceDamageValue("CvCity::m_iReduceDamageValue", m_syncArchive)
 #endif
 
 	, m_iNumAttacks("CvCity::m_iNumAttacks", m_syncArchive)
@@ -942,6 +944,8 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_iExtraDamageHeal = 0;
 	m_iCityBuildingRangeStrikeModifier = 0;
 
+	m_iResetDamageValue = 0;
+	m_iReduceDamageValue = 0;
 #endif
 
 	m_iNumAttacks = 1;
@@ -6794,6 +6798,9 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 #if defined(MOD_ROG_CORE)
 		changeExtraDamageHeal(pBuildingInfo->GetExtraDamageHeal()* iChange);
 		changeCityBuildingRangeStrikeModifier(pBuildingInfo->CityRangedStrikeModifier()* iChange);
+
+		changeResetDamageValue(pBuildingInfo->GetResetDamageValue()* iChange);
+		changeReduceDamageValue(pBuildingInfo->GetReduceDamageValue()* iChange);
 #endif
 
 		changeExtraAttacks(pBuildingInfo->GetExtraAttacks()* iChange);
@@ -15913,7 +15920,9 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iAttacksMade;
 	kStream >> m_iNukeInterceptionChance;
 	kStream >> m_aiYieldPerPopInEmpire;
-	//kStream >> m_yieldChanges;
+	
+	kStream >> m_iResetDamageValue;
+	kStream >> m_iReduceDamageValue;
 #endif
 
 
@@ -16315,7 +16324,9 @@ void CvCity::write(FDataStream& kStream) const
 
 
 	kStream << m_aiYieldPerPopInEmpire;
-	//kStream << m_yieldChanges;
+
+	kStream << m_iResetDamageValue;
+	kStream << m_iReduceDamageValue;
 #endif
 
 
@@ -16787,6 +16798,39 @@ void CvCity::changeExtraDamageHeal(int iChange)
 		if (iChange != 0)
 		{
 			m_iExtraDamageHeal += iChange;
+		}
+}
+
+//	--------------------------------------------------------------------------------
+int CvCity::getResetDamageValue() const
+{
+	VALIDATE_OBJECT
+		return m_iResetDamageValue;
+}
+
+//	--------------------------------------------------------------------------------
+void CvCity::changeResetDamageValue(int iChange)
+{
+	VALIDATE_OBJECT
+		if (iChange != 0)
+		{
+			m_iResetDamageValue += iChange;
+		}
+}
+//	--------------------------------------------------------------------------------
+int CvCity::getReduceDamageValue() const
+{
+	VALIDATE_OBJECT
+		return m_iReduceDamageValue;
+}
+
+//	--------------------------------------------------------------------------------
+void CvCity::changeReduceDamageValue(int iChange)
+{
+	VALIDATE_OBJECT
+		if (iChange != 0)
+		{
+			m_iReduceDamageValue += iChange;
 		}
 }
 #endif
