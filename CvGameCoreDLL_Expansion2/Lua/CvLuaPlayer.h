@@ -966,6 +966,7 @@ protected:
 	static int lHasReceivedNetTurnComplete(lua_State* L);
 	static int lGetTraitGoldenAgeCombatModifier(lua_State* L);
 	static int lGetTraitCityStateCombatModifier(lua_State* L);
+	static int lGetTraitCityStateFriendshipModifier(lua_State* L);
 	static int lGetTraitGreatGeneralExtraBonus(lua_State* L);
 	static int lGetTraitGreatScientistRateModifier(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_TRAITS_ANY_BELIEF)
