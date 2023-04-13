@@ -362,6 +362,7 @@ protected:
 	static int lGetRangedDefenseModifier(lua_State* L);
 #endif
 
+
 	static int lGetRangedAttackModifier(lua_State* L);
 	static int lCityAttackModifier(lua_State* L);
 	static int lCityDefenseModifier(lua_State* L);
@@ -408,6 +409,13 @@ protected:
 	static int lGetChangeDamageValue(lua_State* L);
 	static int lGetNearbyUnitClassModifierFromUnitClass(lua_State* L);
 #endif
+
+#if defined(MOD_ROG_CORE)
+	static int lGetHPHealedIfDefeatEnemyGlobal(lua_State* L);
+	static int lGetNumOriginalCapitalDefenseMod(lua_State* L);
+	static int lGetNumOriginalCapitalAttackMod(lua_State* L);
+#endif
+
 
 	static int lGetDamageCombatModifier(lua_State* L);
 	static int lDomainAttack(lua_State* L);

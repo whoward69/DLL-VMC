@@ -127,7 +127,6 @@ public:
 	int GetGoldenAgeMod() const;
 	int GetRangedSupportFireMod() const;
 
-
 	int GetMeleeDefenseMod() const;
 #endif
 
@@ -140,6 +139,12 @@ public:
 	int  GetAttackBelowHealthMod() const;
 	bool IsStrongerDamaged() const;
 	bool IsFightWellDamaged() const;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int GetHPHealedIfDefeatEnemyGlobal() const;
+	int GetNumOriginalCapitalAttackMod() const;
+	int GetNumOriginalCapitalDefenseMod() const;
 #endif
 
 #if defined(MOD_ROG_CORE)
@@ -425,6 +430,11 @@ protected:
 	int* m_piDomainAttackPercent;
 	int* m_piDomainDefensePercent;
 
+#if defined(MOD_ROG_CORE)
+	int m_iHPHealedIfDefeatEnemyGlobal;
+	int m_iNumOriginalCapitalAttackMod;
+	int m_iNumOriginalCapitalDefenseMod;
+#endif
 
 
 	bool m_bCannotBeChosen;

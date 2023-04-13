@@ -5425,6 +5425,15 @@ public:
 	{
 		return m_iGOLDEN_AGE_LENGTH;
 	}
+
+#if defined(MOD_ROG_CORE)
+	inline int getORIGINAL_CAPITAL_MODMAX()
+	{
+		return m_iORIGINAL_CAPITAL_MODMAX;
+	}
+#endif
+
+
 	inline int getGOLDEN_AGE_GREAT_PEOPLE_MODIFIER()
 	{
 		return m_iGOLDEN_AGE_GREAT_PEOPLE_MODIFIER;
@@ -8986,6 +8995,12 @@ protected:
 	int m_iBASE_GOLDEN_AGE_UNITS;
 	int m_iGOLDEN_AGE_UNITS_MULTIPLIER;
 	int m_iGOLDEN_AGE_LENGTH;
+
+#if defined(MOD_ROG_CORE)
+	int m_iORIGINAL_CAPITAL_MODMAX;
+#endif
+
+
 	int m_iGOLDEN_AGE_GREAT_PEOPLE_MODIFIER;
 	int m_iMIN_UNIT_GOLDEN_AGE_TURNS;
 	int m_iGOLDEN_AGE_CULTURE_MODIFIER;

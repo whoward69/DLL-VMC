@@ -932,6 +932,18 @@ public:
 	void ChangeIsFightWellDamaged(int iChange);
 #endif
 
+
+#if defined(MOD_ROG_CORE)
+	int getHPHealedIfDefeatEnemyGlobal() const;
+	void changeHPHealedIfDefeatEnemyGlobal(int iValue);
+
+	int getNumOriginalCapitalAttackMod() const;
+	void changeNumOriginalCapitalAttackMod(int iValue);
+
+	int getNumOriginalCapitalDefenseMod() const;
+	void changeNumOriginalCapitalDefenseMod(int iValue);
+#endif
+
 	int getAmphibCount() const;
 	bool isAmphib() const;
 	void changeAmphibCount(int iChange);
@@ -1772,6 +1784,11 @@ protected:
 	FAutoVariable<UnitClassTypes, CvUnit>  m_iCombatBonusFromNearbyUnitClass;
 #endif
 
+#if defined(MOD_ROG_CORE)
+	FAutoVariable<int, CvUnit> m_iNumOriginalCapitalAttackMod;
+	FAutoVariable<int, CvUnit> m_iNumOriginalCapitalDefenseMod;
+	FAutoVariable<int, CvUnit> m_iHPHealedIfDefeatEnemyGlobal;
+#endif
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	FAutoVariable<int, CvUnit> m_iCanCrossMountainsCount;

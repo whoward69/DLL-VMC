@@ -4093,6 +4093,8 @@ void CvUnitCombat::ApplyPostCombatTraitEffects(CvUnit* pkWinner, CvUnit* pkLoser
 {
 	int iExistingDelay = 0;
 
+	CvPlayer& kPlayer = GET_PLAYER(pkWinner->getOwner());
+
 	// "Heal if defeat enemy" promotion; doesn't apply if defeat a barbarian
 	if(pkWinner->getHPHealedIfDefeatEnemy() > 0 && (pkLoser->getOwner() != BARBARIAN_PLAYER || !(pkWinner->IsHealIfDefeatExcludeBarbarians())))
 	{
@@ -4121,7 +4123,17 @@ void CvUnitCombat::ApplyPostCombatTraitEffects(CvUnit* pkWinner, CvUnit* pkLoser
 	}
 #endif
 
-	CvPlayer& kPlayer = GET_PLAYER(pkWinner->getOwner());
+#if defined(MOD_ROG_CORE)
+
+	// All units heal from defeat a UNIT?
+	if (pkWinner->getHPHealedIfDefeatEnemyGlobal() > 0)
+	{
+		kPlayer.DoHealGlobal(pkWinner->getHPHealedIfDefeatEnemyGlobal());
+	}
+#endif
+
+
+	
 	if (pkWinner->GetGoldenAgeValueFromKills() > 0)
 	{
 #if defined(MOD_API_EXTENSIONS)

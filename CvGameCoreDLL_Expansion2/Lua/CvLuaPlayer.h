@@ -769,6 +769,12 @@ protected:
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(GetNumPuppetCities, int);
 #endif
+
+
+#if defined(MOD_ROG_CORE)
+	static int lGetNumOriginalCapital(lua_State* L);
+#endif
+
 	static int lGetCityByID(lua_State* L);
 
 	static int lGetUnits(lua_State* L);

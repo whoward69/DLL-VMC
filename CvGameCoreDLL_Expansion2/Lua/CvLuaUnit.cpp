@@ -394,6 +394,12 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(GetDamageCombatModifier);
 
 #if defined(MOD_ROG_CORE)
+	Method(GetHPHealedIfDefeatEnemyGlobal);
+	Method(GetNumOriginalCapitalDefenseMod);
+	Method(GetNumOriginalCapitalAttackMod);
+#endif
+
+#if defined(MOD_ROG_CORE)
 	if (MOD_ROG_CORE)
 	{
 		Method(AttackFullyHealedModifier);
@@ -3501,6 +3507,39 @@ int CvLuaUnit::lAttackBelow50Modifier(lua_State* L)
 }
 #endif
 
+
+
+#if defined(MOD_ROG_CORE)
+
+
+int CvLuaUnit::lGetHPHealedIfDefeatEnemyGlobal(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getHPHealedIfDefeatEnemyGlobal();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetNumOriginalCapitalDefenseMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getNumOriginalCapitalDefenseMod();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+
+int CvLuaUnit::lGetNumOriginalCapitalAttackMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getNumOriginalCapitalAttackMod();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+#endif
 
 //------------------------------------------------------------------------------
 //int GetRangedAttackModifier();

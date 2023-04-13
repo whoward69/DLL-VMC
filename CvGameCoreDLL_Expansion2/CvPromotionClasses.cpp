@@ -120,7 +120,11 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iCombatBonusFromNearbyUnitClass(NO_UNITCLASS),
 #endif
 
-
+#if defined(MOD_ROG_CORE)
+	m_iHPHealedIfDefeatEnemyGlobal(0),
+	m_iNumOriginalCapitalAttackMod(0),
+	m_iNumOriginalCapitalDefenseMod(0),
+#endif
 
 
 
@@ -383,6 +387,12 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 		m_iGoldenAgeMod = kResults.GetInt("GoldenAgeMod");
 		m_iRangedSupportFireMod = kResults.GetInt("RangedSupportFireMod");
 	}
+#endif
+
+#if defined(MOD_ROG_CORE)
+     	m_iHPHealedIfDefeatEnemyGlobal = kResults.GetInt("HPHealedIfDestroyEnemyGlobal");
+		m_iNumOriginalCapitalAttackMod = kResults.GetInt("NumOriginalCapitalAttackMod");
+		m_iNumOriginalCapitalDefenseMod = kResults.GetInt("NumOriginalCapitalDefenseMod");
 #endif
 
 
@@ -1360,7 +1370,22 @@ int CvPromotionEntry::GetAuraEffectChange() const
 }
 #endif
 
+#if defined(MOD_ROG_CORE)
+int CvPromotionEntry::GetHPHealedIfDefeatEnemyGlobal() const
+{
+	return m_iHPHealedIfDefeatEnemyGlobal;
+}
 
+int CvPromotionEntry::GetNumOriginalCapitalAttackMod() const
+{
+	return m_iNumOriginalCapitalAttackMod;
+}
+
+int CvPromotionEntry::GetNumOriginalCapitalDefenseMod() const
+{
+	return m_iNumOriginalCapitalDefenseMod;
+}
+#endif
 
 #if defined(MOD_ROG_CORE)
 int CvPromotionEntry::GetMeleeDefenseMod() const

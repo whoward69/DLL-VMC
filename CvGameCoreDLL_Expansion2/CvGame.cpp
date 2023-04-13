@@ -4075,6 +4075,20 @@ int CvGame::goldenAgeLength() const
 	return iLength;
 }
 
+
+#if defined(MOD_ROG_CORE)
+int CvGame::NumOriginalCapitalModMax() const
+{
+	int iMax;
+
+	iMax = GC.getORIGINAL_CAPITAL_MODMAX();
+
+	return iMax;
+}
+#endif
+
+
+
 //	--------------------------------------------------------------------------------
 int CvGame::victoryDelay(VictoryTypes eVictory) const
 {

@@ -1,3 +1,4 @@
+
 /*	-------------------------------------------------------------------------------------------------------
 	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
@@ -301,6 +302,12 @@ CvUnit::CvUnit() :
 		, m_iExtraAttackAboveHealthMod("CvUnit::m_iExtraAttackAboveHealthMod", m_syncArchive)
 		, m_iExtraAttackBelowHealthMod("CvUnit::m_iExtraAttackBelowHealthMod", m_syncArchive)
 		, m_iExtraFullyHealedMod("CvUnit::m_iExtraFullyHealedMod", m_syncArchive)
+#endif
+
+#if defined(MOD_ROG_CORE)
+		, m_iHPHealedIfDefeatEnemyGlobal("CvUnit::m_iHPHealedIfDefeatEnemyGlobal", m_syncArchive)
+		, m_iNumOriginalCapitalAttackMod("CvUnit::m_iNumOriginalCapitalAttackMod", m_syncArchive)
+		, m_iNumOriginalCapitalDefenseMod("CvUnit::m_iNumOriginalCapitalDefenseMod", m_syncArchive)
 #endif
 
 
@@ -1089,6 +1096,12 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iRangedSupportFireMod = 0;
 #endif
 
+
+#if defined(MOD_ROG_CORE)
+	m_iNumOriginalCapitalAttackMod = 0;
+	m_iNumOriginalCapitalDefenseMod = 0;
+	m_iHPHealedIfDefeatEnemyGlobal = 0;
+#endif
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	m_iCanCrossMountainsCount = 0;
@@ -12825,6 +12838,8 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 {
 	VALIDATE_OBJECT
 
+	CvPlayerAI& kPlayer = GET_PLAYER(getOwner());
+
 	bool bIsEmbarkedAttackingLand = isEmbarked() && (pToPlot && !pToPlot->isWater());
 
 	if(isEmbarked() && !bIsEmbarkedAttackingLand)
@@ -12841,6 +12856,26 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 	// Generic Attack bonus
 	iTempModifier = getAttackModifier();
 	iModifier += iTempModifier;
+
+#if defined(MOD_ROG_CORE)
+	//  modifier always applies for own OriginalCapital
+	int numOriginalCapital;
+	int numAttackMod;
+
+	numOriginalCapital = kPlayer.CountAllOriginalCapitalCity();
+
+	if (numOriginalCapital > 0)
+	{
+		numAttackMod = (numOriginalCapital - 1);
+
+		if (numAttackMod > GC.getORIGINAL_CAPITAL_MODMAX());
+		{
+			numAttackMod = GC.getORIGINAL_CAPITAL_MODMAX();
+		}
+		iTempModifier = (numAttackMod * getNumOriginalCapitalAttackMod());
+		iModifier += iTempModifier;
+	}
+#endif
 
 #if defined(MOD_ROG_CORE)
 	// Move Lfet modifier always applies for melee attack
@@ -12870,7 +12905,7 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 
 #if defined(MOD_ROG_CORE)
 	// GoldenAge modifier always applies for attack
-	CvPlayerAI& kPlayer = GET_PLAYER(getOwner());
+
 	if (kPlayer.isGoldenAge())
 	{
 		iTempModifier = GetGoldenAgeMod();
@@ -13062,6 +13097,8 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 {
 	VALIDATE_OBJECT
 
+	CvPlayer& kPlayer = GET_PLAYER(getOwner());
+
 	if(m_bEmbarked)
 	{
 		return GetEmbarkedUnitDefense();;
@@ -13083,6 +13120,26 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 	if(bFromRangedAttack)
 		iModifier += rangedDefenseModifier();
 
+
+#if defined(MOD_ROG_CORE)
+	//  modifier always applies for own OriginalCapital
+	int numOriginalCapital;
+	int numDefenseMod;
+
+	numOriginalCapital = kPlayer.CountAllOriginalCapitalCity();
+
+	if (numOriginalCapital > 0)
+	{
+		numDefenseMod = (numOriginalCapital - 1);
+		if (numDefenseMod > GC.getORIGINAL_CAPITAL_MODMAX());
+		{
+			numDefenseMod = GC.getORIGINAL_CAPITAL_MODMAX();
+		}
+		iTempModifier = (numDefenseMod * getNumOriginalCapitalDefenseMod());
+		iModifier += iTempModifier;
+	}
+#endif
+
 #if defined(MOD_ROG_CORE)
 	if (!bFromRangedAttack)
 		iModifier += getMeleeDefenseModifier();
@@ -13094,7 +13151,7 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 
 #if defined(MOD_ROG_CORE)
 	// GoldenAge modifier always applies for defense
-	CvPlayerAI& kPlayer = GET_PLAYER(getOwner());
+
 	if (kPlayer.isGoldenAge())
 	{
 		iModifier += GetGoldenAgeMod();
@@ -13656,6 +13713,24 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 	{
 		iModifier += getAttackModifier();
 
+#if defined(MOD_ROG_CORE)
+		//  modifier always applies for own OriginalCapital
+		int numOriginalCapital;
+		int numAttackMod;
+
+		numOriginalCapital = kPlayer.CountAllOriginalCapitalCity();
+
+		if (numOriginalCapital > 0)
+		{
+			numAttackMod = (numOriginalCapital - 1);
+			if (numAttackMod > GC.getORIGINAL_CAPITAL_MODMAX());
+			{
+				numAttackMod = GC.getORIGINAL_CAPITAL_MODMAX();
+			}
+			iTempModifier = (numAttackMod * getNumOriginalCapitalAttackMod());
+			iModifier += iTempModifier;
+		}
+#endif
 
 #if defined(MOD_ROG_CORE)
 		// Move Lfet modifier always applies for Ranged attack
@@ -13758,6 +13833,27 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		}
 		//}
 /////end
+
+#if defined(MOD_ROG_CORE)
+//  modifier always applies for own OriginalCapital
+		int numOriginalCapital;
+		int numDefenseMod;
+
+		//CvPlayer& kPlayer = GET_PLAYER(getOwner());
+
+		numOriginalCapital = kPlayer.CountAllOriginalCapitalCity();
+
+		if (numOriginalCapital > 0)
+		{
+			numDefenseMod = (numOriginalCapital - 1);
+			if (numDefenseMod > GC.getORIGINAL_CAPITAL_MODMAX());
+			{
+				numDefenseMod = GC.getORIGINAL_CAPITAL_MODMAX();
+			}
+			iTempModifier = (numDefenseMod * getNumOriginalCapitalDefenseMod());
+			iModifier += iTempModifier;
+		}
+#endif
 
 		iModifier += getDefenseModifier();
 	}
@@ -16094,6 +16190,56 @@ void CvUnit::changeMeleeDefenseModifier(int iValue)
 }
 #endif
 
+#if defined(MOD_ROG_CORE)
+//	--------------------------------------------------------------------------------
+int CvUnit::getHPHealedIfDefeatEnemyGlobal() const
+{
+	VALIDATE_OBJECT
+		return m_iHPHealedIfDefeatEnemyGlobal;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeHPHealedIfDefeatEnemyGlobal(int iValue)
+{
+	VALIDATE_OBJECT
+		m_iHPHealedIfDefeatEnemyGlobal += iValue;
+	CvAssert(getHPHealedIfDefeatEnemyGlobal() >= 0);
+}
+
+
+//	--------------------------------------------------------------------------------
+int CvUnit::getNumOriginalCapitalAttackMod() const
+{
+	VALIDATE_OBJECT
+		return m_iNumOriginalCapitalAttackMod;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeNumOriginalCapitalAttackMod(int iValue)
+{
+	VALIDATE_OBJECT
+		if (iValue != 0)
+		{
+			m_iNumOriginalCapitalAttackMod += iValue;
+		}
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::getNumOriginalCapitalDefenseMod() const
+{
+	VALIDATE_OBJECT
+		return m_iNumOriginalCapitalDefenseMod;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::changeNumOriginalCapitalDefenseMod(int iValue)
+{
+	VALIDATE_OBJECT
+		if (iValue != 0)
+		{
+			m_iNumOriginalCapitalDefenseMod += iValue;
+		}
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 int CvUnit::cityAttackModifier() const
@@ -22132,6 +22278,13 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeRangedSupportFireMod(thisPromotion.GetRangedSupportFireMod() * iChange);
 
 		changeMeleeDefenseModifier(thisPromotion.GetMeleeDefenseMod() * iChange);
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+		changeHPHealedIfDefeatEnemyGlobal(thisPromotion.GetHPHealedIfDefeatEnemyGlobal() * iChange);
+		changeNumOriginalCapitalAttackMod(thisPromotion.GetNumOriginalCapitalAttackMod() * iChange);
+		changeNumOriginalCapitalDefenseMod(thisPromotion.GetNumOriginalCapitalDefenseMod() * iChange);
 #endif
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)

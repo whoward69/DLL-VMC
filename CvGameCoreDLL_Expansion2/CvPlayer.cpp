@@ -29216,3 +29216,45 @@ void CvPlayer::ChangeInternalTradeRouteDestYieldRate(const YieldTypes eYieldType
 	}
 }
 #endif
+
+#if defined(MOD_ROG_CORE)
+int CvPlayer::CountAllOriginalCapitalCity()
+{
+	int iCount = 0;
+
+	int iLoop;
+	for (CvCity* pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
+	{
+		if (pLoopCity->IsOriginalCapital())
+		{
+			iCount += 1;
+		}
+	}
+
+	return iCount;
+}
+
+
+void CvPlayer::DoHealGlobal(int iHealPercent)
+{
+	int iLoop = 0;
+	CvUnit* pLoopUnit = NULL;
+
+	for (pLoopUnit = firstUnit(&iLoop); pLoopUnit; pLoopUnit = nextUnit(&iLoop))
+	{
+		if (!pLoopUnit)
+			continue;
+		if (pLoopUnit->IsCombatUnit())
+		{
+			if (iHealPercent > pLoopUnit->getDamage())
+			{
+				pLoopUnit->changeDamage(-pLoopUnit->getDamage());
+			}
+			else
+			{
+				pLoopUnit->changeDamage(-iHealPercent);
+			}
+		}
+	}
+}
+#endif

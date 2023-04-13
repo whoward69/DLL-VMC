@@ -131,6 +131,11 @@ public:
 	TeamTypes getActiveTeam();
 	CivilizationTypes getActiveCivilizationType();
 
+#if defined(MOD_ROG_CORE)
+	int NumOriginalCapitalModMax() const;
+#endif
+
+
 #if defined(MOD_API_EXTENSIONS)
 	bool isReallyNetworkMultiPlayer() const;
 #endif
