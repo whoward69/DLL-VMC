@@ -4060,6 +4060,10 @@ int TradeRouteLandPathCost(CvAStarNode* parent, CvAStarNode* node, int data, con
 		// Any land unit may travel over a mountain with a pass
 		bMountain = false;
 	}
+	if (bMountain && pToPlot->isCity())
+	{
+		bMountain = false;
+	}
 
 	if (pToPlot->isImpassable() || bMountain)
 #else

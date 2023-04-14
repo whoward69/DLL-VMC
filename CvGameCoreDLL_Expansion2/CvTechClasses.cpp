@@ -2180,10 +2180,10 @@ void CvTeamTechs::SetResearchProgressTimes100(TechTypes eIndex, int iNewValue, P
 				// iNewValue = iPlayerBeakersThisTurn + ((iPlayerOverflow * iPlayerOverflowDivisorTimes100) / 100)
 				if (iOverflow > iPlayerOverflow) {
 					// If we completed the tech using only iBeakersThisTurn, we need to hand back the remaining iPlayerBeakersThisTurn and the scaled down iPlayerOverflow
-					iOverflow = (iOverflow - iPlayerOverflow) + (iPlayerOverflow * 100 / iPlayerOverflowDivisorTimes100); 
+					iOverflow = (iOverflow - iPlayerOverflow) + (iPlayerOverflow / iPlayerOverflowDivisorTimes100) * 100; 
 				} else {
 					// Otherwise we used all of iBeakersThisTurn and some of iPlayerOverflow, so we need to hand back the scaled down iOverflow
-					iOverflow = iOverflow * 100 / iPlayerOverflowDivisorTimes100;
+					iOverflow = iOverflow / iPlayerOverflowDivisorTimes100 * 100;
 				}
 			}
 #endif

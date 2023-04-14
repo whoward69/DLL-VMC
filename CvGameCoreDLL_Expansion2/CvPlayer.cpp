@@ -22689,7 +22689,7 @@ void CvPlayer::doResearch()
 		}
 		else
 		{
-			iOverflowResearch = (getOverflowResearchTimes100() * calculateResearchModifier(eCurrentTech)) / 100;
+			iOverflowResearch = (getOverflowResearchTimes100()/100) * calculateResearchModifier(eCurrentTech);
 			setOverflowResearch(0);
 			if(GET_TEAM(getTeam()).GetTeamTechs())
 			{
