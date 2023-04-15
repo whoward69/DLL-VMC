@@ -1097,7 +1097,15 @@ int PathCost(CvAStarNode* parent, CvAStarNode* node, int data, const void* point
 			// We want to discourage AIs and automated units from exhausting their movement on a mountain, but if the unit is manually controlled by the human, let them do what they want.
 			if (!pCacheData->isHuman() || pCacheData->IsAutomated())
 			{
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+				if (pUnit->canFound(pToPlot))
+				{
+					iCost += GC.getINFLUENCE_HILL_COST();
+				}
+				else iCost += PATH_END_TURN_MOUNTAIN_WEIGHT;
+#else
 				iCost += PATH_END_TURN_MOUNTAIN_WEIGHT;
+#endif
 			}
 		}
 

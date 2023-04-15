@@ -346,6 +346,13 @@ int CvCitySiteEvaluator::PlotFoundValue(CvPlot* pPlot, CvPlayer* pPlayer, YieldT
 	int iClosestCityOfMine = 999;
 	int iClosestEnemyCity = 999;
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	int iIncaMountainCityValue = 500;
+#endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	int iPolyCoastCityValue = 500;
+#endif
+
 	int iCapitalArea = NULL;
 
 	bool bIsInca = false;
@@ -661,6 +668,20 @@ int CvCitySiteEvaluator::PlotFoundValue(CvPlot* pPlot, CvPlayer* pPlayer, YieldT
 	{
 		rtnValue += (int)rtnValue * /*15*/ GC.getBUILD_ON_RIVER_PERCENT() / 100;
 	}
+
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	if (MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY && pPlot->isMountain() && pPlayer->GetCanFoundMountainCity())
+	{
+		rtnValue += (int)rtnValue*3/2 + iIncaMountainCityValue * (pPlayer->GetCurrentEra() + 1);
+	}
+#endif
+
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	if (MOD_TRAITS_CAN_FOUND_COAST_CITY && pPlot->getTerrainType() == TERRAIN_COAST && pPlayer->GetCanFoundCoastCity())
+	{
+		rtnValue += (int)rtnValue*3 + iPolyCoastCityValue * (pPlayer->GetCurrentEra() + 1);
+	}
+#endif
 
 	if (pPlot->isCoastalLand(GC.getMIN_WATER_SIZE_FOR_OCEAN()))
 	{
