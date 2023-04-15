@@ -2085,8 +2085,8 @@ void CvPlayerTraits::InitPlayerTraits()
 			{
 				m_bFightWellDamaged = true;
 				// JON: Changing the way this works. Above line can/should probably be removed at some point
-				int iWoundedUnitDamageMod = /*-50*/ GC.getTRAIT_WOUNDED_DAMAGE_MOD();
-				m_pPlayer->ChangeWoundedUnitDamageMod(iWoundedUnitDamageMod);
+				//int iWoundedUnitDamageMod = /*-50*/ GC.getTRAIT_WOUNDED_DAMAGE_MOD();
+				//m_pPlayer->ChangeWoundedUnitDamageMod(iWoundedUnitDamageMod);
 			}
 			if(trait->IsMoveFriendlyWoodsAsRoad())
 			{
