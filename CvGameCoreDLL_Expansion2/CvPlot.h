@@ -130,6 +130,7 @@ public:
 	bool isAdjacentToIce() const;
 #endif
 	bool isCoastalLand(int iMinWaterSize = -1) const;
+	bool isCoastalArea(int iMinWaterSize = -1) const;
 	int GetSizeLargestAdjacentWater() const;
 
 	bool isVisibleWorked() const;

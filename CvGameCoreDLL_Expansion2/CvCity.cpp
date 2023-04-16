@@ -7657,7 +7657,7 @@ void CvCity::SetEverCapital(bool bValue)
 bool CvCity::isCoastal(int iMinWaterSize) const
 {
 	VALIDATE_OBJECT
-	return plot()->isCoastalLand(iMinWaterSize);
+	return plot()->isCoastalArea(iMinWaterSize);
 }
 
 #if defined(MOD_API_EXTENSIONS)
@@ -16550,7 +16550,7 @@ bool CvCity::isValidBuildingLocation(BuildingTypes eBuilding) const
 	if(pkBuildingInfo->IsWater())
 	{
 #ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
-		if (!isCoastal(pkBuildingInfo->GetMinAreaSize()) && !plot()->isWater())
+		if (!isCoastal(pkBuildingInfo->GetMinAreaSize()))
 			return false;
 #else
 		if (!isCoastal(pkBuildingInfo->GetMinAreaSize()))

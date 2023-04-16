@@ -1131,6 +1131,47 @@ bool CvPlot::isCoastalLand(int iMinWaterSize) const
 }
 
 //	--------------------------------------------------------------------------------
+bool CvPlot::isCoastalArea(int iMinWaterSize) const
+{
+	CvPlot* pAdjacentPlot;
+	int iI;
+
+	if(isWater() && iMinWaterSize <= 0)
+	{
+		return true;
+	}
+
+	// If -1 was passed in (default argument) use min water size for ocean define
+	if(iMinWaterSize == -1)
+	{
+		iMinWaterSize = GC.getMIN_WATER_SIZE_FOR_OCEAN();
+	}
+
+	for(iI = 0; iI < NUM_DIRECTION_TYPES; ++iI)
+	{
+		pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iI));
+
+		if(pAdjacentPlot != NULL)
+		{
+			if(pAdjacentPlot->isWater())
+			{
+				if(iMinWaterSize <= 0)
+				{
+					return true;
+				}
+				CvLandmass* pAdjacentBodyOfWater = GC.getMap().getLandmass(pAdjacentPlot->getLandmass());
+				if(pAdjacentBodyOfWater && pAdjacentBodyOfWater->getNumTiles() >= iMinWaterSize)
+				{
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+//	--------------------------------------------------------------------------------
 int CvPlot::GetSizeLargestAdjacentWater() const
 {
 	CvPlot* pAdjacentPlot;
