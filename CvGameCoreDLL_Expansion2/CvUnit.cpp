@@ -699,23 +699,12 @@ void CvUnit::initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitA
 	{
 		PromotionTypes ePromotionEmbarkation = kPlayer.GetEmbarkationPromotion();
 
-		bool bGivePromotion = false;
-
-		// Civilians get it for free
-		if(getDomainType() == DOMAIN_LAND)
-		{
-			if(!IsCombatUnit())
-				bGivePromotion = true;
-		}
-
-		// Can the unit get this? (handles water units and such)
-		if(!bGivePromotion && ::IsPromotionValidForUnitCombatType(ePromotionEmbarkation, getUnitType()))
-			bGivePromotion = true;
-
+		bool bGivePromotion = getDomainType() == DOMAIN_LAND && (
+			!IsCombatUnit() || ::IsPromotionValidForUnitCombatType(ePromotionEmbarkation, getUnitType())
 #ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
-		if (!bGivePromotion && bIsWaterCity && getDomainType() == DOMAIN_LAND)
-			bGivePromotion = true;
+			|| (bIsWaterCity)
 #endif
+			);
 
 		// Some case that gives us the promotion?
 		if (bGivePromotion)
