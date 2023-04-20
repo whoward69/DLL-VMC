@@ -226,7 +226,10 @@ protected:
 	LUAAPIEXTN(SetAutomatons, void, iAutomatons, bReassignPop);
 #endif
 
-
+#if defined(MOD_ROG_CORE)
+	static int lGetForcedDamageValue(lua_State* L);
+	static int lGetChangeDamageValue(lua_State* L);
+#endif
 
 	static int lGetHighestPopulation(lua_State* L);
 	static int lSetHighestPopulation(lua_State* L);

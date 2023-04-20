@@ -12868,9 +12868,14 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 	{
 		numAttackMod = (numOriginalCapital - 1);
 
-		if (numAttackMod > GC.getORIGINAL_CAPITAL_MODMAX());
+
+		if (numAttackMod > GC.getORIGINAL_CAPITAL_MODMAX())
 		{
 			numAttackMod = GC.getORIGINAL_CAPITAL_MODMAX();
+		}
+		else if (numAttackMod < GC.getORIGINAL_CAPITAL_MODMAX())
+		{
+			numAttackMod = numOriginalCapital - 1;
 		}
 		iTempModifier = (numAttackMod * getNumOriginalCapitalAttackMod());
 		iModifier += iTempModifier;
@@ -13131,9 +13136,14 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 	if (numOriginalCapital > 0)
 	{
 		numDefenseMod = (numOriginalCapital - 1);
-		if (numDefenseMod > GC.getORIGINAL_CAPITAL_MODMAX());
+
+		if (numDefenseMod > GC.getORIGINAL_CAPITAL_MODMAX())
 		{
 			numDefenseMod = GC.getORIGINAL_CAPITAL_MODMAX();
+		}
+		else if (numDefenseMod < GC.getORIGINAL_CAPITAL_MODMAX())
+		{
+			numDefenseMod = numOriginalCapital - 1;
 		}
 		iTempModifier = (numDefenseMod * getNumOriginalCapitalDefenseMod());
 		iModifier += iTempModifier;
@@ -13723,10 +13733,16 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		if (numOriginalCapital > 0)
 		{
 			numAttackMod = (numOriginalCapital - 1);
-			if (numAttackMod > GC.getORIGINAL_CAPITAL_MODMAX());
+
+			if (numAttackMod > GC.getORIGINAL_CAPITAL_MODMAX())
 			{
 				numAttackMod = GC.getORIGINAL_CAPITAL_MODMAX();
 			}
+			else if (numAttackMod < GC.getORIGINAL_CAPITAL_MODMAX())
+			{
+				numAttackMod = numOriginalCapital - 1;
+			}
+
 			iTempModifier = (numAttackMod * getNumOriginalCapitalAttackMod());
 			iModifier += iTempModifier;
 		}
@@ -13846,10 +13862,16 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		if (numOriginalCapital > 0)
 		{
 			numDefenseMod = (numOriginalCapital - 1);
-			if (numDefenseMod > GC.getORIGINAL_CAPITAL_MODMAX());
+
+			if (numDefenseMod > GC.getORIGINAL_CAPITAL_MODMAX())
 			{
 				numDefenseMod = GC.getORIGINAL_CAPITAL_MODMAX();
 			}
+			else if (numDefenseMod < GC.getORIGINAL_CAPITAL_MODMAX())
+			{
+				numDefenseMod = numOriginalCapital - 1;
+			}
+
 			iTempModifier = (numDefenseMod * getNumOriginalCapitalDefenseMod());
 			iModifier += iTempModifier;
 		}

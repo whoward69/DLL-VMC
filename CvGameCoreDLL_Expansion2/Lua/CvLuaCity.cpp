@@ -297,6 +297,15 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(SetAutomatons);
 #endif
 
+
+#if defined(MOD_ROG_CORE)
+	if (MOD_ROG_CORE)
+	{
+		Method(GetForcedDamageValue);
+		Method(GetChangeDamageValue);
+	}
+#endif
+
 	Method(GetHighestPopulation);
 	Method(SetHighestPopulation);
 	//Method(GetWorkingPopulation);
@@ -4495,6 +4504,31 @@ int CvLuaCity::lGetBaseYieldRateFromOtherYield(lua_State* L) {
 	return BasicLuaMethod(L, &CvCity::GetBaseYieldRateFromOtherYield);
 }
 #endif
+
+
+
+#if defined(MOD_ROG_CORE)
+//int getForcedDamageValue();
+int CvLuaCity::lGetForcedDamageValue(lua_State* L)
+{
+	CvCity* pCity = GetInstance(L);
+
+	const int iResult = pCity->getResetDamageValue();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaCity::lGetChangeDamageValue(lua_State* L)
+{
+	CvCity* pCity = GetInstance(L);
+
+	const int iResult = pCity->getReduceDamageValue();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+#endif
+
+
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 //------------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+
 /*	-------------------------------------------------------------------------------------------------------
 	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
@@ -363,6 +364,7 @@ protected:
 #endif
 
 
+
 	static int lGetRangedAttackModifier(lua_State* L);
 	static int lCityAttackModifier(lua_State* L);
 	static int lCityDefenseModifier(lua_State* L);
@@ -672,3 +674,4 @@ protected:
 
 
 #endif //CVLUAUNIT_H
+
