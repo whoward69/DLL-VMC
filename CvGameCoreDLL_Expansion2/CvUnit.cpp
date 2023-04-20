@@ -3572,10 +3572,10 @@ int CvUnit::getCombatDamage(int iStrength, int iOpponentStrength, int iCurrentDa
 #endif
 	}
 
-	int iDamage = 0;
+	__int64 tDamage = 0;
 
 #if defined(MOD_UNITS_MAX_HP)
-	iDamage = /*400*/ GC.getATTACK_SAME_STRENGTH_MIN_DAMAGE() * iDamageRatio / GetMaxHitPoints();
+	tDamage = /*400*/ (__int64) GC.getATTACK_SAME_STRENGTH_MIN_DAMAGE() * iDamageRatio / GetMaxHitPoints();
 #else
 	iDamage = /*400*/ GC.getATTACK_SAME_STRENGTH_MIN_DAMAGE() * iDamageRatio / GC.getMAX_HIT_POINTS();
 #endif
@@ -3604,7 +3604,7 @@ int CvUnit::getCombatDamage(int iStrength, int iOpponentStrength, int iCurrentDa
 #endif
 		iRoll /= 2;	// The divide by 2 is to provide the average damage
 	}
-	iDamage += iRoll;
+	tDamage += iRoll;
 
 	// Calculations performed to dampen amount of damage by units that are close in strength
 	// RATIO = (((((ME / OPP) + 3) / 4) ^ 4) + 1) / 2
@@ -3629,26 +3629,27 @@ int CvUnit::getCombatDamage(int iStrength, int iOpponentStrength, int iCurrentDa
 		fStrengthRatio = 1 / fStrengthRatio;
 	}
 
-	iDamage = int(iDamage * fStrengthRatio);
+	tDamage = __int64(tDamage * fStrengthRatio);
 
 	// Modify damage for when a city "attacks" a unit
 	if(bAttackerIsCity)
 	{
-		iDamage *= /*50*/ GC.getCITY_ATTACKING_DAMAGE_MOD();
-		iDamage /= 100;
+		tDamage *= /*50*/ GC.getCITY_ATTACKING_DAMAGE_MOD();
+		tDamage /= 100;
 	}
 
 	// Modify damage for when unit is attacking a city
 	if(bDefenderIsCity)
 	{
-		iDamage *= /*100*/ GC.getATTACKING_CITY_MELEE_DAMAGE_MOD();
-		iDamage /= 100;
+		tDamage *= /*100*/ GC.getATTACKING_CITY_MELEE_DAMAGE_MOD();
+		tDamage /= 100;
 	}
 
 	// Bring it back out of hundreds
-	iDamage /= 100;
-
-	iDamage = iDamage > 0 ? iDamage : 1;
+	tDamage /= 100;
+	tDamage = tDamage > 0x7FFFFFF0 ? 0x7FFFFFF0 : tDamage;
+	tDamage = tDamage > 0 ? tDamage : 1;
+	int iDamage = (int)tDamage;
 
 	return iDamage;
 }
