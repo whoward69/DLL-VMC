@@ -159,6 +159,13 @@ public:
 	int GetDomainDefensePercent(int i) const;
 
 
+#if defined(MOD_ROG_CORE)
+	int GetOnCapitalLandAttackMod() const;
+	int GetOutsideCapitalLandAttackMod() const;
+	int GetOnCapitalLandDefenseMod() const;
+	int GetOutsideCapitalLandDefenseMod() const;
+#endif
+
 
 	int GetUpgradeDiscount() const;
 	int GetExperiencePercent() const;
@@ -433,6 +440,15 @@ protected:
 	int m_iHPHealedIfDefeatEnemyGlobal;
 	int m_iNumOriginalCapitalAttackMod;
 	int m_iNumOriginalCapitalDefenseMod;
+#endif
+
+
+
+#if defined(MOD_ROG_CORE)
+	int m_iOnCapitalLandAttackMod;
+	int m_iOutsideCapitalLandAttackMod;
+	int m_iOnCapitalLandDefenseMod;
+	int m_iOutsideCapitalLandDefenseMod;
 #endif
 
 

@@ -399,6 +399,15 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(GetNumOriginalCapitalAttackMod);
 #endif
 
+
+#if defined(MOD_ROG_CORE)
+	Method(GetOnCapitalLandAttackMod);
+	Method(GetOutsideCapitalLandAttackMod);
+	Method(GetOnCapitalLandDefenseMod);
+	Method(GetOutsideCapitalLandDefenseMod);
+#endif
+
+
 #if defined(MOD_ROG_CORE)
 	if (MOD_ROG_CORE)
 	{
@@ -3536,6 +3545,50 @@ int CvLuaUnit::lGetNumOriginalCapitalAttackMod(lua_State* L)
 	CvUnit* pkUnit = GetInstance(L);
 
 	const int iResult = pkUnit->getNumOriginalCapitalAttackMod();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+#endif
+
+
+
+#if defined(MOD_ROG_CORE)
+
+
+int CvLuaUnit::lGetOnCapitalLandAttackMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getOnCapitalLandAttackMod();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetOutsideCapitalLandAttackMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getOutsideCapitalLandAttackMod();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+
+int CvLuaUnit::lGetOnCapitalLandDefenseMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getOnCapitalLandDefenseMod();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+
+int CvLuaUnit::lGetOutsideCapitalLandDefenseMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->getOutsideCapitalLandDefenseMod();
 	lua_pushinteger(L, iResult);
 	return 1;
 }

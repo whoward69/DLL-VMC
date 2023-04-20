@@ -311,6 +311,14 @@ CvUnit::CvUnit() :
 #endif
 
 
+#if defined(MOD_ROG_CORE)
+		, m_iOnCapitalLandAttackMod("CvUnit::m_iOnCapitalLandAttackMod", m_syncArchive)
+		, m_iOutsideCapitalLandAttackMod("CvUnit::m_iOutsideCapitalLandAttackMod", m_syncArchive)
+		, m_iOnCapitalLandDefenseMod("CvUnit::m_iOnCapitalLandDefenseMod", m_syncArchive)
+		, m_iOutsideCapitalLandDefenseMod("CvUnit::m_iOutsideCapitalLandDefenseMod", m_syncArchive)
+#endif
+
+
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	, m_iCanCrossMountainsCount("CvUnit::m_iCanCrossMountainsCount", m_syncArchive)
 #endif
@@ -1090,6 +1098,15 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iNumOriginalCapitalAttackMod = 0;
 	m_iNumOriginalCapitalDefenseMod = 0;
 	m_iHPHealedIfDefeatEnemyGlobal = 0;
+#endif
+
+
+
+#if defined(MOD_ROG_CORE)
+	m_iOnCapitalLandAttackMod = 0;
+	m_iOutsideCapitalLandAttackMod = 0;
+	m_iOnCapitalLandDefenseMod = 0;
+	m_iOutsideCapitalLandDefenseMod = 0;
 #endif
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
@@ -12883,6 +12900,31 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 	}
 #endif
 
+
+#if defined(MOD_ROG_CORE)
+	//  same land with  CapitalCity
+	int pArea;
+	int puArea;
+	CvPlot* pCapitalArea;
+	CvCity* pOtherPlayerCapital = kPlayer.getCapitalCity();
+	if (pOtherPlayerCapital != NULL)
+	{
+
+		pCapitalArea = GC.getMap().plot(pOtherPlayerCapital->getX(), pOtherPlayerCapital->getY());
+		pArea = pCapitalArea->getArea();
+		puArea = plot()->getArea();
+		if (pArea ==  puArea)
+		{
+			iModifier += getOnCapitalLandAttackMod();
+		}
+		else 
+		{
+			iModifier += getOutsideCapitalLandAttackMod();
+		}
+
+	}
+#endif
+
 #if defined(MOD_ROG_CORE)
 	// Move Lfet modifier always applies for melee attack
 	int imovesLeft;
@@ -13148,6 +13190,29 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 		}
 		iTempModifier = (numDefenseMod * getNumOriginalCapitalDefenseMod());
 		iModifier += iTempModifier;
+	}
+#endif
+
+#if defined(MOD_ROG_CORE)
+	//  same land with  CapitalCity
+	int pArea;
+	int puArea;
+	CvPlot* pCapitalArea;
+	CvCity* pOtherPlayerCapital = kPlayer.getCapitalCity();
+	if (pOtherPlayerCapital != NULL)
+	{
+
+		pCapitalArea = GC.getMap().plot(pOtherPlayerCapital->getX(), pOtherPlayerCapital->getY());
+		pArea = pCapitalArea->getArea();
+		puArea = plot()->getArea();
+		if (pArea == puArea)
+		{
+			iModifier += getOnCapitalLandDefenseMod();
+		}
+		else 
+		{
+			iModifier += getOutsideCapitalLandDefenseMod();
+		}
 	}
 #endif
 
@@ -13749,6 +13814,32 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		}
 #endif
 
+
+
+#if defined(MOD_ROG_CORE)
+		//  same land with  CapitalCity
+		int pArea;
+		int puArea;
+		CvPlot* pCapitalArea;
+		CvCity* pOtherPlayerCapital = kPlayer.getCapitalCity();
+		if (pOtherPlayerCapital != NULL)
+		{
+
+			pCapitalArea = GC.getMap().plot(pOtherPlayerCapital->getX(), pOtherPlayerCapital->getY());
+			pArea = pCapitalArea->getArea();
+			puArea = plot()->getArea();
+			if (pArea == puArea)
+			{
+				iModifier += getOnCapitalLandAttackMod();
+			}
+			else 
+			{
+				iModifier += getOutsideCapitalLandAttackMod();
+			}
+
+		}
+#endif
+
 #if defined(MOD_ROG_CORE)
 		// Move Lfet modifier always applies for Ranged attack
 		int imovesLeft;
@@ -13875,6 +13966,30 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 
 			iTempModifier = (numDefenseMod * getNumOriginalCapitalDefenseMod());
 			iModifier += iTempModifier;
+		}
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+		//  same land with  CapitalCity
+		int pArea;
+		int puArea;
+		CvPlot* pCapitalArea;
+		CvCity* pOtherPlayerCapital = kPlayer.getCapitalCity();
+		if (pOtherPlayerCapital != NULL)
+		{
+
+			pCapitalArea = GC.getMap().plot(pOtherPlayerCapital->getX(), pOtherPlayerCapital->getY());
+			pArea = pCapitalArea->getArea();
+			puArea = plot()->getArea();
+			if (pArea == puArea)
+			{
+				iModifier += getOnCapitalLandDefenseMod();
+			}
+			else 
+			{
+				iModifier += getOutsideCapitalLandDefenseMod();
+			}
 		}
 #endif
 
@@ -16260,6 +16375,79 @@ void CvUnit::changeNumOriginalCapitalDefenseMod(int iValue)
 		if (iValue != 0)
 		{
 			m_iNumOriginalCapitalDefenseMod += iValue;
+		}
+}
+#endif
+
+
+
+
+
+#if defined(MOD_ROG_CORE)
+//	--------------------------------------------------------------------------------
+int CvUnit::getOnCapitalLandAttackMod() const
+{
+	VALIDATE_OBJECT
+		return m_iOnCapitalLandAttackMod;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeOnCapitalLandAttackMod(int iValue)
+{
+	VALIDATE_OBJECT
+		if (iValue != 0)
+		{
+			m_iOnCapitalLandAttackMod += iValue;
+		}
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::getOutsideCapitalLandAttackMod() const
+{
+	VALIDATE_OBJECT
+		return m_iOutsideCapitalLandAttackMod;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::changeOutsideCapitalLandAttackMod(int iValue)
+{
+	VALIDATE_OBJECT
+		if (iValue != 0)
+		{
+			m_iOutsideCapitalLandAttackMod += iValue;
+		}
+}
+
+
+//	--------------------------------------------------------------------------------
+int CvUnit::getOnCapitalLandDefenseMod() const
+{
+	VALIDATE_OBJECT
+		return m_iOnCapitalLandDefenseMod;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::changeOnCapitalLandDefenseMod(int iValue)
+{
+	VALIDATE_OBJECT
+		if (iValue != 0)
+		{
+			m_iOnCapitalLandDefenseMod += iValue;
+		}
+}
+
+
+//	--------------------------------------------------------------------------------
+int CvUnit::getOutsideCapitalLandDefenseMod() const
+{
+	VALIDATE_OBJECT
+		return m_iOutsideCapitalLandDefenseMod;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::changeOutsideCapitalLandDefenseMod(int iValue)
+{
+	VALIDATE_OBJECT
+		if (iValue != 0)
+		{
+			m_iOutsideCapitalLandDefenseMod += iValue;
 		}
 }
 #endif
@@ -22308,6 +22496,14 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		changeHPHealedIfDefeatEnemyGlobal(thisPromotion.GetHPHealedIfDefeatEnemyGlobal() * iChange);
 		changeNumOriginalCapitalAttackMod(thisPromotion.GetNumOriginalCapitalAttackMod() * iChange);
 		changeNumOriginalCapitalDefenseMod(thisPromotion.GetNumOriginalCapitalDefenseMod() * iChange);
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+		changeOnCapitalLandAttackMod(thisPromotion.GetOnCapitalLandAttackMod()* iChange);
+		changeOutsideCapitalLandAttackMod(thisPromotion.GetOutsideCapitalLandAttackMod()* iChange);
+		changeOnCapitalLandDefenseMod(thisPromotion.GetOnCapitalLandDefenseMod()* iChange);
+		changeOutsideCapitalLandDefenseMod(thisPromotion.GetOutsideCapitalLandDefenseMod() * iChange);
 #endif
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)

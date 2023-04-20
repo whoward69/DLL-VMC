@@ -126,6 +126,12 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iNumOriginalCapitalDefenseMod(0),
 #endif
 
+#if defined(MOD_ROG_CORE)
+	m_iOnCapitalLandAttackMod(0),
+	m_iOutsideCapitalLandAttackMod(0),
+	m_iOnCapitalLandDefenseMod(0),
+	m_iOutsideCapitalLandDefenseMod(0),
+#endif
 
 
 	m_iUpgradeDiscount(0),
@@ -395,6 +401,13 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 		m_iNumOriginalCapitalDefenseMod = kResults.GetInt("NumOriginalCapitalDefenseMod");
 #endif
 
+
+#if defined(MOD_ROG_CORE)
+		m_iOnCapitalLandAttackMod = kResults.GetInt("OnCapitalLandAttackMod");
+		m_iOutsideCapitalLandAttackMod = kResults.GetInt("OutsideCapitalLandAttackMod");
+		m_iOnCapitalLandDefenseMod = kResults.GetInt("OnCapitalLandDefenseMod");
+		m_iOutsideCapitalLandDefenseMod = kResults.GetInt("OutsideCapitalLandDefenseMod");
+#endif
 
 	m_bRoughTerrainEndsTurn = kResults.GetBool("RoughTerrainEndsTurn");
 	m_bHoveringUnit = kResults.GetBool("HoveringUnit");
@@ -1386,6 +1399,31 @@ int CvPromotionEntry::GetNumOriginalCapitalDefenseMod() const
 	return m_iNumOriginalCapitalDefenseMod;
 }
 #endif
+
+
+#if defined(MOD_ROG_CORE)
+int CvPromotionEntry::GetOnCapitalLandAttackMod() const
+{
+	return m_iOnCapitalLandAttackMod;
+}
+
+int CvPromotionEntry::GetOutsideCapitalLandAttackMod() const
+{
+	return m_iOutsideCapitalLandAttackMod;
+}
+
+int CvPromotionEntry::GetOnCapitalLandDefenseMod() const
+{
+	return m_iOnCapitalLandDefenseMod;
+}
+
+int CvPromotionEntry::GetOutsideCapitalLandDefenseMod() const
+{
+	return m_iOutsideCapitalLandDefenseMod;
+}
+#endif
+
+
 
 #if defined(MOD_ROG_CORE)
 int CvPromotionEntry::GetMeleeDefenseMod() const

@@ -944,6 +944,23 @@ public:
 	void changeNumOriginalCapitalDefenseMod(int iValue);
 #endif
 
+
+#if defined(MOD_ROG_CORE)
+	int getOnCapitalLandAttackMod() const;
+	void changeOnCapitalLandAttackMod(int iValue);
+
+	int getOutsideCapitalLandAttackMod() const;
+	void changeOutsideCapitalLandAttackMod(int iValue);
+
+	int getOnCapitalLandDefenseMod() const;
+	void changeOnCapitalLandDefenseMod(int iValue);
+
+	int getOutsideCapitalLandDefenseMod() const;
+	void changeOutsideCapitalLandDefenseMod(int iValue);
+#endif
+
+
+
 	int getAmphibCount() const;
 	bool isAmphib() const;
 	void changeAmphibCount(int iChange);
@@ -1789,6 +1806,15 @@ protected:
 	FAutoVariable<int, CvUnit> m_iNumOriginalCapitalDefenseMod;
 	FAutoVariable<int, CvUnit> m_iHPHealedIfDefeatEnemyGlobal;
 #endif
+
+
+#if defined(MOD_ROG_CORE)
+	FAutoVariable<int, CvUnit> m_iOnCapitalLandAttackMod;
+	FAutoVariable<int, CvUnit> m_iOutsideCapitalLandAttackMod;
+	FAutoVariable<int, CvUnit> m_iOnCapitalLandDefenseMod;
+	FAutoVariable<int, CvUnit> m_iOutsideCapitalLandDefenseMod;
+#endif
+
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	FAutoVariable<int, CvUnit> m_iCanCrossMountainsCount;
