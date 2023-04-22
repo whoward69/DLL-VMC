@@ -28423,14 +28423,14 @@ bool CvPlayer::hasTurnTimerExpired()
 #ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
 bool CvPlayer::GetCanFoundMountainCity() const
 {
-	return GetPlayerTraits()->IsCanFoundMountainCity();
+	return GetPlayerTraits() && GetPlayerTraits()->IsCanFoundMountainCity();
 }
 #endif
 
 #ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
 bool CvPlayer::GetCanFoundCoastCity() const
 {
-	return GetPlayerTraits()->IsCanFoundCoastCity();
+	return GetPlayerTraits() && GetPlayerTraits()->IsCanFoundCoastCity();
 }
 #endif
 

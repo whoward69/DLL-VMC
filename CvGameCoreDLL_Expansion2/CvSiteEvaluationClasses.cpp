@@ -82,7 +82,7 @@ bool CvCitySiteEvaluator::CanFound(CvPlot* pPlot, const CvPlayer* pPlayer, bool 
 	if (pPlot->isMountain())
 	{
 #ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
-		if (!MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY || !pPlayer->GetCanFoundMountainCity())
+		if (!MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY || !pPlayer || !pPlayer->GetCanFoundMountainCity())
 		{
 			return false;
 		}
@@ -152,7 +152,7 @@ bool CvCitySiteEvaluator::CanFound(CvPlot* pPlot, const CvPlayer* pPlayer, bool 
 	if(pPlot->isWater())
 	{
 #ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
-		if (MOD_TRAITS_CAN_FOUND_COAST_CITY && pPlot->getTerrainType() == TERRAIN_COAST && pPlayer->GetCanFoundCoastCity() && !pPlot->isLake())
+		if (MOD_TRAITS_CAN_FOUND_COAST_CITY && pPlot->getTerrainType() == TERRAIN_COAST && pPlayer && pPlayer->GetCanFoundCoastCity() && !pPlot->isLake())
 		{
 			bValid = true;
 			goto DONE_bValid;
