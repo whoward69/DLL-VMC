@@ -719,7 +719,7 @@ void CvUnit::initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitA
 		{
 			setHasPromotion(ePromotionEmbarkation, true);
 #ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
-			if (bIsWaterCity)
+			if (bIsWaterCity && !canMoveAllTerrain()&& !isTrade() && (!canMoveImpassable() || !IsCombatUnit()))
 				embark(plot());
 #endif // MOD_TRAITS_CAN_FOUND_COAST_CITY 
 		}
@@ -11332,6 +11332,8 @@ bool CvUnit::CanUpgradeRightNow(bool bOnlyTestVisible) const
 	VALIDATE_OBJECT
 	// Is Unit in a state where it can upgrade?
 	if(!isReadyForUpgrade())
+		return false;
+	if(isEmbarked())
 		return false;
 
 	UnitTypes eUpgradeUnitType = GetUpgradeUnitType();
