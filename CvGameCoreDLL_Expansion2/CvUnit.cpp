@@ -13288,8 +13288,8 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 			iModifier += iTempModifier;
 		}
 		// No Feature - use Terrain Defense Mod
-		else
-		{
+		//else
+		//{
 			iTempModifier = terrainDefenseModifier(pInPlot->getTerrainType());
 			iModifier += iTempModifier;
 
@@ -13299,7 +13299,7 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 				iTempModifier = terrainDefenseModifier(TERRAIN_HILL);
 				iModifier += iTempModifier;
 			}
-		}
+		//}
 	}
 
 	////////////////////////

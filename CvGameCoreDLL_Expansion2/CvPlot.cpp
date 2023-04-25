@@ -3170,28 +3170,27 @@ int CvPlot::defenseModifier(TeamTypes eDefender, bool, bool bHelp) const
 
 	// Can only get Defensive Bonus from ONE thing - they don't stack
 
+	iModifier = GC.getTerrainInfo(getTerrainType())->getDefenseModifier();
+
 	// Hill (and mountain)
 	if(isHills() || isMountain())
 	{
-		iModifier = /*25*/ GC.getHILLS_EXTRA_DEFENSE();
+		iModifier += /*25*/ GC.getHILLS_EXTRA_DEFENSE();
 	}
 	// Feature
 	//else if(getFeatureType() != NO_FEATURE)
 	if (getFeatureType() != NO_FEATURE)
 	{
-		iModifier = GC.getFeatureInfo(getFeatureType())->getDefenseModifier();
+		iModifier += GC.getFeatureInfo(getFeatureType())->getDefenseModifier();
 	}
-	// Terrain
-	//else
-	//{
-		iModifier = GC.getTerrainInfo(getTerrainType())->getDefenseModifier();
 
-		// Flat land gives defensive PENALTY
-		if(!isWater())
-		{
-			iModifier += /*-25*/ GC.getFLAT_LAND_EXTRA_DEFENSE();
-		}
-	//}
+	
+	// Flat land gives defensive PENALTY
+	if(!isWater())
+	{
+		iModifier += /*-25*/ GC.getFLAT_LAND_EXTRA_DEFENSE();
+	}
+	
 
 	if(bHelp)
 	{
