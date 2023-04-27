@@ -654,6 +654,10 @@ CvGameReligions::FOUNDING_RESULT CvGameReligions::CanCreatePantheon(PlayerTypes 
 	{
 		return FOUNDING_INVALID_PLAYER;
 	}
+	if (kPlayer.getCapitalCity() == nullptr)
+	{
+		return FOUNDING_NO_CAPITAL_CITY;
+	}
 
 	if(HasCreatedPantheon(ePlayer) || HasCreatedReligion(ePlayer))
 	{
