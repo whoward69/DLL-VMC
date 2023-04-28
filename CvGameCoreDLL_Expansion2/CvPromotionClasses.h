@@ -166,6 +166,19 @@ public:
 	int GetOutsideCapitalLandDefenseMod() const;
 #endif
 
+#if defined(MOD_ROG_CORE)
+	int GetNumSpyDefenseMod() const;
+	int GetNumSpyAttackMod() const;
+
+	int GetNumWonderDefenseMod() const;
+	int GetNumWonderAttackMod() const;
+
+	int GetNumWorkDefenseMod() const;
+	int GetNumWorkAttackMod() const;
+
+	bool IsNoResourcePunishment() const;
+#endif
+
 
 	int GetUpgradeDiscount() const;
 	int GetExperiencePercent() const;
@@ -411,6 +424,19 @@ protected:
 
 	int m_iRangedSupportFireMod;
 	int m_iMeleeDefenseMod;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int m_iNumSpyDefenseMod;
+	int m_iNumSpyAttackMod;
+
+	int m_iNumWonderDefenseMod;
+	int m_iNumWonderAttackMod;
+
+	int m_iNumWorkDefenseMod;
+	int m_iNumWorkAttackMod;
+
+	bool m_bNoResourcePunishment;
 #endif
 
 #if defined(MOD_ROG_CORE)

@@ -428,6 +428,18 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	}
 #endif
 
+
+#if defined(MOD_ROG_CORE)
+	Method(GetNumSpyDefenseMod);
+	Method(GetNumSpyAttackMod);
+	Method(GetNumWorkDefenseMod);
+	Method(GetNumWorkAttackMod);
+	Method(GetNumWonderDefenseMod);
+	Method(GetNumWonderAttackMod);
+
+	Method(IsNoResourcePunishment);
+#endif
+
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_PROMOTIONS_IMPROVEMENT_BONUS)
 	Method(GetNearbyImprovementCombatBonus);
 	Method(GetNearbyImprovementBonusRange);
@@ -3845,6 +3857,73 @@ int CvLuaUnit::lDomainDefense(lua_State* L)
 	lua_pushinteger(L, iResult);
 	return 1;
 }
+
+
+#if defined(MOD_ROG_CORE)
+int CvLuaUnit::lGetNumSpyDefenseMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetNumSpyDefenseMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+//------------------------------------------------------------------------------
+int CvLuaUnit::lGetNumSpyAttackMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetNumSpyAttackMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetNumWorkDefenseMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetNumWorkDefenseMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+//------------------------------------------------------------------------------
+int CvLuaUnit::lGetNumWorkAttackMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetNumWorkAttackMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetNumWonderDefenseMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetNumWonderDefenseMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+//------------------------------------------------------------------------------
+int CvLuaUnit::lGetNumWonderAttackMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetNumWonderAttackMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+
+//------------------------------------------------------------------------------
+//bool NoResourcePunishment;
+int CvLuaUnit::lIsNoResourcePunishment(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const bool bResult = pkUnit->IsNoResourcePunishment();
+
+	lua_pushboolean(L, bResult);
+	return 1;
+}
+#endif
+
 
 
 

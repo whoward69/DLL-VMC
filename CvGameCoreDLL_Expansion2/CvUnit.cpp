@@ -319,6 +319,17 @@ CvUnit::CvUnit() :
 #endif
 
 
+#if defined(MOD_ROG_CORE)
+		, m_iNumSpyDefenseMod("CvUnit::m_iNumSpyDefenseMod", m_syncArchive)
+		, m_iNumSpyAttackMod("CvUnit::m_iNumSpyAttackMod", m_syncArchive)
+		, m_iNumWonderDefenseMod("CvUnit::m_iNumWonderDefenseMod", m_syncArchive)
+		, m_iNumWonderAttackMod("CvUnit::m_iNumWonderAttackMod", m_syncArchive)
+		, m_iNumWorkDefenseMod("CvUnit::m_iNumWorkDefenseMod", m_syncArchive)
+		, m_iNumWorkAttackMod("CvUnit::m_iNumWorkAttackMod", m_syncArchive)
+
+		, m_iNoResourcePunishment("CvUnit::m_iNoResourcePunishment", m_syncArchive)
+#endif
+
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	, m_iCanCrossMountainsCount("CvUnit::m_iCanCrossMountainsCount", m_syncArchive)
 #endif
@@ -389,6 +400,8 @@ CvUnit::CvUnit() :
 		, m_iGoldenAgeMod(0)
 		, m_iRangedSupportFireMod(0)
 #endif
+
+
 
 	, m_iEmbarkExtraVisibility(0)
 	, m_iEmbarkDefensiveModifier(0)
@@ -1100,6 +1113,19 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iHPHealedIfDefeatEnemyGlobal = 0;
 #endif
 
+
+#if defined(MOD_ROG_CORE)
+	m_iNumSpyDefenseMod = 0;
+	m_iNumSpyAttackMod = 0;
+
+	m_iNumWonderDefenseMod = 0;
+	m_iNumWonderAttackMod = 0;
+
+	m_iNumWorkDefenseMod = 0;
+	m_iNumWorkAttackMod = 0;
+
+	m_iNoResourcePunishment = 0;
+#endif
 
 
 #if defined(MOD_ROG_CORE)
@@ -5494,6 +5520,99 @@ int CvUnit::GetCapitalDefenseFalloff() const
 {
 	return m_iCapitalDefenseFalloff;
 }
+
+#if defined(MOD_ROG_CORE)
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeNumSpyAttackMod(int iValue)
+{
+	m_iNumSpyAttackMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetNumSpyAttackMod() const
+{
+	return m_iNumSpyAttackMod;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeNumSpyDefenseMod(int iValue)
+{
+	m_iNumSpyDefenseMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetNumSpyDefenseMod() const
+{
+	return m_iNumSpyDefenseMod;
+}
+
+
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeNumWonderAttackMod(int iValue)
+{
+	m_iNumWonderAttackMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetNumWonderAttackMod() const
+{
+	return m_iNumWonderAttackMod;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeNumWonderDefenseMod(int iValue)
+{
+	m_iNumWonderDefenseMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetNumWonderDefenseMod() const
+{
+	return m_iNumWonderDefenseMod;
+}
+
+
+
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeNumWorkAttackMod(int iValue)
+{
+	m_iNumWorkAttackMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetNumWorkAttackMod() const
+{
+	return m_iNumWorkAttackMod;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeNumWorkDefenseMod(int iValue)
+{
+	m_iNumWorkDefenseMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetNumWorkDefenseMod() const
+{
+	return m_iNumWorkDefenseMod;
+}
+
+
+// No penalty from being wounded, no combat bonus
+//	--------------------------------------------------------------------------------
+bool CvUnit::IsNoResourcePunishment() const
+{
+	return m_iNoResourcePunishment > 0;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeIsNoResourcePunishment(int iChange)
+{
+	m_iNoResourcePunishment += iChange;
+}
+#endif
 
 
 
@@ -12448,6 +12567,9 @@ int CvUnit::GetStrategicResourceCombatPenalty() const
 	if(isBarbarian())
 		return iPenalty;
 
+	if (IsNoResourcePunishment())
+		return iPenalty;
+
 	CvPlayerAI& kPlayer = GET_PLAYER(getOwner());
 
 	// Loop through all resources
@@ -12963,6 +13085,42 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 	}
 #endif
 
+#if defined(MOD_ROG_CORE)
+	// spy modifier always applies for  attack
+	int iSpy;
+	int iSpyAttackModValue;
+
+	int iWork;
+	int iWorkAttackModValue;
+
+	int iWonder;
+	int iWonderAttackModValue;
+
+	if (kPlayer.GetEspionage()->GetNumSpies() > 0)
+	{
+		iSpy = kPlayer.GetEspionage()->GetNumSpies();
+		iSpyAttackModValue = GetNumSpyAttackMod();
+		iTempModifier = (iSpy * iSpyAttackModValue);
+		iModifier += iTempModifier;
+	}
+
+
+	if (kPlayer.GetCulture()->GetNumGreatWorks() > 0)
+	{
+		iWork = kPlayer.GetCulture()->GetNumGreatWorks();
+		iWorkAttackModValue = GetNumWorkAttackMod();
+		iTempModifier = (iWork * iWorkAttackModValue);
+		iModifier += iTempModifier;
+	}
+
+	if (kPlayer.GetNumWorldWonders() > 0)
+	{
+		iWonder = kPlayer.GetNumWorldWonders();
+		iWonderAttackModValue = GetNumWonderAttackMod();
+		iTempModifier = (iWonder * iWonderAttackModValue);
+		iModifier += iTempModifier;
+	}
+#endif
 
 	// Damage modifier always applies for melee attack
 	iModifier += GetDamageCombatModifier();
@@ -13233,6 +13391,45 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 	if (kPlayer.isGoldenAge())
 	{
 		iModifier += GetGoldenAgeMod();
+	}
+#endif
+
+
+
+#if defined(MOD_ROG_CORE)
+	// spy modifier always applies for  attack
+	int iSpy;
+	int iSpyDefenseModValue;
+
+	int iWork;
+	int iWorkDefenseModValue;
+
+	int iWonder;
+	int iWonderDefenseModValue;
+
+	if (kPlayer.GetEspionage()->GetNumSpies() > 0)
+	{
+		iSpy = kPlayer.GetEspionage()->GetNumSpies();
+		iSpyDefenseModValue = GetNumSpyDefenseMod();
+		iTempModifier = (iSpy * iSpyDefenseModValue);
+		iModifier += iTempModifier;
+	}
+
+
+	if (kPlayer.GetCulture()->GetNumGreatWorks() > 0)
+	{
+		iWork = kPlayer.GetCulture()->GetNumGreatWorks();
+		iWorkDefenseModValue = GetNumWorkDefenseMod();
+		iTempModifier = (iWork * iWorkDefenseModValue);
+		iModifier += iTempModifier;
+	}
+
+	if (kPlayer.GetNumWorldWonders() > 0)
+	{
+		iWonder = kPlayer.GetNumWorldWonders();
+		iWonderDefenseModValue = GetNumWonderDefenseMod();
+		iTempModifier = (iWonder * iWonderDefenseModValue);
+		iModifier += iTempModifier;
 	}
 #endif
 
@@ -13876,6 +14073,48 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 			iModifier += iTempModifier;
 		}
 #endif
+
+
+
+#if defined(MOD_ROG_CORE)
+		// spy modifier always applies for  attack
+		int iSpy;
+		int iSpyAttackModValue;
+
+		int iWork;
+		int iWorkAttackModValue;
+
+		int iWonder;
+		int iWonderAttackModValue;
+
+		if (kPlayer.GetEspionage()->GetNumSpies() > 0)
+		{
+			iSpy = kPlayer.GetEspionage()->GetNumSpies();
+			iSpyAttackModValue = GetNumSpyAttackMod();
+			iTempModifier = (iSpy * iSpyAttackModValue);
+			iModifier += iTempModifier;
+		}
+
+
+		if (kPlayer.GetCulture()->GetNumGreatWorks() > 0)
+		{
+			iWork = kPlayer.GetCulture()->GetNumGreatWorks();
+			iWorkAttackModValue = GetNumWorkAttackMod();
+			iTempModifier = (iWork * iWorkAttackModValue);
+			iModifier += iTempModifier;
+		}
+
+		if (kPlayer.GetNumWorldWonders() > 0)
+		{
+			iWonder = kPlayer.GetNumWorldWonders();
+			iWonderAttackModValue = GetNumWonderAttackMod();
+			iTempModifier = (iWonder * iWonderAttackModValue);
+			iModifier += iTempModifier;
+		}
+#endif
+
+
+
 	}
 	// This Unit on defense
 	else
@@ -13992,6 +14231,46 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 			{
 				iModifier += getOutsideCapitalLandDefenseMod();
 			}
+		}
+#endif
+
+
+
+
+#if defined(MOD_ROG_CORE)
+		// spy modifier always applies for  attack
+		int iSpy;
+		int iSpyDefenseModValue;
+
+		int iWork;
+		int iWorkDefenseModValue;
+
+		int iWonder;
+		int iWonderDefenseModValue;
+
+		if (kPlayer.GetEspionage()->GetNumSpies() > 0)
+		{
+			iSpy = kPlayer.GetEspionage()->GetNumSpies();
+			iSpyDefenseModValue = GetNumSpyDefenseMod();
+			iTempModifier = (iSpy * iSpyDefenseModValue);
+			iModifier += iTempModifier;
+		}
+
+
+		if (kPlayer.GetCulture()->GetNumGreatWorks() > 0)
+		{
+			iWork = kPlayer.GetCulture()->GetNumGreatWorks();
+			iWorkDefenseModValue = GetNumWorkDefenseMod();
+			iTempModifier = (iWork * iWorkDefenseModValue);
+			iModifier += iTempModifier;
+		}
+
+		if (kPlayer.GetNumWorldWonders() > 0)
+		{
+			iWonder = kPlayer.GetNumWorldWonders();
+			iWonderDefenseModValue = GetNumWonderDefenseMod();
+			iTempModifier = (iWonder * iWonderDefenseModValue);
+			iModifier += iTempModifier;
 		}
 #endif
 
@@ -22506,6 +22785,19 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		changeOutsideCapitalLandAttackMod(thisPromotion.GetOutsideCapitalLandAttackMod()* iChange);
 		changeOnCapitalLandDefenseMod(thisPromotion.GetOnCapitalLandDefenseMod()* iChange);
 		changeOutsideCapitalLandDefenseMod(thisPromotion.GetOutsideCapitalLandDefenseMod() * iChange);
+#endif
+
+#if defined(MOD_ROG_CORE)
+		ChangeNumSpyAttackMod(thisPromotion.GetNumSpyAttackMod() * iChange);
+		ChangeNumSpyDefenseMod(thisPromotion.GetNumSpyDefenseMod() * iChange);
+
+		ChangeNumWonderAttackMod(thisPromotion.GetNumWonderAttackMod()* iChange);
+		ChangeNumWonderDefenseMod(thisPromotion.GetNumWonderDefenseMod()* iChange);
+
+		ChangeNumWorkAttackMod(thisPromotion.GetNumWorkAttackMod()* iChange);
+		ChangeNumWorkDefenseMod(thisPromotion.GetNumWorkDefenseMod()* iChange);
+
+		ChangeIsNoResourcePunishment(thisPromotion.IsNoResourcePunishment() ? iChange : 0);
 #endif
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)

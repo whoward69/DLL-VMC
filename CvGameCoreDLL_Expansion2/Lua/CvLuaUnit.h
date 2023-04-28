@@ -420,6 +420,18 @@ protected:
 
 
 #if defined(MOD_ROG_CORE)
+	static int lGetNumSpyDefenseMod(lua_State* L);
+	static int lGetNumSpyAttackMod(lua_State* L);
+	static int lGetNumWorkDefenseMod(lua_State* L);
+	static int lGetNumWorkAttackMod(lua_State* L);
+	static int lGetNumWonderDefenseMod(lua_State* L);
+	static int lGetNumWonderAttackMod(lua_State* L);
+
+	static int lIsNoResourcePunishment(lua_State* L);
+#endif
+
+
+#if defined(MOD_ROG_CORE)
 	static int lGetOnCapitalLandAttackMod(lua_State* L);
 	static int lGetOutsideCapitalLandAttackMod(lua_State* L);
 	static int lGetOnCapitalLandDefenseMod(lua_State* L);

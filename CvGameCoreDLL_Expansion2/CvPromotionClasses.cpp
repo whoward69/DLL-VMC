@@ -134,6 +134,19 @@ CvPromotionEntry::CvPromotionEntry():
 #endif
 
 
+#if defined(MOD_ROG_CORE)
+	m_iNumSpyDefenseMod(0),
+	m_iNumSpyAttackMod(0),
+
+	m_iNumWonderDefenseMod(0),
+	m_iNumWonderAttackMod(0), 
+
+	m_iNumWorkDefenseMod(0),
+	m_iNumWorkAttackMod(0),
+
+	m_bNoResourcePunishment(false),
+#endif
+
 	m_iUpgradeDiscount(0),
 	m_iExperiencePercent(0),
 	m_iAdjacentMod(0),
@@ -407,6 +420,22 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 		m_iOutsideCapitalLandAttackMod = kResults.GetInt("OutsideCapitalLandAttackMod");
 		m_iOnCapitalLandDefenseMod = kResults.GetInt("OnCapitalLandDefenseMod");
 		m_iOutsideCapitalLandDefenseMod = kResults.GetInt("OutsideCapitalLandDefenseMod");
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+		if (MOD_ROG_CORE) {
+			m_iNumSpyDefenseMod = kResults.GetInt("NumSpyDefenseMod");
+			m_iNumSpyAttackMod = kResults.GetInt("NumSpyAttackMod");
+
+			m_iNumWonderDefenseMod = kResults.GetInt("NumWonderDefenseMod");
+			m_iNumWonderAttackMod = kResults.GetInt("NumWonderAttackMod");
+
+			m_iNumWorkDefenseMod = kResults.GetInt("NumWorkDefenseMod");
+			m_iNumWorkAttackMod = kResults.GetInt("NumWorkAttackMod");
+
+			m_bNoResourcePunishment = kResults.GetBool("NoResourcePunishment");
+		}
 #endif
 
 	m_bRoughTerrainEndsTurn = kResults.GetBool("RoughTerrainEndsTurn");
@@ -1494,6 +1523,48 @@ int CvPromotionEntry::GetRangedSupportFireMod() const
 	return m_iRangedSupportFireMod;
 }
 #endif
+
+
+
+
+#if defined(MOD_ROG_CORE)
+
+int CvPromotionEntry::GetNumSpyAttackMod() const
+{
+	return m_iNumSpyAttackMod;
+}
+
+int CvPromotionEntry::GetNumSpyDefenseMod() const
+{
+	return m_iNumSpyDefenseMod;
+}
+
+int CvPromotionEntry::GetNumWonderAttackMod() const
+{
+	return m_iNumWonderAttackMod;
+}
+
+int CvPromotionEntry::GetNumWonderDefenseMod() const
+{
+	return m_iNumWonderDefenseMod;
+}
+
+int CvPromotionEntry::GetNumWorkAttackMod() const
+{
+	return m_iNumWorkAttackMod;
+}
+
+int CvPromotionEntry::GetNumWorkDefenseMod() const
+{
+	return m_iNumWorkDefenseMod;
+}
+
+bool CvPromotionEntry::IsNoResourcePunishment() const
+{
+	return m_bNoResourcePunishment;
+}
+#endif
+
 
 
 #if defined(MOD_ROG_CORE)

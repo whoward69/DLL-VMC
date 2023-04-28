@@ -1576,6 +1576,33 @@ public:
 #endif
 
 
+
+#if defined(MOD_ROG_CORE)
+	void ChangeNumSpyAttackMod(int iValue);
+	int GetNumSpyAttackMod() const;
+
+	void ChangeNumWonderAttackMod(int iValue);
+	int GetNumWonderAttackMod() const;
+
+	void ChangeNumWorkAttackMod(int iValue);
+	int GetNumWorkAttackMod() const;
+
+
+	void ChangeNumSpyDefenseMod(int iValue);
+	int GetNumSpyDefenseMod() const;
+
+	void ChangeNumWonderDefenseMod(int iValue);
+	int GetNumWonderDefenseMod() const;
+
+	void ChangeNumWorkDefenseMod(int iValue);
+	int GetNumWorkDefenseMod() const;
+
+
+	bool IsNoResourcePunishment() const;
+	void ChangeIsNoResourcePunishment(int iChange);
+#endif
+
+
 	void ChangeCityAttackPlunderModifier(int iValue);
 	int GetCityAttackPlunderModifier() const;
 
@@ -1816,6 +1843,18 @@ protected:
 #endif
 
 
+
+#if defined(MOD_ROG_CORE)
+	FAutoVariable<int, CvUnit> m_iNumSpyDefenseMod;
+	FAutoVariable<int, CvUnit> m_iNumSpyAttackMod;
+	FAutoVariable<int, CvUnit> m_iNumWonderDefenseMod;
+	FAutoVariable<int, CvUnit> m_iNumWonderAttackMod;
+	FAutoVariable<int, CvUnit> m_iNumWorkDefenseMod;
+	FAutoVariable<int, CvUnit> m_iNumWorkAttackMod;
+
+	FAutoVariable<int, CvUnit> m_iNoResourcePunishment;
+#endif
+
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	FAutoVariable<int, CvUnit> m_iCanCrossMountainsCount;
 #endif
@@ -1963,6 +2002,8 @@ protected:
 	int m_iGoldenAgeMod;
 	int m_iRangedSupportFireMod;
 #endif
+
+
 
 
 	int m_iEmbarkExtraVisibility;

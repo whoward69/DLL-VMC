@@ -29258,3 +29258,23 @@ void CvPlayer::DoHealGlobal(int iHealPercent)
 	}
 }
 #endif
+
+
+#if defined(MOD_ROG_CORE)
+int CvPlayer::GetNumWorldWonders()
+{
+	int iCount = 0;
+
+	int iLoop;
+	for (CvCity* pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
+	{
+		if (pLoopCity->getNumWorldWonders() > 0)
+		{
+			iCount += pLoopCity->getNumWorldWonders();
+		}
+	}
+
+	return iCount;
+
+}
+#endif

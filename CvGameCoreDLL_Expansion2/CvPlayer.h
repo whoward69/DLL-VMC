@@ -1836,6 +1836,9 @@ public:
 	int CountAllOriginalCapitalCity();
 #endif
 
+#if defined(MOD_ROG_CORE)
+	int GetNumWorldWonders();
+#endif
 
 	// for serialization
 	virtual void Read(FDataStream& kStream);
