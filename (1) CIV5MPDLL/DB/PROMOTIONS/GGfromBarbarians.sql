@@ -1,0 +1,4 @@
+ALTER TABLE UnitPromotions
+  ADD GGFromBarbarians INTEGER DEFAULT 0;
+
+INSERT INTO CustomModDbUpdates(Name, Value) VALUES('PROMOTIONS_GG_FROM_BARBARIANS', 1);

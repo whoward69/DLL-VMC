@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<!-- Espionage.xml -->
+	<Language_JA_JP>
+		<Row Tag="TXT_KEY_SPY_STATE_TERMINATED">
+			<Text>死亡！</Text>
+		</Row>
+	</Language_JA_JP>
+
+	<!-- GoodyHutMessages.xml -->
+	<Language_JA_JP>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_GOLD"/>
+			<Set>
+				<Text>遺跡の中で、古代帝国の財宝を見つけた！</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_PROPHET_FAITH"/>
+			<Set>
+				<Text>秘密の教団を発見した。説教師が大予言者の訪れを予言する。</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_FAITH"/>
+			<Set>
+				<Text>古代神殿を発見した。司祭が神の信託を授ける。</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_CULTURE"/>
+			<Set>
+				<Text>遺跡の中で文化遺物を見つけた！これを目にした民が感銘を受けている。</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_MISC_RECEIVED_GOLD"/>
+			<Set>
+				<Text>[SPACE]{1_Num}[ICON_GOLD]ゴールドを獲得した！</Text>
+			</Set>
+		</Update>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_CULTURE">
+			<Text>[SPACE][ICON_CULTURE]文化力{1_Num}を獲得した！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_FAITH">
+			<Text>[SPACE][ICON_PEACE]信仰力{1_Num}を獲得した！</Text>
+		</Row>
+	</Language_JA_JP>
+		
+	<!-- Religion.xml -->
+	<Language_JA_JP>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_ACTIVE_PLAYER">
+			<Text>新たな信仰の証を追加してパンテオン信仰を強化した。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED">
+			<Text>{1_CivName}が新たな信仰の証を追加してパンテオン信仰を強化した。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_UNKNOWN">
+			<Text>未知の文明が新たな信仰の証を追加してパンテオン信仰を強化した。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_S">
+			<Text>パンテオンの強化</Text>
+		</Row>
+	</Language_JA_JP>
+
+	<!-- SpyNames.xml -->
+	<Language_JA_JP>
+		<Row Tag="TXT_KEY_SPY_NAME_UNKNOWN">
+			<Text>不明</Text>
+		</Row>
+	</Language_JA_JP>
+    
+	<!-- UnifiedYieldsGoldenAge.xml -->
+	<Language_JA_JP>
+		<Row Tag="TXT_KEY_YIELD_GOLDEN_AGE_POINTS">
+			<Text>黄金時代</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_GOLDEN_AGE_POINTS_YIELD_TT">
+			<Text>{1_Num} [ICON_GOLDEN_AGE]黄金時代</Text>
+		</Row>
+		<Row Tag="TXT_KEY_GOLDEN_AGE_POINTS_FROM_TRADE_ROUTES">
+			<Text>{1_perTurn:number "#.##"} [ICON_GOLDEN_AGE]黄金時代ポイント (この都市に設立された交易路から)</Text>
+		</Row>
+	</Language_JA_JP>
+    
+	<!-- UnifiedYieldsTourism.xml -->
+	<Language_JA_JP>
+		<Row Tag="TXT_KEY_YIELD_TOURISM">
+			<Text>観光力</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_TOURISM_YIELD_TT">
+			<Text>{1_Num} [ICON_TOURISM]観光力</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOURISM_FROM_TRADE_ROUTES">
+			<Text>{1_perTurn:number "#.##"} [ICON_TOURISM] (この都市に設立された交易路から)</Text>
+		</Row>
+	</Language_JA_JP>
+    
+	<!-- UnitclassNotUnit.xml -->
+	<Language_JA_JP>
+		<Row Tag="TXT_KEY_TP_FAITH_NEXT_PROPHET_PARAM">
+			<Text>次の{2_UNITCLASS_PROPHET}誕生には[ICON_PEACE]信仰力{1_Num}以上が必要。</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_RO_FAITH_TOOLTIP_PARAM">
+			<Text>次の{2_UNITCLASS_PROPHET}誕生には[ICON_PEACE]信仰力{1_MinFaith}以上が必要。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PROPHET_PARAM">
+			<Text>{1_UNITCLASS_PROPHET}を購入するために貯めておく</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PURCHASE_PROPHET_PARAM">
+			<Text>{1_UNITCLASS_PROPHET}を購入する</Text>
+		</Row>
+	</Language_JA_JP>
+
+	<!-- UnitNaming.xml -->
+	<Language_JA_JP>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_INVULNERABIILITY">
+			<Text>鉄人クリス</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_SNEAK_ATTACK">
+			<Text>奇襲クリス</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_HEROISM">
+			<Text>英雄クリス</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_AMBITION">
+			<Text>野心クリス</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_RESTLESSNESS">
+			<Text>執拗クリス</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_RECRUITMENT">
+			<Text>回復クリス</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_ENEMY_BLADE">
+			<Text>呪詛クリス</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_EVIL_SPIRITS">
+			<Text>悪霊クリス</Text>
+		</Row>
+	</Language_JA_JP>
+
+	<!-- VariableRecon.xml -->
+	<Language_JA_JP>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_SHORT_RANGE">
+			<Text>視程 (短)</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_SHORT_RANGE_HELP">
+			<Text>視程-2。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PEDIA_PROMOTION_RECON_SHORT_RANGE">
+			<Text>視程 (短)</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_LONG_RANGE">
+			<Text>視程 (長)</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_LONG_RANGE_HELP">
+			<Text>視程+2。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PEDIA_PROMOTION_RECON_LONG_RANGE">
+			<Text>視程 (長)</Text>
+		</Row>
+	</Language_JA_JP>
+</GameData>

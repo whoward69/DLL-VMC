@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<!-- Espionage.xml -->
+	<Language_zh_Hant_HK>
+		<Row Tag="TXT_KEY_SPY_STATE_TERMINATED">
+			<Text>被消滅了！</Text>
+		</Row>
+	</Language_zh_Hant_HK>
+
+	<!-- GoodyHutMessages.xml -->
+	<Language_zh_Hant_HK>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_GOLD"/>
+			<Set>
+				<Text>您在該遺迹中找到了上古帝國的寶藏！</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_PROPHET_FAITH"/>
+			<Set>
+				<Text>您發現了一處秘密的宗教社區。傳教士預言了大預言家的降臨。</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_FAITH"/>
+			<Set>
+				<Text>您發現了一座古老的祭司神殿。祭司向您揭示了神的啟示，賜予您祝福。</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_CULTURE"/>
+			<Set>
+				<Text>您找到了讓人民敬畏的文化寶物！</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_MISC_RECEIVED_GOLD"/>
+			<Set>
+				<Text>[SPACE]您獲得了{1_Num}[ICON_GOLD]枚金幣！</Text>
+			</Set>
+		</Update>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_CULTURE">
+			<Text>[SPACE]您獲得了{1_Num}[ICON_CULTURE]文化值！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_FAITH">
+			<Text>[SPACE]您獲得了{1_Num}[ICON_PEACE]信仰值！</Text>
+		</Row>
+	</Language_zh_Hant_HK>
+
+	<!-- Religion.xml -->
+	<Language_zh_Hant_HK>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_ACTIVE_PLAYER">
+			<Text>您已納入新的信條以強化您的神系。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED">
+			<Text>{1_CivName}已納入新的信條以強化他們的神系。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_UNKNOWN">
+			<Text>一個未曾謀面的文明已納入新的信條以強化他們的神系。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_S">
+			<Text>神系強化</Text>
+		</Row>
+	</Language_zh_Hant_HK>
+
+	<!-- SpyNames.xml -->
+	<Language_zh_Hant_HK>
+		<Row Tag="TXT_KEY_SPY_NAME_UNKNOWN">
+			<Text>無名</Text>
+		</Row>
+	</Language_zh_Hant_HK>
+    
+	<!-- UnifiedYieldsGoldenAge.xml -->
+	<Language_zh_Hant_HK>
+		<Row Tag="TXT_KEY_YIELD_GOLDEN_AGE_POINTS">
+			<Text>黃金時代點</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_GOLDEN_AGE_POINTS_YIELD_TT">
+			<Text>{1_Num}[ICON_GOLDEN_AGE]黃金時代點</Text>
+		</Row>
+		<Row Tag="TXT_KEY_GOLDEN_AGE_POINTS_FROM_TRADE_ROUTES">
+			<Text>通過與該城市建立貿易線路以每回合獲取{1_perTurn:number "#.##"}點[ICON_GOLDEN_AGE]</Text>
+		</Row>
+	</Language_zh_Hant_HK>
+    
+	<!-- UnifiedYieldsTourism.xml -->
+	<Language_zh_Hant_HK>
+		<Row Tag="TXT_KEY_YIELD_TOURISM">
+			<Text>旅遊業績</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_TOURISM_YIELD_TT">
+			<Text>{1_Num}[ICON_TOURISM]旅遊業績</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOURISM_FROM_TRADE_ROUTES">
+			<Text>通過與該城市建立貿易線路以每回合獲取{1_perTurn:number "#.##"}點[ICON_TOURISM]</Text>
+		</Row>
+	</Language_zh_Hant_HK>
+    
+	<!-- UnitclassNotUnit.xml -->
+	<Language_zh_Hant_HK>
+		<Row Tag="TXT_KEY_TP_FAITH_NEXT_PROPHET_PARAM">
+			<Text>需要至少{1_Num}[ICON_PEACE]信仰值才可誕生下一個{2_UNITCLASS_PROPHET}</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_RO_FAITH_TOOLTIP_PARAM">
+			<Text>至少需要{1_MinFaith}[ICON_PEACE]信仰值才誕生下個{2_UNITCLASS_PROPHET}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PROPHET_PARAM">
+			<Text>為{1_UNITCLASS_PROPHET}留存</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PURCHASE_PROPHET_PARAM">
+			<Text>購買{1_UNITCLASS_PROPHET}</Text>
+		</Row>
+	</Language_zh_Hant_HK>
+
+	<!-- UnitNaming.xml -->
+	<Language_zh_Hant_HK>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_INVULNERABIILITY">
+			<Text>不朽的克里斯</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_SNEAK_ATTACK">
+			<Text>奇襲的克里斯</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_HEROISM">
+			<Text>英勇的克里斯</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_AMBITION">
+			<Text>狂莽的克里斯</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_RESTLESSNESS">
+			<Text>不懈的克里斯</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_RECRUITMENT">
+			<Text>新銳的克里斯</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_ENEMY_BLADE">
+			<Text>受詛咒的克里斯</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_EVIL_SPIRITS">
+			<Text>著魔的克里斯</Text>
+		</Row>
+	</Language_zh_Hant_HK>
+
+	<!-- VariableRecon.xml -->
+	<Language_zh_Hant_HK>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_SHORT_RANGE">
+			<Text>偵查受限</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_SHORT_RANGE_HELP">
+			<Text>視野-2。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PEDIA_PROMOTION_RECON_SHORT_RANGE">
+			<Text>偵查受限</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_LONG_RANGE">
+			<Text>偵查強化</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_LONG_RANGE_HELP">
+			<Text>視野+2。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PEDIA_PROMOTION_RECON_LONG_RANGE">
+			<Text>偵查強化</Text>
+		</Row>
+	</Language_zh_Hant_HK>
+	
+	<!-- Quests.xml -->
+	<Language_zh_Hant_HK>
+		<Row Tag="TXT_KEY_CITY_STATE_QUEST_GENERIC_FORMAL">
+			<Text>他們希望您能爲城邦做點兒什麽。</Text>
+		</Row>
+	</Language_zh_Hant_HK>
+
+	<!-- New Yield Modifier -->
+	<Language_zh_Hant_HK>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_NUM_GREAT_WORK">
+			<Text>[NEWLINE][ICON_BULLET]杰作修正: {1_Num}%</Text>
+		</Row>
+	</Language_zh_Hant_HK>
+</GameData>

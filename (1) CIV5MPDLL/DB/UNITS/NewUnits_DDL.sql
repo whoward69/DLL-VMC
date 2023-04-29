@@ -1,0 +1,1 @@
+ALTER TABLE Units ADD 'ScaleFromNumGWs' INTEGER DEFAULT 0;

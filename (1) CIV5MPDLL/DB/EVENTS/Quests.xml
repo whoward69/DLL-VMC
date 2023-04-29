@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<Table name="Quests">
+		<Column name="ID" type="integer" primarykey="true" autoincrement="true"/>
+		<Column name="Type" type="text" unique="true" notnull="true"/>
+
+		<!-- Set to true if quest is backed by C++ code in the DLL -->
+		<Column name="Internal" type="boolean" default="false"/>
+
+		<!-- Set to false to disable this type of event -->
+		<Column name="Enabled" type="boolean" default="true"/>
+		<!-- Game option (if any) to disable this event for, eg GAMEOPTION_NO_POLICIES, GAMEOPTION_NO_RELIGION, GAMEOPTION_NO_SCIENCE -->
+		<Column name="DisabledOnOption" type="text" default="NULL"/>
+
+		<!-- Set to true for global (one quest applies to all players), false for personal (one quest per player) quests -->
+		<Column name="Global" type="boolean" default="false"/>
+
+		<!-- Set to false to override the default behaviour of revoking the quest in the player bullies the CS -->
+		<Column name="RevokeOnBully" type="boolean" default="true"/>
+
+		<!-- Set to true if this is a contest type quest (eg most culture, science, etc) - must also hook the QuestContestValue event -->
+		<Column name="Contest" type="boolean" default="false"/>
+
+		<!-- Mininimum number of majors the CS must have met before the quest can be considered, typically used for contest quests -->
+		<Column name="MinPlayers" type="integer" default="1"/>
+
+		<!-- Duration in turns this quest runs for; will be automatically adjusted for non-standard game speeds -->
+		<Column name="Duration" type="integer" default="-1"/>
+
+		<!-- Friendship/Influence gained on completion of the quest -->
+		<Column name="Friendship" type="integer" default="0"/>
+
+		<!-- Notification text pairs, set to NULL to force a QuestSendNotification event -->
+		<Column name="StartSummary" type="text" default="NULL" reference="Language_en_US(Tag)"/>
+		<Column name="StartMessage" type="text" default="NULL" reference="Language_en_US(Tag)"/>
+		<Column name="FinishSummary" type="text" default="NULL" reference="Language_en_US(Tag)"/>
+		<Column name="FinishMessage" type="text" default="NULL" reference="Language_en_US(Tag)"/>
+		<Column name="CancelSummary" type="text" default="NULL" reference="Language_en_US(Tag)"/>
+		<Column name="CancelMessage" type="text" default="NULL" reference="Language_en_US(Tag)"/>
+
+		<!-- Personality biases, only one of these will ever apply -->
+		<Column name="BiasFriendly" type="integer" default="100"/>
+		<Column name="BiasNeutral" type="integer" default="100"/>
+		<Column name="BiasHostile" type="integer" default="100"/>
+		<Column name="BiasIrrational" type="integer" default="100"/>
+
+		<!-- Trait biases, only one of these will ever apply -->
+		<Column name="BiasMaritime" type="integer" default="100"/>
+		<Column name="BiasMercantile" type="integer" default="100"/>
+		<Column name="BiasCultured" type="integer" default="100"/>
+		<Column name="BiasMilitaristic" type="integer" default="100"/>
+		<Column name="BiasReligious" type="integer" default="100"/>
+
+		<!-- UI related data, not processed by the DLL in any way -->
+		<!-- The priority for displaying the quest,
+		     there are "holes" in the standard quest sequence to permit custom quests to be inserted if needed -->
+		<Column name="Priority" type="integer" default="100"/>
+		<!-- The icon associated with the quest, or the function name to determine the icon -->
+		<Column name="Icon" type="text" default="[ICON_TEAM_1]"/>
+		<!-- The TXT_KEY associated with the quest (can use {1_TargetName:textkey} if there is a target for the quest (bully, find, etc)),
+		     or the function name to determine the tooltip -->
+		<Column name="Tooltip" type="text" default="TXT_KEY_CITY_STATE_QUEST_GENERIC_FORMAL"/>
+	</Table>
+
+	<Quests>
+		<!-- Do NOT remove/reorder these quests ... their ID values MUST correspond to the values in the DLL -->
+		<Row>
+			<ID>0</ID>
+			<Type>MINOR_CIV_QUEST_ROUTE</Type>
+			<Internal>true</Internal>
+			<Friendship>50</Friendship>
+			<BiasFriendly>200</BiasFriendly>
+			<BiasHostile>20</BiasHostile>
+			<BiasMaritime>120</BiasMaritime>
+			<BiasMercantile>150</BiasMercantile>
+			<Priority>100</Priority>
+			<Icon>[ICON_CONNECTED]</Icon>
+			<Tooltip>TXT_KEY_CITY_STATE_QUEST_ROUTE_FORMAL</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_KILL_CAMP</Type>
+			<Internal>true</Internal>
+			<Global>true</Global>
+			<RevokeOnBully>false</RevokeOnBully>
+			<Friendship>50</Friendship>
+			<BiasFriendly>300</BiasFriendly>
+			<BiasNeutral>300</BiasNeutral>
+			<BiasHostile>300</BiasHostile>
+			<BiasIrrational>300</BiasIrrational>
+			<BiasMilitaristic>300</BiasMilitaristic>
+			<Priority>7</Priority>
+			<Icon>[ICON_WAR]</Icon>
+			<Tooltip>TXT_KEY_CITY_STATE_QUEST_KILL_CAMP_FORMAL</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_CONNECT_RESOURCE</Type>
+			<Internal>true</Internal>
+			<Friendship>40</Friendship>
+			<BiasMaritime>200</BiasMaritime>
+			<BiasMercantile>300</BiasMercantile>
+			<Priority>60</Priority>
+			<Icon>GetResourceQuestIcon</Icon>
+			<Tooltip>GetResourceQuestTooltip</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_CONSTRUCT_WONDER</Type>
+			<Internal>true</Internal>
+			<Friendship>40</Friendship>
+			<BiasCultured>300</BiasCultured>
+			<Priority>55</Priority>
+			<Icon>[ICON_GOLDEN_AGE]</Icon>
+			<Tooltip>GetWonderQuestTooltip</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_GREAT_PERSON</Type>
+			<Internal>true</Internal>
+			<Friendship>40</Friendship>
+			<BiasCultured>300</BiasCultured>
+			<Priority>50</Priority>
+			<Icon>GetGreatPersonQuestIconText</Icon>
+			<Tooltip>GetGreatPersonQuestTooltip</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_KILL_CITY_STATE</Type>
+			<Internal>true</Internal>
+			<Enabled>false</Enabled>
+			<RevokeOnBully>false</RevokeOnBully>
+			<Friendship>80</Friendship>
+			<BiasNeutral>40</BiasNeutral>
+			<BiasHostile>200</BiasHostile>
+			<BiasMilitaristic>200</BiasMilitaristic>
+			<Priority>45</Priority>
+			<Icon>[ICON_RAZING]</Icon>
+			<Tooltip>GetKillCSQuestTooltip</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_FIND_PLAYER</Type>
+			<Internal>true</Internal>
+			<Friendship>35</Friendship>
+			<BiasMaritime>300</BiasMaritime>
+			<BiasMercantile>200</BiasMercantile>
+			<Priority>40</Priority>
+			<Icon>GetFindPlayerQuestIcon</Icon>
+			<Tooltip>TXT_KEY_CITY_STATE_QUEST_FIND_PLAYER_FORMAL</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_FIND_NATURAL_WONDER</Type>
+			<Internal>true</Internal>
+			<Friendship>40</Friendship>
+			<BiasHostile>30</BiasHostile>
+			<BiasMilitaristic>50</BiasMilitaristic>
+			<Priority>35</Priority>
+			<Icon>[ICON_HAPPINESS_1]</Icon>
+			<Tooltip>TXT_KEY_CITY_STATE_QUEST_FIND_NATURAL_WONDER_FORMAL</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_GIVE_GOLD</Type>
+			<Internal>true</Internal>
+			<Duration>30</Duration>
+			<Friendship>20</Friendship>
+			<BiasMaritime>300</BiasMaritime>
+			<BiasMercantile>350</BiasMercantile>
+			<BiasCultured>300</BiasCultured>
+			<BiasMilitaristic>200</BiasMilitaristic>
+			<BiasReligious>300</BiasReligious>
+			<Priority>10</Priority>
+			<Icon>[ICON_GOLD]</Icon>
+			<Tooltip>TXT_KEY_CITY_STATE_QUEST_GIVE_GOLD_FORMAL</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_PLEDGE_TO_PROTECT</Type>
+			<Internal>true</Internal>
+			<Duration>30</Duration>
+			<Friendship>20</Friendship>
+			<BiasMaritime>300</BiasMaritime>
+			<BiasMercantile>300</BiasMercantile>
+			<BiasCultured>350</BiasCultured>
+			<BiasMilitaristic>200</BiasMilitaristic>
+			<BiasReligious>300</BiasReligious>
+			<Priority>13</Priority>
+			<Icon>[ICON_STRENGTH]</Icon>
+			<Tooltip>TXT_KEY_CITY_STATE_QUEST_PLEDGE_TO_PROTECT_FORMAL</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_CONTEST_CULTURE</Type>
+			<Internal>true</Internal>
+			<DisabledOnOption>GAMEOPTION_NO_POLICIES</DisabledOnOption>
+			<Global>true</Global>
+			<RevokeOnBully>false</RevokeOnBully>
+			<Contest>true</Contest>
+			<MinPlayers>3</MinPlayers>
+			<Duration>30</Duration>
+			<Friendship>40</Friendship>
+			<BiasCultured>200</BiasCultured>
+			<Priority>1</Priority>
+			<Icon>[ICON_CULTURE]</Icon>
+			<Tooltip>GetContestCultureQuestTooltip</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_CONTEST_FAITH</Type>
+			<Internal>true</Internal>
+			<DisabledOnOption>GAMEOPTION_NO_RELIGION</DisabledOnOption>
+			<Global>true</Global>
+			<RevokeOnBully>false</RevokeOnBully>
+			<Contest>true</Contest>
+			<MinPlayers>3</MinPlayers>
+			<Duration>30</Duration>
+			<Friendship>40</Friendship>
+			<BiasMaritime>50</BiasMaritime>
+			<BiasMercantile>50</BiasMercantile>
+			<BiasCultured>50</BiasCultured>
+			<BiasMilitaristic>50</BiasMilitaristic>
+			<BiasReligious>200</BiasReligious>
+			<Priority>2</Priority>
+			<Icon>[ICON_PEACE]</Icon>
+			<Tooltip>GetContestFaithQuestTooltip</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_CONTEST_TECHS</Type>
+			<Internal>true</Internal>
+			<DisabledOnOption>GAMEOPTION_NO_SCIENCE</DisabledOnOption>
+			<Global>true</Global>
+			<RevokeOnBully>false</RevokeOnBully>
+			<Contest>true</Contest>
+			<MinPlayers>3</MinPlayers>
+			<Duration>30</Duration>
+			<Friendship>40</Friendship>
+			<BiasReligious>50</BiasReligious>
+			<Priority>3</Priority>
+			<Icon>[ICON_RESEARCH]</Icon>
+			<Tooltip>GetContestTechsQuestTooltip</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_INVEST</Type>
+			<Internal>true</Internal>
+			<Global>true</Global>
+			<MinPlayers>2</MinPlayers>
+			<Duration>30</Duration>
+			<Friendship>0</Friendship>
+			<BiasMercantile>150</BiasMercantile>
+			<Priority>5</Priority>
+			<Icon>[ICON_INVEST]</Icon>
+			<Tooltip>TXT_KEY_CITY_STATE_QUEST_INVEST_FORMAL</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_BULLY_CITY_STATE</Type>
+			<Internal>true</Internal>
+			<Duration>30</Duration>
+			<Friendship>40</Friendship>
+			<BiasFriendly>30</BiasFriendly>
+			<BiasHostile>200</BiasHostile>
+			<BiasIrrational>150</BiasIrrational>
+			<Priority>30</Priority>
+			<Icon>[ICON_PIRATE]</Icon>
+			<Tooltip>TXT_KEY_CITY_STATE_QUEST_BULLY_CITY_STATE_FORMAL</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_DENOUNCE_MAJOR</Type>
+			<Internal>true</Internal>
+			<Duration>30</Duration>
+			<Friendship>40</Friendship>
+			<BiasMaritime>200</BiasMaritime>
+			<BiasMercantile>150</BiasMercantile>
+			<BiasCultured>150</BiasCultured>
+			<BiasMilitaristic>150</BiasMilitaristic>
+			<BiasReligious>250</BiasReligious>
+			<Priority>16</Priority>
+			<Icon>[ICON_DENOUNCE]</Icon>
+			<Tooltip>TXT_KEY_CITY_STATE_QUEST_DENOUNCE_MAJOR_FORMAL</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_SPREAD_RELIGION</Type>
+			<Internal>true</Internal>
+			<DisabledOnOption>GAMEOPTION_NO_RELIGION</DisabledOnOption>
+			<Friendship>40</Friendship>
+			<BiasReligious>300</BiasReligious>
+			<Priority>25</Priority>
+			<Icon>GetReligionQuestIcon</Icon>
+			<Tooltip>GetReligionQuestTooltip</Tooltip>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_TRADE_ROUTE</Type>
+			<Internal>true</Internal>
+			<Friendship>40</Friendship>
+			<BiasMaritime>200</BiasMaritime>
+			<BiasMercantile>200</BiasMercantile>
+			<Priority>20</Priority>
+			<Icon>[ICON_INTERNATIONAL_TRADE]</Icon>
+			<Tooltip>TXT_KEY_CITY_STATE_QUEST_TRADE_ROUTE_FORMAL</Tooltip>
+		</Row>
+		
+		<!-- CSD Placeholders -->
+		<Row>
+			<Type>MINOR_CIV_QUEST_WAR</Type>
+			<Internal>true</Internal>
+			<Enabled>false</Enabled>
+			<Friendship>35</Friendship>
+			<BiasHostile>600</BiasHostile>
+			<BiasMaritime>125</BiasMaritime>
+			<BiasMercantile>125</BiasMercantile>
+			<BiasCultured>500</BiasCultured>
+			<BiasMilitaristic>800</BiasMilitaristic>
+			<BiasReligious>125</BiasReligious>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_CONSTRUCT_NATIONAL_WONDER</Type>
+			<Internal>true</Internal>
+			<Enabled>false</Enabled>
+			<Friendship>40</Friendship>
+			<BiasMaritime>75</BiasMaritime>
+			<BiasMercantile>75</BiasMercantile>
+			<BiasCultured>300</BiasCultured>
+			<BiasMilitaristic>75</BiasMilitaristic>
+			<BiasReligious>75</BiasReligious>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_FIND_CITY_STATE</Type>
+			<Internal>true</Internal>
+			<Enabled>false</Enabled>
+			<Friendship>25</Friendship>
+			<BiasMaritime>115</BiasMaritime>
+			<BiasMercantile>120</BiasMercantile>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_INFLUENCE</Type>
+			<Internal>true</Internal>
+			<Enabled>false</Enabled>
+			<Global>true</Global>
+			<MinPlayers>2</MinPlayers>
+			<Duration>30</Duration>
+			<Friendship>0</Friendship>
+			<BiasFriendly>70</BiasFriendly>
+			<BiasNeutral>70</BiasNeutral>
+			<BiasHostile>50</BiasHostile>
+			<BiasIrrational>70</BiasIrrational>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_CONTEST_TOURISM</Type>
+			<Internal>true</Internal>
+			<Enabled>false</Enabled>
+			<DisabledOnOption>GAMEOPTION_NO_POLICIES</DisabledOnOption>
+			<Global>true</Global>
+			<RevokeOnBully>false</RevokeOnBully>
+			<Contest>true</Contest>
+			<MinPlayers>3</MinPlayers>
+			<Duration>30</Duration>
+			<Friendship>20</Friendship>
+			<BiasFriendly>130</BiasFriendly>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_ARCHAEOLOGY</Type>
+			<Internal>true</Internal>
+			<Enabled>false</Enabled>
+			<Global>true</Global>
+			<RevokeOnBully>false</RevokeOnBully>
+			<Friendship>40</Friendship>
+			<BiasMaritime>75</BiasMaritime>
+			<BiasMercantile>75</BiasMercantile>
+			<BiasCultured>75</BiasCultured>
+			<BiasMilitaristic>250</BiasMilitaristic>
+			<BiasReligious>300</BiasReligious>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_CIRCUMNAVIGATION</Type>
+			<Internal>true</Internal>
+			<Enabled>false</Enabled>
+			<Global>true</Global>
+			<Friendship>35</Friendship>
+			<BiasMaritime>250</BiasMaritime>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_LIBERATION</Type>
+			<Internal>true</Internal>
+			<Enabled>false</Enabled>
+			<RevokeOnBully>false</RevokeOnBully>
+			<Friendship>80</Friendship>
+			<BiasFriendly>400</BiasFriendly>
+			<BiasMaritime>50</BiasMaritime>
+			<BiasMercantile>50</BiasMercantile>
+			<BiasCultured>50</BiasCultured>
+			<BiasMilitaristic>600</BiasMilitaristic>
+			<BiasReligious>500</BiasReligious>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_HORDE</Type>
+			<Internal>true</Internal>
+			<Enabled>false</Enabled>
+			<Global>true</Global>
+			<RevokeOnBully>false</RevokeOnBully>
+			<Duration>20</Duration>
+			<Friendship>0</Friendship>
+			<BiasFriendly>300</BiasFriendly>
+			<BiasNeutral>300</BiasNeutral>
+			<BiasHostile>300</BiasHostile>
+			<BiasIrrational>300</BiasIrrational>
+		</Row>
+		<Row>
+			<Type>MINOR_CIV_QUEST_REBELLION</Type>
+			<Internal>true</Internal>
+			<Enabled>false</Enabled>
+			<Global>true</Global>
+			<RevokeOnBully>false</RevokeOnBully>
+			<Duration>20</Duration>
+			<Friendship>0</Friendship>
+			<BiasFriendly>700</BiasFriendly>
+			<BiasNeutral>700</BiasNeutral>
+			<BiasHostile>700</BiasHostile>
+			<BiasIrrational>700</BiasIrrational>
+		</Row>
+	</Quests>
+
+	<CustomModDbUpdates>
+		<Row Name="EVENTS_QUESTS" Value="1"/>
+	</CustomModDbUpdates>
+</GameData>

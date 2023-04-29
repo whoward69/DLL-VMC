@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<!-- New Table Definitions -->
+    <Table name="Improvement_AdjacentImprovementYieldChanges">
+        <Column name="ImprovementType" type="text" reference="Improvements(Type)"/>
+        <Column name="OtherImprovementType" type="text" reference="Improvements(Type)"/>
+        <Column name="YieldType" type="text" reference="Yields(Type)"/>
+        <Column name="Yield" type="integer"/>
+    </Table>
+</GameData>

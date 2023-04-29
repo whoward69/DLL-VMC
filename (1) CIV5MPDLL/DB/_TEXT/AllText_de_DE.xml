@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<!-- Espionage.xml -->
+    <Language_de_DE>
+		<Row Tag="TXT_KEY_SPY_STATE_TERMINATED">
+			<Text>Ausgelöscht!</Text>
+		</Row>
+	</Language_de_DE>
+
+	<!-- GoodyHutMessages.xml -->
+   	<Language_de_DE>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_GOLD"/>
+			<Set>
+				<Text>In den Ruinen findet Ihr den Schatz eines vergangenen Reiches!</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_PROPHET_FAITH"/>
+			<Set>
+				<Text>Ihr habt eine geheime Religionsgemeinschaft gefunden. Der Priester sagt die Ankunft eines großen Propheten voraus!</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_FAITH"/>
+			<Set>
+				<Text>Ihr habt ein altes Orakel gefunden. Die Priesterin segnet Euch mit einer göttlichen Offenbarung.</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_CULTURE"/>
+			<Set>
+				<Text>Ihr habt ein kulturelles Artefakt gefunden, welches Eure Bürger beeindruckt!</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_MISC_RECEIVED_GOLD"/>
+			<Set>
+				<Text>[SPACE]Ihr habt {1_Num} [ICON_GOLD] Gold erhalten!</Text>
+			</Set>
+		</Update>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_CULTURE">
+			<Text>[SPACE]Ihr erhaltet {1_Num} [ICON_CULTURE] Kultur!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_FAITH">
+			<Text>[SPACE]Ihr erhaltet {1_Num} [ICON_PEACE] Glauben!</Text>
+		</Row>
+	</Language_de_DE>
+
+	<!-- Religion.xml -->
+   	<Language_de_DE>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_ACTIVE_PLAYER">
+			<Text>Durch das Hinzufügen eines neuen Glaubenssatzes habt Ihr euer Pantheon verbessert.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED">
+			<Text>{1_CivName} {1: plural 1?hat sein; 2?haben ihr;} Pantheon, durch Hinzufügen eines neuen Glaubenssatzes, verbessert.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_UNKNOWN">
+			<Text>Eine unbekannte Zivilisation hat ihr Pantheon, durch Hinzufügen eines neuen Glaubenssatzes, verbessert.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_S">
+			<Text>Pantheon verbessert</Text>
+		</Row>
+	</Language_de_DE>
+
+	<!-- SpyNames.xml -->
+    <Language_de_DE>
+		<Row Tag="TXT_KEY_SPY_NAME_UNKNOWN">
+			<Text>Unbekannt</Text>
+		</Row>
+	</Language_de_DE>
+    
+	<!-- UnifiedYieldsGoldenAge.xml -->
+   	<Language_de_DE>
+		<Row Tag="TXT_KEY_YIELD_GOLDEN_AGE_POINTS">
+			<Text>Goldenes Zeitalter</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_GOLDEN_AGE_POINTS_YIELD_TT">
+			<Text>{1_Num} [ICON_GOLDEN_AGE] Goldenes Zeitalter</Text>
+		</Row>
+		<Row Tag="TXT_KEY_GOLDEN_AGE_POINTS_FROM_TRADE_ROUTES">
+			<Text>{1_perTurn:number "#.##"} [ICON_GOLDEN_AGE] von Handelsrouten dieser Stadt.</Text>
+		</Row>
+	</Language_de_DE>
+    
+	<!-- UnifiedYieldsTourism.xml -->
+    <Language_de_DE>
+		<Row Tag="TXT_KEY_YIELD_TOURISM">
+			<Text>Tourismus</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_TOURISM_YIELD_TT">
+			<Text>{1_Num} [ICON_TOURISM] Tourismus</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOURISM_FROM_TRADE_ROUTES">
+			<Text>{1_perTurn:number "#.##"} [ICON_TOURISM] von Handelsrouten dieser Stadt.</Text>
+		</Row>
+	</Language_de_DE>
+    
+	<!-- UnitclassNotUnit.xml -->
+    <Language_de_DE>
+		<Row Tag="TXT_KEY_TP_FAITH_NEXT_PROPHET_PARAM">
+			<Text>{1_Num} [ICON_PEACE] Glaube wird mindestens benötigt für Eure nächste Chance auf einen {2_UNITCLASS_PROPHET}.</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_RO_FAITH_TOOLTIP_PARAM">
+			<Text>Ihr braucht mindestens {1_MinFaith} [ICON_PEACE] Glauben für den nächsten {2_UNITCLASS_PROPHET}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PROPHET_PARAM">
+			<Text>Spare für {1_UNITCLASS_PROPHET}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PURCHASE_PROPHET_PARAM">
+			<Text>Kaufe {1_UNITCLASS_PROPHET}</Text>
+		</Row>
+	</Language_de_DE>
+
+	<!-- UnitNaming.xml -->
+	<Language_de_DE>
+		<!-- Require translation
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_INVULNERABIILITY">
+			<Text>Defensive Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_SNEAK_ATTACK">
+			<Text>Flanking Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_HEROISM">
+			<Text>Heroic Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_AMBITION">
+			<Text>Offensive Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_RESTLESSNESS">
+			<Text>Restless Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_RECRUITMENT">
+			<Text>Regenerating Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_ENEMY_BLADE">
+			<Text>Cursed Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_EVIL_SPIRITS">
+			<Text>Possessed Kris</Text>
+		</Row>
+		-->
+	</Language_de_DE>
+
+	<!-- VariableRecon.xml -->
+	<Language_de_DE>
+		<!-- Require translation
+		<Row Tag="TXT_KEY_PROMOTION_RECON_SHORT_RANGE">
+			<Text>Short Range Recon</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_SHORT_RANGE_HELP">
+			<Text>Short Range Recon (-2 visibility).</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PEDIA_PROMOTION_RECON_SHORT_RANGE">
+			<Text>Short Range Recon</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_LONG_RANGE">
+			<Text>Long Range Recon</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_LONG_RANGE_HELP">
+			<Text>Long Range Recon (+2 visibility).</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PEDIA_PROMOTION_RECON_LONG_RANGE">
+			<Text>Long Range Recon</Text>
+		</Row>
+		-->
+	</Language_de_DE>
+</GameData>
