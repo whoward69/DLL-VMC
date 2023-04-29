@@ -724,6 +724,7 @@ protected:
 
 	static int lIsBuildingFree(lua_State* L);
 	static int lGetUnitClassCount(lua_State* L);
+	static int lGetUnitCountFromHasPromotion(lua_State* L);
 	static int lIsUnitClassMaxedOut(lua_State* L);
 	static int lGetUnitClassMaking(lua_State* L);
 	static int lGetUnitClassCountPlusMaking(lua_State* L);
@@ -965,6 +966,8 @@ protected:
 
 	static int lUnitsAux(lua_State* L);
 	static int lUnits(lua_State* L);
+
+	static int lGetUnitsListFromHasPromotion(lua_State* L);
 
 	static int lCitiesAux(lua_State* L);
 	static int lCities(lua_State* L);

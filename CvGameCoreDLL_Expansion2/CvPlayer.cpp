@@ -20864,6 +20864,45 @@ int CvPlayer::getUnitClassCount(UnitClassTypes eIndex) const
 
 
 //	--------------------------------------------------------------------------------
+int CvPlayer::getUnitCountFromHasPromotion(PromotionTypes ePromotion) const
+{
+	CvAssertMsg(ePromotion >= 0, "ePromotion is expected to be non-negative (invalid Index)");
+	CvAssertMsg(ePromotion < GC.getNumPromotionInfos(), "ePromotion is expected to be within maximum bounds (invalid Index)");
+	
+	int countOfUnitHasThisPromotion = 0;
+	int iLoop;
+	const CvUnit* pLoopUnit;
+	for(pLoopUnit = firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = nextUnit(&iLoop))
+	{
+		//IS Unit has this promotion ?
+		if(pLoopUnit->isHasPromotion(ePromotion))
+		{
+			countOfUnitHasThisPromotion++;
+		}
+	}
+	return countOfUnitHasThisPromotion;
+}
+
+//	--------------------------------------------------------------------------------
+void CvPlayer::getUnitsListFromHasPromotion(PromotionTypes ePromotion, std::vector<const CvUnit*>& unitsListFromHasPromotion) const
+{ 
+	CvAssertMsg(ePromotion >= 0, "ePromotion is expected to be non-negative (invalid Index)");
+	CvAssertMsg(ePromotion < GC.getNumPromotionInfos(), "ePromotion is expected to be within maximum bounds (invalid Index)");
+	int iLoop;
+	const CvUnit* pLoopUnit;
+
+	unitsListFromHasPromotion.clear();
+    for(pLoopUnit = firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = nextUnit(&iLoop))
+	{
+		//IS Unit has this promotion ?
+		if(pLoopUnit && pLoopUnit->isHasPromotion(ePromotion))
+		{
+			unitsListFromHasPromotion.push_back(pLoopUnit);
+		}
+	}
+}
+
+//	--------------------------------------------------------------------------------
 bool CvPlayer::isUnitClassMaxedOut(UnitClassTypes eIndex, int iExtra) const
 {
 	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");

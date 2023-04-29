@@ -822,6 +822,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 	Method(IsBuildingFree);
 	Method(GetUnitClassCount);
+	Method(GetUnitCountFromHasPromotion);
 	Method(IsUnitClassMaxedOut);
 	Method(GetUnitClassMaking);
 	Method(GetUnitClassCountPlusMaking);
@@ -877,6 +878,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 
 	Method(Units);
+	Method(GetUnitsListFromHasPromotion);
 	Method(GetNumUnits);
 	Method(GetUnitByID);
 
@@ -7666,6 +7668,12 @@ int CvLuaPlayer::lGetUnitClassCount(lua_State* L)
 	return BasicLuaMethod(L, &CvPlayerAI::getUnitClassCount);
 }
 //------------------------------------------------------------------------------
+//int getUnitCountFromHasPromotion(UnitClassTypes eIndex);
+int CvLuaPlayer::lGetUnitCountFromHasPromotion(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlayerAI::getUnitCountFromHasPromotion);
+}
+//------------------------------------------------------------------------------
 //bool isUnitClassMaxedOut(UnitClassTypes  eIndex, int iExtra);
 int CvLuaPlayer::lIsUnitClassMaxedOut(lua_State* L)
 {
@@ -8040,6 +8048,28 @@ int CvLuaPlayer::lUnits(lua_State* L)
 	lua_pushcclosure(L, lUnitsAux, 1);		/* generator, */
 	lua_pushvalue(L, 1);					/* state (self)*/
 	return 2;
+}
+//------------------------------------------------------------------------------
+// Method for iterating through units have given Promotion (behaves like pairs)
+int CvLuaPlayer::lGetUnitsListFromHasPromotion(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const PromotionTypes ePromotion = (PromotionTypes)lua_tointeger(L, 2);
+
+	lua_createtable(L, 0, 0);
+	const int t = lua_gettop(L);
+	int idx = 1;
+
+	std::vector<const CvUnit*> unitsListFromHasPromotion;
+	pkPlayer->getUnitsListFromHasPromotion(ePromotion, unitsListFromHasPromotion);
+
+	for(std::vector<const CvUnit*>::iterator it = unitsListFromHasPromotion.begin();
+	        it!= unitsListFromHasPromotion.end(); ++it)
+	{
+		CvLuaUnit::Push(L, const_cast<CvUnit*>(*it));
+		lua_rawseti(L, t, idx++);
+	}
+	return 1;
 }
 //------------------------------------------------------------------------------
 //CvUnit GetUnitByID();
