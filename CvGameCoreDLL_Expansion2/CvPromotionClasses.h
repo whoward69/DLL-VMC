@@ -177,6 +177,13 @@ public:
 	int GetNumWorkAttackMod() const;
 
 	bool IsNoResourcePunishment() const;
+
+	int GetCurrentHitPointAttackMod() const;
+	int GetCurrentHitPointDefenseMod() const;
+
+
+	int GetNearNumEnemyAttackMod() const;
+	int GetNearNumEnemyDefenseMod() const;
 #endif
 
 
@@ -437,6 +444,12 @@ protected:
 	int m_iNumWorkAttackMod;
 
 	bool m_bNoResourcePunishment;
+
+	int m_iCurrentHitPointAttackMod;
+	int m_iCurrentHitPointDefenseMod;
+
+	int m_iNearNumEnemyAttackMod;
+	int m_iNearNumEnemyDefenseMod;
 #endif
 
 #if defined(MOD_ROG_CORE)

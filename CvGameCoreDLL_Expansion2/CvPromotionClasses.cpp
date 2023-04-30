@@ -145,6 +145,10 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iNumWorkAttackMod(0),
 
 	m_bNoResourcePunishment(false),
+
+
+	m_iCurrentHitPointAttackMod(0),
+	m_iCurrentHitPointDefenseMod(0),
 #endif
 
 	m_iUpgradeDiscount(0),
@@ -424,7 +428,6 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 
 
 #if defined(MOD_ROG_CORE)
-		if (MOD_ROG_CORE) {
 			m_iNumSpyDefenseMod = kResults.GetInt("NumSpyDefenseMod");
 			m_iNumSpyAttackMod = kResults.GetInt("NumSpyAttackMod");
 
@@ -435,7 +438,12 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 			m_iNumWorkAttackMod = kResults.GetInt("NumWorkAttackMod");
 
 			m_bNoResourcePunishment = kResults.GetBool("NoResourcePunishment");
-		}
+
+			m_iCurrentHitPointAttackMod = kResults.GetInt("CurrentHitPointAttackMod");
+			m_iCurrentHitPointDefenseMod = kResults.GetInt("CurrentHitPointDefenseMod");
+
+			m_iNearNumEnemyAttackMod = kResults.GetInt("NearNumEnemyAttackMod");
+			m_iNearNumEnemyDefenseMod = kResults.GetInt("NearNumEnemyDefenseMod");
 #endif
 
 	m_bRoughTerrainEndsTurn = kResults.GetBool("RoughTerrainEndsTurn");
@@ -1562,6 +1570,29 @@ int CvPromotionEntry::GetNumWorkDefenseMod() const
 bool CvPromotionEntry::IsNoResourcePunishment() const
 {
 	return m_bNoResourcePunishment;
+}
+
+
+int CvPromotionEntry::GetCurrentHitPointAttackMod() const
+{
+	return m_iCurrentHitPointAttackMod;
+}
+
+int CvPromotionEntry::GetCurrentHitPointDefenseMod() const
+{
+	return m_iCurrentHitPointDefenseMod;
+}
+
+
+
+int CvPromotionEntry::GetNearNumEnemyAttackMod() const
+{
+	return m_iNearNumEnemyAttackMod;
+}
+
+int CvPromotionEntry::GetNearNumEnemyDefenseMod() const
+{
+	return m_iNearNumEnemyDefenseMod;
 }
 #endif
 

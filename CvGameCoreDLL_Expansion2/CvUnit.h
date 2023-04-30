@@ -1600,6 +1600,23 @@ public:
 
 	bool IsNoResourcePunishment() const;
 	void ChangeIsNoResourcePunishment(int iChange);
+
+	void ChangeCurrentHitPointAttackMod(int iValue);
+	int GetCurrentHitPointAttackMod() const;
+
+	void ChangeCurrentHitPointDefenseMod(int iValue);
+	int GetCurrentHitPointDefenseMod() const;
+
+
+	void ChangeNearNumEnemyAttackMod(int iValue);
+	int GetNearNumEnemyAttackMod() const;
+
+	void ChangeNearNumEnemyDefenseMod(int iValue);
+	int GetNearNumEnemyDefenseMod() const;
+
+
+	int GetNumEnemyAdjacent() const;
+
 #endif
 
 
@@ -1853,6 +1870,12 @@ protected:
 	FAutoVariable<int, CvUnit> m_iNumWorkAttackMod;
 
 	FAutoVariable<int, CvUnit> m_iNoResourcePunishment;
+
+	FAutoVariable<int, CvUnit> m_iCurrentHitPointAttackMod;
+	FAutoVariable<int, CvUnit> m_iCurrentHitPointDefenseMod;
+
+	FAutoVariable<int, CvUnit> m_iNearNumEnemyAttackMod;
+	FAutoVariable<int, CvUnit> m_iNearNumEnemyDefenseMod;
 #endif
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)

@@ -438,6 +438,14 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(GetNumWonderAttackMod);
 
 	Method(IsNoResourcePunishment);
+
+	Method(GetCurrentHitPointAttackMod);
+	Method(GetCurrentHitPointDefenseMod);
+
+	Method(GetNearNumEnemyAttackMod);
+	Method(GetNearNumEnemyDefenseMod);
+
+	Method(GetNumEnemyAdjacent);
 #endif
 
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_PROMOTIONS_IMPROVEMENT_BONUS)
@@ -3922,6 +3930,55 @@ int CvLuaUnit::lIsNoResourcePunishment(lua_State* L)
 	lua_pushboolean(L, bResult);
 	return 1;
 }
+
+
+
+int CvLuaUnit::lGetCurrentHitPointDefenseMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetCurrentHitPointDefenseMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+//------------------------------------------------------------------------------
+int CvLuaUnit::lGetCurrentHitPointAttackMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetCurrentHitPointAttackMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+
+
+int CvLuaUnit::lGetNearNumEnemyDefenseMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetNearNumEnemyDefenseMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+//------------------------------------------------------------------------------
+int CvLuaUnit::lGetNearNumEnemyAttackMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	const int bResult = pkUnit->GetNearNumEnemyAttackMod();
+	lua_pushinteger(L, bResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetNumEnemyAdjacent(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	//CvUnit* pkOtherUnit = CvLuaUnit::GetInstance(L, 2);
+
+	const int iResult = pkUnit->GetNumEnemyAdjacent();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
 #endif
 
 

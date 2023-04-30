@@ -328,6 +328,13 @@ CvUnit::CvUnit() :
 		, m_iNumWorkAttackMod("CvUnit::m_iNumWorkAttackMod", m_syncArchive)
 
 		, m_iNoResourcePunishment("CvUnit::m_iNoResourcePunishment", m_syncArchive)
+
+
+		, m_iCurrentHitPointAttackMod("CvUnit::m_iCurrentHitPointAttackMod", m_syncArchive)
+		, m_iCurrentHitPointDefenseMod("CvUnit::m_iCurrentHitPointDefenseMod", m_syncArchive)
+
+		, m_iNearNumEnemyAttackMod("CvUnit::m_iNearNumEnemyAttackMod", m_syncArchive)
+		, m_iNearNumEnemyDefenseMod("CvUnit::m_iNearNumEnemyDefenseMod", m_syncArchive)
 #endif
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
@@ -1125,6 +1132,13 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iNumWorkAttackMod = 0;
 
 	m_iNoResourcePunishment = 0;
+
+
+	m_iCurrentHitPointAttackMod = 0;
+	m_iCurrentHitPointDefenseMod = 0;
+
+	m_iNearNumEnemyAttackMod = 0;
+	m_iNearNumEnemyDefenseMod = 0;
 #endif
 
 
@@ -5611,6 +5625,57 @@ bool CvUnit::IsNoResourcePunishment() const
 void CvUnit::ChangeIsNoResourcePunishment(int iChange)
 {
 	m_iNoResourcePunishment += iChange;
+}
+
+
+
+
+void CvUnit::ChangeCurrentHitPointAttackMod(int iValue)
+{
+	m_iCurrentHitPointAttackMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetCurrentHitPointAttackMod() const
+{
+	return m_iCurrentHitPointAttackMod;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeCurrentHitPointDefenseMod(int iValue)
+{
+	m_iCurrentHitPointDefenseMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetCurrentHitPointDefenseMod() const
+{
+	return m_iCurrentHitPointDefenseMod;
+}
+
+
+
+void CvUnit::ChangeNearNumEnemyAttackMod(int iValue)
+{
+	m_iNearNumEnemyAttackMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetNearNumEnemyAttackMod() const
+{
+	return m_iNearNumEnemyAttackMod;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeNearNumEnemyDefenseMod(int iValue)
+{
+	m_iNearNumEnemyDefenseMod += iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetNearNumEnemyDefenseMod() const
+{
+	return m_iNearNumEnemyDefenseMod;
 }
 #endif
 
@@ -13096,6 +13161,7 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 	int iWonder;
 	int iWonderAttackModValue;
 
+	int iBonus;
 	if (kPlayer.GetEspionage()->GetNumSpies() > 0)
 	{
 		iSpy = kPlayer.GetEspionage()->GetNumSpies();
@@ -13120,6 +13186,34 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 		iTempModifier = (iWonder * iWonderAttackModValue);
 		iModifier += iTempModifier;
 	}
+
+
+	if (GetCurrHitPoints() > 0)
+	{
+		
+		iBonus = (GetMaxHitPoints() - GetCurrHitPoints());
+		if (iBonus > 100)
+		{
+			iBonus = 100;
+		}
+		iTempModifier = (iBonus * GetCurrentHitPointAttackMod());
+		iModifier += iTempModifier;
+	}
+
+
+	// near enemy
+	int iNumAdjacentEnemy = GetNumEnemyAdjacent();
+	if (iNumAdjacentEnemy > 0)
+	{
+		int iEnemyModifier = GetNearNumEnemyAttackMod();
+		if (iEnemyModifier > 0)
+		{
+			iTempModifier = GetNearNumEnemyAttackMod() * iNumAdjacentEnemy;
+		}
+
+		iModifier += iTempModifier;
+	}
+
 #endif
 
 	// Damage modifier always applies for melee attack
@@ -13407,6 +13501,8 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 	int iWonder;
 	int iWonderDefenseModValue;
 
+	int iBonus;
+
 	if (kPlayer.GetEspionage()->GetNumSpies() > 0)
 	{
 		iSpy = kPlayer.GetEspionage()->GetNumSpies();
@@ -13429,6 +13525,32 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 		iWonder = kPlayer.GetNumWorldWonders();
 		iWonderDefenseModValue = GetNumWonderDefenseMod();
 		iTempModifier = (iWonder * iWonderDefenseModValue);
+		iModifier += iTempModifier;
+	}
+
+
+	if (GetCurrHitPoints() > 0)
+	{
+		
+		iBonus = (GetMaxHitPoints()- GetCurrHitPoints());
+	  if (iBonus >100)
+	  {
+		  iBonus=100;
+	  }
+		iTempModifier = (iBonus * GetCurrentHitPointDefenseMod());
+		iModifier += iTempModifier;
+	}
+
+	// near enemy
+	int iNumAdjacentEnemy = GetNumEnemyAdjacent();
+	if (iNumAdjacentEnemy > 0)
+	{
+		int iEnemyModifier = GetNearNumEnemyDefenseMod();
+		if (iEnemyModifier > 0)
+		{
+			iTempModifier = GetNearNumEnemyDefenseMod() * iNumAdjacentEnemy;
+		}
+
 		iModifier += iTempModifier;
 	}
 #endif
@@ -14087,6 +14209,8 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		int iWonder;
 		int iWonderAttackModValue;
 
+		int iBonus;
+
 		if (kPlayer.GetEspionage()->GetNumSpies() > 0)
 		{
 			iSpy = kPlayer.GetEspionage()->GetNumSpies();
@@ -14109,6 +14233,31 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 			iWonder = kPlayer.GetNumWorldWonders();
 			iWonderAttackModValue = GetNumWonderAttackMod();
 			iTempModifier = (iWonder * iWonderAttackModValue);
+			iModifier += iTempModifier;
+		}
+
+		if (GetCurrHitPoints() > 0)
+		{
+			iBonus = (GetMaxHitPoints() - GetCurrHitPoints());
+			if (iBonus > 100)
+			{
+				iBonus = 100;
+			}
+			iTempModifier = (iBonus * GetCurrentHitPointAttackMod());
+			iModifier += iTempModifier;
+		}
+
+
+		// near enemy
+		int iNumAdjacentEnemy = GetNumEnemyAdjacent();
+		if (iNumAdjacentEnemy > 0)
+		{
+			int iEnemyModifier = GetNearNumEnemyAttackMod();
+			if (iEnemyModifier > 0)
+			{
+				iTempModifier = GetNearNumEnemyAttackMod() * iNumAdjacentEnemy;
+			}
+
 			iModifier += iTempModifier;
 		}
 #endif
@@ -14248,6 +14397,8 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		int iWonder;
 		int iWonderDefenseModValue;
 
+		int iBonus;
+
 		if (kPlayer.GetEspionage()->GetNumSpies() > 0)
 		{
 			iSpy = kPlayer.GetEspionage()->GetNumSpies();
@@ -14270,6 +14421,32 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 			iWonder = kPlayer.GetNumWorldWonders();
 			iWonderDefenseModValue = GetNumWonderDefenseMod();
 			iTempModifier = (iWonder * iWonderDefenseModValue);
+			iModifier += iTempModifier;
+		}
+
+
+		if (GetCurrHitPoints() > 0)
+		{
+			
+			iBonus = (GetMaxHitPoints() - GetCurrHitPoints());
+			if (iBonus > 100)
+			{
+				iBonus = 100;
+			}
+			iTempModifier = (iBonus * GetCurrentHitPointDefenseMod());
+			iModifier += iTempModifier;
+		}
+
+		// near enemy
+		int iNumAdjacentEnemy = GetNumEnemyAdjacent();
+		if (iNumAdjacentEnemy > 0)
+		{
+			int iEnemyModifier = GetNearNumEnemyDefenseMod();
+			if (iEnemyModifier > 0)
+			{
+				iTempModifier = GetNearNumEnemyDefenseMod() * iNumAdjacentEnemy;
+			}
+
 			iModifier += iTempModifier;
 		}
 #endif
@@ -22798,6 +22975,14 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeNumWorkDefenseMod(thisPromotion.GetNumWorkDefenseMod()* iChange);
 
 		ChangeIsNoResourcePunishment(thisPromotion.IsNoResourcePunishment() ? iChange : 0);
+
+
+		ChangeCurrentHitPointAttackMod(thisPromotion.GetCurrentHitPointAttackMod() * iChange);
+		ChangeCurrentHitPointDefenseMod(thisPromotion.GetCurrentHitPointDefenseMod() * iChange);
+
+
+		ChangeNearNumEnemyAttackMod(thisPromotion.GetNearNumEnemyAttackMod() * iChange);
+		ChangeNearNumEnemyDefenseMod(thisPromotion.GetNearNumEnemyDefenseMod() * iChange);
 #endif
 
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
@@ -27615,3 +27800,57 @@ FDataStream& operator>>(FDataStream& loadFrom, CvUnit& writeTo)
 }
 
 
+
+
+
+#if defined(MOD_ROG_CORE)
+//	--------------------------------------------------------------------------------
+/// How many enemy Units are adjacent to this guy?
+int CvUnit::GetNumEnemyAdjacent() const
+{
+	int iNumEnemiesAdjacent = 0;
+
+	TeamTypes eMyTeam = getTeam();
+
+	CvPlot* pLoopPlot;
+
+	for (int iI = 0; iI < NUM_DIRECTION_TYPES; iI++)
+	{
+		pLoopPlot = plotDirection(getX(), getY(), ((DirectionTypes)iI));
+
+		if (pLoopPlot != NULL)
+		{
+			for (int iUnitLoop = 0; iUnitLoop < pLoopPlot->getNumUnits(); iUnitLoop++)
+			{
+				CvUnit* pkUnit = pLoopPlot->getUnitByIndex(iUnitLoop);
+
+				// Loop through all units on this plot
+				if (pkUnit != NULL)
+				{
+					// This team which this unit belongs to must be at war with us
+					if (GET_TEAM(pkUnit->getTeam()).isAtWar(eMyTeam))
+					{
+						// Must be a combat Unit
+						if (pkUnit->IsCombatUnit() && !pkUnit->isEmbarked())
+						{
+							// Must be same domain
+							if (pkUnit->getDomainType() == getDomainType())
+							{
+								iNumEnemiesAdjacent++;
+							}
+							else if (getDomainType() == DOMAIN_SEA && pkUnit->IsHoveringUnit()) {
+
+								// Need to count adjacent hovering units as enemies regardless
+								iNumEnemiesAdjacent++;
+							}
+
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return iNumEnemiesAdjacent;
+}
+#endif
