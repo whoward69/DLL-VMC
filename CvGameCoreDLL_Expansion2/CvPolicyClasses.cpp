@@ -449,6 +449,10 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 
 	m_iNumExtraBranches = kResults.GetInt("NumExtraBranches");
 
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	m_iWarCasualtiesModifier = kResults.GetInt("WarCasualtiesModifier");
+#endif
+
 	const char* szFreeBuilding = kResults.GetText("FreeBuildingOnConquest");
 	if(szFreeBuilding)
 	{
@@ -2400,6 +2404,13 @@ int CvPolicyEntry::GetInternalTradeRouteDestYieldRate(const YieldTypes eYieldTyp
 	CvAssertMsg(eYieldType < YieldTypes::NUM_YIELD_TYPES, "Index out of upper bounds");
 	CvAssertMsg(eYieldType > -1, "Index out of lower bounds");
 	return m_piInternalTradeRouteDestYieldRate[eYieldType];
+}
+#endif
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+int CvPolicyEntry::GetWarCasualtiesModifier() const
+{
+	return m_iWarCasualtiesModifier;
 }
 #endif
 

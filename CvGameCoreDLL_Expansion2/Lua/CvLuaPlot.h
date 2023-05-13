@@ -342,6 +342,13 @@ protected:
 	static int lGetCityPurchaseID(lua_State* L);
 	static int lSetCityPurchaseID(lua_State* L);
 
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	static int lGetXP(lua_State* L);
+	static int lGetXPGrowth(lua_State* L);
+	static int lSetXP(lua_State* L);
+	static int lChangeXP(lua_State* L);
+#endif
+
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(AddMessage, void, sMessage, iNotifyPlayer);
 	LUAAPIEXTN(AddPopupMessage, void, sMessage, fDelay, iNotifyPlayer);

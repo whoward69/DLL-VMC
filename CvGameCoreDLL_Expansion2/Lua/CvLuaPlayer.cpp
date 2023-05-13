@@ -334,6 +334,12 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 	Method(GetJONSCultureEverGenerated);
 
+#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
+	Method(GetGoldenAgePointPerTurnFromReligion);
+	Method(GetGoldenAgePointPerTurnFromTraits);
+	Method(GetGoldenAgePointPerTurnFromCitys);
+#endif	
+
 	Method(GetLastTurnLifetimeCulture);
 	Method(GetInfluenceOn);
 	Method(GetLastTurnInfluenceOn);
@@ -663,6 +669,8 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 	Method(IsMajorCiv);
+	Method(GetCivBuilding);
+	Method(GetCivUnit);
 #endif
 	Method(IsMinorCiv);
 	Method(GetMinorCivType);
@@ -1262,6 +1270,13 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 #ifdef MOD_API_RELIGION_EXTENSIONS
 	Method(IsSecondReligionPantheon);
 #endif // MOD_API_RELIGION_EXTENSIONS
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	Method(GetWarCasualtiesCounter);
+	Method(ChangeWarCasualtiesCounter);
+	Method(SetWarCasualtiesCounter);
+	Method(CheckAndUpdateWarCasualtiesCounter);
+#endif
 
 }
 //------------------------------------------------------------------------------
@@ -2640,6 +2655,29 @@ int CvLuaPlayer::lGetJONSCultureEverGenerated(lua_State* L)
 	return BasicLuaMethod(L, &CvPlayerAI::GetJONSCultureEverGenerated);
 }
 //------------------------------------------------------------------------------
+#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
+int CvLuaPlayer::lGetGoldenAgePointPerTurnFromReligion(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const int iResult = pkPlayer->GetYieldPerTurnFromReligion(YIELD_GOLDEN_AGE_POINTS);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+int CvLuaPlayer::lGetGoldenAgePointPerTurnFromTraits(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const int iResult = pkPlayer->GetYieldPerTurnFromTraits(YIELD_GOLDEN_AGE_POINTS);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+int CvLuaPlayer::lGetGoldenAgePointPerTurnFromCitys(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const int iResult = pkPlayer->GetGoldenAgePointPerTurnFromCitys();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+#endif
 //int GetLastTurnLifetimeCulture();
 int CvLuaPlayer::lGetLastTurnLifetimeCulture(lua_State* L)
 {
@@ -5331,7 +5369,7 @@ int CvLuaPlayer::lHasPolicy(lua_State* L)
 	return 1;
 }
 //------------------------------------------------------------------------------
-//void setHasPolicy(PolicyTypes  eIndex, bool bNewValue);
+//void setHasPolicy(PolicyTypes  eIndex, bool bNewValue, bool bFree);
 int CvLuaPlayer::lSetHasPolicy(lua_State* L)
 {
 #if defined(MOD_API_EXTENSIONS)
@@ -6485,6 +6523,16 @@ int CvLuaPlayer::lIsGoldenAgeCultureBonusDisabled(lua_State* L)
 int CvLuaPlayer::lIsMajorCiv(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlayerAI::isMajorCiv);
+}
+
+int CvLuaPlayer::lGetCivBuilding(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlayerAI::GetCivBuilding);
+}
+
+int CvLuaPlayer::lGetCivUnit(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlayerAI::GetCivUnit);
 }
 #endif
 //------------------------------------------------------------------------------
@@ -12095,6 +12143,13 @@ int CvLuaPlayer::lIsSecondReligionPantheon(lua_State* L)
 	return BasicLuaMethod(L, &CvPlayerAI::IsSecondReligionPantheon);
 }
 #endif // MOD_API_RELIGION_EXTENSIONS
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+LUAAPIIMPL(Player, GetWarCasualtiesCounter)
+LUAAPIIMPL(Player, ChangeWarCasualtiesCounter)
+LUAAPIIMPL(Player, SetWarCasualtiesCounter)
+LUAAPIIMPL(Player, CheckAndUpdateWarCasualtiesCounter)
+#endif
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 LUAAPIIMPL(Player, HasBelief)

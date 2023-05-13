@@ -86,6 +86,10 @@ public:
 #endif
 	int GetXPValueAttack() const;
 	int GetXPValueDefense() const;
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+	int GetExtraXPValueAttack() const;
+	int GetExtraXPValueDefense() const;
+#endif
 	int GetSpecialCargo() const;
 	int GetDomainCargo() const;
 
@@ -250,6 +254,10 @@ private:
 #endif
 	int m_iXPValueAttack;
 	int m_iXPValueDefense;
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+	int m_iExtraXPValueAttack;
+	int m_iExtraXPValueDefense;
+#endif
 	int m_iSpecialCargo;
 
 	int m_iDomainCargo;

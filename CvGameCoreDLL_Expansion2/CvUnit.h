@@ -580,6 +580,10 @@ public:
 	int experienceNeeded() const;
 	int attackXPValue() const;
 	int defenseXPValue() const;
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+	int ExtraAttackXPValue() const;
+	int ExtraDefenseXPValue() const;
+#endif
 	int maxXPValue() const;
 
 	int firstStrikes() const;
@@ -1682,6 +1686,36 @@ public:
 	bool IsWithinDistanceOfTerrain(TerrainTypes iTerrainType, int iDistance) const;
 #endif
 
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int GetWarCasualtiesModifier() const;
+	void ChangeWarCasualtiesModifier(int iChange);
+	void SetWarCasualtiesModifier(int iValue);
+#endif
+
+#ifdef MOD_PROMOTION_SPLASH_DAMAGE
+	std::vector<SplashInfo>& GetSplashInfoVec();
+
+	int GetSplashImmuneRC() const;
+	void ChangeSplashImmuneRC(int iChange);
+	void SetSplashImmuneRC(int iValue);
+
+	int GetSplashXP() const;
+	void ChangeSplashXP(int iChange);
+	void SetSplashXP(int iValue);
+#endif
+
+#ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
+	std::vector<CollateralInfo>& GetCollateralInfoVec();
+
+	int GetCollateralImmuneRC() const;
+	void ChangeCollateralImmuneRC(int iChange);
+	void SetCollateralImmuneRC(int iValue);
+
+	int GetCollateralXP() const;
+	void ChangeCollateralXP(int iChange);
+	void SetCollateralXP(int iValue);
+#endif
+
 protected:
 	const MissionQueueNode* HeadMissionQueueNode() const;
 	MissionQueueNode* HeadMissionQueueNode();
@@ -2026,8 +2060,19 @@ protected:
 	int m_iRangedSupportFireMod;
 #endif
 
+#ifdef MOD_PROMOTION_SPLASH_DAMAGE
+	std::vector<SplashInfo> m_asSplashInfoVec = {};
 
+	int m_iSplashImmuneRC = 0;
+	int m_iSplashXP = 0;
+#endif
 
+#ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
+	std::vector<CollateralInfo> m_asCollateralInfoVec = {};
+
+	int m_iCollateralImmuneRC = 0;
+	int m_iCollateralXP = 0;
+#endif
 
 	int m_iEmbarkExtraVisibility;
 	int m_iEmbarkDefensiveModifier;
@@ -2064,6 +2109,10 @@ protected:
 	// these are do to a unit using Heavy Charge against you
 	bool CanFallBackFromMelee(CvUnit& pAttacker);
 	bool DoFallBackFromMelee(CvUnit& pAttacker);
+
+ #ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int m_iWarCasualtiesModifier = 0;
+ #endif
 
 private:
 

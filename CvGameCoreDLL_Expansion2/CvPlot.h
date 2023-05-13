@@ -867,6 +867,13 @@ public:
 	int CvPlot::ComputeYieldFromAdjacentFeature(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
 #endif
 
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	int GetXP() const;
+	int GetXPGrowth() const;
+	int SetXP(int iNewValue, bool bDoUpdate);
+	int ChangeXP(int iChange, bool bDoUpdate);
+#endif
+
 protected:
 	class PlotBoolField
 	{
@@ -1025,6 +1032,10 @@ protected:
 	bool m_bIsImpassable:1;					// Cached value, do not serialize
 
 	CvArchaeologyData m_kArchaeologyData;
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	int m_iXP = 0;
+#endif
 
 	void processArea(CvArea* pArea, int iChange);
 	void doImprovementUpgrade();

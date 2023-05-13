@@ -5,8 +5,8 @@
     <ProjectGuid>{0b961596-36f9-4289-a247-0e889fef1f39}</ProjectGuid>
     <Name>(1) CIV5MPDLL</Name>
     <Guid>a2969a0a-e4da-41cc-9e0b-19b29aa971d8</Guid>
-    <ModVersion>1</ModVersion>
-    <Stability>Experimental</Stability>
+    <ModVersion>2</ModVersion>
+    <Stability>Alpha</Stability>
     <Teaser>This mod is based on whoward69's DLL-VMC v97. It fixes multiplayer gaming bugs and provides more useful modding interface.</Teaser>
     <Description>This mod is based on whoward69's DLL-VMC v97. It fixes out-of-sync problem of
       playing with mods in multiplayer game by creating lua interface allows to broadcast arbitrary
@@ -465,6 +465,21 @@
         <Type>UpdateDatabase</Type>
         <FileName>DB/YIELDS/NewYields_DDL.sql</FileName>
       </Action>
+      <Action>
+        <Set>OnModActivated</Set>
+        <Type>UpdateDatabase</Type>
+        <FileName>DB/IMPROVEMENTS/Improvement_Upgrade_Downgrade.sql</FileName>
+      </Action>
+      <Action>
+        <Set>OnModActivated</Set>
+        <Type>UpdateDatabase</Type>
+        <FileName>DB/GLOBAL/WarCasualties.sql</FileName>
+      </Action>
+      <Action>
+        <Set>OnModActivated</Set>
+        <Type>UpdateDatabase</Type>
+        <FileName>DB/PROMOTIONS/NewBattleEffects.sql</FileName>
+      </Action>
     </ModActions>
     <ModReferences />
   </PropertyGroup>
@@ -803,11 +818,23 @@
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
+    <Content Include="DB\GLOBAL\WarCasualties.sql">
+      <SubType>Lua</SubType>
+      <ImportIntoVFS>False</ImportIntoVFS>
+    </Content>
     <Content Include="DB\IMPROVEMENTS\Improvement_AdjacentImprovementYieldChanges.xml">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
+    <Content Include="DB\IMPROVEMENTS\Improvement_Upgrade_Downgrade.sql">
+      <SubType>Lua</SubType>
+      <ImportIntoVFS>False</ImportIntoVFS>
+    </Content>
     <Content Include="DB\NewTableChanges.sql">
+      <SubType>Lua</SubType>
+      <ImportIntoVFS>False</ImportIntoVFS>
+    </Content>
+    <Content Include="DB\PROMOTIONS\NewBattleEffects.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>

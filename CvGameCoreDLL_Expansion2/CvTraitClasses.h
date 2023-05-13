@@ -243,6 +243,10 @@ public:
 
 	bool NoTrain(UnitClassTypes eUnitClassType);
 
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	int GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYield) const;
+#endif
+
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
 protected:
@@ -422,6 +426,10 @@ protected:
 	std::multimap<int, int> m_FreePromotionUnitCombats;
 	std::vector<FreeResourceXCities> m_aFreeResourceXCities;
 	std::vector<bool> m_abNoTrainUnitClass;
+
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	int m_piPerMajorReligionFollowerYieldModifier[NUM_YIELD_TYPES];
+#endif
 
 private:
 	CvTraitEntry(const CvTraitEntry&);
@@ -1004,6 +1012,13 @@ public:
 
 	bool NoTrain(UnitClassTypes eUnitClassType);
 
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	int GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType) const
+	{
+		return m_piPerMajorReligionFollowerYieldModifier[eYieldType];
+	}
+#endif
+
 	// Maya calendar routines
 	bool IsUsingMayaCalendar() const;
 	bool IsEndOfMayaLongCount();
@@ -1221,6 +1236,10 @@ private:
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppaaiUnimprovedFeatureYieldChange;
 
 	std::vector<FreeResourceXCities> m_aFreeResourceXCities;
+
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	int m_piPerMajorReligionFollowerYieldModifier[NUM_YIELD_TYPES];
+#endif
 };
 
 #endif //CIV5_TRAIT_CLASSES_H

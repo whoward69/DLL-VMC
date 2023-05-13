@@ -15395,6 +15395,23 @@ int CvUnit::defenseXPValue() const
 	return m_pUnitInfo->GetXPValueDefense();
 }
 
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+//	--------------------------------------------------------------------------------
+int CvUnit::ExtraAttackXPValue() const
+{
+	VALIDATE_OBJECT
+	return m_pUnitInfo->GetExtraXPValueAttack();
+}
+
+
+//	--------------------------------------------------------------------------------
+int CvUnit::ExtraDefenseXPValue() const
+{
+	VALIDATE_OBJECT
+	return m_pUnitInfo->GetExtraXPValueDefense();
+}
+#endif
+
 
 //	--------------------------------------------------------------------------------
 int CvUnit::maxXPValue() const
@@ -17614,7 +17631,7 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 											kPlayer.DoYieldsFromKill(getUnitType(), pLoopUnit->getUnitType(), iX, iY, pLoopUnit->isBarbarian(), 0);
 #endif
 #if defined(MOD_API_EXTENSIONS)
-											kPlayer.DoUnitKilledCombat(this, pLoopUnit->getOwner(), pLoopUnit->getUnitType());
+											kPlayer.DoUnitKilledCombat(this, pLoopUnit->getOwner(), pLoopUnit->getUnitType(), pLoopUnit);
 #else
 											kPlayer.DoUnitKilledCombat(pLoopUnit->getOwner(), pLoopUnit->getUnitType());
 #endif
@@ -18723,19 +18740,6 @@ int CvUnit::setDamage(int iNewValue, PlayerTypes ePlayer, float fAdditionalTextD
 
 		m_iLastGameTurnAtFullHealth = -1;
 
-		kill(true, ePlayer);
-
-		CvString szMsg;
-		CvString szUnitAIString;
-		getUnitAIString(szUnitAIString, AI_getUnitAIType());
-		szMsg.Format("Killed in combat: %s, AI was: ", getName().GetCString());
-		szMsg += szUnitAIString;
-#if defined(MOD_BUGFIX_USE_GETTERS)
-		GET_MY_PLAYER().GetTacticalAI()->LogTacticalMessage(szMsg, true /*bSkipLogDominanceZone*/);
-#else
-		GET_PLAYER(m_eOwner).GetTacticalAI()->LogTacticalMessage(szMsg, true /*bSkipLogDominanceZone*/);
-#endif
-
 		if(ePlayer != NO_PLAYER)
 		{
 #if defined(MOD_BUGFIX_USE_GETTERS)
@@ -18748,7 +18752,7 @@ int CvUnit::setDamage(int iNewValue, PlayerTypes ePlayer, float fAdditionalTextD
 			}
 
 #if defined(MOD_API_EXTENSIONS)
-			GET_PLAYER(ePlayer).DoUnitKilledCombat(NULL, getOwner(), getUnitType());
+			GET_PLAYER(ePlayer).DoUnitKilledCombat(NULL, getOwner(), getUnitType(), this);
 #else
 			GET_PLAYER(ePlayer).DoUnitKilledCombat(getOwner(), getUnitType());
 #endif
@@ -18763,6 +18767,19 @@ int CvUnit::setDamage(int iNewValue, PlayerTypes ePlayer, float fAdditionalTextD
 			}
 #endif
 		}
+
+		kill(true, ePlayer);
+
+		CvString szMsg;
+		CvString szUnitAIString;
+		getUnitAIString(szUnitAIString, AI_getUnitAIType());
+		szMsg.Format("Killed in combat: %s, AI was: ", getName().GetCString());
+		szMsg += szUnitAIString;
+#if defined(MOD_BUGFIX_USE_GETTERS)
+		GET_MY_PLAYER().GetTacticalAI()->LogTacticalMessage(szMsg, true /*bSkipLogDominanceZone*/);
+#else
+		GET_PLAYER(m_eOwner).GetTacticalAI()->LogTacticalMessage(szMsg, true /*bSkipLogDominanceZone*/);
+#endif
 	}
 
 	return iDiff;
@@ -23122,6 +23139,10 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		changeExperiencePercent(thisPromotion.GetExperiencePercent() * iChange);
 		changeCargoSpace(thisPromotion.GetCargoChange() * iChange);
 
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+		ChangeWarCasualtiesModifier(thisPromotion.GetWarCasualtiesModifier() * iChange);
+#endif
+
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
 		if (MOD_PROMOTIONS_UNIT_NAMING) {
 			if (thisPromotion.IsUnitNaming(getUnitType())) {
@@ -23188,6 +23209,54 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 			if (thisPromotion.GetEmbarkExtraVisibility() || thisPromotion.IsNoRevealMap() || thisPromotion.GetVisibilityChange())
 				GC.getMap().updateDeferredFog();
 		}
+
+#ifdef MOD_PROMOTION_SPLASH_DAMAGE
+		if (thisPromotion.GetSplashDamageRadius() > 0 && thisPromotion.GetSplashDamagePlotUnitLimit() > 0)
+		{
+			if (iChange == 1)
+			{
+				m_asSplashInfoVec.push_back({thisPromotion});
+			}
+			else if (iChange == -1)
+			{
+				for (auto iter = m_asSplashInfoVec.begin(); iter != m_asSplashInfoVec.end(); iter++)
+				{
+					if (iter->ePromotion == (PromotionTypes) thisPromotion.GetID())
+					{
+						iter = m_asSplashInfoVec.erase(iter);
+						break;
+					}
+				}
+			}
+		}
+		
+		ChangeSplashImmuneRC(thisPromotion.GetSplashDamageImmune() ? iChange : 0);
+		ChangeSplashXP(thisPromotion.GetSplashXP() * iChange);
+#endif
+
+#ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
+		if (thisPromotion.GetCollateralDamagePlotUnitLimit() > 0)
+		{
+			if (iChange == 1)
+			{
+				m_asCollateralInfoVec.push_back({thisPromotion});
+			}
+			else if (iChange == -1)
+			{
+				for (auto iter = m_asCollateralInfoVec.begin(); iter != m_asCollateralInfoVec.end(); iter++)
+				{
+					if (iter->ePromotion == (PromotionTypes) thisPromotion.GetID())
+					{
+						iter = m_asCollateralInfoVec.erase(iter);
+						break;
+					}
+				}
+			}
+		}
+		
+		ChangeCollateralImmuneRC(thisPromotion.GetCollateralDamageImmune() ? iChange : 0);
+		ChangeCollateralXP(thisPromotion.GetCollateralXP() * iChange);
+#endif
 
 #if !defined(NO_ACHIEVEMENTS)
 		PromotionTypes eBuffaloChest =(PromotionTypes) GC.getInfoTypeForString("PROMOTION_BUFFALO_CHEST", true /*bHideAssert*/);
@@ -23552,6 +23621,42 @@ void CvUnit::read(FDataStream& kStream)
 		m_iTourismBlastStrength = 0;
 	}
 
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	kStream >> m_iWarCasualtiesModifier;
+#endif
+
+#ifdef MOD_PROMOTION_SPLASH_DAMAGE
+	m_asSplashInfoVec.clear();
+	int iSplashInfoLen = 0;
+	kStream >> iSplashInfoLen;
+	m_asSplashInfoVec.reserve(iSplashInfoLen);
+	for (int i = 0; i < iSplashInfoLen; i++)
+	{
+		SplashInfo sSplashInfo;
+		sSplashInfo.read(kStream);
+		m_asSplashInfoVec.push_back(sSplashInfo);
+	}
+
+	kStream >> m_iSplashImmuneRC;
+	kStream >> m_iSplashXP;
+#endif
+
+#ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
+	m_asCollateralInfoVec.clear();
+	int iCollateralInfoLen = 0;
+	kStream >> iCollateralInfoLen;
+	m_asCollateralInfoVec.reserve(iCollateralInfoLen);
+	for (int i = 0; i < iCollateralInfoLen; i++)
+	{
+		CollateralInfo sCollateralInfo;
+		sCollateralInfo.read(kStream);
+		m_asCollateralInfoVec.push_back(sCollateralInfo);
+	}
+
+	kStream >> m_iCollateralImmuneRC;
+	kStream >> m_iCollateralXP;
+#endif
+
 	//  Read mission queue
 	UINT uSize;
 	kStream >> uSize;
@@ -23696,6 +23801,32 @@ void CvUnit::write(FDataStream& kStream) const
 	}
 
 	kStream << m_iTourismBlastStrength;
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	kStream << m_iWarCasualtiesModifier;
+#endif
+
+#ifdef MOD_PROMOTION_SPLASH_DAMAGE
+	kStream << m_asSplashInfoVec.size();
+	for (int i = 0; i < m_asSplashInfoVec.size(); i++)
+	{
+		m_asSplashInfoVec[i].write(kStream);
+	}
+
+	kStream << m_iSplashImmuneRC;
+	kStream << m_iSplashXP;
+#endif
+
+#ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
+	kStream << m_asCollateralInfoVec.size();
+	for (int i = 0; i < m_asCollateralInfoVec.size(); i++)
+	{
+		m_asCollateralInfoVec[i].write(kStream);
+	}
+
+	kStream << m_iCollateralImmuneRC;
+	kStream << m_iCollateralXP;
+#endif
 
 	//  Write mission list
 	kStream << m_missionQueue.getLength();
@@ -25820,7 +25951,7 @@ bool CvUnit::IsCanDefend(const CvPlot* pPlot) const
 	{
 		return false;
 	}
-
+	
 	if(isDelayedDeath())
 	{
 		return false;
@@ -27852,5 +27983,74 @@ int CvUnit::GetNumEnemyAdjacent() const
 	}
 
 	return iNumEnemiesAdjacent;
+}
+#endif
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+int CvUnit::GetWarCasualtiesModifier() const
+{
+	return this->m_iWarCasualtiesModifier;
+}
+void CvUnit::ChangeWarCasualtiesModifier(int iChange)
+{
+	this->m_iWarCasualtiesModifier += iChange;
+}
+void CvUnit::SetWarCasualtiesModifier(int iValue)
+{
+	this->m_iWarCasualtiesModifier = iValue;
+}
+#endif
+
+#ifdef MOD_PROMOTION_SPLASH_DAMAGE
+std::vector<SplashInfo>& CvUnit::GetSplashInfoVec()
+{
+	return this->m_asSplashInfoVec;
+}
+
+int CvUnit::GetSplashImmuneRC() const {
+	return this->m_iSplashImmuneRC;
+}
+void CvUnit::ChangeSplashImmuneRC(int iChange) {
+	this->m_iSplashImmuneRC += iChange;
+}
+void CvUnit::SetSplashImmuneRC(int iValue) {
+	this->m_iSplashImmuneRC = iValue;
+}
+
+int CvUnit::GetSplashXP() const {
+	return this->m_iSplashXP;
+}
+void CvUnit::ChangeSplashXP(int iChange) {
+	this->m_iSplashXP += iChange;
+}
+void CvUnit::SetSplashXP(int iValue) {
+	this->m_iSplashXP = iValue;
+}
+#endif
+
+#ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
+std::vector<CollateralInfo>& CvUnit::GetCollateralInfoVec()
+{
+	return this->m_asCollateralInfoVec;
+}
+
+int CvUnit::GetCollateralImmuneRC() const {
+	return this->m_iCollateralImmuneRC;
+}
+void CvUnit::ChangeCollateralImmuneRC(int iChange) {
+	this->m_iCollateralImmuneRC += iChange;
+}
+void CvUnit::SetCollateralImmuneRC(int iValue) {
+	this->m_iCollateralImmuneRC = iValue;
+}
+
+int CvUnit::GetCollateralXP() const {
+	return this->m_iCollateralXP;
+}
+void CvUnit::ChangeCollateralXP(int iChange) {
+	this->m_iCollateralXP += iChange;
+}
+void CvUnit::SetCollateralXP(int iValue) {
+	this->m_iCollateralXP = iValue;
 }
 #endif

@@ -327,6 +327,27 @@ public:
 	bool IsCannotBeRangedAttacked() const;
 #endif
 
+ #ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int GetWarCasualtiesModifier() const;
+ #endif
+
+ #ifdef MOD_PROMOTION_SPLASH_DAMAGE
+	int GetSplashDamageRadius() const;
+	int GetSplashDamagePercent() const;
+	int GetSplashDamageFixed() const;
+	int GetSplashDamagePlotUnitLimit() const;
+	bool GetSplashDamageImmune() const;
+	int GetSplashXP() const;
+#endif
+
+#ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
+	int GetCollateralDamagePercent() const;
+	int GetCollateralDamageFixed() const;
+	int GetCollateralDamagePlotUnitLimit() const;
+	bool GetCollateralDamageImmune() const;
+	int GetCollateralXP() const;
+#endif
+
 protected:
 	int m_iLayerAnimationPath;
 	int m_iPrereqPromotion;
@@ -431,6 +452,23 @@ protected:
 
 	int m_iRangedSupportFireMod;
 	int m_iMeleeDefenseMod;
+#endif
+
+#ifdef MOD_PROMOTION_SPLASH_DAMAGE
+	int m_iSplashDamagePercent = 0;
+	int m_iSplashDamageRadius = 0;
+	int m_iSplashDamageFixed = 0;
+	int m_iSplashDamagePlotUnitLimit = 0;
+	bool m_iSplashDamageImmune = 0;
+	int m_iSplashXP = 0;
+#endif
+
+#ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
+	int m_iCollateralDamagePercent = 0;
+	int m_iCollateralDamageFixed = 0;
+	int m_iCollateralDamagePlotUnitLimit = 0;
+	bool m_iCollateralDamageImmune = 0;
+	int m_iCollateralXP = 0;
 #endif
 
 #if defined(MOD_ROG_CORE)
@@ -608,6 +646,10 @@ protected:
  #if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 	bool m_bCannotBeRangedAttacked;
  #endif
+
+ #ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int m_iWarCasualtiesModifier = 0;
+ #endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -709,3 +751,78 @@ void Write(FDataStream& kStream, const CvBitfield& kPromotions, int iArraySize);
 }
 
 #endif //CIV5_PROMOTION_CLASSES_H
+
+#ifdef MOD_PROMOTION_SPLASH_DAMAGE
+struct SplashInfo {
+	PromotionTypes ePromotion;
+
+	int iRadius;
+	int iPercent;
+	int iFixed;
+	int iPlotUnitLimit;
+
+	SplashInfo() = default;
+
+	SplashInfo(const CvPromotionEntry& promotion) :
+		ePromotion{ (PromotionTypes)promotion.GetID()}, 
+		iRadius{promotion.GetSplashDamageRadius()}, 
+		iPercent{ promotion.GetSplashDamagePercent() }, 
+		iFixed{ promotion.GetSplashDamageFixed() }, 
+		iPlotUnitLimit{ promotion.GetSplashDamagePlotUnitLimit() } {}
+
+	inline void read(FDataStream& kStream) {
+		int iPromotion;
+		kStream >> iPromotion;
+		ePromotion = (PromotionTypes)iPromotion;
+		kStream >> iRadius;
+		kStream >> iPercent;
+		kStream >> iFixed;
+		kStream >> iPlotUnitLimit;
+	}
+
+	inline void write(FDataStream& kStream) const {
+		int iPromotion = (int)ePromotion;
+		kStream << iPromotion;
+		kStream << iRadius;
+		kStream << iPercent;
+		kStream << iFixed;
+		kStream << iPlotUnitLimit;
+	}
+};
+#endif
+
+#ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
+struct CollateralInfo {
+	PromotionTypes ePromotion;
+
+	int iPercent;
+	int iFixed;
+	int iPlotUnitLimit;
+
+	CollateralInfo() = default;
+
+	// TODO:
+	CollateralInfo(const CvPromotionEntry& promotion) :
+		ePromotion{ (PromotionTypes)promotion.GetID() },
+		iPercent{ promotion.GetCollateralDamagePercent() },
+		iFixed{ promotion.GetCollateralDamageFixed() },
+		iPlotUnitLimit{ promotion.GetCollateralDamagePlotUnitLimit() } {}
+
+	inline void read(FDataStream& kStream) {
+		int iPromotion;
+		kStream >> iPromotion;
+		ePromotion = (PromotionTypes)iPromotion;
+		kStream >> iPercent;
+		kStream >> iFixed;
+		kStream >> iPlotUnitLimit;
+	}
+
+	inline void write(FDataStream& kStream) const {
+		int iPromotion = (int)ePromotion;
+		kStream << iPromotion;
+		kStream << iPercent;
+		kStream << iFixed;
+		kStream << iPlotUnitLimit;
+	}
+};
+#endif

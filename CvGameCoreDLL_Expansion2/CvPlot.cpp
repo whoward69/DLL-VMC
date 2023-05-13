@@ -455,6 +455,30 @@ void CvPlot::doTurn()
 	// Clear world anchor
 	SetWorldAnchor(NO_WORLD_ANCHOR);
 
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	if (MOD_IMPROVEMENTS_UPGRADE)
+	{
+		bool bChangeXP = false;
+		if (getImprovementType() == NO_IMPROVEMENT)
+		{
+			bChangeXP = false;
+		}
+		else {
+			CvImprovementEntry* pInfo = GC.getImprovementInfo(getImprovementType());
+			bChangeXP = pInfo && (pInfo->GetEnableUpgrade() || pInfo->GetEnableDowngrade());
+		}
+
+		if (bChangeXP)
+		{
+			int iXPChange = GetXPGrowth();
+			if (iXPChange != 0)
+			{
+				ChangeXP(iXPChange, true);
+			}
+		}
+	}
+#endif
+
 	// XXX
 #ifdef _DEBUG
 	{
@@ -7124,6 +7148,26 @@ void CvPlot::setImprovementType(ImprovementTypes eNewValue, PlayerTypes eBuilder
 			}
 #endif
 
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+			if (MOD_IMPROVEMENTS_UPGRADE)
+			{
+				bool bResetXP = false;
+				if (eNewValue == NO_IMPROVEMENT)
+				{
+					bResetXP = true;
+				}
+				else if (!GC.getImprovementInfo(eNewValue) || !GC.getImprovementInfo(eNewValue)->GetEnableXP())
+				{
+					bResetXP = true;
+				}
+
+				if (bResetXP)
+				{
+					this->SetXP(0, false);
+				}
+			}
+#endif // MOD_IMPROVEMENTS_UPGRADE
+
 
 			// Someone owns this plot
 			if(owningPlayerID != NO_PLAYER)
@@ -11332,6 +11376,10 @@ void CvPlot::read(FDataStream& kStream)
 	kStream >> m_cContinentType;
 	kStream >> m_kArchaeologyData;
 
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	kStream >> m_iXP;
+#endif
+
 	updateImpassable();
 }
 
@@ -11487,6 +11535,10 @@ void CvPlot::write(FDataStream& kStream) const
 
 	kStream << m_cContinentType;
 	kStream << m_kArchaeologyData;
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	kStream << m_iXP;
+#endif
 }
 
 //	--------------------------------------------------------------------------------
@@ -12807,5 +12859,102 @@ int CvPlot::ComputeYieldFromAdjacentFeature(CvImprovementEntry& kImprovement, Yi
 
 	return iRtnValue;
 }
+#endif
 
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+int CvPlot::GetXP() const
+{
+	return this->m_iXP;
+}
+int CvPlot::GetXPGrowth() const
+{
+	int iXPChange = 0;
+	int iValue = 0;
+	CvCity* pCity = getWorkingCity();
+	if (GAMEEVENTINVOKE_VALUE(iValue, GAMEEVENT_GetImprovementXPPerTurn, getX(), getY(), getImprovementType(), GetXP(), getOwner(), pCity ? pCity->GetID() : -1) == GAMEEVENTRETURN_VALUE) {
+		iXPChange += iValue;
+	}
+
+	return iXPChange;
+}
+
+int CvPlot::SetXP(int iNewValue, bool bDoUpdate)
+{
+	if (!MOD_IMPROVEMENTS_UPGRADE)
+	{
+		this->m_iXP = 0;
+		return this->m_iXP;
+	}
+	
+	ImprovementTypes  eCurImpr = this->getImprovementType();
+	if (eCurImpr == NO_IMPROVEMENT)
+	{
+		return this->m_iXP;
+	}
+	CvImprovementEntry* pImprInfo = GC.getImprovementInfo(eCurImpr);
+	if (pImprInfo == nullptr)
+	{
+		return this->m_iXP;
+	}
+	int upgradeXP = pImprInfo->GetUpgradeXP();
+	
+	this->m_iXP = iNewValue;
+	while (this->m_iXP >= upgradeXP && pImprInfo->GetEnableUpgrade())
+	{
+		ImprovementTypes eOldImpr = eCurImpr;
+		this->m_iXP -= upgradeXP;
+		this->setImprovementType(pImprInfo->GetUpgradeImprovementType());
+		eCurImpr = this->getImprovementType();
+		CvCity* pCity = getWorkingCity();
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_OnImprovementUpgrade, getX(), getY(), eOldImpr, eCurImpr, getOwner(), pCity ? pCity->GetID() : -1);
+		if (eCurImpr == NO_IMPROVEMENT)
+		{
+			this->m_iXP = 0;
+			break;
+		}
+		pImprInfo = GC.getImprovementInfo(eCurImpr);
+		if (pImprInfo == nullptr)
+		{
+			this->m_iXP = 0;
+			break;
+		}
+		upgradeXP = pImprInfo->GetUpgradeXP();
+	}
+	while (this->m_iXP < 0 && pImprInfo->GetEnableDowngrade())
+	{
+		ImprovementTypes eOldImpr = eCurImpr;
+		this->setImprovementType(pImprInfo->GetDowngradeImprovementType());
+		eCurImpr = this->getImprovementType();
+		CvCity* pCity = getWorkingCity();
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_OnImprovementDowngrade, getX(), getY(), eOldImpr, eCurImpr, getOwner(), pCity ? pCity->GetID() : -1);
+		if (eCurImpr == NO_IMPROVEMENT)
+		{
+			this->m_iXP = 0;
+			break;
+		}
+		pImprInfo = GC.getImprovementInfo(eCurImpr);
+		if (pImprInfo == nullptr)
+		{
+			this->m_iXP = 0;
+			break;
+		}
+
+		if (pImprInfo->GetEnableUpgrade())
+		{
+			upgradeXP = pImprInfo->GetUpgradeXP();
+			this->m_iXP += upgradeXP;
+		}
+		else
+		{
+			this->m_iXP = 0;
+			break;
+		}
+	}
+
+	return this->m_iXP;
+}
+int CvPlot::ChangeXP(int iChange, bool bDoUpdate)
+{
+	return this->SetXP(GetXP() + iChange, bDoUpdate);
+}
 #endif

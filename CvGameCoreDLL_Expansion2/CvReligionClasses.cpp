@@ -4119,7 +4119,7 @@ void CvCityReligions::SimulateReligiousPressure(ReligionTypes eReligion, int iPr
 		else if (it->m_eReligion > RELIGION_PANTHEON)
 		{
 			const CvReligion *pReligion = GC.getGame().GetGameReligions()->GetReligion(eReligion, NO_PLAYER);
-			int iPressureErosion = pReligion->m_Beliefs.GetOtherReligionPressureErosion();  // Normally 0
+			int iPressureErosion = pReligion ? pReligion->m_Beliefs.GetOtherReligionPressureErosion() : 0;  // Normally 0
 			if (iPressureErosion > 0)
 			{
 				int iErosionAmount = iPressureErosion * iPressure / 100;

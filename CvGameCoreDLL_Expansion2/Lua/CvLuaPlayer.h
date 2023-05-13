@@ -237,6 +237,12 @@ protected:
 
 	static int lGetJONSCultureEverGenerated(lua_State* L);
 
+#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
+	static int lGetGoldenAgePointPerTurnFromReligion(lua_State* L);
+	static int lGetGoldenAgePointPerTurnFromTraits(lua_State* L);
+	static int lGetGoldenAgePointPerTurnFromCitys(lua_State* L);
+#endif	
+
 	static int lGetLastTurnLifetimeCulture(lua_State* L);
 	static int lGetInfluenceOn(lua_State* L);
 	static int lGetLastTurnInfluenceOn(lua_State* L);
@@ -565,6 +571,8 @@ protected:
 	// Minor Civ stuff
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(IsMajorCiv, bool);
+	LUAAPIEXTN(GetCivBuilding, int);
+	LUAAPIEXTN(GetCivUnit, int);
 #endif
 	static int lIsMinorCiv(lua_State* L);
 	static int lGetMinorCivType(lua_State* L);
@@ -1109,6 +1117,12 @@ protected:
 	static int lGetWarmongerPreviewString(lua_State* L);
 	static int lGetLiberationPreviewString(lua_State* L);
 
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	static int lGetWarCasualtiesCounter(lua_State* L);
+	static int lChangeWarCasualtiesCounter(lua_State* L);
+	static int lSetWarCasualtiesCounter(lua_State* L);
+	static int lCheckAndUpdateWarCasualtiesCounter(lua_State* L);
+#endif
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(AddMessage, void, sMessage);

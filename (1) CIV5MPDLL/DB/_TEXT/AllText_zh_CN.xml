@@ -176,4 +176,40 @@
 			<Text>[NEWLINE][ICON_BULLET]杰作修正: {1_Num}%</Text>
 		</Row>
 	</Language_zh_CN>
+
+	<Language_zh_CN>
+		<Row Tag="TXT_KEY_NOTIFICATION_WAR_CASUALTIES_MESSAGE">
+			<Text>战争给你的文明带来了巨大的伤亡！[COLOR_NEGATIVE_TEXT]{@1_CityName}[ENDCOLOR]失去{2_loss}个单位的[ICON_CITIZEN]人口！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_WAR_CASUALTIES_SUMMARY">
+			<Text>惨重的战争伤亡！</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE">
+			<Text>在防御中，你的{2_UnitName}受到{1_EnUName}攻击时的[COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR]点溅射伤害！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE_ENEMY">
+			<Text>你的{1_UnitName}攻击时对{2_EnUName}造成了[COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR]点溅射伤害！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE_DEATH">
+			<Text>在防御中，你的{2_UnitName}被{1_EnUName}攻击时的溅射伤害消灭了！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE_ENEMY_DEATH">
+			<Text>你的{1_UnitName}攻击时的溅射伤害将{2_EnUName}消灭了！</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE">
+			<Text>在防御中，你的{2_UnitName}受到敌方{1_EnUName}攻击时的[COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR]点穿透伤害！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE_ENEMY">
+			<Text>你的{1_UnitName}攻击时对敌方{2_EnUName}造成了[COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR]点穿透伤害！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE_DEATH">
+			<Text>在防御中，你的{2_UnitName}被敌方{1_EnUName}攻击时的穿透伤害消灭了！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE_ENEMY_DEATH">
+			<Text>你的{1_UnitName}攻击时的穿透伤害将敌方{2_EnUName}消灭了！</Text>
+		</Row>
+	</Language_zh_CN>
+
 </GameData>

@@ -1243,6 +1243,13 @@ bool CvTraitEntry::IsCanFoundCoastCity() const
 }
 #endif
 
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+int CvTraitEntry::GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYield) const
+{
+	return m_piPerMajorReligionFollowerYieldModifier[eYield];
+}
+#endif
+
 /// Load XML data
 bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility)
 {
@@ -1906,6 +1913,29 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 		}
 	}
 
+	{
+		for (int i = 0; i < NUM_YIELD_TYPES; i++)
+		{
+			m_piPerMajorReligionFollowerYieldModifier[i] = 0;
+		}
+
+		std::string strKey("Trait_PerMajorReligionFollowerYieldModifier");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select t2.ID, t1.Yield from Trait_PerMajorReligionFollowerYieldModifier t1 inner join Yields t2 on t1.YieldType = t2.Type where t1.TraitType = ?");
+		}
+
+		pResults->Bind(1, szTraitType);
+
+		while (pResults->Step())
+		{
+			const int eYieldType = pResults->GetInt(0);
+			const int iModifier = pResults->GetInt(1);
+			m_piPerMajorReligionFollowerYieldModifier[eYieldType] += iModifier;
+		}
+	}
+
 	return true;
 }
 
@@ -2080,6 +2110,16 @@ void CvPlayerTraits::InitPlayerTraits()
 #endif
 			m_iTradeReligionModifier += trait->GetTradeReligionModifier();
 			m_iTradeBuildingModifier += trait->GetTradeBuildingModifier();
+
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+			if (MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS)
+			{
+				for (int i = 0; i < NUM_YIELD_TYPES; i++)
+				{
+					m_piPerMajorReligionFollowerYieldModifier[i] += trait->GetPerMajorReligionFollowerYieldModifier(static_cast<YieldTypes>(i));
+				}
+			}
+#endif
 
 			if(trait->IsFightWellDamaged())
 			{
@@ -2569,6 +2609,13 @@ void CvPlayerTraits::Reset()
 #endif
 	m_ppaaiUnimprovedFeatureYieldChange.clear();
 	m_ppaaiUnimprovedFeatureYieldChange.resize(GC.getNumFeatureInfos());
+
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	for (int i = 0; i < NUM_YIELD_TYPES; i++)
+	{
+		m_piPerMajorReligionFollowerYieldModifier[i] = 0;
+	}
+#endif
 
 	Firaxis::Array< int, NUM_YIELD_TYPES > yield;
 	for(unsigned int j = 0; j < NUM_YIELD_TYPES; ++j)
@@ -4135,6 +4182,8 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	{
 		m_aUniqueLuxuryAreas.clear();
 	}
+
+	kStream >> m_piPerMajorReligionFollowerYieldModifier;
 }
 
 /// Serialization write
@@ -4348,6 +4397,8 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	{
 		kStream << m_aUniqueLuxuryAreas[iI];
 	}
+
+	kStream << m_piPerMajorReligionFollowerYieldModifier;
 }
 
 // PRIVATE METHODS

@@ -11,6 +11,7 @@
 #include "CvImprovementClasses.h"
 #include "FireWorks/FRemark.h"
 #include "CvInfosSerializationHelper.h"
+#include <string>
 
 // must be included after all other headers
 #include "LintFree.h"
@@ -337,6 +338,52 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 	m_iDefenseModifier = kResults.GetInt("DefenseModifier");
 	m_iNearbyEnemyDamage = kResults.GetInt("NearbyEnemyDamage");
 
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	if (MOD_IMPROVEMENTS_UPGRADE)
+	{
+		m_bEnableXP = kResults.GetBool("EnableXP");
+
+		m_bEnableUpgrade = kResults.GetBool("EnableUpgrade");
+		m_iUpgradeXP = kResults.GetInt("UpgradeXP");
+		std::string strUpgradeImprovement = kResults.GetText("UpgradeImprovementType");
+		if (!strUpgradeImprovement.empty())
+		{
+			std::string strKey = "Improvements - Upgrade";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select ID "
+					"from Improvements "
+					"where Type = ?;");
+			}
+			pResults->Bind(1, strUpgradeImprovement.c_str(), strUpgradeImprovement.size(), false);
+			if (pResults->Step())
+			{
+				m_eUpgradeImprovementType = static_cast<ImprovementTypes>(pResults->GetInt(0));
+			}
+		}
+
+		m_bEnableDowngrade = kResults.GetBool("EnableDowngrade");
+		std::string strDowngradeImprovement = kResults.GetText("DowngradeImprovementType");
+		if (!strDowngradeImprovement.empty())
+		{
+			std::string strKey = "Improvements - Downgrade";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select ID "
+					"from Improvements "
+					"where Type = ?;");
+			}
+			pResults->Bind(1, strDowngradeImprovement.c_str(), strDowngradeImprovement.size(), false);
+
+			if (pResults->Step())
+			{
+				m_eDowngradeImprovementType = static_cast<ImprovementTypes>(pResults->GetInt(0));
+			}
+		}
+	}
+#endif
 
 #if defined(MOD_ROG_CORE)
 	m_iNearbyFriendHeal = kResults.GetInt("NearbyFriendHeal");
@@ -1560,6 +1607,38 @@ CvImprovementEntry* CvImprovementXMLEntries::GetImprovementForResource(int eReso
 
 	return NULL;
 }
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+bool CvImprovementEntry::GetEnableXP() const
+{
+	return this->m_bEnableXP;
+}
+
+bool CvImprovementEntry::GetEnableUpgrade() const
+{
+	return this->m_bEnableUpgrade;
+}
+
+int CvImprovementEntry::GetUpgradeXP() const
+{
+	return this->m_iUpgradeXP;
+}
+
+ImprovementTypes CvImprovementEntry::GetUpgradeImprovementType() const
+{
+	return this->m_eUpgradeImprovementType;
+}
+
+bool CvImprovementEntry::GetEnableDowngrade() const
+{
+	return this->m_bEnableDowngrade;
+}
+
+ImprovementTypes CvImprovementEntry::GetDowngradeImprovementType() const
+{
+	return this->m_eDowngradeImprovementType;
+}
+#endif
 
 /// Clear improvement entries
 void CvImprovementXMLEntries::DeleteArray()

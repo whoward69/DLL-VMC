@@ -219,6 +219,17 @@ public:
 
 	int  GetFlavorValue(int i) const;
 
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	bool GetEnableXP() const;
+
+	bool GetEnableUpgrade() const;
+	int GetUpgradeXP() const;
+	ImprovementTypes GetUpgradeImprovementType() const;
+
+	bool GetEnableDowngrade() const;
+	ImprovementTypes GetDowngradeImprovementType() const;
+#endif
+
 	//---------------------------------------PROTECTED MEMBER VARIABLES---------------------------------
 protected:
 	void InitImprovementResourceList(CvImprovementResourceInfo** ppImprovementResource, int iListLen);
@@ -351,6 +362,17 @@ protected:
 	int** m_ppiTechNoFreshWaterYieldChanges;
 	int** m_ppiTechFreshWaterYieldChanges;
 	int** m_ppiRouteYieldChanges;
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	bool m_bEnableXP = false;
+
+	bool m_bEnableUpgrade = false;
+	int m_iUpgradeXP = -1;
+	ImprovementTypes m_eUpgradeImprovementType = NO_IMPROVEMENT;
+
+	bool m_bEnableDowngrade = false;
+	ImprovementTypes m_eDowngradeImprovementType = NO_IMPROVEMENT;
+#endif
 
 	CvImprovementResourceInfo* m_paImprovementResource;
 };

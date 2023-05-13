@@ -260,6 +260,7 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 #if defined(MOD_API_LUA_EXTENSIONS)
 	Method(GetNumBuildingClass);
 	Method(IsHasBuildingClass);
+	Method(SetNumRealBuildingClass);
 #endif
 	Method(GetNumActiveBuilding);
 	Method(GetID);
@@ -1949,17 +1950,17 @@ int CvLuaCity::lGetNumBuildingClass(lua_State* L)
 {
 	CvCity* pkCity = GetInstance(L);
 	const BuildingClassTypes eBuildingClassType = (BuildingClassTypes)lua_tointeger(L, 2);
-	if(eBuildingClassType != NO_BUILDINGCLASS)
-	{
-		CvCivilizationInfo& playerCivilizationInfo = GET_PLAYER(pkCity->getOwner()).getCivilizationInfo();
-		BuildingTypes eBuilding = (BuildingTypes)playerCivilizationInfo.getCivilizationBuildings(eBuildingClassType);
-		const int iResult = pkCity->GetCityBuildings()->GetNumBuilding(eBuilding);
-		lua_pushinteger(L, iResult);
-	}
-	else
+	if (eBuildingClassType == NO_BUILDINGCLASS)
 	{
 		lua_pushinteger(L, 0);
+		return 1;
+
 	}
+
+	CvPlayerAI& pkPlayer = GET_PLAYER(pkCity->getOwner());
+	BuildingTypes eBuilding = pkPlayer.GetCivBuilding(eBuildingClassType);
+	lua_pushinteger(L, eBuilding == NO_BUILDING? 0 : pkCity->GetCityBuildings()->GetNumBuilding(eBuilding));
+
 	return 1;
 }
 //------------------------------------------------------------------------------
@@ -1968,17 +1969,44 @@ int CvLuaCity::lIsHasBuildingClass(lua_State* L)
 {
 	CvCity* pkCity = GetInstance(L);
 	const BuildingClassTypes eBuildingClassType = (BuildingClassTypes)lua_tointeger(L, 2);
-	if(eBuildingClassType != NO_BUILDINGCLASS)
+	if (eBuildingClassType == NO_BUILDINGCLASS)
 	{
-		CvCivilizationInfo& playerCivilizationInfo = GET_PLAYER(pkCity->getOwner()).getCivilizationInfo();
-		BuildingTypes eBuilding = (BuildingTypes)playerCivilizationInfo.getCivilizationBuildings(eBuildingClassType);
-		const bool bResult = pkCity->GetCityBuildings()->GetNumBuilding(eBuilding);
-		lua_pushboolean(L, bResult);
+		lua_pushboolean(L, false);
+		return 1;
 	}
-	else
+
+	CvPlayerAI& pkPlayer = GET_PLAYER(pkCity->getOwner());
+	BuildingTypes eBuilding = pkPlayer.GetCivBuilding(eBuildingClassType);
+	lua_pushboolean(L, eBuilding == NO_BUILDING ? false : pkCity->GetCityBuildings()->GetNumBuilding(eBuilding) > 0);
+
+	return 1;
+}
+
+//bool SetNumRealBuildingClass(BuildingClassTypes eBuildingClassType, int iNum);
+int CvLuaCity::lSetNumRealBuildingClass(lua_State* L)
+{
+	CvCity* pkCity = GetInstance(L);
+	const BuildingClassTypes eBuildingClassType = (BuildingClassTypes)lua_tointeger(L, 2);
+	const int iNum = lua_tointeger(L, 3);
+	if (eBuildingClassType == NO_BUILDINGCLASS)
+	{
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	CvPlayerAI& pkPlayer = GET_PLAYER(pkCity->getOwner());
+	BuildingTypes eBuilding = pkPlayer.GetCivBuilding(eBuildingClassType);
+
+	if (eBuilding == NO_BUILDING)
 	{
 		lua_pushboolean(L, false);
 	}
+	else
+	{
+		pkCity->GetCityBuildings()->SetNumRealBuilding(eBuilding, iNum);
+		lua_pushboolean(L, true);
+	}
+
 	return 1;
 }
 #endif

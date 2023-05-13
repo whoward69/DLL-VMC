@@ -176,4 +176,40 @@
 			<Text>[NEWLINE][ICON_BULLET]Great Work Modifiers: {1_Num}%</Text>
 		</Row>
 	</Language_en_US>
+
+	<Language_en_US>
+		<Row Tag="TXT_KEY_NOTIFICATION_WAR_CASUALTIES_MESSAGE">
+			<Text>Casualties in the battle has caused {2_loss} [ICON_CITIZEN] Citizen lost in your city: [COLOR_NEGATIVE_TEXT]{@1_CityName}[ENDCOLOR]!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_WAR_CASUALTIES_SUMMARY">
+			<Text>Casualties in Battle!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE">
+			<Text>While defending, Your {2_UnitName} was [COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR] damaged by {1_EnUName} due to AoE Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE_ENEMY">
+			<Text>Your {1_UnitName} did [COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR] damage to {2_EnUName} due to AoE Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE_DEATH">
+			<Text>While defending, Your {2_UnitName} was destroyed by {1_EnUName} due to AoE Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE_ENEMY_DEATH">
+			<Text>Your {1_UnitName} destroyed {2_EnUName} due to AoE Damage!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE">
+			<Text>While defending, Your {2_UnitName} was [COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR] damaged by an enemy {1_EnUName} due to Collateral Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE_ENEMY">
+			<Text>Your {1_UnitName} did [COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR] damage to an enemy {2_EnUName} due to Collateral Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE_DEATH">
+			<Text>While defending, Your {2_UnitName} was destroyed by {1_EnUName} due to Collateral Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE_ENEMY_DEATH">
+			<Text>Your {1_UnitName} destroyed an enemy {2_EnUName} due to Collateral Damage!</Text>
+		</Row>
+	</Language_en_US>
+
 </GameData>

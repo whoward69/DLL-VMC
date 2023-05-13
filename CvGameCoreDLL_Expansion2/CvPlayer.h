@@ -670,6 +670,11 @@ public:
 	int GetTourismBonusTurns() const;
 	void ChangeTourismBonusTurns(int iChange);
 
+
+#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
+	int GetGoldenAgePointPerTurnFromCitys() const;
+#endif	
+
 	// Golden Age Stuff
 
 	void DoProcessGoldenAge();
@@ -817,7 +822,7 @@ public:
 
 	// Unit Killed in Combat
 #if defined(MOD_API_EXTENSIONS)
-	void DoUnitKilledCombat(CvUnit* pKillingUnit, PlayerTypes eKilledPlayer, UnitTypes eUnitType);
+	void DoUnitKilledCombat(CvUnit* pKillingUnit, PlayerTypes eKilledPlayer, UnitTypes eUnitType, CvUnit* pKilledUnit);
 #else
 	void DoUnitKilledCombat(PlayerTypes eKilledPlayer, UnitTypes eUnit);
 #endif
@@ -1136,6 +1141,8 @@ public:
 	bool isMinorCiv() const;
 #if defined(MOD_API_EXTENSIONS)
 	bool isMajorCiv() const;
+	BuildingTypes GetCivBuilding(BuildingClassTypes eBuildingClass) const;
+	UnitTypes GetCivUnit(UnitClassTypes eUnitClass) const;
 #endif
 	bool IsHasBetrayedMinorCiv() const;
 	void SetHasBetrayedMinorCiv(bool bValue);
@@ -1841,6 +1848,11 @@ public:
 #if defined(MOD_ROG_CORE)
 	int GetNumWorldWonders();
 #endif
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	void SetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iValue);
+	void ChangePerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iChange);
+	int GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType) const;
+#endif
 
 	// for serialization
 	virtual void Read(FDataStream& kStream);
@@ -1901,6 +1913,19 @@ public:
 #ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
 	bool GetCanFoundCoastCity() const;
 #endif
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int GetWarCasualtiesCounter() const;
+	void ChangeWarCasualtiesCounter(const int iChange);
+	void SetWarCasualtiesCounter(const int iValue);
+	bool CheckAndUpdateWarCasualtiesCounter();
+
+	int GetWarCasualtiesModifier() const;
+	void SetWarCasualtiesModifier(const int iValue);
+	void ChangeWarCasualtiesModifier(const int iChange);
+#endif
+
+	CvCity* CvPlayer::GetRandomCity();
 
 protected:
 	class ConqueredByBoolField
@@ -2311,6 +2336,10 @@ protected:
 	Firaxis::Array<int, YieldTypes::NUM_YIELD_TYPES> m_piInternalTradeRouteDestYieldRate;
 #endif
 
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int m_iWarCasualtiesModifier = 0;
+#endif
+
 	// Obsolete: only used to read old saves
 	FAutoVariable< std::vector< Firaxis::Array< int, NUM_YIELD_TYPES > >, CvPlayer> m_ppaaiBuildingClassYieldMod;
 
@@ -2445,6 +2474,14 @@ protected:
 	friend const CvUnit* GetPlayerUnit(const IDInfo& unit);
 
 	CvPlayerAchievements m_kPlayerAchievements;
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int m_iWarCasualtiesCounter = 0;
+#endif
+
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	int m_piPerMajorReligionFollowerYieldModifier[NUM_YIELD_TYPES];
+#endif
 };
 
 extern bool CancelActivePlayerEndTurn();

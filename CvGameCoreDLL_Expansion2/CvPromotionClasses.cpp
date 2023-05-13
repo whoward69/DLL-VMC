@@ -572,6 +572,27 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iTradeMissionInfluenceModifier = kResults.GetInt("TradeMissionInfluenceModifier");
 	m_iTradeMissionGoldModifier = kResults.GetInt("TradeMissionGoldModifier");
 
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	m_iWarCasualtiesModifier = kResults.GetInt("WarCasualtiesModifier");
+#endif
+
+#ifdef MOD_PROMOTION_SPLASH_DAMAGE
+	m_iSplashDamageRadius = kResults.GetInt("SplashDamageRadius");
+	m_iSplashDamagePercent = kResults.GetInt("SplashDamagePercent");
+	m_iSplashDamageFixed = kResults.GetInt("SplashDamageFixed");
+	m_iSplashDamagePlotUnitLimit = kResults.GetInt("SplashDamagePlotUnitLimit");
+	m_iSplashDamageImmune = kResults.GetBool("SplashDamageImmune");
+	m_iSplashXP = kResults.GetInt("SplashXP");
+#endif
+
+#ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
+	m_iCollateralDamagePercent = kResults.GetInt("CollateralDamagePercent");
+	m_iCollateralDamageFixed = kResults.GetInt("CollateralDamageFixed");
+	m_iCollateralDamagePlotUnitLimit = kResults.GetInt("CollateralDamagePlotUnitLimit");
+	m_iCollateralDamageImmune = kResults.GetBool("CollateralDamageImmune");
+	m_iCollateralXP = kResults.GetInt("CollateralXP");
+#endif
+
 	//References
 	const char* szLayerAnimationPath = kResults.GetText("LayerAnimationPath");
 	m_iLayerAnimationPath = GC.getInfoTypeForString(szLayerAnimationPath, true);
@@ -2579,6 +2600,63 @@ int CvPromotionEntry::GetOtherPromotionDefenseModifier(PromotionTypes other) con
 	}
 
 	return iterator->second;
+}
+#endif
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+int CvPromotionEntry::GetWarCasualtiesModifier() const
+{
+	return this->m_iWarCasualtiesModifier;
+}
+#endif
+
+#ifdef MOD_PROMOTION_SPLASH_DAMAGE
+int CvPromotionEntry::GetSplashDamageRadius() const
+{
+	return m_iSplashDamageRadius;
+}
+int CvPromotionEntry::GetSplashDamagePercent() const
+{
+	return m_iSplashDamagePercent;
+}
+int CvPromotionEntry::GetSplashDamageFixed() const
+{
+	return m_iSplashDamageFixed;
+}
+int CvPromotionEntry::GetSplashDamagePlotUnitLimit() const
+{
+	return m_iSplashDamagePlotUnitLimit;
+}
+bool CvPromotionEntry::GetSplashDamageImmune() const
+{
+	return m_iSplashDamageImmune;
+}
+int CvPromotionEntry::GetSplashXP() const
+{
+	return m_iSplashXP;
+}
+#endif
+
+#ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
+int CvPromotionEntry::GetCollateralDamagePercent() const
+{
+	return m_iCollateralDamagePercent;
+}
+int CvPromotionEntry::GetCollateralDamageFixed() const
+{
+	return m_iCollateralDamageFixed;
+}
+int CvPromotionEntry::GetCollateralDamagePlotUnitLimit() const
+{
+	return m_iCollateralDamagePlotUnitLimit;
+}
+bool CvPromotionEntry::GetCollateralDamageImmune() const
+{
+	return m_iCollateralDamageImmune;
+}
+int CvPromotionEntry::GetCollateralXP() const
+{
+	return m_iCollateralXP;
 }
 #endif
 

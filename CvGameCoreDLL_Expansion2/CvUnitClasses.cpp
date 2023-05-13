@@ -70,6 +70,10 @@ CvUnitEntry::CvUnitEntry(void) :
 #endif
 	m_iXPValueAttack(0),
 	m_iXPValueDefense(0),
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+	m_iExtraXPValueAttack(0),
+	m_iExtraXPValueDefense(0),
+#endif
 	m_iSpecialCargo(0),
 	m_iDomainCargo(0),
 	m_iConscriptionValue(0),
@@ -254,6 +258,10 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 #endif
 	m_iXPValueAttack = kResults.GetInt("XPValueAttack");
 	m_iXPValueDefense = kResults.GetInt("XPValueDefense");
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+	m_iExtraXPValueAttack = kResults.GetInt("ExtraXPValueAttack");
+	m_iExtraXPValueDefense = kResults.GetInt("ExtraXPValueDefense");
+#endif
 	m_iConscriptionValue = kResults.GetInt("Conscription");
 	m_iExtraMaintenanceCost = kResults.GetInt("ExtraMaintenanceCost");
 	m_bNoMaintenance = kResults.GetBool("NoMaintenance");
@@ -791,6 +799,20 @@ int CvUnitEntry::GetXPValueDefense() const
 {
 	return m_iXPValueDefense;
 }
+
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+/// Extra Experience point value when attacking
+int CvUnitEntry::GetExtraXPValueAttack() const
+{
+	return m_iExtraXPValueAttack;
+}
+
+/// Extra Experience point value when defending
+int CvUnitEntry::GetExtraXPValueDefense() const
+{
+	return m_iExtraXPValueDefense;
+}
+#endif
 
 /// Is there a special unit this unit carries (e.g. Nuclear Sub carries Nuclear missile)
 int CvUnitEntry::GetSpecialCargo() const

@@ -73,3 +73,6 @@ ALTER TABLE UnitPromotions ADD 'CurrentHitPointDefenseMod' INTEGER DEFAULT 0;
 
 ALTER TABLE UnitPromotions ADD 'NearNumEnemyAttackMod' INTEGER DEFAULT 0;
 ALTER TABLE UnitPromotions ADD 'NearNumEnemyDefenseMod' INTEGER DEFAULT 0;
+
+ALTER TABLE Units ADD 'ExtraXPValueAttack' INTEGER DEFAULT 0;
+ALTER TABLE Units ADD 'ExtraXPValueDefense' INTEGER DEFAULT 0;

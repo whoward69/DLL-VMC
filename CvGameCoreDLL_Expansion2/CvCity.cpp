@@ -1976,12 +1976,29 @@ void CvCity::doTurn()
 			ChangeJONSCultureStored(getJONSCulturePerTurn());
 		}
 
+#ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_CULTURE
+		if (MOD_GLOBAL_UNLIMITED_ONE_TURN_CULTURE)
+		{
+			while (GetJONSCultureStored() >= GetJONSCultureThreshold())
+			{
+				DoJONSCultureLevelIncrease();
+			}
+		}
+		else
+		{
+			// Enough Culture to acquire a new Plot?
+			if (GetJONSCultureStored() >= GetJONSCultureThreshold())
+			{
+				DoJONSCultureLevelIncrease();
+			}
+		}
+#else
 		// Enough Culture to acquire a new Plot?
 		if(GetJONSCultureStored() >= GetJONSCultureThreshold())
 		{
 			DoJONSCultureLevelIncrease();
 		}
-
+#endif
 		// Resource Demanded Counter
 		if(GetResourceDemandedCountdown() > 0)
 		{
@@ -10997,14 +11014,25 @@ int CvCity::getBaseYieldRateModifier(YieldTypes eIndex, int iExtra, CvString* to
 	if(pReligion)
 	{
 		int iReligionYieldMaxFollowers = pReligion->m_Beliefs.GetMaxYieldModifierPerFollower(eIndex);
+		int iFollowers = GetCityReligions()->GetNumFollowers(eMajority);
+		iTempMod = 0;
 		if (iReligionYieldMaxFollowers > 0)
 		{
-			int iFollowers = GetCityReligions()->GetNumFollowers(eMajority);
+			// From religion belief
 			iTempMod = min(iFollowers, iReligionYieldMaxFollowers);
-			iModifier += iTempMod;
-			if(toolTipSink)
-				GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_BELIEF", iTempMod);
 		}
+
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+		if (MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS)
+		{
+			// From traits
+			iTempMod += iFollowers * GET_PLAYER(getOwner()).GetPerMajorReligionFollowerYieldModifier(eIndex);
+		}
+#endif
+
+		iModifier += iTempMod;
+		if (toolTipSink)
+			GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_BELIEF", iTempMod);
 	}
 
 	// Production Yield Rate Modifier from City States
@@ -15299,6 +15327,84 @@ void CvCity::doGrowth()
 
 	setFoodKept(range(getFoodKept(), 0, ((growthThreshold() * getMaxFoodKeptPercent()) / 100)));
 
+#ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_GROWTH
+	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_GROWTH)
+	{
+		while (getFood() >= growthThreshold())
+		{
+			if (GetCityCitizens()->IsForcedAvoidGrowth())  // don't grow a city if we are at avoid growth
+			{
+				setFood(growthThreshold());
+				break;
+			}
+
+			changeFood(-(std::max(0, (growthThreshold() - getFoodKept()))));
+			changePopulation(1);
+
+			// Only show notification if the city is small
+			if(getPopulation() <= 5)
+			{
+				CvNotifications* pNotifications = GET_PLAYER(getOwner()).GetNotifications();
+				if(pNotifications)
+				{
+					Localization::String localizedText = Localization::Lookup("TXT_KEY_NOTIFICATION_CITY_GROWTH");
+					localizedText << getNameKey() << getPopulation();
+					Localization::String localizedSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_SUMMARY_CITY_GROWTH");
+					localizedSummary << getNameKey();
+					pNotifications->Add(NOTIFICATION_CITY_GROWTH, localizedText.toUTF8(), localizedSummary.toUTF8(), getX(), getY(), GetID());
+				}
+			}
+		}
+
+		if (getFood() < 0)
+		{
+			changeFood(-(getFood()));
+
+			if(getPopulation() > 1)
+			{
+				changePopulation(-1);
+			}
+		}
+	}
+	else // old rule
+	{
+		if(getFood() >= growthThreshold())
+		{
+			if(GetCityCitizens()->IsForcedAvoidGrowth())  // don't grow a city if we are at avoid growth
+			{
+				setFood(growthThreshold());
+			}
+			else
+			{
+				changeFood(-(std::max(0, (growthThreshold() - getFoodKept()))));
+				changePopulation(1);
+
+				// Only show notification if the city is small
+				if(getPopulation() <= 5)
+				{
+					CvNotifications* pNotifications = GET_PLAYER(getOwner()).GetNotifications();
+					if(pNotifications)
+					{
+						Localization::String localizedText = Localization::Lookup("TXT_KEY_NOTIFICATION_CITY_GROWTH");
+						localizedText << getNameKey() << getPopulation();
+						Localization::String localizedSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_SUMMARY_CITY_GROWTH");
+						localizedSummary << getNameKey();
+						pNotifications->Add(NOTIFICATION_CITY_GROWTH, localizedText.toUTF8(), localizedSummary.toUTF8(), getX(), getY(), GetID());
+					}
+				}
+			}
+		}
+		else if(getFood() < 0)
+		{
+			changeFood(-(getFood()));
+
+			if(getPopulation() > 1)
+			{
+				changePopulation(-1);
+			}
+		}
+	}
+#else
 	if(getFood() >= growthThreshold())
 	{
 		if(GetCityCitizens()->IsForcedAvoidGrowth())  // don't grow a city if we are at avoid growth
@@ -15334,6 +15440,7 @@ void CvCity::doGrowth()
 			changePopulation(-1);
 		}
 	}
+#endif
 }
 
 //	--------------------------------------------------------------------------------
@@ -15618,26 +15725,92 @@ void CvCity::doProduction(bool bAllowNoProduction)
 	{
 		return;
 	}
-
-	if(isProduction())
+#ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION
+	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION)
 	{
-
-		if(isProductionBuilding())
+		if (!isProduction())
 		{
-			const OrderData* pOrderNode = headOrderQueueNode();
+			changeOverflowProductionTimes100(getCurrentProductionDifferenceTimes100(false, false));
+			return;
+		}
+
+		for (int iProductionCount = 0, iMaxProductionCount = 5; iProductionCount < iMaxProductionCount && isProduction(); iProductionCount++)
+		{
+			if (isProductionBuilding())
+			{
+				const OrderData *pOrderNode = headOrderQueueNode();
+				int iData1 = -1;
+				if (pOrderNode != NULL)
+				{
+					iData1 = pOrderNode->iData1;
+				}
+
+				const BuildingTypes eBuilding = static_cast<BuildingTypes>(iData1);
+				CvBuildingEntry *pkBuildingInfo = GC.getBuildingInfo(eBuilding);
+				if (pkBuildingInfo)
+				{
+					if (isWorldWonderClass(pkBuildingInfo->GetBuildingClassInfo()))
+					{
+						if (m_pCityBuildings->GetBuildingProduction(eBuilding) == 0) // otherwise we are probably already showing this
+						{
+							auto_ptr<ICvCity1> pDllCity(new CvDllCity(this));
+							DLLUI->AddDeferredWonderCommand(WONDER_CREATED, pDllCity.get(), eBuilding, 0);
+						}
+					}
+				}
+			}
+
+			// notice: To avoid product duplicated, we only count the difference production once.
+			changeProductionTimes100(iProductionCount == 0 ? getCurrentProductionDifferenceTimes100(false, true) : getOverflowProductionTimes100());
+
+#if defined(MOD_PROCESS_STOCKPILE)
+			if (!(MOD_PROCESS_STOCKPILE && isProductionProcess()))
+#endif
+				setOverflowProduction(0);
+			setFeatureProduction(0);
+
+#if defined(MOD_PROCESS_STOCKPILE)
+			if (getProduction() >= getProductionNeeded())
+#else
+			if (getProduction() >= getProductionNeeded() && !isProductionProcess())
+#endif
+			{
+#if defined(MOD_PROCESS_STOCKPILE)
+				popOrder(0, !isProductionProcess(), true);
+#else
+				popOrder(0, true, true);
+#endif
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+	else // old rule
+	{
+		if (!isProduction())
+		{
+			changeOverflowProductionTimes100(getCurrentProductionDifferenceTimes100(false, false));
+			return;
+		}
+
+		if (isProductionBuilding())
+		{
+			const OrderData *pOrderNode = headOrderQueueNode();
 			int iData1 = -1;
-			if(pOrderNode != NULL)
+			if (pOrderNode != NULL)
 			{
 				iData1 = pOrderNode->iData1;
 			}
 
 			const BuildingTypes eBuilding = static_cast<BuildingTypes>(iData1);
-			CvBuildingEntry* pkBuildingInfo = GC.getBuildingInfo(eBuilding);
-			if(pkBuildingInfo)
+			CvBuildingEntry *pkBuildingInfo = GC.getBuildingInfo(eBuilding);
+			if (pkBuildingInfo)
 			{
-				if(isWorldWonderClass(pkBuildingInfo->GetBuildingClassInfo()))
+				if (isWorldWonderClass(pkBuildingInfo->GetBuildingClassInfo()))
 				{
-					if(m_pCityBuildings->GetBuildingProduction(eBuilding) == 0)  // otherwise we are probably already showing this
+					if (m_pCityBuildings->GetBuildingProduction(eBuilding) == 0) // otherwise we are probably already showing this
 					{
 						auto_ptr<ICvCity1> pDllCity(new CvDllCity(this));
 						DLLUI->AddDeferredWonderCommand(WONDER_CREATED, pDllCity.get(), eBuilding, 0);
@@ -15651,13 +15824,13 @@ void CvCity::doProduction(bool bAllowNoProduction)
 #if defined(MOD_PROCESS_STOCKPILE)
 		if (!(MOD_PROCESS_STOCKPILE && isProductionProcess()))
 #endif
-		setOverflowProduction(0);
+			setOverflowProduction(0);
 		setFeatureProduction(0);
 
 #if defined(MOD_PROCESS_STOCKPILE)
-		if(getProduction() >= getProductionNeeded())
+		if (getProduction() >= getProductionNeeded())
 #else
-		if(getProduction() >= getProductionNeeded() && !isProductionProcess())
+		if (getProduction() >= getProductionNeeded() && !isProductionProcess())
 #endif
 		{
 #if defined(MOD_PROCESS_STOCKPILE)
@@ -15667,10 +15840,58 @@ void CvCity::doProduction(bool bAllowNoProduction)
 #endif
 		}
 	}
-	else
+#else  // old rule
+	if (!isProduction())
 	{
 		changeOverflowProductionTimes100(getCurrentProductionDifferenceTimes100(false, false));
+		return;
 	}
+
+	if (isProductionBuilding())
+	{
+		const OrderData *pOrderNode = headOrderQueueNode();
+		int iData1 = -1;
+		if (pOrderNode != NULL)
+		{
+			iData1 = pOrderNode->iData1;
+		}
+
+		const BuildingTypes eBuilding = static_cast<BuildingTypes>(iData1);
+		CvBuildingEntry *pkBuildingInfo = GC.getBuildingInfo(eBuilding);
+		if (pkBuildingInfo)
+		{
+			if (isWorldWonderClass(pkBuildingInfo->GetBuildingClassInfo()))
+			{
+				if (m_pCityBuildings->GetBuildingProduction(eBuilding) == 0) // otherwise we are probably already showing this
+				{
+					auto_ptr<ICvCity1> pDllCity(new CvDllCity(this));
+					DLLUI->AddDeferredWonderCommand(WONDER_CREATED, pDllCity.get(), eBuilding, 0);
+				}
+			}
+		}
+	}
+
+	changeProductionTimes100(getCurrentProductionDifferenceTimes100(false, true));
+
+#if defined(MOD_PROCESS_STOCKPILE)
+	if (!(MOD_PROCESS_STOCKPILE && isProductionProcess()))
+#endif
+		setOverflowProduction(0);
+	setFeatureProduction(0);
+
+#if defined(MOD_PROCESS_STOCKPILE)
+	if (getProduction() >= getProductionNeeded())
+#else
+	if (getProduction() >= getProductionNeeded() && !isProductionProcess())
+#endif
+	{
+#if defined(MOD_PROCESS_STOCKPILE)
+		popOrder(0, !isProductionProcess(), true);
+#else
+		popOrder(0, true, true);
+#endif
+	}
+#endif
 }
 
 

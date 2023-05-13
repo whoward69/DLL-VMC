@@ -3304,6 +3304,11 @@ void CvCityBuildings::SetNumRealBuildingTimed(BuildingTypes eIndex, int iNewValu
 	int iChangeNumRealBuilding = iNewValue - GetNumRealBuilding(eIndex);
 
 	CvBuildingEntry* buildingEntry = GC.getBuildingInfo(eIndex);
+	if (buildingEntry == nullptr)
+	{
+		return;
+	}
+
 	const BuildingClassTypes buildingClassType = (BuildingClassTypes) buildingEntry->GetBuildingClassType();
 	const CvBuildingClassInfo& kBuildingClassInfo = buildingEntry->GetBuildingClassInfo();
 
