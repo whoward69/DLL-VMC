@@ -900,6 +900,7 @@ public:
 	bool isBlitz() const;
 	void changeBlitzCount(int iChange);
 
+	void DoAdjacentPlotDamage(CvPlot* pWhere, int iValue);
 
 #if defined(MOD_ROG_CORE)
 	int getMeleeDefenseModifier() const;
@@ -908,8 +909,6 @@ public:
 	int attackFullyHealedModifier() const;
 	int attackAbove50HealthModifier() const;
 	int attackBelow50HealthModifier() const;
-
-	//int DoAdjacentPlotDamage(CvPlot* pWhere, int iValue, const char* chTextKey = NULL);
 
 	int getForcedDamageValue();
 	void ChangeForcedDamageValue(int iChange);
@@ -1577,8 +1576,25 @@ public:
 
 	void ChangeRangedSupportFireMod(int iValue);
 	int GetRangedSupportFireMod() const;
+
+
+	int GetDamageAoEFortified() const;
+	void ChangeDamageAoEFortified(int iChange);
+
+	int GetWorkRateMod() const;
+	void ChangeWorkRateMod(int iChange);
+
+	int getAOEDamageOnKill() const;
+	void changeAOEDamageOnKill(int iChange);
+
+	int GetBarbarianCombatBonus() const;
+	void ChangeBarbarianCombatBonus(int iValue);
 #endif
 
+	int GetCaptureDefeatedEnemyChance() const;
+	void ChangeCaptureDefeatedEnemyChance(int iValue);
+	void ChangeCannotBeCapturedCount(int iChange);
+	bool GetCannotBeCaptured();
 
 
 #if defined(MOD_ROG_CORE)
@@ -1702,6 +1718,30 @@ public:
 	int GetSplashXP() const;
 	void ChangeSplashXP(int iChange);
 	void SetSplashXP(int iValue);
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+	std::tr1::unordered_map<PromotionCollectionsTypes, int>& GetPromotionCollections();
+#endif
+
+#ifdef MOD_PROMOTION_ADD_ENERMY_PROMOTIONS
+	int GetAddEnermyPromotionImmuneRC() const;
+	void ChangeAddEnermyPromotionImmuneRC(int iChange);
+#endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	void ClearSamePlotPromotions();
+	std::tr1::unordered_set<PromotionTypes>& GetPromotionsThatCanBeActionCleared();
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+	std::tr1::unordered_map<PromotionTypes, DestroyBuildingsInfo>& GetDestroyBuildings();
+
+	int GetSiegeKillCitizensPercent() const;
+	int GetSiegeKillCitizensFixed() const;
+	void ChangeSiegeKillCitizensPercent(int iChange);
+	void ChangeSiegeKillCitizensFixed(int iChange);
+	bool CanSiegeKillCitizens() const;
 #endif
 
 #ifdef MOD_PROMOTION_COLLATERAL_DAMAGE
@@ -2058,7 +2098,16 @@ protected:
 	int m_iMoveUsedAttackMod;
 	int m_iGoldenAgeMod;
 	int m_iRangedSupportFireMod;
+
+	int m_iBarbCombatBonus;
+	int m_iDamageAoEFortified;
+	int m_iWorkRateMod;
+	int m_iAOEDamageOnKill;
 #endif
+
+	int m_iCannotBeCapturedCount;
+	int m_iCaptureDefeatedEnemyChance;
+
 
 #ifdef MOD_PROMOTION_SPLASH_DAMAGE
 	std::vector<SplashInfo> m_asSplashInfoVec = {};
@@ -2072,6 +2121,26 @@ protected:
 
 	int m_iCollateralImmuneRC = 0;
 	int m_iCollateralXP = 0;
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+	std::tr1::unordered_map<PromotionCollectionsTypes, int> m_sPromotionCollections;
+#endif
+
+ #ifdef MOD_PROMOTION_ADD_ENERMY_PROMOTIONS
+	int m_iAddEnermyPromotionImmuneRC = 0;
+ #endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	std::tr1::unordered_map<PromotionTypes, AutoRemoveInfo> m_mapAutoRemovePromotions;
+	std::tr1::unordered_set<PromotionTypes> m_sPromotionsThatCanBeActionCleared;
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+	std::tr1::unordered_map<PromotionTypes, DestroyBuildingsInfo> m_mapDestroyBuildings;
+
+	int m_iSiegeKillCitizensPercent = 0;
+	int m_iSiegeKillCitizensFixed = 0;
 #endif
 
 	int m_iEmbarkExtraVisibility;

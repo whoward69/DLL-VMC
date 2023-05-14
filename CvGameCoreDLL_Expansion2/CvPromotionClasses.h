@@ -164,7 +164,16 @@ public:
 	int GetOutsideCapitalLandAttackMod() const;
 	int GetOnCapitalLandDefenseMod() const;
 	int GetOutsideCapitalLandDefenseMod() const;
+
+	int GetBarbarianCombatBonus() const;
+	int GetAOEDamageOnKill() const;
+	int GetDamageAoEFortified() const;
+	int GetWorkRateMod() const;
 #endif
+
+	bool CannotBeCaptured() const;
+	int GetCaptureDefeatedEnemyChance() const;
+
 
 #if defined(MOD_ROG_CORE)
 	int GetNumSpyDefenseMod() const;
@@ -331,6 +340,28 @@ public:
 	int GetWarCasualtiesModifier() const;
  #endif
 
+ #ifdef MOD_PROMOTION_ADD_ENERMY_PROMOTIONS
+	bool GetAddEnermyPromotionImmune() const;
+ #endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	bool CanAutoRemove() const;
+	int GetRemoveAfterXTurns() const;
+	bool GetRemoveAfterFullyHeal() const;
+	bool GetRemoveWithLuaCheck() const;
+	bool GetCanActionClear() const;
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+	BuildingClassCollectionsTypes GetDestroyBuildingCollection() const;
+	int GetDestroyBuildingProbability() const;
+	int GetDestroyBuildingNumLimit() const;
+	bool CanDestroyBuildings() const;
+
+	int GetSiegeKillCitizensPercent() const;
+	int GetSiegeKillCitizensFixed() const;
+#endif
+
  #ifdef MOD_PROMOTION_SPLASH_DAMAGE
 	int GetSplashDamageRadius() const;
 	int GetSplashDamagePercent() const;
@@ -494,8 +525,16 @@ protected:
 	int m_iNearbyUnitClassBonus;
 	int m_iNearbyUnitClassBonusRange;
 	UnitClassTypes m_iCombatBonusFromNearbyUnitClass;
+
+
+	int m_iAOEDamageOnKill;
+	int m_iDamageAoEFortified;
+	int m_iWorkRateMod;
+	int m_iBarbarianCombatBonus;
 #endif
 
+	int m_iCaptureDefeatedEnemyChance;
+	bool m_bCannotBeCaptured;
 
 #if defined(MOD_ROG_CORE)	
 	int m_iAoEDamageOnMove;
@@ -650,6 +689,26 @@ protected:
  #ifdef MOD_GLOBAL_WAR_CASUALTIES
 	int m_iWarCasualtiesModifier = 0;
  #endif
+
+#ifdef MOD_PROMOTION_ADD_ENERMY_PROMOTIONS
+	bool m_bAddEnermyPromotionImmune = 0;
+#endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	int m_iRemoveAfterXTurns = 0;
+	bool m_bRemoveAfterFullyHeal = 0;
+	bool m_bRemoveWithLuaCheck = 0;
+	bool m_bCanActionClear = 0;
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+	BuildingClassCollectionsTypes m_iDestroyBuildingCollection = NO_BUILDINGCLASS_COLLECTION;
+	int m_iDestroyBuildingProbability = 0;
+	int m_iDestroyBuildingNumLimit = 0;
+
+	int m_iSiegeKillCitizensPercent = 0;
+	int m_iSiegeKillCitizensFixed = 0;
+#endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -825,4 +884,82 @@ struct CollateralInfo {
 		kStream << iPlotUnitLimit;
 	}
 };
+#endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+struct AutoRemoveInfo {
+	PromotionTypes m_ePromotion = NO_PROMOTION;
+
+	int m_iTurnToRemove = -1;
+	bool m_bRemoveAfterFullyHeal = false;
+	bool m_bRemoveLuaCheck = false;
+
+	AutoRemoveInfo() = default;
+
+	AutoRemoveInfo(const CvPromotionEntry& entry, int iTurnToRemove):
+		m_ePromotion((PromotionTypes)entry.GetID()),
+		m_iTurnToRemove(iTurnToRemove),
+		m_bRemoveAfterFullyHeal(entry.GetRemoveAfterFullyHeal()),
+		m_bRemoveLuaCheck(entry.GetRemoveWithLuaCheck()) {}
+};
+
+inline FDataStream& operator<<(FDataStream& os, const AutoRemoveInfo& info) {
+	os << (int)info.m_ePromotion;
+	os << info.m_iTurnToRemove;
+	os << info.m_bRemoveAfterFullyHeal;
+	os << info.m_bRemoveLuaCheck;
+
+	return os;
+}
+
+inline FDataStream& operator>>(FDataStream& is, AutoRemoveInfo& info) {
+	int iPromotion = -1;
+	is >> iPromotion;
+	info.m_ePromotion = (PromotionTypes)iPromotion;
+	is >> info.m_iTurnToRemove;
+	is >> info.m_bRemoveAfterFullyHeal;
+	is >> info.m_bRemoveLuaCheck;
+
+	return is;
+}
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+struct DestroyBuildingsInfo {
+	PromotionTypes ePromotion;
+
+	BuildingClassCollectionsTypes m_iDestroyBuildingCollection = NO_BUILDINGCLASS_COLLECTION;
+	int m_iDestroyBuildingProbability = 0;
+	int m_iDestroyBuildingNumLimit = 0;
+
+	DestroyBuildingsInfo() = default;
+	DestroyBuildingsInfo(const CvPromotionEntry& entry):
+		ePromotion{ (PromotionTypes)entry.GetID() },
+		m_iDestroyBuildingCollection{ entry.GetDestroyBuildingCollection() },
+		m_iDestroyBuildingProbability{ entry.GetDestroyBuildingProbability() },
+		m_iDestroyBuildingNumLimit{ entry.GetDestroyBuildingNumLimit() } {}
+};
+
+inline FDataStream& operator<<(FDataStream& os, const DestroyBuildingsInfo& info) {
+	os << (int)info.ePromotion;
+	os << (int)info.m_iDestroyBuildingCollection;
+	os << info.m_iDestroyBuildingProbability;
+	os << info.m_iDestroyBuildingNumLimit;
+
+	return os;
+}
+
+inline FDataStream& operator>>(FDataStream& is, DestroyBuildingsInfo& info) {
+	int iPromotion = -1;
+	int iBuildingClassType = -1;
+	is >> iPromotion;
+	info.ePromotion = (PromotionTypes)iPromotion;
+	is >> iBuildingClassType;
+	info.m_iDestroyBuildingCollection = (BuildingClassCollectionsTypes)iBuildingClassType;
+	is >> info.m_iDestroyBuildingProbability;
+	is >> info.m_iDestroyBuildingNumLimit;
+
+	return is;
+}
+
 #endif

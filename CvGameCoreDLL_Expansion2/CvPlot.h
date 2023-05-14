@@ -874,6 +874,10 @@ public:
 	int ChangeXP(int iChange, bool bDoUpdate);
 #endif
 
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	void ClearUnitPromotions();
+#endif
+
 protected:
 	class PlotBoolField
 	{

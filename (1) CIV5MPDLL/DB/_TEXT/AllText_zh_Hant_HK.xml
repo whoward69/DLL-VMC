@@ -210,5 +210,19 @@
 		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE_ENEMY_DEATH">
 			<Text>你的{1_UnitName}攻擊時的穿透傷害將敵方{2_EnUName}消滅了！</Text>
 		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_BOMBER_CITY_BUILDING_DESTROYED_ATTACKING">
+			<Text>[COLOR_NEGATIVE_TEXT]{1_num}[ENDCOLOR] 建築在此次襲擊中被摧毀！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_BOMBER_CITY_BUILDING_DESTROYED_ATTACKED">
+			<Text>[COLOR_NEGATIVE_TEXT]{1_num}[ENDCOLOR] 建築在你的城市中被摧毀: {2_CityName:textkey}</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_BOMBER_CITY_KILL_POPULATION_ATTACKING">
+			<Text>[COLOR_NEGATIVE_TEXT]{1_num}[ENDCOLOR] [ICON_CITIZEN] 市民在此次襲擊中死亡！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_BOMBER_CITY_KILL_POPULATION_ATTACKED">
+			<Text>[COLOR_NEGATIVE_TEXT]{1_num}[ENDCOLOR] [ICON_CITIZEN] 市民在你的城市中被殺害：{2_CityName}</Text>
+		</Row>
 	</Language_zh_Hant_HK>
 </GameData>

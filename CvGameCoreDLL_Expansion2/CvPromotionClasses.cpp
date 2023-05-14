@@ -118,7 +118,15 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iNearbyUnitClassBonus(0),
 	m_iNearbyUnitClassBonusRange(0),
 	m_iCombatBonusFromNearbyUnitClass(NO_UNITCLASS),
+
+	m_iAOEDamageOnKill(0),
+	m_iDamageAoEFortified(0),
+	m_iWorkRateMod(0),
+	m_iBarbarianCombatBonus(0),
 #endif
+
+	m_iCaptureDefeatedEnemyChance(0),
+	m_bCannotBeCaptured(false),
 
 #if defined(MOD_ROG_CORE)
 	m_iHPHealedIfDefeatEnemyGlobal(0),
@@ -424,8 +432,17 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 		m_iOutsideCapitalLandAttackMod = kResults.GetInt("OutsideCapitalLandAttackMod");
 		m_iOnCapitalLandDefenseMod = kResults.GetInt("OnCapitalLandDefenseMod");
 		m_iOutsideCapitalLandDefenseMod = kResults.GetInt("OutsideCapitalLandDefenseMod");
+
+
+		m_iDamageAoEFortified = kResults.GetInt("AoEWhileFortified");
+		m_iWorkRateMod = kResults.GetInt("WorkRateMod");
+		m_iAOEDamageOnKill = kResults.GetInt("AOEDamageOnKill");
+
+		m_iBarbarianCombatBonus = kResults.GetInt("BarbarianCombatBonus");
 #endif
 
+		m_iCaptureDefeatedEnemyChance = kResults.GetInt("CaptureDefeatedEnemyChance");
+		m_bCannotBeCaptured = kResults.GetBool("CannotBeCaptured");
 
 #if defined(MOD_ROG_CORE)
 			m_iNumSpyDefenseMod = kResults.GetInt("NumSpyDefenseMod");
@@ -591,6 +608,47 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iCollateralDamagePlotUnitLimit = kResults.GetInt("CollateralDamagePlotUnitLimit");
 	m_iCollateralDamageImmune = kResults.GetBool("CollateralDamageImmune");
 	m_iCollateralXP = kResults.GetInt("CollateralXP");
+#endif
+
+#ifdef MOD_PROMOTION_ADD_ENERMY_PROMOTIONS
+	m_bAddEnermyPromotionImmune = kResults.GetBool("AddEnermyPromotionImmune");
+#endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	m_iRemoveAfterXTurns = kResults.GetInt("RemoveAfterXTurns");
+	m_bRemoveAfterFullyHeal = kResults.GetBool("RemoveAfterFullyHeal");
+	m_bRemoveWithLuaCheck = kResults.GetBool("RemoveWithLuaCheck");
+	m_bCanActionClear = kResults.GetBool("CanActionClear");
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+	m_iDestroyBuildingProbability =  kResults.GetInt("DestroyBuildingProbability");
+	m_iDestroyBuildingNumLimit = kResults.GetInt("DestroyBuildingNumLimit");
+	const char* strDestroyBuildingCollection = kResults.GetText("DestroyBuildingCollection");
+	if (strDestroyBuildingCollection != nullptr)
+	{
+		int iLen = strlen(strDestroyBuildingCollection);
+		if (iLen > 0)
+		{
+			std::string sqlKey = "UnitPromotions_DestroyBuildingCollection";
+			Database::Results* pResults = kUtility.GetResults(sqlKey);
+			if (pResults == NULL)
+			{
+				const char* szSQL = "select ID from BuildingClassCollections where Type = ?;";
+				pResults = kUtility.PrepareResults(sqlKey, szSQL);
+			}
+
+			pResults->Bind(1, strDestroyBuildingCollection, iLen, false);
+			if (pResults->Step())
+			{
+				int id = pResults->GetInt(0);
+				m_iDestroyBuildingCollection = (BuildingClassCollectionsTypes)id;
+			}
+		}
+	}
+
+	m_iSiegeKillCitizensFixed = kResults.GetInt("SiegeKillCitizensFixed");
+	m_iSiegeKillCitizensPercent = kResults.GetInt("SiegeKillCitizensPercent");
 #endif
 
 	//References
@@ -1551,7 +1609,38 @@ int CvPromotionEntry::GetRangedSupportFireMod() const
 {
 	return m_iRangedSupportFireMod;
 }
+
+/// Accessor: Can this Promotion grant bonuses v. barbarians?
+int CvPromotionEntry::GetBarbarianCombatBonus() const
+{
+	return m_iBarbarianCombatBonus;
+}
+
+int CvPromotionEntry::GetAOEDamageOnKill() const
+{
+	return m_iAOEDamageOnKill;
+}
+
+int CvPromotionEntry::GetDamageAoEFortified() const
+{
+	return m_iDamageAoEFortified;
+}
+int CvPromotionEntry::GetWorkRateMod() const
+{
+	return m_iWorkRateMod;
+}
 #endif
+
+int CvPromotionEntry::GetCaptureDefeatedEnemyChance() const
+{
+	return m_iCaptureDefeatedEnemyChance;
+}
+
+//Cannot be captured
+bool CvPromotionEntry::CannotBeCaptured() const
+{
+	return m_bCannotBeCaptured;
+}
 
 
 
@@ -2657,6 +2746,63 @@ bool CvPromotionEntry::GetCollateralDamageImmune() const
 int CvPromotionEntry::GetCollateralXP() const
 {
 	return m_iCollateralXP;
+}
+#endif
+
+#ifdef MOD_PROMOTION_ADD_ENERMY_PROMOTIONS
+bool CvPromotionEntry::GetAddEnermyPromotionImmune() const
+{
+	return m_bAddEnermyPromotionImmune;
+}
+#endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+bool CvPromotionEntry::CanAutoRemove() const{
+	return m_iRemoveAfterXTurns > 0 || m_bRemoveAfterFullyHeal || m_bRemoveWithLuaCheck;
+}
+
+int CvPromotionEntry::GetRemoveAfterXTurns() const{
+	return m_iRemoveAfterXTurns;
+}
+
+bool CvPromotionEntry::GetRemoveAfterFullyHeal() const{
+	return m_bRemoveAfterFullyHeal;
+}
+
+bool CvPromotionEntry::GetRemoveWithLuaCheck() const{
+	return m_bRemoveWithLuaCheck;
+}
+
+bool CvPromotionEntry::GetCanActionClear() const{
+	return m_bCanActionClear;
+}
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+BuildingClassCollectionsTypes CvPromotionEntry::GetDestroyBuildingCollection() const
+{
+	return m_iDestroyBuildingCollection;
+}
+int CvPromotionEntry::GetDestroyBuildingProbability() const
+{
+	return m_iDestroyBuildingProbability;
+}
+int CvPromotionEntry::GetDestroyBuildingNumLimit() const
+{
+	return m_iDestroyBuildingNumLimit;
+}
+bool CvPromotionEntry::CanDestroyBuildings() const
+{
+	return m_iDestroyBuildingCollection != NO_BUILDINGCLASS_COLLECTION && m_iDestroyBuildingProbability > 0 && m_iDestroyBuildingNumLimit > 0;
+}
+
+int CvPromotionEntry::GetSiegeKillCitizensPercent() const
+{
+	return m_iSiegeKillCitizensPercent;
+}
+int CvPromotionEntry::GetSiegeKillCitizensFixed() const
+{
+	return m_iSiegeKillCitizensFixed;
 }
 #endif
 

@@ -93,6 +93,12 @@ public:
 	int GetResourceQuantityFromImprovement() const;
 #endif
 
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+	int GetNewImprovement() const;
+	int GetResourceCreated() const;
+	int GetResourceQuantityCreated() const;
+#endif
+
 #if defined(MOD_GLOBAL_RELOCATION)
 	bool IsAllowsRebaseTo() const;
 	bool IsAllowsAirliftFrom() const;
@@ -267,6 +273,12 @@ protected:
 
 	int m_iImprovementResource;
 	int m_iImprovementResourceQuantity;
+#endif
+
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+	int m_iSetNewImprovement;
+	int m_iCreateResource;
+	int m_iCreatedResourceQuantity;
 #endif
 
 #if defined(MOD_GLOBAL_RELOCATION)

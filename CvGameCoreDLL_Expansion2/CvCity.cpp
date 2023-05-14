@@ -818,6 +818,11 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 	}
 #endif
 
+#ifdef MOD_GLOBAL_CITY_SCALES
+	if (MOD_GLOBAL_CITY_SCALES)
+		UpdateScaleBuildings();
+#endif
+
 	AI_init();
 
 	if (GC.getGame().getGameTurn() == 0)
@@ -1363,6 +1368,10 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 		//	}
 		//}
 	}
+#endif
+
+#ifdef MOD_GLOBAL_CITY_SCALES
+	m_eCityScale = NO_CITY_SCALE;
 #endif
 }
 
@@ -6907,6 +6916,10 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		}
 #endif
 
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+		ChangeSiegeKillCitizensModifier(pBuildingInfo->GetSiegeKillCitizensModifier() * iChange);
+#endif
+
 		if (pBuildingInfo->AffectSpiesNow() && iChange > 0)
 		{
 			for (uint ui = 0; ui < MAX_MAJOR_CIVS; ui++)
@@ -8370,6 +8383,14 @@ void CvCity::setPopulation(int iNewValue, bool bReassignPop /* = true */)
 
 		//updateGenericBuildings();
 		updateStrengthValue();
+
+#ifdef MOD_GLOBAL_CITY_SCALES
+		if (MOD_GLOBAL_CITY_SCALES)
+		{
+			CvCityScaleEntry* pNewScaleInfo = GC.getCityScaleInfoByPopulation(getPopulation());
+			SetScale(pNewScaleInfo? (CityScaleTypes)pNewScaleInfo->GetID() : NO_CITY_SCALE);
+		}
+#endif
 
 		DLLUI->setDirty(CityInfo_DIRTY_BIT, true);
 	}
@@ -16453,6 +16474,16 @@ void CvCity::read(FDataStream& kStream)
 
 	kStream >> *m_pCityEspionage;
 
+#ifdef MOD_GLOBAL_CITY_SCALES
+	int iCityScale;
+	kStream >> iCityScale;
+	m_eCityScale = (CityScaleTypes)iCityScale;
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+	kStream >> m_iSiegeKillCitizensModifier;
+#endif
+
 	if (uiVersion >= 3)
 	{
 		kStream >> m_iExtraHitPoints;
@@ -16753,6 +16784,14 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << *m_pCityReligions;
 	m_pEmphases->Write(kStream);
 	kStream << *m_pCityEspionage;
+
+#ifdef MOD_GLOBAL_CITY_SCALES
+	kStream << (int) m_eCityScale;
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+	kStream << m_iSiegeKillCitizensModifier;
+#endif
 
 	kStream << m_iExtraHitPoints;
 }
@@ -19182,5 +19221,98 @@ int CvCity::CountWorkedTerrain(TerrainTypes iTerrainType) const
 bool CvCity::HasYieldFromOtherYield() const
 {
 	return m_bHasYieldFromOtherYield;
+}
+#endif
+
+#ifdef MOD_GLOBAL_CITY_SCALES
+void CvCity::SetScale(CityScaleTypes eNewScale)
+{
+	if (!MOD_GLOBAL_CITY_SCALES) return;
+	CityScaleTypes eOldScale = GetScale();
+
+	if (eOldScale == eNewScale)
+	{
+		return;
+	}
+
+	m_eCityScale = eNewScale;
+	UpdateScaleBuildings();
+
+#ifdef MOD_EVENTS_CITY_SCALES
+	if (MOD_EVENTS_CITY_SCALES)
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_OnCityScaleChange, getOwner(), GetID(), eOldScale, eNewScale);
+#endif
+}
+
+void CvCity::UpdateScaleBuildings()
+{
+	CityScaleTypes eScale = GetScale();
+	CvCityScaleEntry *pNewScale = GC.getCityScaleInfo(eScale);
+	auto &pAllScales = GC.getCityScaleInfo();
+	CvPlayerAI &pkOwner = GET_PLAYER(getOwner());
+	std::tr1::unordered_map<BuildingClassTypes, int> buildingClassNum;
+
+	// clear all scale buildings
+	for (auto *pScale : pAllScales)
+	{
+		if (pScale == nullptr)
+			continue;
+
+		for (auto& vFreeBuildings : pScale->GetFreeBuildingClassInfo())
+		{
+			buildingClassNum[vFreeBuildings.m_eBuildingClass] = 0;
+		}
+
+		for (auto& vFreeBuildings : pScale->GetFreeBuildingClassInfoFromPolicies())
+		{
+			buildingClassNum[vFreeBuildings.m_eBuildingClass] = 0;
+		}
+
+		for (auto& vFreeBuildings : pScale->GetFreeBuildingClassInfoFromTraits())
+		{
+			buildingClassNum[vFreeBuildings.m_eBuildingClass] = 0;
+		}
+	}
+
+	// add new scale buildings
+	if (pNewScale)
+	{
+		for (auto& vFreeBuildings : pNewScale->GetFreeBuildingClassInfo())
+		{
+			buildingClassNum[vFreeBuildings.m_eBuildingClass] += vFreeBuildings.m_iNum;
+		}
+		for (auto& vFreeBuildings : pNewScale->GetFreeBuildingClassInfoFromPolicies())
+		{
+			if (pkOwner.HasPolicy(vFreeBuildings.m_eRequiredPolicy) && !pkOwner.GetPlayerPolicies()->IsPolicyBlocked(vFreeBuildings.m_eRequiredPolicy))
+			{
+				buildingClassNum[vFreeBuildings.m_eBuildingClass] += vFreeBuildings.m_iNum;
+			}
+		}
+		for (auto& vFreeBuildings : pNewScale->GetFreeBuildingClassInfoFromTraits())
+		{
+			if (pkOwner.isMajorCiv() && pkOwner.GetPlayerTraits()->HasTrait(vFreeBuildings.m_eRequiredTrait))
+			{
+				buildingClassNum[vFreeBuildings.m_eBuildingClass] += vFreeBuildings.m_iNum;
+			}
+		}
+	}
+
+	for (auto iter = buildingClassNum.begin(); iter != buildingClassNum.end(); iter++)
+	{
+		BuildingTypes eBuilding = pkOwner.GetCivBuilding(iter->first);
+		GetCityBuildings()->SetNumRealBuilding(eBuilding, iter->second);
+	}
+}
+
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+int CvCity::GetSiegeKillCitizensModifier() const
+{
+	return m_iSiegeKillCitizensModifier;
+}
+void CvCity::ChangeSiegeKillCitizensModifier(int iChange)
+{
+	m_iSiegeKillCitizensModifier += iChange;
 }
 #endif

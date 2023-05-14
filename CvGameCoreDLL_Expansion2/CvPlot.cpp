@@ -2620,6 +2620,12 @@ bool CvPlot::canBuild(BuildTypes eBuild, PlayerTypes ePlayer, bool bTestVisible,
 			return false;
 		}
 
+		// Can not create resource in a plot where already has one
+		if(getResourceType() != NO_RESOURCE && (ResourceTypes)GC.getImprovementInfo(eImprovement)->GetResourceCreated() != NO_RESOURCE)
+		{
+			return false;
+		}
+
 		// Already an improvement here
 		if(getImprovementType() != NO_IMPROVEMENT)
 		{
@@ -10450,6 +10456,20 @@ bool CvPlot::changeBuildProgress(BuildTypes eBuild, int iChange, PlayerTypes ePl
 			// Constructed Improvement
 			if (eImprovement != NO_IMPROVEMENT)
 			{
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+				CvImprovementEntry& tImprovementEntry = *GC.getImprovementInfo(eImprovement);
+				ResourceTypes cResource = (ResourceTypes)tImprovementEntry.GetResourceCreated();
+				int cResourceQuantity = tImprovementEntry.GetResourceQuantityCreated();
+				if (MOD_IMPROVEMENTS_CREATE_ITEMS && cResource != NO_RESOURCE && cResourceQuantity != 0)
+				{
+					cResourceQuantity = cResourceQuantity > 0 ? cResourceQuantity : GC.getGame().getJonRandNum(-cResourceQuantity, "Get random source quantity when constructed ") + 1;
+					setResourceType(cResource, cResourceQuantity);
+				}
+				if(MOD_IMPROVEMENTS_CREATE_ITEMS && (ImprovementTypes)tImprovementEntry.GetNewImprovement() != NO_IMPROVEMENT)
+				{
+					eImprovement = (ImprovementTypes)tImprovementEntry.GetNewImprovement();
+				}
+#endif
 				setImprovementType(eImprovement, ePlayer);
 				
 #if defined(MOD_BUGFIX_MINOR)
@@ -12956,5 +12976,25 @@ int CvPlot::SetXP(int iNewValue, bool bDoUpdate)
 int CvPlot::ChangeXP(int iChange, bool bDoUpdate)
 {
 	return this->SetXP(GetXP() + iChange, bDoUpdate);
+}
+#endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+void CvPlot::ClearUnitPromotions()
+{
+	if (!MOD_GLOBAL_PROMOTIONS_REMOVAL) return;
+
+	int iUnitCount = getNumUnits();
+	for (int i = 0; i < iUnitCount; i++)
+	{
+		CvUnit* pLoopUnit = getUnitByIndex(i);
+		if (!pLoopUnit) continue;
+
+		auto& candidatePromotionToClear = pLoopUnit->GetPromotionsThatCanBeActionCleared();
+		for (auto it = candidatePromotionToClear.begin(); it != candidatePromotionToClear.end(); ++it)
+		{
+			pLoopUnit->setHasPromotion(*it, false);
+		}
+	}
 }
 #endif

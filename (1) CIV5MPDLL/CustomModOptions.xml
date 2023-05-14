@@ -1016,6 +1016,12 @@
     <!-- Table changes: Improvement_Upgrade_Downgrade.sql -->
     <Row Class="5" Name="IMPROVEMENTS_UPGRADE" Value="0"/>
 
+    <!-- table changes: -->
+    <!-- ALTER TABLE Improvements ADD COLUMN 'CreateResource' TEXT DEFAULT NULL; -->
+    <!-- ALTER TABLE Improvements ADD COLUMN 'CreatedResourceQuantity' INTEGER DEFAULT 0; -->
+    <!-- ALTER TABLE Improvements ADD COLUMN 'SetNewImprovement' TEXT DEFAULT NULL; -->
+    <Row Class="5" Name="IMPROVEMENTS_CREATE_ITEMS" Value="1"/>
+
     <Row Class="6" Name="GLOBAL_UNLIMITED_ONE_TURN_GROWTH" Value="0"/>
     <Row Class="6" Name="GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION" Value="0"/>
     <Row Class="6" Name="GLOBAL_UNLIMITED_ONE_TURN_CULTURE" Value="0"/>
@@ -1045,9 +1051,16 @@
     <!-- INSERT INTO Defines(Name, Value) VALUES('GOLDEN_AGE_POINT_MULTIPLE_IN_GA', 2); -->
     <Row Class="6" Name="GLOBAL_TRIGGER_NEW_GOLDEN_AGE_IN_GA" Value="0"/>
 
-    <!-- table change: NewBattleEffects.sql -->
+    <!-- table change: NewBattleEffects.sql and PromotionCollections.sql -->
     <Row Class="6" Name="PROMOTION_SPLASH_DAMAGE" Value="0"/>
     <Row Class="6" Name="PROMOTION_COLLATERAL_DAMAGE" Value="0"/>
+    <Row Class="6" Name="PROMOTION_ADD_ENERMY_PROMOTIONS" Value="0"/>
+    <Row Class="6" Name="PROMOTION_CITY_DESTROYER" Value="0"/>
+
+    <Row Class="6" Name="GLOBAL_PROMOTIONS_REMOVAL" Value="0"/>
+
+    <Row Class="6" Name="GLOBAL_CITY_SCALES" Value="0"/>
+    <Row Class="6" Name="EVENTS_CITY_SCALES" Value="0"/>
   </CustomModOptions>
 
   <CustomModPostDefines>

@@ -626,6 +626,10 @@ protected:
 	static int lIsHasSecondaryBelief(lua_State* L);
 	static int lIsSecondaryReligionActive(lua_State* L);
 #endif
+
+#ifdef MOD_GLOBAL_CITY_SCALES
+	LUAAPIEXTN(GetScale, int);
+#endif
 };
 
 #endif //CVLUACITY_H

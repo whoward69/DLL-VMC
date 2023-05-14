@@ -40,6 +40,10 @@ ALTER TABLE Improvements ADD COLUMN 'NearbyFriendHeal' INTEGER DEFAULT 0;
 ALTER TABLE Improvements ADD COLUMN 'ImprovementResource' TEXT DEFAULT NULL;
 ALTER TABLE Improvements ADD COLUMN 'ImprovementResourceQuantity' INTEGER DEFAULT 0;
 
+ALTER TABLE Improvements ADD COLUMN 'CreateResource' TEXT DEFAULT NULL;
+ALTER TABLE Improvements ADD COLUMN 'CreatedResourceQuantity' INTEGER DEFAULT 0;
+ALTER TABLE Improvements ADD COLUMN 'SetNewImprovement' TEXT DEFAULT NULL;
+
 INSERT INTO Defines(Name, Value) VALUES('ORIGINAL_CAPITAL_MODMAX', 10);
 
 CREATE TABLE IF NOT EXISTS UnitPromotions_PromotionModifiers (
@@ -76,3 +80,10 @@ ALTER TABLE UnitPromotions ADD 'NearNumEnemyDefenseMod' INTEGER DEFAULT 0;
 
 ALTER TABLE Units ADD 'ExtraXPValueAttack' INTEGER DEFAULT 0;
 ALTER TABLE Units ADD 'ExtraXPValueDefense' INTEGER DEFAULT 0;
+
+ALTER TABLE UnitPromotions ADD 'WorkRateMod' INTEGER DEFAULT 0;
+ALTER TABLE UnitPromotions ADD 'AoEWhileFortified' INTEGER DEFAULT 0;
+ALTER TABLE UnitPromotions ADD 'AOEDamageOnKill' INTEGER DEFAULT 0;
+ALTER TABLE UnitPromotions ADD 'CaptureDefeatedEnemyChance' BOOLEAN DEFAULT 0;
+ALTER TABLE UnitPromotions ADD 'BarbarianCombatBonus' INTEGER DEFAULT 0;
+ALTER TABLE UnitPromotions ADD 'CannotBeCaptured' BOOLEAN DEFAULT 0;

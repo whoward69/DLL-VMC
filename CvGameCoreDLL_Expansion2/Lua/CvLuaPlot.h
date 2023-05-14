@@ -405,5 +405,9 @@ protected:
 	LUAAPIEXTN(IsAdjacentToTerrain, bool, iTerrainType);
 	LUAAPIEXTN(IsWithinDistanceOfTerrain, bool, iTerrainType, iDistance);
 #endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	LUAAPIEXTN(ClearUnitPromotions, void);
+#endif
 };
 #endif

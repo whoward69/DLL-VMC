@@ -93,6 +93,11 @@ CvImprovementEntry::CvImprovementEntry(void):
 	m_iImprovementResourceQuantity(0),
 #endif
 
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+	m_iSetNewImprovement(NO_IMPROVEMENT),
+	m_iCreateResource(NO_RESOURCE),
+	m_iCreatedResourceQuantity(0),
+#endif
 
 	m_iPillageGold(0),
 	m_iResourceExtractionMod(0),
@@ -393,6 +398,13 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 	m_iImprovementResourceQuantity = kResults.GetInt("ImprovementResourceQuantity");
 #endif
 
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+	const char* szSetNewImprovement = kResults.GetText("SetNewImprovement");
+	m_iSetNewImprovement = (ImprovementTypes)GC.getInfoTypeForString(szSetNewImprovement, true);
+	const char* szCreateResource = kResults.GetText("CreateResource");
+	m_iCreateResource = (ResourceTypes)GC.getInfoTypeForString(szCreateResource, true);
+	m_iCreatedResourceQuantity = kResults.GetInt("CreatedResourceQuantity");
+#endif
 
 	m_iPillageGold = kResults.GetInt("PillageGold");
 	m_bOutsideBorders = kResults.GetBool("OutsideBorders");
@@ -938,6 +950,24 @@ int CvImprovementEntry::GetResourceFromImprovement() const
 int CvImprovementEntry::GetResourceQuantityFromImprovement() const
 {
 	return m_iImprovementResourceQuantity;
+}
+#endif
+
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+// Does this improvement change to another improvement when construced?
+int CvImprovementEntry::GetNewImprovement() const
+{
+	return m_iSetNewImprovement;
+}
+// Does this improvement create a resource in plot when construced?
+int CvImprovementEntry::GetResourceCreated() const
+{
+	return m_iCreateResource;
+}
+// Does this improvement create a resource in plot when construced?
+int CvImprovementEntry::GetResourceQuantityCreated() const
+{
+	return m_iCreatedResourceQuantity;
 }
 #endif
 

@@ -173,10 +173,13 @@
   <ItemGroup>
     <ClCompile Include="CustomMods.cpp" />
     <ClCompile Include="CvAchievementInfo.cpp" />
+    <ClCompile Include="CvBuildingClassCollectionsClasses.cpp" />
     <ClCompile Include="CvCityManager.cpp" />
+    <ClCompile Include="CvCityScaleClasses.cpp" />
     <ClCompile Include="CvEventLog.cpp" />
     <ClCompile Include="CvGreatPersonInfo.cpp" />
     <ClCompile Include="CvPlotInfo.cpp" />
+    <ClCompile Include="CvPromotionCollectionClasses.cpp" />
     <ClCompile Include="CvQuestInfo.cpp" />
     <ClCompile Include="CvTargeting.cpp" />
     <ClCompile Include="FunctionsRef.cpp" />
@@ -441,6 +444,7 @@
     <ClInclude Include="CvBeliefClasses.h" />
     <ClInclude Include="CvBitfield.h" />
     <ClInclude Include="CvBuilderTaskingAI.h" />
+    <ClInclude Include="CvBuildingClassCollectionsClasses.h" />
     <ClInclude Include="CvBuildingClasses.h" />
     <ClInclude Include="CvBuildingProductionAI.h" />
     <ClInclude Include="CvCity.h" />
@@ -448,6 +452,7 @@
     <ClInclude Include="CvCityCitizens.h" />
     <ClInclude Include="CvCityConnections.h" />
     <ClInclude Include="CvCityManager.h" />
+    <ClInclude Include="CvCityScaleClasses.h" />
     <ClInclude Include="CvCitySpecializationAI.h" />
     <ClInclude Include="CvCityStrategyAI.h" />
     <ClInclude Include="CvCultureClasses.h" />
@@ -505,6 +510,7 @@
     <ClInclude Include="CvProjectClasses.h" />
     <ClInclude Include="CvProjectProductionAI.h" />
     <ClInclude Include="CvPromotionClasses.h" />
+    <ClInclude Include="CvPromotionCollectionClasses.h" />
     <ClInclude Include="CvQuestInfo.h" />
     <ClInclude Include="CvRandom.h" />
     <ClInclude Include="CvReligionClasses.h" />
