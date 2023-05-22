@@ -705,6 +705,7 @@ protected:
 	static int lGetScienceFromHappinessTimes100(lua_State* L);
 	static int lGetScienceFromResearchAgreementsTimes100(lua_State* L);
 	static int lGetScienceFromBudgetDeficitTimes100(lua_State* L);
+	static int lGetScienceFromReligion(lua_State* L);
 
 	// END Science
 

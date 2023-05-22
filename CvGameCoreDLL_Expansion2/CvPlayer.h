@@ -1061,6 +1061,12 @@ public:
 	int GetOriginalCapitalX() const;
 	int GetOriginalCapitalY() const;
 
+
+
+	int GetYieldFromProcessModifierGlobal(YieldTypes eIndex1) const;
+	void ChangeYieldFromProcessModifierGlobal(YieldTypes eIndex, int iChange);
+
+
 	bool IsHasLostCapital() const;
 	void SetHasLostCapital(bool bValue, PlayerTypes eConqueror);
 #if defined(MOD_GLOBAL_NO_CONQUERED_SPACESHIPS)
@@ -2258,6 +2264,10 @@ protected:
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiCapitalYieldChange;
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiCapitalYieldPerPopChange;
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiSeaPlotYield;
+
+	FAutoVariable<std::vector<int>, CvPlayer> m_aiYieldFromProcessModifierGlobal;
+
+
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiYieldRateModifier;
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiCapitalYieldRateModifier;
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiExtraYieldThreshold;

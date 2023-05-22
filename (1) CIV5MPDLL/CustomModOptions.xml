@@ -1017,9 +1017,11 @@
     <Row Class="5" Name="IMPROVEMENTS_UPGRADE" Value="0"/>
 
     <!-- table changes: -->
-    <!-- ALTER TABLE Improvements ADD COLUMN 'CreateResource' TEXT DEFAULT NULL; -->
+    <!-- see Improvements_Create_Item.sql -->
+    <!-- ALTER TABLE Improvements ADD COLUMN 'CreatedItemMod' INTEGER DEFAULT 0; -->
     <!-- ALTER TABLE Improvements ADD COLUMN 'CreatedResourceQuantity' INTEGER DEFAULT 0; -->
     <!-- ALTER TABLE Improvements ADD COLUMN 'SetNewImprovement' TEXT DEFAULT NULL; -->
+    <!-- ALTER TABLE Improvements ADD COLUMN 'SetNewFeature' TEXT DEFAULT NULL; -->
     <Row Class="5" Name="IMPROVEMENTS_CREATE_ITEMS" Value="1"/>
 
     <Row Class="6" Name="GLOBAL_UNLIMITED_ONE_TURN_GROWTH" Value="0"/>
@@ -1048,19 +1050,48 @@
     <!-- ALTER TABLE Units add column ExtraXPValueDefense int not null default 0; -->
     <Row Class="6" Name="GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE" Value="1"/>
 
+    <!-- table changes: -->
+    <!-- see NewTableChanges.sql -->
+    <!-- ALTER TABLE UnitPromotions ADD 'FeatureInvisible' TEXT DEFAULT NULL; -->
+    <!-- ALTER TABLE UnitPromotions ADD 'FeatureInvisible2' TEXT DEFAULT NULL; -->
+    <Row Class="6" Name="PROMOTION_FEATURE_INVISIBLE" Value="0"/>
+
     <!-- INSERT INTO Defines(Name, Value) VALUES('GOLDEN_AGE_POINT_MULTIPLE_IN_GA', 2); -->
     <Row Class="6" Name="GLOBAL_TRIGGER_NEW_GOLDEN_AGE_IN_GA" Value="0"/>
+    <!-- INSERT INTO Defines(Name, Value) VALUES('UNIT_MOVES_AFTER_DISEMBARK', 60); --> 
+    <Row Class="6" Name="GLOBAL_UNIT_MOVES_AFTER_DISEMBARK" Value="0"/>
+
+    <!-- table changes: -->
+    <!-- ALTER TABLE UnitPromotions ADD 'MultipleInitExperence' INTEGER DEFAULT 0; -->
+    <Row Class="6" Name="PROMOTION_MULTIPLE_INIT_EXPERENCE" Value="1"/>
+
+    <!-- table changes: -->
+    <!-- ALTER TABLE UnitPromotions ADD 'UnitAttackFaithBonus' INTEGER DEFAULT 0; -->
+    <!-- ALTER TABLE UnitPromotions ADD 'CityAttackFaithBonus' INTEGER DEFAULT 0; -->
+    <Row Class="6" Name="PROMOTION_GET_INSTANCE_FROM_ATTACK" Value="1"/>
+
+    <!-- table changes: -->
+    <!-- ALTER TABLE UnitPromotions ADD 'RemovePromotionUpgrade' TEXT DEFAULT NULL; -->
+    <Row Class="6" Name="PROMOTION_REMOVE_PROMOTION_UPGRADE" Value="1"/>
+
+    <!-- table changes: -->
+    <!-- see Building_InstantYield.xml -->
+    <Row Class="6" Name="GLOBAL_BUILDING_INSTANT_YIELD" Value="0"/>
 
     <!-- table change: NewBattleEffects.sql and PromotionCollections.sql -->
     <Row Class="6" Name="PROMOTION_SPLASH_DAMAGE" Value="0"/>
     <Row Class="6" Name="PROMOTION_COLLATERAL_DAMAGE" Value="0"/>
-    <Row Class="6" Name="PROMOTION_ADD_ENERMY_PROMOTIONS" Value="0"/>
+    <Row Class="6" Name="PROMOTION_ADD_ENEMY_PROMOTIONS" Value="0"/>
     <Row Class="6" Name="PROMOTION_CITY_DESTROYER" Value="0"/>
 
     <Row Class="6" Name="GLOBAL_PROMOTIONS_REMOVAL" Value="0"/>
 
     <Row Class="6" Name="GLOBAL_CITY_SCALES" Value="0"/>
     <Row Class="6" Name="EVENTS_CITY_SCALES" Value="0"/>
+
+    <!-- Permits units to receive a combat bonus from Ally City States-->
+    <!-- table change: NewTableChanges.sql -->
+    <Row Class="4" Name="PROMOTIONS_ALLYCITYSTATE_BONUS" Value="0"/>
   </CustomModOptions>
 
   <CustomModPostDefines>

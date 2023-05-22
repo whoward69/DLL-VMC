@@ -349,6 +349,9 @@ protected:
 #endif
 	static int lIsNeverInvisible(lua_State* L);
 	static int lIsInvisible(lua_State* L);
+#if defined(MOD_PROMOTION_FEATURE_INVISIBLE)
+	static int lIsInvisibleInvalid(lua_State* L);
+#endif
 
 	static int lIsNukeImmune(lua_State* L);
 
@@ -705,6 +708,10 @@ protected:
 
 #ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
 	LUAAPIEXTN(ClearSamePlotPromotions, void);
+#endif
+
+#ifdef MOD_PROMOTION_ADD_ENEMY_PROMOTIONS
+	LUAAPIEXTN(IsImmuneNegtivePromotions, bool);
 #endif
 };
 

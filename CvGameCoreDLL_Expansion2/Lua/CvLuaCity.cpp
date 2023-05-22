@@ -705,6 +705,7 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 
 #ifdef MOD_GLOBAL_CITY_SCALES
 	Method(GetScale);
+	Method(CanGrowNormally);
 #endif
 }
 //------------------------------------------------------------------------------
@@ -4670,4 +4671,5 @@ int CvLuaCity::lIsSecondaryReligionActive(lua_State* L)
 
 #ifdef MOD_GLOBAL_CITY_SCALES
 LUAAPIIMPL(City, GetScale)
+LUAAPIIMPL(City, CanGrowNormally)
 #endif

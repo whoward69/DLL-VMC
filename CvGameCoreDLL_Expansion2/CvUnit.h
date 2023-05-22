@@ -625,6 +625,14 @@ public:
 	void SetCombatBonusImprovement(ImprovementTypes eImprovement);
 #endif
 
+#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
+	int GetAllyCityStateCombatModifier() const;
+	void SetAllyCityStateCombatModifier(int iCombatBonus);
+	int GetAllyCityStateCombatModifierMax() const;
+	void SetAllyCityStateCombatModifierMax(int iCombatBonusMax);
+	int GetStrengthModifierFromAlly() const;
+#endif
+
 #if defined(MOD_ROG_CORE)
 	int getNearbyUnitClassBonus() const;
 	void SetNearbyUnitClassBonus(int iCombatBonus);
@@ -902,6 +910,8 @@ public:
 
 	void DoAdjacentPlotDamage(CvPlot* pWhere, int iValue);
 
+	void MoveToEnemyPlotDamage(CvPlot* pWhere);
+
 #if defined(MOD_ROG_CORE)
 	int getMeleeDefenseModifier() const;
 	void changeMeleeDefenseModifier(int iValue);
@@ -962,7 +972,29 @@ public:
 	void changeOutsideCapitalLandDefenseMod(int iValue);
 #endif
 
+	int GetAttackInflictDamageChange() const;
+	int GetAttackInflictDamageChangeMaxHPPercent() const;
+	void ChangeAttackInflictDamageChange(int iChange);
+	void ChangeAttackInflictDamageChangeMaxHPPercent(int iChange);
 
+	int GetDefenseInflictDamageChange() const;
+	int GetDefenseInflictDamageChangeMaxHPPercent() const;
+	void ChangeDefenseInflictDamageChange(int iChange);
+	void ChangeDefenseInflictDamageChangeMaxHPPercent(int iChange);
+
+	int GetSiegeInflictDamageChange() const;
+	int GetSiegeInflictDamageChangeMaxHPPercent() const;
+	void ChangeSiegeInflictDamageChange(int iChange);
+	void ChangeSiegeInflictDamageChangeMaxHPPercent(int iChange);
+
+	int GetHeavyChargeAddMoves() const;
+	int GetHeavyChargeExtraDamage() const;
+	int GetHeavyChargeCollateralFixed() const;
+	int GetHeavyChargeCollateralPercent() const;
+	void ChangeHeavyChargeAddMoves(int iChange);
+	void ChangeHeavyChargeExtraDamage(int iChange);
+	void ChangeHeavyChargeCollateralFixed(int iChange);
+	void ChangeHeavyChargeCollateralPercent(int iChange);
 
 	int getAmphibCount() const;
 	bool isAmphib() const;
@@ -1291,6 +1323,16 @@ public:
 
 	const InvisibleTypes getSeeInvisibleType() const;
 	void setSeeInvisibleType(InvisibleTypes InvisibleType);
+#if defined(MOD_PROMOTION_FEATURE_INVISIBLE)
+	const int GetFeatureInvisible() const;
+	const int GetFeatureInvisible2() const;
+	void setFeatureInvisible(int FeatureInvisible, int FeatureInvisible2);
+	bool IsInvisibleInvalid() const;
+#endif
+#if defined(MOD_PROMOTION_MULTIPLE_INIT_EXPERENCE)
+	const int GetMultipleInitExperence() const;
+	void ChangeMultipleInitExperence(int iValue);
+#endif
 
 	const CvUnit* getCombatUnit() const;
 	CvUnit* getCombatUnit();
@@ -1643,6 +1685,17 @@ public:
 	void ChangeCityAttackPlunderModifier(int iValue);
 	int GetCityAttackPlunderModifier() const;
 
+#if defined(MOD_PROMOTION_GET_INSTANCE_FROM_ATTACK)
+	void ChangeUnitAttackFaithBonus(int iValue);
+	void ChangeCityAttackFaithBonus(int iValue);
+	int GetUnitAttackFaithBonus() const;
+	int GetCityAttackFaithBonus() const;
+#endif
+#if defined(MOD_PROMOTION_REMOVE_PROMOTION_UPGRADE)
+	void setRemovePromotionUpgrade(int iValue);
+	int GetRemovePromotionUpgrade() const;
+#endif
+
 	void ChangeReligiousStrengthLossRivalTerritory(int iValue);
 	int GetReligiousStrengthLossRivalTerritory() const;
 
@@ -1724,9 +1777,10 @@ public:
 	std::tr1::unordered_map<PromotionCollectionsTypes, int>& GetPromotionCollections();
 #endif
 
-#ifdef MOD_PROMOTION_ADD_ENERMY_PROMOTIONS
-	int GetAddEnermyPromotionImmuneRC() const;
-	void ChangeAddEnermyPromotionImmuneRC(int iChange);
+#ifdef MOD_PROMOTION_ADD_ENEMY_PROMOTIONS
+	int GetAddEnemyPromotionImmuneRC() const;
+	bool IsImmuneNegtivePromotions() const;
+	void ChangeAddEnemyPromotionImmuneRC(int iChange);
 #endif
 
 #ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
@@ -1899,6 +1953,10 @@ protected:
 	FAutoVariable<ImprovementTypes, CvUnit> m_eCombatBonusImprovement;
 #endif
 
+#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
+	FAutoVariable<int, CvUnit> m_iAllyCityStateCombatModifier;
+	FAutoVariable<int, CvUnit> m_iAllyCityStateCombatModifierMax;
+#endif
 
 #if defined(MOD_ROG_CORE)
 	FAutoVariable<int, CvUnit> m_iAoEDamageOnMove;
@@ -2037,6 +2095,14 @@ protected:
 	FAutoVariable<UnitTypes, CvUnit> m_eLeaderUnitType;
 	FAutoVariable<InvisibleTypes, CvUnit> m_eInvisibleType;
 	FAutoVariable<InvisibleTypes, CvUnit> m_eSeeInvisibleType;
+#if defined(MOD_PROMOTION_FEATURE_INVISIBLE)
+	FAutoVariable<int, CvUnit> m_eFeatureInvisible;
+	FAutoVariable<int, CvUnit> m_eFeatureInvisible2;
+#endif
+#if defined(MOD_PROMOTION_MULTIPLE_INIT_EXPERENCE)
+	FAutoVariable<int, CvUnit> m_eMultipleInitExperence;
+#endif
+
 	FAutoVariable<GreatPeopleDirectiveTypes, CvUnit> m_eGreatPeopleDirectiveType;
 	CvUnitEntry* m_pUnitInfo;
 
@@ -2127,8 +2193,8 @@ protected:
 	std::tr1::unordered_map<PromotionCollectionsTypes, int> m_sPromotionCollections;
 #endif
 
- #ifdef MOD_PROMOTION_ADD_ENERMY_PROMOTIONS
-	int m_iAddEnermyPromotionImmuneRC = 0;
+ #ifdef MOD_PROMOTION_ADD_ENEMY_PROMOTIONS
+	int m_iAddEnemyPromotionImmuneRC = 0;
  #endif
 
 #ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
@@ -2148,12 +2214,33 @@ protected:
 	int m_iCapitalDefenseModifier;
 	int m_iCapitalDefenseFalloff;
 	int m_iCityAttackPlunderModifier;
+#if defined(MOD_PROMOTION_GET_INSTANCE_FROM_ATTACK)
+	int m_iUnitAttackFaithBonus;
+	int m_iCityAttackFaithBonus;
+#endif	
+#if defined(MOD_PROMOTION_REMOVE_PROMOTION_UPGRADE)
+	int m_iRemovePromotionUpgrade;
+#endif
 	int m_iReligiousStrengthLossRivalTerritory;
 	int m_iTradeMissionInfluenceModifier;
 	int m_iTradeMissionGoldModifier;
 	int m_iMapLayer;		// Which layer does the unit reside on for pathing/stacking/etc.
 	int m_iNumGoodyHutsPopped;
 	int m_iLastGameTurnAtFullHealth;
+
+	int m_iAttackInflictDamageChange = 0;
+	int m_iAttackInflictDamageChangeMaxHPPercent = 0;
+
+	int m_iDefenseInflictDamageChange = 0;
+	int m_iDefenseInflictDamageChangeMaxHPPercent = 0;
+
+	int m_iSiegeInflictDamageChange = 0;
+	int m_iSiegeInflictDamageChangeMaxHPPercent = 0;
+
+	int m_iHeavyChargeAddMoves = 0;
+	int m_iHeavyChargeExtraDamage = 0;
+	int m_iHeavyChargeCollateralFixed = 0;
+	int m_iHeavyChargeCollateralPercent = 0;
 	
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
 	CvString m_strUnitName;

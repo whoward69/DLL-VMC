@@ -6,8 +6,8 @@
 
 class CvPromotionCollectionEntry : public CvBaseInfo
 {
-private:
-    struct TriggerAddPromotionInfo {
+public:
+    struct TriggerInfo {
         bool m_bMeleeAttack = false;
         bool m_bRangedAttack = false;
         bool m_bMeleeDefense = false;
@@ -24,11 +24,14 @@ private:
         PromotionTypes m_ePromotionType;
 
         int m_iIndex = 0;
-        TriggerAddPromotionInfo m_kTriggerAddPromotionInfo;
+        TriggerInfo m_kTriggerInfo;
     };
 
+private:
     std::vector<PromotionEntry> m_vPromotions;
-    std::vector<PromotionCollectionsTypes> m_vAddEnermyPromotionPools;
+    std::vector<PromotionCollectionsTypes> m_vAddEnemyPromotionPools;
+    bool m_bStackingFightBack = false;
+    bool m_bStopAttacker = false;
 
 public:
     CvPromotionCollectionEntry() = default;
@@ -36,10 +39,13 @@ public:
 
     bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility) override;
 
-    bool CanAddEnermyPromotions() const { return !m_vAddEnermyPromotionPools.empty();}
+    bool CanAddEnemyPromotions() const { return !m_vAddEnemyPromotionPools.empty();}
 
     auto GetPromotions() -> decltype(m_vPromotions)& { return m_vPromotions; }
-    auto GetAddEnermyPromotionPools() -> decltype(m_vAddEnermyPromotionPools)& { return m_vAddEnermyPromotionPools; }
+    auto GetAddEnemyPromotionPools() -> decltype(m_vAddEnemyPromotionPools)& { return m_vAddEnemyPromotionPools; }
+
+    auto GetStackingFightBack() -> decltype(m_bStackingFightBack) { return m_bStackingFightBack; }
+    auto GetStopAttacker() -> decltype(m_bStopAttacker) { return m_bStopAttacker; }
 };
 
 class CvPromotionCollectionEntries

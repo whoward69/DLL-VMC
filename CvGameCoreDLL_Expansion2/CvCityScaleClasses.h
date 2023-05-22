@@ -29,11 +29,17 @@ protected:
     std::vector<FreeBuildingClassInfo> m_vFreeBuildingClassInfoFromPolicies;
     std::vector<FreeBuildingClassInfo> m_vFreeBuildingClassInfoFromTraits;
 
+    std::vector<BuildingTypes> m_vBuildingsSupportGrowth;
+
+    bool m_bNeedGrowthBuilding = false;
+
 public:
     inline int GetMinPopulation() const { return m_iMinPopulation; }
     inline auto GetFreeBuildingClassInfo() -> decltype(m_vFreeBuildingClassInfo)& { return m_vFreeBuildingClassInfo; }
     inline auto GetFreeBuildingClassInfoFromPolicies() -> decltype(m_vFreeBuildingClassInfoFromPolicies)& { return m_vFreeBuildingClassInfoFromPolicies; }
     inline auto GetFreeBuildingClassInfoFromTraits() -> decltype(m_vFreeBuildingClassInfoFromTraits)& { return m_vFreeBuildingClassInfoFromTraits; }
+    inline auto GetBuildingsSupportGrowth() -> decltype(m_vBuildingsSupportGrowth)& { return m_vBuildingsSupportGrowth; }
+    inline bool NeedGrowthBuilding() { return m_bNeedGrowthBuilding; }
 };
 
 class CvCityScaleXMLEntries

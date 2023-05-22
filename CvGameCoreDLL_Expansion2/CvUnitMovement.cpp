@@ -125,6 +125,32 @@ void CvUnitMovement::GetCostsForMove(const CvUnit* pUnit, const CvPlot* pFromPlo
 				}
 			}
 		}
+
+#if defined(MOD_ROG_CORE)
+
+		CvCity* pOwner = pToPlot->getWorkingCity();
+
+		if (pOwner != NULL && GET_TEAM(pOwner->getTeam()).isAtWar(kPlayer.getTeam()))
+		{
+			if (pToPlot->isWater())
+			{
+				int iTempCost = pToPlot->getWorkingCity()->getWaterTileMovementReduce();
+				if (iTempCost > 0)
+				{
+					iRegularCost += iMoveDenominator * iTempCost;
+				}
+			}
+
+			else
+			{
+				int iTempCost = pToPlot->getWorkingCity()->getLandTileMovementReduce();
+				if (iTempCost > 0)
+				{
+				  iRegularCost += iMoveDenominator * iTempCost;
+				}
+			}
+		}
+#endif
 	}
 }
 

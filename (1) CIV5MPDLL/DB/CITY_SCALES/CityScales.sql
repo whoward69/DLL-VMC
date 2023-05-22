@@ -1,7 +1,9 @@
 create table CityScales (
     ID integer primary key autoincrement not null,
     Type text not null unique,
-    MinPopulation integer not null
+    MinPopulation integer not null,
+
+    NeedGrowthBuilding boolean not null default 0
 );
 
 create table CityScale_FreeBuildingClass (
@@ -12,3 +14,6 @@ create table CityScale_FreeBuildingClass (
     RequiredTraitType text null,
     RequiredPolicyType text null
 );
+
+alter table Buildings add column 'EnableCityScaleGrowth' text null;
+alter table Buildings add column 'EnableAllCityScaleGrowth' boolean not null default 0;

@@ -629,6 +629,7 @@ protected:
 
 #ifdef MOD_GLOBAL_CITY_SCALES
 	LUAAPIEXTN(GetScale, int);
+	LUAAPIEXTN(CanGrowNormally, bool);
 #endif
 };
 

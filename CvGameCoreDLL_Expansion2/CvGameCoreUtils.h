@@ -381,6 +381,11 @@ inline const CvUnit* GetPlayerUnit(const IDInfo& unit)
 bool isBeforeUnitCycle(const CvUnit* pFirstUnit, const CvUnit* pSecondUnit);
 bool IsPromotionValidForUnitCombatType(PromotionTypes ePromotion, UnitTypes eUnit);
 bool IsPromotionValidForCivilianUnitType(PromotionTypes ePromotion, UnitTypes eUnit);
+
+
+bool IsPromotionValidForUnitType(PromotionTypes ePromotion, UnitTypes eUnit);
+
+
 bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, bool bTestingPrereq=false);
 
 int getPopulationAsset(int iPopulation);

@@ -101,6 +101,19 @@ bool CvCityScaleEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 		pResults->Reset();
 	}
 
+	auto &buildingXMLEntries = GC.getBuildingInfo();
+	for (auto it = buildingXMLEntries.begin(); it != buildingXMLEntries.end(); it++)
+	{
+		if (*it == nullptr)
+			continue;
+		auto* entry = *it;
+		if (entry->GetEnableCityScaleGrowth() == (CityScaleTypes)GetID() || entry->GetEnableAllCityScaleGrowth())
+		{
+			m_vBuildingsSupportGrowth.push_back((BuildingTypes)entry->GetID());
+		}
+	}
+	m_bNeedGrowthBuilding = kResults.GetBool("NeedGrowthBuilding");
+
 #ifdef DEBUG_CvCityScaleEntry
 	CUSTOMLOG("CvCityScaleEntry::CacheResults end!");
 #endif
