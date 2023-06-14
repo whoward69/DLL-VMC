@@ -122,6 +122,10 @@ public:
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 	int GetPlotYieldChange(int i, int j) const;
 #endif
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+	bool AllowYieldPerBirth() const;
+	int GetYieldPerBirth(int i) const;
+#endif
 	int GetResourceHappiness(int i) const;
 	int GetYieldChangeAnySpecialist(int i) const;
 	int GetYieldChangeTradeRoute(int i) const;
@@ -184,6 +188,9 @@ protected:
 	bool m_bRequiresPeace;
 	bool m_bConvertsBarbarians;
 	bool m_bFaithPurchaseAllGreatPeople;
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+	bool m_bAllowYieldPerBirth;
+#endif
 
 	EraTypes m_eObsoleteEra;
 	ResourceTypes m_eResourceRevealed;
@@ -226,6 +233,9 @@ protected:
 #endif
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 	int** m_ppiPlotYieldChange;
+#endif
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+	int* m_piYieldPerBirth;
 #endif
 	int* m_piResourceHappiness;
 	int* m_piYieldChangeAnySpecialist;
@@ -447,6 +457,10 @@ public:
 #endif
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 	int GetPlotYieldChange(PlotTypes ePlot, YieldTypes eYieldType) const;
+#endif
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+	bool AllowYieldPerBirth() const;
+	int GetYieldPerBirth(YieldTypes eYieldType) const;
 #endif
 	int GetResourceHappiness(ResourceTypes eResource) const;
 	int GetYieldChangeAnySpecialist(YieldTypes eYieldType) const;

@@ -5,6 +5,14 @@
 		<Row Tag="TXT_KEY_SPY_STATE_TERMINATED">
 			<Text>Eliminated!</Text>
 		</Row>
+
+
+	<Row Tag="TXT_KEY_PRODMOD_WONDER_IMPROVEMENT">
+			<Text>
+				[NEWLINE][ICON_BULLET]Improved facilities provide spectacle construction bonus: {1_Num}%。
+			</Text>
+		</Row>
+
 	</Language_en_US>
 
 	<!-- GoodyHutMessages.xml -->
@@ -224,6 +232,25 @@
 		<Row Tag="TXT_KEY_NOTIFICATION_BOMBER_CITY_KILL_POPULATION_ATTACKED">
 			<Text>[COLOR_NEGATIVE_TEXT]{1_num}[ENDCOLOR] [ICON_CITIZEN] Citizens are KILLED in your city: {2_CityName}</Text>
 		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_LOCAL_CITY_WONDER">
+			<Text>
+				[NEWLINE][ICON_BULLET]City Modifier for World Wonder: {1_Num}%
+			</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_LOCAL_CITY_WONDER">
+			<Text>
+				[NEWLINE][ICON_BULLET]City Modifier for the Trade Routes(Policy): {1_Num}%
+			</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_TP_HAPPINESS_FAITH">
+			<Text>
+				{1_Happiness} from Faith.
+			</Text>
+		</Row>
+
 	</Language_en_US>
 
 </GameData>

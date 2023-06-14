@@ -181,6 +181,7 @@ public:
 #if defined(MOD_GLOBAL_BUILDING_INSTANT_YIELD)
 	int GetInstantYield(int i) const;
 	int* GetInstantYieldArray() const;
+	bool IsAllowInstantYield() const;
 #endif
 
 #if defined(MOD_ROG_CORE)
@@ -365,6 +366,12 @@ public:
 	int GetUnitCombatProductionModifier(int i) const;
 	int GetDomainFreeExperience(int i) const;
 	int GetDomainFreeExperiencePerGreatWork(int i) const;
+
+#if defined(MOD_ROG_CORE)
+	int GetDomainFreeExperiencePerGreatWorkGlobal(int i) const;
+	int GetDomainFreeExperienceGlobal(int i) const;
+#endif
+
 	int GetDomainProductionModifier(int i) const;
 	int GetLockedBuildingClasses(int i) const;
 	int GetPrereqAndTechs(int i) const;
@@ -502,6 +509,7 @@ private:
 
 #if defined(MOD_GLOBAL_BUILDING_INSTANT_YIELD)
 	int* m_piInstantYield;
+	bool m_bAllowInstantYield;
 #endif
 
 #if defined(MOD_ROG_CORE)
@@ -685,6 +693,13 @@ private:
 	int* m_piUnitCombatProductionModifiers;
 	int* m_piDomainFreeExperience;
 	int* m_piDomainFreeExperiencePerGreatWork;
+
+#if defined(MOD_ROG_CORE)
+	int* m_piDomainFreeExperiencePerGreatWorkGlobal;
+	std::map<int, int> m_piDomainFreeExperienceGlobal;
+#endif
+
+
 	int* m_piDomainProductionModifier;
 	int* m_piPrereqNumOfBuildingClass;
 	int* m_piFlavorValue;

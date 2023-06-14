@@ -5,7 +5,7 @@
     <ProjectGuid>{0b961596-36f9-4289-a247-0e889fef1f39}</ProjectGuid>
     <Name>(1) CIV5MPDLL</Name>
     <Guid>a2969a0a-e4da-41cc-9e0b-19b29aa971d8</Guid>
-    <ModVersion>4</ModVersion>
+    <ModVersion>5</ModVersion>
     <Stability>Alpha</Stability>
     <Teaser>This mod is based on whoward69's DLL-VMC v97. It fixes multiplayer gaming bugs and provides more useful modding interface.</Teaser>
     <Description>This mod is based on whoward69's DLL-VMC v97. It fixes out-of-sync problem of
@@ -343,6 +343,11 @@
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
+        <FileName>DB/RELIGION/Belief_YieldPerBirth.sql</FileName>
+      </Action>
+      <Action>
+        <Set>OnModActivated</Set>
+        <Type>UpdateDatabase</Type>
         <FileName>DB/RELIGION/PolicyBranchFaithGp.xml</FileName>
       </Action>
       <Action>
@@ -515,6 +520,26 @@
         <Type>UpdateDatabase</Type>
         <FileName>DB/PROMOTIONS/InflictDamageChange.sql</FileName>
       </Action>
+      <Action>
+        <Set>OnModActivated</Set>
+        <Type>UpdateDatabase</Type>
+        <FileName>DB/SPECIALISTS/Specialist_Resources.sql</FileName>
+      </Action>
+      <Action>
+        <Set>OnModActivated</Set>
+        <Type>UpdateDatabase</Type>
+        <FileName>DB/IMPROVEMENTS/Improvement_TradeRouteYieldChanges.sql</FileName>
+      </Action>
+      <Action>
+        <Set>OnModActivated</Set>
+        <Type>UpdateDatabase</Type>
+        <FileName>DB/TRAITS/TraitsGoldenAgeEffects.sql</FileName>
+      </Action>
+      <Action>
+        <Set>OnModActivated</Set>
+        <Type>UpdateDatabase</Type>
+        <FileName>DB/TECHS/TechQuickRazing.sql</FileName>
+      </Action>
     </ModActions>
     <ModReferences />
     <ModBlockers>
@@ -540,6 +565,8 @@
     <Folder Include="DB\ERAS" />
     <Folder Include="DB\IMPROVEMENTS" />
     <Folder Include="DB\CITY_SCALES" />
+    <Folder Include="DB\TECHS" />
+    <Folder Include="DB\SPECIALISTS" />
     <Folder Include="DB\YIELDS" />
     <Folder Include="DB\POLICIES" />
     <Folder Include="DB\UNITS" />
@@ -791,6 +818,10 @@
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
+    <Content Include="DB/RELIGION/Belief_YieldPerBirth.sql">
+      <SubType>Lua</SubType>
+      <ImportIntoVFS>False</ImportIntoVFS>
+    </Content>
     <Content Include="DB/RELIGION/PolicyBranchFaithGp.xml">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
@@ -883,6 +914,10 @@
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
+    <Content Include="DB\IMPROVEMENTS\Improvement_TradeRouteYieldChanges.sql">
+      <SubType>Lua</SubType>
+      <ImportIntoVFS>False</ImportIntoVFS>
+    </Content>
     <Content Include="DB\IMPROVEMENTS\Improvement_Upgrade_Downgrade.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
@@ -908,6 +943,18 @@
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
     <Content Include="DB\PROMOTIONS\PromotionCollections.sql">
+      <SubType>Lua</SubType>
+      <ImportIntoVFS>False</ImportIntoVFS>
+    </Content>
+    <Content Include="DB\SPECIALISTS\Specialist_Resources.sql">
+      <SubType>Lua</SubType>
+      <ImportIntoVFS>False</ImportIntoVFS>
+    </Content>
+    <Content Include="DB\TECHS\TechQuickRazing.sql">
+      <SubType>Lua</SubType>
+      <ImportIntoVFS>False</ImportIntoVFS>
+    </Content>
+    <Content Include="DB\TRAITS\TraitsGoldenAgeEffects.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>

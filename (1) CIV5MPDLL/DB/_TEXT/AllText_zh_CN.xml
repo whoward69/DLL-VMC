@@ -2,6 +2,13 @@
 <GameData>
 	<!-- Espionage.xml -->
 	<Language_zh_CN>
+
+	<Row Tag="TXT_KEY_PRODMOD_WONDER_IMPROVEMENT">
+			<Text>
+				[NEWLINE][ICON_BULLET]改良设施提供奇观建造加成: {1_Num}%。
+			</Text>
+		</Row>
+
 		<Row Tag="TXT_KEY_SPY_STATE_TERMINATED">
 			<Text>被消灭了！</Text>
 		</Row>
@@ -223,6 +230,24 @@
 		</Row>
 		<Row Tag="TXT_KEY_NOTIFICATION_BOMBER_CITY_KILL_POPULATION_ATTACKED">
 			<Text>[COLOR_NEGATIVE_TEXT]{1_num}[ENDCOLOR] [ICON_CITIZEN] 市民在你的城市中被杀害：{2_CityName}</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_LOCAL_CITY_WONDER">
+			<Text>
+				[NEWLINE][ICON_BULLET]城市级修正(世界奇观): {1_Num}%
+			</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_POLICY_TRADE_ROUTE_NUM">
+			<Text>
+				[NEWLINE][ICON_BULLET]商路数量修正(政策): {1_Num}%
+			</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_TP_HAPPINESS_FAITH">
+			<Text>
+				{1_Happiness} 来自[ICON_PEACE]信仰。
+			</Text>
 		</Row>
 	</Language_zh_CN>
 

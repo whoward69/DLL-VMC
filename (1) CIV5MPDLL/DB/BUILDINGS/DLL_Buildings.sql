@@ -10,3 +10,5 @@ create table Building_YieldFromOtherYield(
 	OutYieldType text not null references Yields(Type),
 	OutYieldValue integer not null
 );
+
+ALTER TABLE Buildings ADD COLUMN 'AllowInstantYield' BOOLEAN DEFAULT 0;

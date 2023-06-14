@@ -2118,12 +2118,12 @@ void CvGlobals::init()
 #if defined(MOD_GLOBAL_CITY_WORKING)
 		// this is the 6 ring layout
 		//	 -5  -4  -3  -2  -1   0   1   2   3  4  5  -- in the Y direction
-		{ -1,  -1,  -1,  -1,  -1,  -1, 116, 117, 118, 119, 120, 121, 122}, // -6 hex-space x
-		{ -1,  -1,  -1,  -1,  -1, 115,  81,  82,  83,  84,  85,  86, 123}, // -5 hex-space x
-		{ -1,  -1,  -1,  -1, 114,  80,  53,  54,  55,  56,  57,  87, 124}, // -4 hex-space x
-		{ -1,  -1,  -1, 113,  79,  52,  31,  32,  33,  34,  58,  88, 125}, // -3 hex-space x
-		{ -1,  -1, 112,  78,  51,  30,  15,  16,  17,  35,  59,  89, 126}, // -2 hex-space x
-		{110, 111,  77,  50,  29,  14,   5,   6,  18,  36,  60,  90, 127}, // -1 hex-space x
+		{ -1,  -1,  -1,  -1,  -1,  -1, 115, 116, 117, 118, 119, 120, 121}, // -6 hex-space x
+		{ -1,  -1,  -1,  -1,  -1, 114,  81,  82,  83,  84,  85,  86, 122}, // -5 hex-space x
+		{ -1,  -1,  -1,  -1, 113,  80,  53,  54,  55,  56,  57,  87, 123}, // -4 hex-space x
+		{ -1,  -1,  -1, 112,  79,  52,  31,  32,  33,  34,  58,  88, 124}, // -3 hex-space x
+		{ -1,  -1, 111,  78,  51,  30,  15,  16,  17,  35,  59,  89, 125}, // -2 hex-space x
+		{ -1, 110,  77,  50,  29,  14,   5,   6,  18,  36,  60,  90, 126}, // -1 hex-space x
 		{109,  76,  49,  28,  13,   4,   0,   1,   7,  19,  37,  61,  91}, //  0 hex-space x
 		{108,  75,  48,  27,  12,   3,   2,   8,  20,  38,  62,  92,  -1}, //  1 hex-space x
 		{107,  74,  47,  26,  11,  10,   9,  21,  39,  63,  93,  -1,  -1}, //  2 hex-space x
@@ -2259,6 +2259,10 @@ void CvGlobals::init()
 
 	CvPlayerAI::initStatics();
 	CvTeam::initStatics();
+
+#ifdef MOD_SPECIALIST_RESOURCES
+	GC.initSpecialistResourcesDependencies();
+#endif
 
 	memcpy(m_aiPlotDirectionX, aiPlotDirectionX, sizeof(m_aiPlotDirectionX));
 	memcpy(m_aiPlotDirectionY, aiPlotDirectionY, sizeof(m_aiPlotDirectionY));
@@ -4205,6 +4209,34 @@ CvAchievementInfo* CvGlobals::getAchievementInfo(EAchievement eAchievementNum)
 CvAchievementXMLEntries* CvGlobals::GetGameAchievements() const
 {
 	return m_pAchievements;
+}
+#endif
+
+#ifdef MOD_SPECIALIST_RESOURCES
+std::tr1::unordered_set<PolicyTypes>& CvGlobals::getSpecialistResourcesPolicies()
+{
+	return m_vSpecialistResourcesPolicies;
+}
+void CvGlobals::initSpecialistResourcesDependencies()
+{
+	for (CvSpecialistInfo* sinfo : getSpecialistInfo())
+	{
+		for (CvSpecialistInfo::ResourceInfo& rinfo : sinfo->GetResourceInfo())
+		{
+			if (rinfo.m_eRequiredPolicy != NO_POLICY)
+			{
+				m_vSpecialistResourcesPolicies.insert(rinfo.m_eRequiredPolicy);
+			}
+			if (rinfo.m_eRequiredTech != NO_TECH)
+			{
+				m_vSpecialistResourcesTechnologies.insert(rinfo.m_eRequiredTech);
+			}
+		}
+	}
+}
+std::tr1::unordered_set<TechTypes>& CvGlobals::getSpecialistResourcesTechnologies()
+{
+	return m_vSpecialistResourcesTechnologies;
 }
 #endif
 

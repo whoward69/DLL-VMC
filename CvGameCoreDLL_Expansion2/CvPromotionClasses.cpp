@@ -98,6 +98,11 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iMaxHitPointsModifier(0),
 #endif
 
+#if defined(MOD_DEFENSE_MOVES_BONUS)
+	m_iMoveLeftDefenseMod(0),
+	m_iMoveUsedDefenseMod(0),
+#endif
+
 #if defined(MOD_ROG_CORE)
 	m_iMoveLfetAttackMod(0),
 	m_iMoveUsedAttackMod(0),
@@ -217,6 +222,13 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iAllyCityStateCombatModifier(0),
 	m_iAllyCityStateCombatModifierMax(0),
 #endif
+#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
+	m_eExtraResourceType(NO_RESOURCE),
+	m_iExtraResourceCombatModifier(0),
+	m_iExtraResourceCombatModifierMax(0),
+	m_iExtraHappinessCombatModifier(0),
+	m_iExtraHappinessCombatModifierMax(0),
+#endif
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	m_bCanCrossMountains(false),
 #endif
@@ -257,6 +269,7 @@ CvPromotionEntry::CvPromotionEntry():
 	m_bCaptureDefeatedEnemy(false),
 	m_bIgnoreGreatGeneralBenefit(false),
 	m_bIgnoreZOC(false),
+	m_bImmueMeleeAttack(false),
 	m_bHasPostCombatPromotions(false),
 	m_bPostCombatPromotionsExclusive(false),
 	m_bSapper(false),
@@ -395,6 +408,26 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	}
 #endif
 
+#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
+	if (MOD_PROMOTIONS_EXTRARES_BONUS) {
+		const char* szTextVal = kResults.GetText("ExtraResourceType");
+		if (szTextVal) {
+			m_eExtraResourceType = (ResourceTypes)GC.getInfoTypeForString(szTextVal, true);
+		}
+		m_iExtraResourceCombatModifier = kResults.GetInt("ExtraResourceCombatModifier");
+		m_iExtraResourceCombatModifierMax = kResults.GetInt("ExtraResourceCombatModifierMax");
+		m_iExtraHappinessCombatModifier = kResults.GetInt("ExtraHappinessCombatModifier");
+		m_iExtraHappinessCombatModifierMax = kResults.GetInt("ExtraHappinessCombatModifierMax");
+	}
+#endif
+
+#if defined(MOD_DEFENSE_MOVES_BONUS)
+	if (MOD_DEFENSE_MOVES_BONUS) {
+		m_iMoveLeftDefenseMod = kResults.GetInt("MoveLeftDefenseMod");
+		m_iMoveUsedDefenseMod = kResults.GetInt("MoveUsedDefenseMod");
+	}
+#endif
+
 #if defined(MOD_ROG_CORE)
 	if (MOD_ROG_CORE) {
 		m_iNearbyUnitClassBonus = kResults.GetInt("NearbyUnitClassBonus");
@@ -439,7 +472,6 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 
 	m_iMeleeDefenseMod = kResults.GetInt("MeleeDefenseMod");
 #endif
-
 
 #if defined(MOD_ROG_CORE)
 	if (MOD_ROG_CORE) {
@@ -521,6 +553,7 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_bCaptureDefeatedEnemy = kResults.GetBool("CaptureDefeatedEnemy");
 	m_bIgnoreGreatGeneralBenefit = kResults.GetBool("IgnoreGreatGeneralBenefit");
 	m_bIgnoreZOC = kResults.GetBool("IgnoreZOC");
+	m_bImmueMeleeAttack = kResults.GetBool("ImmueMeleeAttack");
 	m_bHasPostCombatPromotions = kResults.GetBool("HasPostCombatPromotions");
 	m_bPostCombatPromotionsExclusive = kResults.GetBool("PostCombatPromotionsExclusive");
 	m_bSapper = kResults.GetBool("Sapper");
@@ -1665,6 +1698,19 @@ bool CvPromotionEntry::IsGreatAdmiral() const
 	return m_bGreatAdmiral;
 }
 
+
+#if defined(MOD_DEFENSE_MOVES_BONUS)
+int CvPromotionEntry::GetMoveLeftDefenseMod() const
+{
+	return m_iMoveLeftDefenseMod;
+}
+
+int CvPromotionEntry::GetMoveUsedDefenseMod() const
+{
+	return m_iMoveUsedDefenseMod;
+}
+#endif
+
 #if defined(MOD_PROMOTIONS_AURA_CHANGE)
 /// Accessor: Does this Promotion change the range of the aura of a Great General or Great Admiral?
 int CvPromotionEntry::GetAuraRangeChange() const
@@ -2255,6 +2301,30 @@ int CvPromotionEntry::GetAllyCityStateCombatModifierMax() const
 }
 #endif
 
+#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
+// Permits units to receive a combat bonus from Extra Resourses/Hapiness
+ResourceTypes CvPromotionEntry::GetExtraResourceType() const
+{
+	return m_eExtraResourceType;
+}
+int CvPromotionEntry::GetExtraResourceCombatModifier() const
+{
+	return m_iExtraResourceCombatModifier;
+}
+int CvPromotionEntry::GetExtraResourceCombatModifierMax() const
+{
+	return m_iExtraResourceCombatModifierMax;
+}
+int CvPromotionEntry::GetExtraHappinessCombatModifier() const
+{
+	return m_iExtraHappinessCombatModifier;
+}
+int CvPromotionEntry::GetExtraHappinessCombatModifierMax() const
+{
+	return m_iExtraHappinessCombatModifierMax;
+}
+#endif
+
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 /// Accessor: Can cross mountains (but we'd rather they left them nice and straight!)
 bool CvPromotionEntry::CanCrossMountains() const
@@ -2437,6 +2507,12 @@ bool CvPromotionEntry::IsCaptureDefeatedEnemy() const
 bool CvPromotionEntry::IsIgnoreGreatGeneralBenefit() const
 {
 	return m_bIgnoreGreatGeneralBenefit;
+}
+
+
+bool CvPromotionEntry::IsImmueMeleeAttack() const
+{
+	return m_bImmueMeleeAttack;
 }
 
 /// Accessor: Can this unit ignore ZOC when moving?

@@ -3007,6 +3007,15 @@ bool CvPlayerTrade::CreateTradeRoute(CvCity* pOriginCity, CvCity* pDestCity, Dom
 			{
 				plotsX[ui] = pTrade->m_aTradeConnections[iRouteIndex].m_aPlotList[ui].m_iX;
 				plotsY[ui] = pTrade->m_aTradeConnections[iRouteIndex].m_aPlotList[ui].m_iY;
+
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+				if (MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+				{		
+					CvPlot* pPlot = GC.getMap().plot(plotsX[ui], plotsY[ui]);
+					pPlot->updateYield();
+				}
+#endif
+
 			}
 			gDLL->TradeVisuals_NewRoute(iRouteIndex, m_pPlayer->GetID(),pTrade->m_aTradeConnections[iRouteIndex].m_eConnectionType, nPlots, plotsX, plotsY);
 			gDLL->TradeVisuals_UpdateRouteDirection(iRouteIndex, pTrade->m_aTradeConnections[iRouteIndex].m_bTradeUnitMovingForward);
@@ -3600,6 +3609,28 @@ bool CvPlayerTrade::PlunderTradeRoute(int iTradeConnectionID)
 #if defined(MOD_EVENTS_TRADE_ROUTE_PLUNDERED)
 	if (MOD_EVENTS_TRADE_ROUTE_PLUNDERED) {
 		GAMEEVENTINVOKE_HOOK(GAMEEVENT_PlayerPlunderedTradeRoute, pUnit->getOwner(), pUnit->GetID(), iPlunderGoldValue, pOriginCity->getOwner(), pOriginCity->GetID(), pDestCity->getOwner(), pDestCity->GetID(), eConnectionType, eDomain);
+	}
+#endif
+
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	if (MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	{
+		if (iTradeConnectionIndex != -1)
+		{
+			int plotsX[MAX_PLOTS_TO_DISPLAY], plotsY[MAX_PLOTS_TO_DISPLAY];
+			int nPlots = pTrade->m_aTradeConnections[iTradeConnectionIndex].m_aPlotList.size();
+			if (nPlots > 0) {
+				if (nPlots > MAX_PLOTS_TO_DISPLAY)
+					nPlots = MAX_PLOTS_TO_DISPLAY;
+				for (uint ui = 0; ui < (uint)nPlots; ui++) 
+				{
+					plotsX[ui] = pTrade->m_aTradeConnections[iTradeConnectionIndex].m_aPlotList[ui].m_iX;
+					plotsY[ui] = pTrade->m_aTradeConnections[iTradeConnectionIndex].m_aPlotList[ui].m_iY;
+					CvPlot* pPlot = GC.getMap().plot(plotsX[ui], plotsY[ui]);
+					pPlot->updateYield();
+				}		
+			}
+		}
 	}
 #endif
 

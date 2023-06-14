@@ -348,6 +348,8 @@ inline DirectionTypes hexspaceSpikeDirection(const int iXOffset, const int iYOff
 
 CvPlot* plotCity(int iX, int iY, int iIndex);
 
+CvPlot* iterateRingPlots(int iX, int iY, int iIndex);
+
 int plotCityXY(const CvCity* pCity, const CvPlot* pPlot);
 
 DirectionTypes estimateDirection(int iDX, int iDY);

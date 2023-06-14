@@ -66,6 +66,9 @@ CvBeliefEntry::CvBeliefEntry() :
 	m_bRequiresPeace(false),
 	m_bConvertsBarbarians(false),
 	m_bFaithPurchaseAllGreatPeople(false),
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+	m_bAllowYieldPerBirth(false),
+#endif
 
 	m_eObsoleteEra(NO_ERA),
 	m_eResourceRevealed(NO_RESOURCE),
@@ -105,6 +108,9 @@ CvBeliefEntry::CvBeliefEntry() :
 #endif
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 	m_ppiPlotYieldChange(NULL),
+#endif
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+	m_piYieldPerBirth(NULL),
 #endif
 	m_piResourceHappiness(NULL),
 	m_piYieldChangeAnySpecialist(NULL),
@@ -665,6 +671,18 @@ int CvBeliefEntry::GetPlotYieldChange(int i, int j) const
 	}
 }
 #endif
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+bool CvBeliefEntry::AllowYieldPerBirth() const
+{
+	return m_bAllowYieldPerBirth;
+}
+int CvBeliefEntry::GetYieldPerBirth(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piYieldPerBirth ? m_piYieldPerBirth[i] : -1;
+}
+#endif
 
 /// Happiness from a resource
 int CvBeliefEntry::GetResourceHappiness(int i) const
@@ -794,7 +812,9 @@ bool CvBeliefEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	m_bRequiresPeace				  = kResults.GetBool("RequiresPeace");
 	m_bConvertsBarbarians			  = kResults.GetBool("ConvertsBarbarians");
 	m_bFaithPurchaseAllGreatPeople	  = kResults.GetBool("FaithPurchaseAllGreatPeople");
-
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+	m_bAllowYieldPerBirth	  		  = kResults.GetBool("AllowYieldPerBirth");
+#endif
 	//References
 	const char* szTextVal;
 	szTextVal						  = kResults.GetText("ObsoleteEra");
@@ -806,6 +826,9 @@ bool CvBeliefEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 
 	//Arrays
 	const char* szBeliefType = GetType();
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+	kUtility.SetYields(m_piYieldPerBirth, "Belief_YieldPerBirth", "BeliefType", szBeliefType);
+#endif
 	kUtility.SetYields(m_paiCityYieldChange, "Belief_CityYieldChanges", "BeliefType", szBeliefType);
 	kUtility.SetYields(m_paiHolyCityYieldChange, "Belief_HolyCityYieldChanges", "BeliefType", szBeliefType);
 	kUtility.SetYields(m_piYieldChangeAnySpecialist, "Belief_YieldChangeAnySpecialist", "BeliefType", szBeliefType);
@@ -2020,6 +2043,43 @@ int CvReligionBeliefs::GetPlotYieldChange(PlotTypes ePlot, YieldTypes eYieldType
 			{
 				rtnValue += pBeliefs->GetEntry(i)->GetPlotYieldChange(ePlot, eYieldType);
 			}
+		}
+	}
+
+	return rtnValue;
+}
+#endif
+
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+/// Is has beliefs allow birth yeild ?
+bool CvReligionBeliefs::AllowYieldPerBirth() const
+{
+	CvBeliefXMLEntries* pBeliefs = GC.GetGameBeliefs();
+
+	for(int i = 0; i < pBeliefs->GetNumBeliefs(); i++)
+	{
+		if(HasBelief((BeliefTypes)i))
+		{
+			if (pBeliefs->GetEntry(i)->AllowYieldPerBirth())
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+/// Get yield modifier from beliefs from birth
+int CvReligionBeliefs::GetYieldPerBirth(YieldTypes eYieldType) const
+{
+	CvBeliefXMLEntries* pBeliefs = GC.GetGameBeliefs();
+	int rtnValue = 0;
+
+	for(int i = 0; i < pBeliefs->GetNumBeliefs(); i++)
+	{
+		if(HasBelief((BeliefTypes)i))
+		{
+			rtnValue += pBeliefs->GetEntry(i)->GetYieldPerBirth(eYieldType);
 		}
 	}
 

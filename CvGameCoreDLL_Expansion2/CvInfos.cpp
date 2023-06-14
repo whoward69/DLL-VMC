@@ -817,6 +817,42 @@ bool CvSpecialistInfo::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	kUtility.SetFlavors(m_piFlavorValue, "SpecialistFlavors", "SpecialistType", szType);
 	kUtility.SetYields(m_piYieldChange, "SpecialistYields", "SpecialistType", szType);
 
+#ifdef MOD_SPECIALIST_RESOURCES
+	{
+		m_vResourceInfo.clear();
+		std::string strKey = "Specialist - Resources";
+		Database::Results *pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select * from Specialist_Resources where SpecialistType = ?");
+		}
+		pResults->Bind(1, szType, strlen(szType), false);
+
+		while (pResults->Step())
+		{
+			const char* szResource = pResults->GetText("ResourceType");
+			ResourceTypes eResource = (ResourceTypes)GC.getInfoTypeForString(szResource, true);
+			if (eResource == NO_RESOURCE) continue;
+
+			ResourceInfo info;
+			info.m_eResource = eResource;
+			info.m_iQuantity = pResults->GetInt("Quantity");
+
+			const char* szRequiredPolicyType = pResults->GetText("RequiredPolicyType");
+			PolicyTypes eRequiredPolicy = (PolicyTypes)GC.getInfoTypeForString(szRequiredPolicyType, true);
+			info.m_eRequiredPolicy = eRequiredPolicy;
+
+			const char* szRequiredTechType = pResults->GetText("RequiredTechType");
+			TechTypes eRequiredTech = (TechTypes)GC.getInfoTypeForString(szRequiredTechType, true);
+			info.m_eRequiredTech = eRequiredTech;
+
+			m_vResourceInfo.push_back(info);
+		}
+
+		pResults->Reset();
+	}
+#endif
+
 	return true;
 }
 

@@ -3491,279 +3491,279 @@ void CvPlayerCulture::DoPublicOpinion()
 	PolicyBranchTypes eCurrentIdeology = m_pPlayer->GetPlayerPolicies()->GetLateGamePolicyTree();
 
 	// We have an ideology, so public opinion matters
-	if (eCurrentIdeology != NO_POLICY_BRANCH_TYPE)
+	if (eCurrentIdeology == NO_POLICY_BRANCH_TYPE)
+		return;
+
+	int iPressureForFreedom = 0;
+	int iPressureForAutocracy = 0;
+	int iPressureForOrder = 0;
+	CvString strWorldIdeologyPressureString = "";
+	CvString strFreedomPressureString = "";
+	CvString strAutocracyPressureString = "";
+	CvString strOrderPressureString = "";
+
+	// Look at World Congress
+	iPressureForFreedom += GC.getGame().GetGameLeagues()->GetPressureForIdeology(m_pPlayer->GetID(), eFreedomBranch);
+	if (iPressureForFreedom > 0)
 	{
-		int iPressureForFreedom = 0;
-		int iPressureForAutocracy = 0;
-		int iPressureForOrder = 0;
-		CvString strWorldIdeologyPressureString = "";
-		CvString strFreedomPressureString = "";
-		CvString strAutocracyPressureString = "";
-		CvString strOrderPressureString = "";
+		Localization::String sTemp = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_FREEDOM");
+		CvString sIcons = "";
+		for (int i = 0; i < iPressureForFreedom; i++)
+		{
+			sIcons += "[ICON_IDEOLOGY_FREEDOM]";
+		}
+		sTemp << sIcons;
+		strWorldIdeologyPressureString += sTemp.toUTF8();
+	}
+	iPressureForAutocracy += GC.getGame().GetGameLeagues()->GetPressureForIdeology(m_pPlayer->GetID(), eAutocracyBranch);
+	if (iPressureForAutocracy > 0)
+	{
+		Localization::String sTemp = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_AUTOCRACY");
+		CvString sIcons = "";
+		for (int i = 0; i < iPressureForAutocracy; i++)
+		{
+			sIcons += "[ICON_IDEOLOGY_AUTOCRACY]";
+		}
+		sTemp << sIcons;
+		strWorldIdeologyPressureString += sTemp.toUTF8();
+	}
+	iPressureForOrder += GC.getGame().GetGameLeagues()->GetPressureForIdeology(m_pPlayer->GetID(), eOrderBranch);
+	if (iPressureForOrder > 0)
+	{
+		Localization::String sTemp = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_ORDER");
+		CvString sIcons = "";
+		for (int i = 0; i < iPressureForOrder; i++)
+		{
+			sIcons += "[ICON_IDEOLOGY_ORDER]";
+		}
+		sTemp << sIcons;
+		strWorldIdeologyPressureString += sTemp.toUTF8();
+	}
 
-		// Look at World Congress
-		iPressureForFreedom += GC.getGame().GetGameLeagues()->GetPressureForIdeology(m_pPlayer->GetID(), eFreedomBranch);
-		if (iPressureForFreedom > 0)
+	// Look at each civ
+	for (int iLoopPlayer = 0; iLoopPlayer < MAX_MAJOR_CIVS; iLoopPlayer++)
+	{
+		CvPlayer &kPlayer = GET_PLAYER((PlayerTypes)iLoopPlayer);
+		if (iLoopPlayer == m_pPlayer->GetID() || !kPlayer.isAlive() || kPlayer.isMinorCiv())
+			continue;
+		PolicyBranchTypes eOtherCivIdeology = kPlayer.GetPlayerPolicies()->GetLateGamePolicyTree();
+		if (eOtherCivIdeology == NO_POLICY_BRANCH_TYPE)
+			continue;
+		int iCulturalDominanceOverUs = kPlayer.GetCulture()->GetInfluenceLevel(m_pPlayer->GetID()) - m_pPlayer->GetCulture()->GetInfluenceLevel((PlayerTypes)iLoopPlayer);
+		if (iCulturalDominanceOverUs <= 0)
+			continue;
+
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+		if (MOD_POLICIY_PUBLIC_OPTION)
 		{
-			Localization::String sTemp = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_FREEDOM");
-			CvString sIcons = "";
-			for (int i = 0; i < iPressureForFreedom; i++)
-			{
-				sIcons += "[ICON_IDEOLOGY_FREEDOM]";
-			}
-			sTemp << sIcons;
-			strWorldIdeologyPressureString += sTemp.toUTF8();
+			iCulturalDominanceOverUs = (100 + kPlayer.GetIdeologyPressureModifier()) * iCulturalDominanceOverUs / 100;
 		}
-		iPressureForAutocracy += GC.getGame().GetGameLeagues()->GetPressureForIdeology(m_pPlayer->GetID(), eAutocracyBranch);
-		if (iPressureForAutocracy > 0)
+#endif
+
+		if (eOtherCivIdeology == eFreedomBranch)
 		{
-			Localization::String sTemp = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_AUTOCRACY");
-			CvString sIcons = "";
-			for (int i = 0; i < iPressureForAutocracy; i++)
+			iPressureForFreedom += iCulturalDominanceOverUs;
+			if (strFreedomPressureString.size() > 0)
 			{
-				sIcons += "[ICON_IDEOLOGY_AUTOCRACY]";
+				strFreedomPressureString += ", ";
 			}
-			sTemp << sIcons;
-			strWorldIdeologyPressureString += sTemp.toUTF8();
+			strFreedomPressureString += kPlayer.getCivilizationShortDescription();
+			for (int iI = 0; iI < iCulturalDominanceOverUs; iI++)
+			{
+				strFreedomPressureString += "[ICON_IDEOLOGY_FREEDOM]";
+			}
 		}
-		iPressureForOrder += GC.getGame().GetGameLeagues()->GetPressureForIdeology(m_pPlayer->GetID(), eOrderBranch);
-		if (iPressureForOrder > 0)
+		else if (eOtherCivIdeology == eAutocracyBranch)
 		{
-			Localization::String sTemp = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_ORDER");
-			CvString sIcons = "";
-			for (int i = 0; i < iPressureForOrder; i++)
+			iPressureForAutocracy += iCulturalDominanceOverUs;
+			if (strAutocracyPressureString.size() > 0)
 			{
-				sIcons += "[ICON_IDEOLOGY_ORDER]";
+				strAutocracyPressureString += ", ";
 			}
-			sTemp << sIcons;
-			strWorldIdeologyPressureString += sTemp.toUTF8();
+			strAutocracyPressureString += kPlayer.getCivilizationShortDescription();
+			for (int iI = 0; iI < iCulturalDominanceOverUs; iI++)
+			{
+				strAutocracyPressureString += "[ICON_IDEOLOGY_AUTOCRACY]";
+			}
+		}
+		else
+		{
+			iPressureForOrder += iCulturalDominanceOverUs;
+			if (strOrderPressureString.size() > 0)
+			{
+				strOrderPressureString += ", ";
+			}
+			strOrderPressureString += kPlayer.getCivilizationShortDescription();
+			for (int iI = 0; iI < iCulturalDominanceOverUs; iI++)
+			{
+				strOrderPressureString += "[ICON_IDEOLOGY_ORDER]";
+			}
+		}
+	}
+
+	// Now compute satisfaction with this branch compared to two other ones
+	int iDissatisfaction = 0;
+	if (eCurrentIdeology == eFreedomBranch)
+	{
+		if (iPressureForFreedom >= (iPressureForAutocracy + iPressureForOrder))
+		{
+			m_eOpinion = PUBLIC_OPINION_CONTENT;
+		}
+		else
+		{
+			if (iPressureForAutocracy > iPressureForOrder)
+			{
+				m_ePreferredIdeology = eAutocracyBranch;
+			}
+			else if (iPressureForOrder >= iPressureForAutocracy)
+			{
+				m_ePreferredIdeology = eOrderBranch;
+			}
+			iDissatisfaction = (iPressureForAutocracy + iPressureForOrder) - iPressureForFreedom;
+		}
+	}
+	else if (eCurrentIdeology == eAutocracyBranch)
+	{
+		if (iPressureForAutocracy >= (iPressureForFreedom + iPressureForOrder))
+		{
+			m_eOpinion = PUBLIC_OPINION_CONTENT;
+		}
+		else
+		{
+			if (iPressureForFreedom >= iPressureForOrder)
+			{
+				m_ePreferredIdeology = eFreedomBranch;
+			}
+			else if (iPressureForOrder > iPressureForFreedom)
+			{
+				m_ePreferredIdeology = eOrderBranch;
+			}
+			iDissatisfaction = (iPressureForFreedom + iPressureForOrder) - iPressureForAutocracy;
+		}
+	}
+	else
+	{
+		if (iPressureForOrder >= (iPressureForFreedom + iPressureForAutocracy))
+		{
+			m_eOpinion = PUBLIC_OPINION_CONTENT;
+		}
+		else
+		{
+			if (iPressureForFreedom > iPressureForAutocracy)
+			{
+				m_ePreferredIdeology = eFreedomBranch;
+			}
+			else if (iPressureForAutocracy >= iPressureForFreedom)
+			{
+				m_ePreferredIdeology = eAutocracyBranch;
+			}
+			iDissatisfaction = (iPressureForFreedom + iPressureForAutocracy) - iPressureForOrder;
+		}
+	}
+
+	// Compute effects of dissatisfaction
+	int iPerCityUnhappy = 1;
+	int iUnhappyPerXPop = 10;
+	if (m_eOpinion != PUBLIC_OPINION_CONTENT)
+	{
+		if (iDissatisfaction < 3)
+		{
+			m_eOpinion = PUBLIC_OPINION_DISSIDENTS;
+		}
+		else if (iDissatisfaction < 5)
+		{
+			m_eOpinion = PUBLIC_OPINION_CIVIL_RESISTANCE;
+		}
+		else
+		{
+			m_eOpinion = PUBLIC_OPINION_REVOLUTIONARY_WAVE;
 		}
 
-		// Look at each civ
+		m_iOpinionUnhappiness = ComputePublicOpinionUnhappiness(iDissatisfaction, iPerCityUnhappy, iUnhappyPerXPop);
+
+		// Find civ exerting greatest pressure
+		int iGreatestDominance = -1;
 		for (int iLoopPlayer = 0; iLoopPlayer < MAX_MAJOR_CIVS; iLoopPlayer++)
 		{
 			CvPlayer &kPlayer = GET_PLAYER((PlayerTypes)iLoopPlayer);
-			if (iLoopPlayer != m_pPlayer->GetID() && kPlayer.isAlive() && !kPlayer.isMinorCiv())
-			{
-				PolicyBranchTypes eOtherCivIdeology = kPlayer.GetPlayerPolicies()->GetLateGamePolicyTree();
-				if (eOtherCivIdeology != NO_POLICY_BRANCH_TYPE)
-				{
-					int iCulturalDominanceOverUs = kPlayer.GetCulture()->GetInfluenceLevel(m_pPlayer->GetID()) - m_pPlayer->GetCulture()->GetInfluenceLevel((PlayerTypes)iLoopPlayer);
-					if (iCulturalDominanceOverUs > 0)
-					{
-						if (eOtherCivIdeology == eFreedomBranch)
-						{
-							iPressureForFreedom += iCulturalDominanceOverUs;
-							if (strFreedomPressureString.size() > 0)
-							{
-								strFreedomPressureString += ", ";
-							}
-							strFreedomPressureString += kPlayer.getCivilizationShortDescription();
-							for (int iI = 0; iI < iCulturalDominanceOverUs; iI++)
-							{
-								strFreedomPressureString += "[ICON_IDEOLOGY_FREEDOM]";
-							}
-						}
-						else if (eOtherCivIdeology == eAutocracyBranch)
-						{
-							iPressureForAutocracy += iCulturalDominanceOverUs;
-							if (strAutocracyPressureString.size() > 0)
-							{
-								strAutocracyPressureString += ", ";
-							}
-							strAutocracyPressureString += kPlayer.getCivilizationShortDescription();
-							for (int iI = 0; iI < iCulturalDominanceOverUs; iI++)
-							{
-								strAutocracyPressureString += "[ICON_IDEOLOGY_AUTOCRACY]";
-							}
-						}
-						else
-						{
-							iPressureForOrder += iCulturalDominanceOverUs;
-							if (strOrderPressureString.size() > 0)
-							{
-								strOrderPressureString += ", ";
-							}
-							strOrderPressureString += kPlayer.getCivilizationShortDescription();
-							for (int iI = 0; iI < iCulturalDominanceOverUs; iI++)
-							{
-								strOrderPressureString += "[ICON_IDEOLOGY_ORDER]";
-							}
-						}
-					}
-				}
-			}
-		}
+			if (iLoopPlayer == m_pPlayer->GetID() || !kPlayer.isAlive() || kPlayer.isMinorCiv())
+				continue;
+			PolicyBranchTypes eOtherCivIdeology = kPlayer.GetPlayerPolicies()->GetLateGamePolicyTree();
+			if (eOtherCivIdeology != m_ePreferredIdeology)
+				continue;
+			int iCulturalDominanceOverUs = kPlayer.GetCulture()->GetInfluenceLevel(m_pPlayer->GetID()) - m_pPlayer->GetCulture()->GetInfluenceLevel((PlayerTypes)iLoopPlayer);
+			if (iCulturalDominanceOverUs <= 0 || iCulturalDominanceOverUs <= iGreatestDominance)
+				continue;
 
-		// Now compute satisfaction with this branch compared to two other ones
-		int iDissatisfaction = 0;
-		if (eCurrentIdeology == eFreedomBranch)
-		{
-			if (iPressureForFreedom >= (iPressureForAutocracy + iPressureForOrder))
-			{
-				m_eOpinion = PUBLIC_OPINION_CONTENT;
-			}
-			else
-			{
-				if (iPressureForAutocracy > iPressureForOrder)
-				{
-					m_ePreferredIdeology = eAutocracyBranch;
-				}
-				else if (iPressureForOrder >= iPressureForAutocracy)
-				{
-					m_ePreferredIdeology = eOrderBranch;
-				}
-				iDissatisfaction = (iPressureForAutocracy + iPressureForOrder) - iPressureForFreedom;
-			}
+			iGreatestDominance = iCulturalDominanceOverUs;
+			m_eOpinionBiggestInfluence = (PlayerTypes)iLoopPlayer;
 		}
-		else if (eCurrentIdeology == eAutocracyBranch)
-		{
-			if (iPressureForAutocracy >= (iPressureForFreedom + iPressureForOrder))
-			{
-				m_eOpinion = PUBLIC_OPINION_CONTENT;
-			}
-			else
-			{
-				if (iPressureForFreedom >= iPressureForOrder)
-				{
-					m_ePreferredIdeology = eFreedomBranch;
-				}
-				else if (iPressureForOrder > iPressureForFreedom)
-				{
-					m_ePreferredIdeology = eOrderBranch;
-				}
-				iDissatisfaction = (iPressureForFreedom + iPressureForOrder) - iPressureForAutocracy;
-			}
-		}
-		else
-		{
-			if (iPressureForOrder >= (iPressureForFreedom + iPressureForAutocracy))
-			{
-				m_eOpinion = PUBLIC_OPINION_CONTENT;
-			}
-			else
-			{
-				if (iPressureForFreedom > iPressureForAutocracy)
-				{
-					m_ePreferredIdeology = eFreedomBranch;
-				}
-				else if (iPressureForAutocracy >= iPressureForFreedom)
-				{
-					m_ePreferredIdeology = eAutocracyBranch;
-				}
-				iDissatisfaction = (iPressureForFreedom + iPressureForAutocracy) - iPressureForOrder;
-			}
-		}
+	}
 
-		// Compute effects of dissatisfaction
-		int iPerCityUnhappy = 1;
-		int iUnhappyPerXPop = 10;
-		if (m_eOpinion != PUBLIC_OPINION_CONTENT)
-		{
-			if (iDissatisfaction < 3)
-			{
-				m_eOpinion = PUBLIC_OPINION_DISSIDENTS;
-			}
-			else if (iDissatisfaction < 5)
-			{
-				m_eOpinion = PUBLIC_OPINION_CIVIL_RESISTANCE;
-			}
-			else
-			{
-				m_eOpinion = PUBLIC_OPINION_REVOLUTIONARY_WAVE;
-			}
+	// Build tooltip
+	if (strFreedomPressureString.size() > 0)
+	{
+		Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_FREEDOM");
+		locText << strFreedomPressureString;
+		strFreedomPressureString = locText.toUTF8();
+	}
+	if (strAutocracyPressureString.size() > 0)
+	{
+		Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_AUTOCRACY");
+		locText << strAutocracyPressureString;
+		strAutocracyPressureString = locText.toUTF8();
+	}
+	if (strOrderPressureString.size() > 0)
+	{
+		Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_ORDER");
+		locText << strOrderPressureString;
+		strOrderPressureString = locText.toUTF8();
+	}
 
-			m_iOpinionUnhappiness = ComputePublicOpinionUnhappiness(iDissatisfaction, iPerCityUnhappy, iUnhappyPerXPop);
+	if (strWorldIdeologyPressureString.size() != 0)
+	{
+		Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_INFLUENCED_WORLD_IDEOLOGY");
+		m_strOpinionTooltip += locText.toUTF8();
+		m_strOpinionTooltip += strWorldIdeologyPressureString;
+		m_strOpinionTooltip += "[NEWLINE][NEWLINE]";
+	}
 
-			// Find civ exerting greatest pressure
-			int iGreatestDominance = -1;
-			for (int iLoopPlayer = 0; iLoopPlayer < MAX_MAJOR_CIVS; iLoopPlayer++)
-			{
-				CvPlayer &kPlayer = GET_PLAYER((PlayerTypes)iLoopPlayer);
-				if (iLoopPlayer != m_pPlayer->GetID() && kPlayer.isAlive() && !kPlayer.isMinorCiv())
-				{
-					PolicyBranchTypes eOtherCivIdeology = kPlayer.GetPlayerPolicies()->GetLateGamePolicyTree();
-					if (eOtherCivIdeology == m_ePreferredIdeology)
-					{
-						int iCulturalDominanceOverUs = kPlayer.GetCulture()->GetInfluenceLevel(m_pPlayer->GetID()) - m_pPlayer->GetCulture()->GetInfluenceLevel((PlayerTypes)iLoopPlayer);
-						if (iCulturalDominanceOverUs > 0)
-						{
-							if (iCulturalDominanceOverUs > iGreatestDominance)
-							{
-								iGreatestDominance = iCulturalDominanceOverUs;
-								m_eOpinionBiggestInfluence = (PlayerTypes)iLoopPlayer;
-							}
-						}
-					}
-				}
-			}
-		}
+	if ((strFreedomPressureString.size() + strAutocracyPressureString.size() + strOrderPressureString.size()) == 0)
+	{
+		Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_NOT_INFLUENCED");
+		m_strOpinionTooltip += locText.toUTF8();
+	}
+	else
+	{
+		Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_INFLUENCED_BY");
+		m_strOpinionTooltip += locText.toUTF8();
+		m_strOpinionTooltip += strFreedomPressureString + strAutocracyPressureString + strOrderPressureString;
+	}
 
-		// Build tooltip
-		if (strFreedomPressureString.size() > 0)
-		{
-			Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_FREEDOM");
-			locText << strFreedomPressureString;
-			strFreedomPressureString = locText.toUTF8();
-		}
-		if (strAutocracyPressureString.size() > 0)
-		{
-			Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_AUTOCRACY");
-			locText << strAutocracyPressureString;
-			strAutocracyPressureString = locText.toUTF8();
-		}
-		if (strOrderPressureString.size() > 0)
-		{
-			Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_FOR_ORDER");
-			locText << strOrderPressureString;
-			strOrderPressureString = locText.toUTF8();
-		}
+	if (m_ePreferredIdeology != NO_POLICY_BRANCH_TYPE)
+	{
+		Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_PREFERRED_IDEOLOGY");
+		locText << GC.getPolicyBranchInfo(m_ePreferredIdeology)->GetDescription();
+		m_strOpinionTooltip += locText.toUTF8();
+	}
 
-		if (strWorldIdeologyPressureString.size() != 0)
-		{
-			Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_INFLUENCED_WORLD_IDEOLOGY");
-			m_strOpinionTooltip += locText.toUTF8();
-			m_strOpinionTooltip += strWorldIdeologyPressureString;
-			m_strOpinionTooltip += "[NEWLINE][NEWLINE]";
-		}
+	if (m_iOpinionUnhappiness > 0)
+	{
+		Localization::String locText;
+		locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_UNHAPPINESS_LINE1");
+		locText << m_iOpinionUnhappiness;
+		m_strOpinionUnhappinessTooltip += locText.toUTF8();
 
-		if ((strFreedomPressureString.size() + strAutocracyPressureString.size() + strOrderPressureString.size()) == 0)
-		{
-			Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_NOT_INFLUENCED");
-			m_strOpinionTooltip += locText.toUTF8();
-		}
-		else
-		{
-			Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_INFLUENCED_BY");
-			m_strOpinionTooltip += locText.toUTF8();
-			m_strOpinionTooltip += strFreedomPressureString + strAutocracyPressureString + strOrderPressureString;
-		}
+		locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_UNHAPPINESS_LINE2");
+		m_strOpinionUnhappinessTooltip += locText.toUTF8();
 
-		if (m_ePreferredIdeology != NO_POLICY_BRANCH_TYPE)
-		{
-			Localization::String locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_PREFERRED_IDEOLOGY");
-			locText << GC.getPolicyBranchInfo(m_ePreferredIdeology)->GetDescription();
-			m_strOpinionTooltip += locText.toUTF8();
-		}
- 
-		if (m_iOpinionUnhappiness > 0)
-		{
-			Localization::String locText;
-			locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_UNHAPPINESS_LINE1");
-			locText << m_iOpinionUnhappiness;
-			m_strOpinionUnhappinessTooltip += locText.toUTF8();
+		locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_UNHAPPINESS_LINE3");
+		locText << iPerCityUnhappy;
+		m_strOpinionUnhappinessTooltip += locText.toUTF8();
 
-			locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_UNHAPPINESS_LINE2");
-			m_strOpinionUnhappinessTooltip += locText.toUTF8();
-
-			locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_UNHAPPINESS_LINE3");
-			locText << iPerCityUnhappy;
-			m_strOpinionUnhappinessTooltip += locText.toUTF8();
-
-			locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_UNHAPPINESS_LINE4");
-			locText << iUnhappyPerXPop;
-			m_strOpinionUnhappinessTooltip += locText.toUTF8();
-		}
+		locText = Localization::Lookup("TXT_KEY_CO_OPINION_TT_UNHAPPINESS_LINE4");
+		locText << iUnhappyPerXPop;
+		m_strOpinionUnhappinessTooltip += locText.toUTF8();
 	}
 }
 
@@ -3970,23 +3970,27 @@ int CvPlayerCulture::ComputePublicOpinionUnhappiness(int iDissatisfaction, int &
 	{
 		iPerCityUnhappy = 1;
 		iUnhappyPerXPop = 10;
-
 	}
 	else if (iDissatisfaction < 5)
 	{
 		iPerCityUnhappy = 2;
 		iUnhappyPerXPop = 5;
-
 	}
 	else
 	{
 		iPerCityUnhappy = 4;
 		iUnhappyPerXPop = 3;
-
 	}
 
 	CUSTOMLOG("ComputePublicOpinionUnhappiness: dissatisfaction=%i, perCity=%i, perPop=%i", iDissatisfaction, iPerCityUnhappy, iUnhappyPerXPop);
-	return max(m_pPlayer->getNumCities() * iPerCityUnhappy, m_pPlayer->getTotalPopulation() / iUnhappyPerXPop);
+	int iUnhapiness = max(m_pPlayer->getNumCities() * iPerCityUnhappy, m_pPlayer->getTotalPopulation() / iUnhappyPerXPop);
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+		if (MOD_POLICIY_PUBLIC_OPTION)
+		{
+			iUnhapiness = (100 + m_pPlayer->GetIdeologyUnhappinessModifier()) * iUnhapiness / 100;
+		}
+#endif
+	return iUnhapiness;
 }
 
 // LOGGING FUNCTIONS

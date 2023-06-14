@@ -620,6 +620,12 @@ public:
 	CvAchievementXMLEntries* GetGameAchievements() const;
 #endif
 
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::tr1::unordered_set<PolicyTypes>& getSpecialistResourcesPolicies();
+	std::tr1::unordered_set<TechTypes>& getSpecialistResourcesTechnologies();
+	void initSpecialistResourcesDependencies();
+#endif
+
 	//
 	// Global Types
 	// All type strings are upper case and are kept in this hash map for fast lookup
@@ -7836,6 +7842,11 @@ protected:
 
 #ifdef MOD_BUILDINGCLASS_COLLECTIONS
 	CvBuildingClassCollectionsXMLEntries* m_pBuildingClassCollections;
+#endif
+
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::tr1::unordered_set<PolicyTypes> m_vSpecialistResourcesPolicies;
+	std::tr1::unordered_set<TechTypes> m_vSpecialistResourcesTechnologies;
 #endif
 
 	//////////////////////////////////////////////////////////////////////////

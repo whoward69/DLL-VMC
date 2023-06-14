@@ -210,6 +210,9 @@ public:
 	bool isPermanentAllianceTrading() const;
 	void changePermanentAllianceTradingCount(int iChange);
 
+	int GetRazeSpeedModifier() const;
+	void ChangeRazeSpeedModifier(int iChange);
+
 #if defined(MOD_TECHS_CITY_WORKING)
 	int GetCityWorkingChange() const;
 	bool isCityWorkingChange() const;
@@ -480,6 +483,8 @@ protected:
 #if defined(MOD_TECHS_CITY_AUTOMATON_WORKERS)
 	int m_iCityAutomatonWorkersChange;
 #endif
+
+	int m_iRazeSpeedModifier = 0; // team level raze speed modifier
 
 	int m_iBridgeBuildingCount;
 	int m_iWaterWorkCount;

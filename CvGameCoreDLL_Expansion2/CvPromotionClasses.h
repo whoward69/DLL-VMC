@@ -138,6 +138,11 @@ public:
 	int  GetMaxHitPointsModifier() const;
 #endif
 
+#if defined(MOD_DEFENSE_MOVES_BONUS)
+	int GetMoveLeftDefenseMod() const;
+	int GetMoveUsedDefenseMod() const;
+#endif
+
 #if defined(MOD_ROG_CORE)
 	int GetMoveLfetAttackMod() const;
 	int GetMoveUsedAttackMod() const;
@@ -273,6 +278,15 @@ public:
 	int GetAllyCityStateCombatModifier() const;
 	int GetAllyCityStateCombatModifierMax() const;
 #endif
+
+#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
+	ResourceTypes GetExtraResourceType() const;
+	int GetExtraResourceCombatModifier() const;
+	int GetExtraResourceCombatModifierMax() const;
+	int GetExtraHappinessCombatModifier() const;
+	int GetExtraHappinessCombatModifierMax() const;
+#endif
+
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	bool CanCrossMountains() const;
 #endif
@@ -313,6 +327,7 @@ public:
 	bool IsCaptureDefeatedEnemy() const;
 	bool IsIgnoreGreatGeneralBenefit() const;
 	bool IsIgnoreZOC() const;
+	bool IsImmueMeleeAttack() const;
 	bool IsSapper() const;
 	bool IsCanHeavyCharge() const;
 	bool HasPostCombatPromotions() const;
@@ -547,6 +562,11 @@ protected:
 	int m_iTradeMissionInfluenceModifier;
 	int m_iTradeMissionGoldModifier;
 
+#if defined(MOD_DEFENSE_MOVES_BONUS)
+	int m_iMoveLeftDefenseMod;
+	int m_iMoveUsedDefenseMod;
+#endif
+
 #if defined(MOD_ROG_CORE)
 	int m_iMoveLfetAttackMod;
 	int m_iMoveUsedAttackMod;
@@ -672,6 +692,13 @@ protected:
 	int m_iAllyCityStateCombatModifier;
 	int m_iAllyCityStateCombatModifierMax;
 #endif
+#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
+	ResourceTypes m_eExtraResourceType;
+	int m_iExtraResourceCombatModifier;
+	int m_iExtraResourceCombatModifierMax;
+	int m_iExtraHappinessCombatModifier;
+	int m_iExtraHappinessCombatModifierMax;
+#endif
 #if defined(MOD_PROMOTIONS_CROSS_MOUNTAINS)
 	bool m_bCanCrossMountains;
 #endif
@@ -712,6 +739,7 @@ protected:
 	bool m_bCaptureDefeatedEnemy;
 	bool m_bIgnoreGreatGeneralBenefit;
 	bool m_bIgnoreZOC;
+	bool m_bImmueMeleeAttack;
 	bool m_bHasPostCombatPromotions;
 	bool m_bPostCombatPromotionsExclusive;
 	bool m_bSapper;

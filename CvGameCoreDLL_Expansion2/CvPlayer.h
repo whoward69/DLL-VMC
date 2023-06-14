@@ -875,6 +875,11 @@ public:
 	int getWorkerSpeedModifier() const;
 	void changeWorkerSpeedModifier(int iChange);
 
+#if defined(MOD_POLICY_WATER_BUILD_SPEED_MODIFIER)
+	int getWaterBuildSpeedModifier() const;
+	void changeWaterBuildSpeedModifier(int iChange);
+#endif
+
 	int getImprovementCostModifier() const;
 	void changeImprovementCostModifier(int iChange);
 
@@ -974,6 +979,14 @@ public:
 	int getHalfSpecialistFoodCount() const;
 	bool isHalfSpecialistFood() const;
 	void changeHalfSpecialistFoodCount(int iChange);
+
+#if defined(MOD_ROG_CORE)
+	void ChangeDomainFreeExperiencePerGreatWorkGlobal(DomainTypes eDomain, int iChange);
+	int GetDomainFreeExperiencePerGreatWorkGlobal(DomainTypes eDomain) const;
+
+	void ChangeDomainFreeExperience(DomainTypes eDomain, int iChange);
+	int GetDomainFreeExperience(DomainTypes) const;
+#endif
 
 	int getMilitaryFoodProductionCount() const;
 	bool isMilitaryFoodProduction() const;
@@ -1256,6 +1269,11 @@ public:
 	int getYieldRateModifier(YieldTypes eIndex) const;
 	void changeYieldRateModifier(YieldTypes eIndex, int iChange);
 
+#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+	int getGoldenAgeYieldRateModifier(YieldTypes eIndex) const;
+	void changeGoldenAgeYieldRateModifier(YieldTypes eIndex, int iChange);
+#endif
+
 	int getCapitalYieldRateModifier(YieldTypes eIndex) const;
 	void changeCapitalYieldRateModifier(YieldTypes eIndex, int iChange);
 
@@ -1351,6 +1369,13 @@ public:
 
 	int getResourceSiphoned(ResourceTypes eIndex) const;
 	void changeResourceSiphoned(ResourceTypes eIndex, int iChange);
+
+#ifdef MOD_SPECIALIST_RESOURCES
+	int getResourceFromSpecialists(ResourceTypes eIndex) const;
+	void changeResourceFromSpecialists(ResourceTypes eIndex, int iChange);
+	void UpdateResourceFromSpecialists();
+	bool MeetSpecialistResourceRequirement(const CvSpecialistInfo::ResourceInfo& info) const;
+#endif
 
 	int getResourceInOwnedPlots(ResourceTypes eIndex);
 
@@ -1931,7 +1956,26 @@ public:
 	void ChangeWarCasualtiesModifier(const int iChange);
 #endif
 
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+	int GetIdeologyPressureModifier() const;
+	int GetIdeologyUnhappinessModifier() const;
+	void ChangeIdeologyPressureModifier(int iChange);
+	void ChangeIdeologyUnhappinessModifier(int iChange);
+#endif
+
+	std::vector<PolicyYieldInfo>& GetCityWithWorldWonderYieldModifier();
+	std::vector<PolicyYieldInfo>& GetTradeRouteCityYieldModifier();
+	int GetGlobalHappinessFromFaithPercent() const;
+	void ChangeGlobalHappinessFromFaithPercent(int iChange);
+
+	int GetHappinessInWLTKDCities() const;
+	void ChangeHappinessInWLTKDCities(int iChange);
+
+	int GetHappinessFromFaith() const;
+
 	CvCity* CvPlayer::GetRandomCity();
+
+	int GetRazeSpeedModifier() const;
 
 protected:
 	class ConqueredByBoolField
@@ -2104,6 +2148,9 @@ protected:
 	FAutoVariable<int, CvPlayer> m_iFreeExperienceFromMinors;
 	FAutoVariable<int, CvPlayer> m_iFeatureProductionModifier;
 	FAutoVariable<int, CvPlayer> m_iWorkerSpeedModifier;
+#if defined(MOD_POLICY_WATER_BUILD_SPEED_MODIFIER)
+	FAutoVariable<int, CvPlayer> m_iWaterBuildSpeedModifier;
+#endif
 	FAutoVariable<int, CvPlayer> m_iImprovementCostModifier;
 	FAutoVariable<int, CvPlayer> m_iImprovementUpgradeRateModifier;
 	FAutoVariable<int, CvPlayer> m_iSpecialistProductionModifier;
@@ -2280,6 +2327,16 @@ protected:
 	std::vector<int> m_aiSiphonLuxuryCount;
 	std::vector<int> m_aiGreatWorkYieldChange;
 
+#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+	std::vector<int> m_aiGoldenAgeYieldRateModifier;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	FAutoVariable<std::vector<int>, CvPlayer> m_aiDomainFreeExperiencePerGreatWorkGlobal;
+
+	std::map<int, int> m_piDomainFreeExperience;
+#endif
+
 	typedef std::pair<uint, int> PlayerOptionEntry;
 	typedef std::vector< PlayerOptionEntry > PlayerOptionsVector;
 	FAutoVariable<PlayerOptionsVector, CvPlayer> m_aOptions;
@@ -2296,6 +2353,9 @@ protected:
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiResourceImport;
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiResourceFromMinors;
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiResourcesSiphoned;
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::vector<int> m_paiResourcesFromSpecialists;
+#endif
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiImprovementCount;
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiFreeBuildingCount;
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiFreePromotionCount;
@@ -2349,6 +2409,16 @@ protected:
 #ifdef MOD_GLOBAL_WAR_CASUALTIES
 	int m_iWarCasualtiesModifier = 0;
 #endif
+
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+	int m_iIdeologyPressureModifier = 0;
+	int m_iIdeologyUnhappinessModifier = 0;
+#endif
+
+	std::vector<PolicyYieldInfo> m_vCityWithWorldWonderYieldModifier;
+	std::vector<PolicyYieldInfo> m_vTradeRouteCityYieldModifier;
+	int m_iGlobalHappinessFromFaithPercent = 0;
+	int m_iHappinessInWLTKDCities = 0;
 
 	// Obsolete: only used to read old saves
 	FAutoVariable< std::vector< Firaxis::Array< int, NUM_YIELD_TYPES > >, CvPlayer> m_ppaaiBuildingClassYieldMod;

@@ -87,6 +87,8 @@ public:
 #endif
 
 #if defined(MOD_ROG_CORE)
+	int GetWonderProductionModifier() const;
+
 	int GetNearbyFriendHeal() const;
 
 	int GetResourceFromImprovement() const;
@@ -226,6 +228,11 @@ public:
 	int GetRouteYieldChanges(int i, int j) const;
 	int* GetRouteYieldChangesArray(int i);				// For Moose - CvWidgetData XXX
 
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	int GetTradeRouteYieldChanges(int i, int j) const;
+	int* GetTradeRouteYieldChangesArray(int i);				// For Moose - CvWidgetData XXX
+#endif
+
 	int  GetImprovementResourceYield(int i, int j) const;
 	bool IsImprovementResourceMakesValid(int i) const;
 	bool IsImprovementResourceTrade(int i) const;
@@ -277,6 +284,7 @@ protected:
 #endif
 
 #if defined(MOD_ROG_CORE)
+	int m_iWonderProductionModifier;
 	int m_iNearbyFriendHeal;
 
 	int m_iImprovementResource;
@@ -389,6 +397,10 @@ protected:
 	int** m_ppiTechNoFreshWaterYieldChanges;
 	int** m_ppiTechFreshWaterYieldChanges;
 	int** m_ppiRouteYieldChanges;
+
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	int** m_ppiTradeRouteYieldChanges;
+#endif
 
 #ifdef MOD_IMPROVEMENTS_UPGRADE
 	bool m_bEnableXP = false;

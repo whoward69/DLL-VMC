@@ -62,6 +62,9 @@ CvPolicyEntry::CvPolicyEntry(void):
 	m_iCapitalUnhappinessMod(0),
 	m_iFreeExperience(0),
 	m_iWorkerSpeedModifier(0),
+#if defined(MOD_POLICY_WATER_BUILD_SPEED_MODIFIER)
+	m_iWaterBuildSpeedModifier(0),
+#endif
 	m_iAllFeatureProduction(0),
 	m_iImprovementCostModifier(0),
 	m_iImprovementUpgradeRateModifier(0),
@@ -324,6 +327,9 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	m_iCapitalUnhappinessMod = kResults.GetInt("CapitalUnhappinessMod");
 	m_iFreeExperience = kResults.GetInt("FreeExperience");
 	m_iWorkerSpeedModifier = kResults.GetInt("WorkerSpeedModifier");
+#if defined(MOD_POLICY_WATER_BUILD_SPEED_MODIFIER)
+	m_iWaterBuildSpeedModifier = kResults.GetInt("WaterBuildSpeedModifier");
+#endif
 	m_iAllFeatureProduction = kResults.GetInt("AllFeatureProduction");
 	m_iImprovementCostModifier = kResults.GetInt("ImprovementCostModifier");
 	m_iImprovementUpgradeRateModifier = kResults.GetInt("ImprovementUpgradeRateModifier");
@@ -451,6 +457,11 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 
 #ifdef MOD_GLOBAL_WAR_CASUALTIES
 	m_iWarCasualtiesModifier = kResults.GetInt("WarCasualtiesModifier");
+#endif
+
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+	m_iIdeologyPressureModifier = kResults.GetInt("IdeologyPressureModifier");
+	m_iIdeologyUnhappinessModifier = kResults.GetInt("IdeologyUnhappinessModifier");
 #endif
 
 	const char* szFreeBuilding = kResults.GetText("FreeBuildingOnConquest");
@@ -883,6 +894,58 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 		pResults->Reset();
 	}
 
+	{
+		m_vCityWithWorldWonderYieldModifier.clear();
+		std::string sqlKey = "m_vCityWithWorldWonderYieldModifier";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if(pResults == NULL)
+		{
+			const char* szSQL = "select t2.ID, t1.Yield from Policy_CityWithWorldWonderYieldModifier t1 left join Yields t2 on t1.YieldType = t2.Type where t1.PolicyType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+
+		pResults->Bind(1, szPolicyType, false);
+
+		while(pResults->Step())
+		{
+			PolicyYieldInfo p;
+			p.eYield = (YieldTypes)pResults->GetInt(0);
+			p.iYield = pResults->GetInt(1);
+			p.ePolicy = (PolicyTypes)GetID();
+			m_vCityWithWorldWonderYieldModifier.push_back(p);
+		}
+
+		pResults->Reset();
+	}
+
+	
+	{
+		m_vTradeRouteCityYieldModifier.clear();
+		std::string sqlKey = "m_vTradeRouteCityYieldModifier";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if(pResults == NULL)
+		{
+			const char* szSQL = "select t2.ID, t1.Yield from Policy_TradeRouteCityYieldModifier t1 left join Yields t2 on t1.YieldType = t2.Type where t1.PolicyType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+
+		pResults->Bind(1, szPolicyType, false);
+
+		while(pResults->Step())
+		{
+			PolicyYieldInfo p;
+			p.eYield = (YieldTypes)pResults->GetInt(0);
+			p.iYield = pResults->GetInt(1);
+			p.ePolicy = (PolicyTypes)GetID();
+			m_vTradeRouteCityYieldModifier.push_back(p);
+		}
+
+		pResults->Reset();
+	}
+
+	m_iGlobalHappinessFromFaithPercent = kResults.GetInt("GlobalHappinessFromFaithPercent");
+	m_iHappinessInWLTKDCities = kResults.GetInt("HappinessInWLTKDCities");
+
 #if defined(MOD_RELIGION_POLICY_BRANCH_FAITH_GP)
 	//FaithPurchaseUnitClasses
 	if (MOD_RELIGION_POLICY_BRANCH_FAITH_GP)
@@ -1274,7 +1337,13 @@ int CvPolicyEntry::GetWorkerSpeedModifier() const
 {
 	return m_iWorkerSpeedModifier;
 }
-
+#if defined(MOD_POLICY_WATER_BUILD_SPEED_MODIFIER)
+/// build on water
+int CvPolicyEntry::GetWaterBuildSpeedModifier() const
+{
+	return m_iWaterBuildSpeedModifier;
+}
+#endif
 /// How much Production does removing ALL Features now give us?
 int CvPolicyEntry::GetAllFeatureProduction() const
 {
@@ -2413,6 +2482,37 @@ int CvPolicyEntry::GetWarCasualtiesModifier() const
 	return m_iWarCasualtiesModifier;
 }
 #endif
+
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+int CvPolicyEntry::GetIdeologyPressureModifier() const
+{
+	return m_iIdeologyPressureModifier;
+}
+int CvPolicyEntry::GetIdeologyUnhappinessModifier() const
+{
+	return m_iIdeologyUnhappinessModifier;
+}
+#endif
+
+std::vector<PolicyYieldInfo>& CvPolicyEntry::GetCityWithWorldWonderYieldModifier()
+{
+	return m_vCityWithWorldWonderYieldModifier;
+}
+
+std::vector<PolicyYieldInfo>& CvPolicyEntry::GetTradeRouteCityYieldModifier()
+{
+	return m_vTradeRouteCityYieldModifier;
+}
+
+int CvPolicyEntry::GetGlobalHappinessFromFaithPercent() const
+{
+	return m_iGlobalHappinessFromFaithPercent;
+}
+
+int CvPolicyEntry::GetHappinessInWLTKDCities() const
+{
+	return m_iHappinessInWLTKDCities;
+}
 
 //=====================================
 // CvPolicyBranchEntry

@@ -872,6 +872,7 @@
     <!-- Some bug fixes cannot be turned on or off, those entries (*) are just here to get their entries into the CustomMod.log file -->
     <!-- * Fixes the bug where a city doesn't work its centre tile (v45) -->
     <Row Class="1" Name="BUGFIX_CITY_CENTRE_WORKING" Value="1"/>
+    <Row Class="1" Name="BUGFIX_CITY_NEGATIVE_YIELD_MODIFIED" Value="1"/>
 	<!-- * Fixes the bug of creating a capital from a puppet city, and leaving it that way (v73) -->
     <Row Class="1" Name="BUGFIX_NO_PUPPET_CAPITALS" Value="1"/>
     <!-- * Adds missing policy events when adopting an ideology (v33) -->
@@ -951,6 +952,10 @@
     <Row Class="1" Name="BUGFIX_NO_HOVERING_REBELS" Value="1"/>
     <!-- * Fixes a bug in the pathfinder code for hovering units at the seaside! (v19) -->  
     <Row Class="1" Name="BUGFIX_HOVERING_PATHFINDER" Value="1"/>
+
+    <Row Class="1" Name="BUGFIX_BUILDING_FREEBUILDING" Value="1"/>
+
+    <Row Class="1" Name="BUGFIX_INVISIBLE_UNIT_MOVE_ENEMY_CITY" Value="1"/>
 
     <Row Class="2" Name="API_BUILDING_ENABLE_PURCHASE_UNITS" Value="1"/>
 
@@ -1060,6 +1065,10 @@
     <Row Class="6" Name="GLOBAL_TRIGGER_NEW_GOLDEN_AGE_IN_GA" Value="0"/>
     <!-- INSERT INTO Defines(Name, Value) VALUES('UNIT_MOVES_AFTER_DISEMBARK', 60); --> 
     <Row Class="6" Name="GLOBAL_UNIT_MOVES_AFTER_DISEMBARK" Value="0"/>
+    
+    <!-- table changes: -->
+    <!-- see NewTableChanges.sql -->
+    <Row Class="6" Name="POLICY_WATER_BUILD_SPEED_MODIFIER" Value="0"/>
 
     <!-- table changes: -->
     <!-- ALTER TABLE UnitPromotions ADD 'MultipleInitExperence' INTEGER DEFAULT 0; -->
@@ -1076,7 +1085,12 @@
 
     <!-- table changes: -->
     <!-- see Building_InstantYield.xml -->
-    <Row Class="6" Name="GLOBAL_BUILDING_INSTANT_YIELD" Value="0"/>
+    <!-- ALTER TABLE Buildings ADD COLUMN 'AllowInstantYield' BOOLEAN DEFAULT 0;-->
+    <Row Class="6" Name="GLOBAL_BUILDING_INSTANT_YIELD" Value="1"/>
+
+    <!-- table changes: -->
+    <!-- see Belief_YieldPerBirth.sql -->
+    <Row Class="6" Name="BELIEF_BIRTH_INSTANT_YIELD" Value="0"/>
 
     <!-- table change: NewBattleEffects.sql and PromotionCollections.sql -->
     <Row Class="6" Name="PROMOTION_SPLASH_DAMAGE" Value="0"/>
@@ -1092,6 +1106,24 @@
     <!-- Permits units to receive a combat bonus from Ally City States-->
     <!-- table change: NewTableChanges.sql -->
     <Row Class="4" Name="PROMOTIONS_ALLYCITYSTATE_BONUS" Value="0"/>
+
+    <Row Class="6" Name="SPECIALIST_RESOURCES" Value="0"/>
+    <!-- Permits units to receive defense bonus from Left/Used Moves-->
+    <!-- table change: NewTableChanges.sql -->
+    <Row Class="4" Name="DEFENSE_MOVES_BONUS" Value="0"/>
+
+    <!-- Improvement_TradeRouteYieldChanges -->
+    <!-- table change: Improvement_TradeRouteYieldChanges.sql -->
+    <Row Class="4" Name="IMPROVEMENT_TRADE_ROUTE_BONUSES" Value="0"/>
+
+    <Row Class="6" Name="TRAITS_GOLDEN_AGE_YIELD_MODIFIER" Value="0"/>
+
+    <Row Class="6" Name="POLICIY_PUBLIC_OPTION" Value="0"/>
+
+    <Row Class="6" Name="BATTLE_CAPTURE_NEW_RULE" Value="0"/>
+    <!-- Permits units to receive a combat bonus from Extra Resourses/Hapiness-->
+    <!-- table change: NewTableChanges.sql -->
+    <Row Class="4" Name="PROMOTIONS_EXTRARES_BONUS" Value="0"/>
   </CustomModOptions>
 
   <CustomModPostDefines>

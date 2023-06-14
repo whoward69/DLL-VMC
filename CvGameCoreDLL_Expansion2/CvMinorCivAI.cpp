@@ -6210,6 +6210,11 @@ int CvMinorCivAI::GetFriendshipChangePerTurnTimes100(PlayerTypes ePlayer)
 			iShift += kPlayer.GetPlayerPolicies()->GetNumericModifier(POLICYMOD_AFRAID_INFLUENCE);
 			iShift += kPlayer.GetPlayerTraits()->GetAfraidMinorPerTurnInfluence();
 		}
+
+		if (kPlayer.isGoldenAge())
+		{
+			iShift += kPlayer.GetPlayerTraits()->GetGoldenAgeMinorPerTurnInfluence();
+		}
 		
 		if (iShift != 0)
 		{

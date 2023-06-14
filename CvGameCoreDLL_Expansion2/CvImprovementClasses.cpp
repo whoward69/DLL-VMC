@@ -87,6 +87,7 @@ CvImprovementEntry::CvImprovementEntry(void):
 	m_iNearbyEnemyDamage(0),
 
 #if defined(MOD_ROG_CORE)
+	m_iWonderProductionModifier(0),
 	m_iNearbyFriendHeal(0),
 
 	m_iImprovementResource(NO_RESOURCE),
@@ -194,6 +195,11 @@ CvImprovementEntry::CvImprovementEntry(void):
 	m_ppiTechNoFreshWaterYieldChanges(NULL),
 	m_ppiTechFreshWaterYieldChanges(NULL),
 	m_ppiRouteYieldChanges(NULL),
+
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	m_ppiTradeRouteYieldChanges(NULL),
+#endif
+
 	m_paImprovementResource(NULL)
 {
 }
@@ -277,6 +283,14 @@ CvImprovementEntry::~CvImprovementEntry(void)
 	{
 		CvDatabaseUtility::SafeDelete2DArray(m_ppiRouteYieldChanges);
 	}
+
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	if(m_ppiTradeRouteYieldChanges != NULL)
+	{
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiTradeRouteYieldChanges);
+	}
+#endif
+
 }
 
 /// Read from XML file
@@ -406,6 +420,7 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 #endif
 
 #if defined(MOD_ROG_CORE)
+	m_iWonderProductionModifier = kResults.GetInt("WonderProductionModifier");
 	m_iNearbyFriendHeal = kResults.GetInt("NearbyFriendHeal");
 
 	const char* szImprovementResource = kResults.GetText("ImprovementResource");
@@ -878,6 +893,39 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 
 	}
 
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	//TradeRouteYieldChanges
+	{
+		// const int iNumRoutes = kUtility.MaxRows("Routes");
+		kUtility.Initialize2DArray(m_ppiTradeRouteYieldChanges, "Domains", "Yields");
+
+		std::string strKey = "Improvements - TradeRouteYieldChanges";
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if(pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Domains.ID as DomainID, Yield from Improvement_TradeRouteYieldChanges inner join Yields on YieldType = Yields.Type inner join Domains on Domains.Type = DomainType where ImprovementType = ?;");
+		}
+
+		pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+		while(pResults->Step())
+		{
+			const int yield_idx = pResults->GetInt(0);
+			CvAssert(yield_idx > -1);
+
+			const int domain_idx = pResults->GetInt(1);
+			CvAssert(domain_idx > -1);
+
+			const int yield = pResults->GetInt(2);
+
+			m_ppiTradeRouteYieldChanges[domain_idx][yield_idx] = yield;
+		}
+
+		pResults->Reset();
+
+	}
+#endif
+
 	return true;
 }
 
@@ -991,12 +1039,17 @@ int CvImprovementEntry::GetDefenseModifier() const
 }
 
 #if defined(MOD_ROG_CORE)
+
+int CvImprovementEntry::GetWonderProductionModifier() const
+{
+	return m_iWonderProductionModifier;
+}
+
 /// heal done to nearby our units
 int CvImprovementEntry::GetNearbyFriendHeal() const
 {
 	return m_iNearbyFriendHeal;
 }
-
 
 // Does this improvement create a resource when construced?
 int CvImprovementEntry::GetResourceFromImprovement() const
@@ -1661,6 +1714,23 @@ int* CvImprovementEntry::GetRouteYieldChangesArray(int i)				// For Moose - CvWi
 {
 	return m_ppiRouteYieldChanges[i];
 }
+
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+/// How much a type of trade route improves the yield of this improvement
+int CvImprovementEntry::GetTradeRouteYieldChanges(int i, int j) const
+{
+	CvAssertMsg(i < GC.getNumUnitDomainInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiTradeRouteYieldChanges[i][j];
+}
+
+int* CvImprovementEntry::GetTradeRouteYieldChangesArray(int i)				// For Moose - CvWidgetData XXX
+{
+	return m_ppiTradeRouteYieldChanges[i];
+}
+#endif
 
 /// How much a yield improves when a resource is present with the improvement
 int CvImprovementEntry::GetImprovementResourceYield(int i, int j) const

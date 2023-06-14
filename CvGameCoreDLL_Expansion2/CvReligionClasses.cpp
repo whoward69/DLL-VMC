@@ -6486,6 +6486,18 @@ int CvReligionAI::ScoreBeliefAtCity(CvBeliefEntry* pEntry, CvCity* pCity)
 		}
 		iRtnValue += iTempValue;
 
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+		if(MOD_BELIEF_BIRTH_INSTANT_YIELD && pEntry->AllowYieldPerBirth())
+		{
+			iTempValue = pEntry->GetYieldPerBirth(iI);
+			if(pCity->getPopulation() < 15)  // Like it more with small cities
+			{
+				iTempValue *= 2;
+			}
+			iRtnValue += iTempValue;
+		}
+#endif
+
 		// Building class yield change
 		for(int jJ = 0; jJ < GC.getNumBuildingClassInfos(); jJ++)
 		{

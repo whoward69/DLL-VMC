@@ -1198,6 +1198,12 @@ protected:
 	LUAAPIEXTN(ActivateMilitaryStrategy, void, iStrategy);
 	LUAAPIEXTN(DeactivateMilitaryStrategy, void, iStrategy);
 #endif
+
+#if defined(MOD_SPECIALIST_RESOURCES)
+	LUAAPIEXTN(GetSpecialistResources, table, eSpecialist);
+#endif
+
+	LUAAPIEXTN(GetHappinessFromFaith, int);
 };
 
 #endif //CVLUAPLAYER_H

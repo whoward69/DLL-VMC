@@ -549,7 +549,11 @@ public:
 	void changeFreeExperience(int iChange);
 
 #if defined(MOD_GLOBAL_BUILDING_INSTANT_YIELD)
-	void doInstantYieldArray(int* iInstantYieldArray);
+#if defined(MOD_BELIEF_BIRTH_INSTANT_YIELD)
+	void doRelogionInstantYield(ReligionTypes eReligion);
+	void doBeliefInstantYield(BeliefTypes eBelief);
+#endif	
+	void doBuildingInstantYield(int* iInstantYieldArray);
 	void doInstantYield(YieldTypes iYield, int iValue);
 #endif
 
@@ -763,6 +767,10 @@ public:
 
 	int getDomainFreeExperienceFromGreatWorks(DomainTypes eIndex) const;
 	
+#if defined(MOD_ROG_CORE)
+	int getDomainFreeExperienceFromGreatWorksGlobal(DomainTypes eIndex) const;
+#endif
+
 	int getDomainProductionModifier(DomainTypes eIndex) const;
 	void changeDomainProductionModifier(DomainTypes eIndex, int iChange);
 
@@ -1219,6 +1227,9 @@ protected:
 	std::vector<int> m_aiBaseYieldRateFromReligion;
 	FAutoVariable<std::vector<int>, CvCity> m_aiYieldRateModifier;
 	FAutoVariable<std::vector<int>, CvCity> m_aiYieldPerPop;
+
+
+
 
 #if defined(MOD_ROG_CORE)
 	std::map<int, int> m_aiYieldPerPopInEmpire;

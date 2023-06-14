@@ -104,6 +104,7 @@ public:
 	int GetPrereqOrTechs(int i) const;
 	int GetPrereqAndTechs(int i) const;
 
+	int GetRazeSpeedModifier() const;
 
 #if defined(MOD_ROG_CORE)
 	int GetTechYieldChanges(int i, int j) const;
@@ -160,6 +161,8 @@ private:
 	bool m_bWaterWork;
 	bool m_bTriggersArchaeologicalSites;
 	bool m_bAllowsWorldCongress;
+
+	int m_iRazeSpeedModifier = 0;
 
 	CvString m_strQuoteKey;
 	CvString m_wstrQuote;
