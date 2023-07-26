@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -81,12 +81,18 @@ struct CvArchaeologyData
 FDataStream& operator>>(FDataStream&, CvArchaeologyData&);
 FDataStream& operator<<(FDataStream&, const CvArchaeologyData&);
 
-class CvPlot
+class CvPlot : public CvGameObjectExtractable
 {
 
 public:
 	CvPlot();
 	~CvPlot();
+
+	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
+	static void RegistInstanceFunctions();
+	static void RegistStaticFunctions();
+	static CvPlot* Provide(int x, int y);
 
 	void init(int iX, int iY);
 	void uninit();
@@ -124,6 +130,7 @@ public:
 	bool isAdjacentToIce() const;
 #endif
 	bool isCoastalLand(int iMinWaterSize = -1) const;
+	bool isCoastalArea(int iMinWaterSize = -1) const;
 	int GetSizeLargestAdjacentWater() const;
 
 	bool isVisibleWorked() const;
@@ -187,6 +194,8 @@ public:
 		return isCity() ? GC.getCITY_UNIT_LIMIT() : (GC.getPLOT_UNIT_LIMIT() + getAdditionalUnitsFromImprovement());
 	}
 #endif
+
+	CvCity* GetNukeInterceptor(PlayerTypes eAttackingPlayer) const;
 
 	int getExtraMovePathCost() const;
 	void changeExtraMovePathCost(int iChange);
@@ -848,6 +857,26 @@ public:
 	bool IsAdjacentToTerrain(TerrainTypes iTerrainType) const;
 	bool IsWithinDistanceOfTerrain(TerrainTypes iTerrainType, int iDistance) const;
 #endif
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	int CvPlot::ComputeYieldFromOtherAdjacentImprovement(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int CvPlot::ComputeYieldFromAdjacentTerrain(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
+	int CvPlot::ComputeYieldFromAdjacentResource(CvImprovementEntry& kImprovement, YieldTypes eYield, TeamTypes eTeam) const;
+	int CvPlot::ComputeYieldFromAdjacentFeature(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
+#endif
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	int GetXP() const;
+	int GetXPGrowth() const;
+	int SetXP(int iNewValue, bool bDoUpdate);
+	int ChangeXP(int iChange, bool bDoUpdate);
+#endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	void ClearUnitPromotions();
+#endif
 
 protected:
 	class PlotBoolField
@@ -1007,6 +1036,10 @@ protected:
 	bool m_bIsImpassable:1;					// Cached value, do not serialize
 
 	CvArchaeologyData m_kArchaeologyData;
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	int m_iXP = 0;
+#endif
 
 	void processArea(CvArea* pArea, int iChange);
 	void doImprovementUpgrade();

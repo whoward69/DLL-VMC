@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -79,7 +79,22 @@ bool CvCitySiteEvaluator::CanFound(CvPlot* pPlot, const CvPlayer* pPlayer, bool 
 		}
 	}
 
-	if(pPlot->isImpassable() || pPlot->isMountain())
+	if (pPlot->isMountain())
+	{
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+		if (!MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY || !pPlayer || !pPlayer->GetCanFoundMountainCity())
+		{
+			return false;
+		}
+		
+		bValid = true;
+		goto DONE_bValid;
+#else
+		return false;
+#endif
+	}
+
+	if (pPlot->isImpassable())
 	{
 		return false;
 	}
@@ -136,7 +151,18 @@ bool CvCitySiteEvaluator::CanFound(CvPlot* pPlot, const CvPlayer* pPlayer, bool 
 
 	if(pPlot->isWater())
 	{
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+		if (MOD_TRAITS_CAN_FOUND_COAST_CITY && pPlot->getTerrainType() == TERRAIN_COAST && pPlayer && pPlayer->GetCanFoundCoastCity() && !pPlot->isLake())
+		{
+			bValid = true;
+			goto DONE_bValid;
+		}
+		else {
+			return false;
+		}
+#else
 		return false;
+#endif // MOD_TRAITS_CAN_FOUND_COAST_CITY
 	}
 
 	if(!bValid)
@@ -144,6 +170,7 @@ bool CvCitySiteEvaluator::CanFound(CvPlot* pPlot, const CvPlayer* pPlayer, bool 
 		return false;
 	}
 
+DONE_bValid:
 	if(!bTestVisible)
 	{
 		// look at same land mass
@@ -318,6 +345,13 @@ int CvCitySiteEvaluator::PlotFoundValue(CvPlot* pPlot, CvPlayer* pPlayer, YieldT
 
 	int iClosestCityOfMine = 999;
 	int iClosestEnemyCity = 999;
+
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	int iIncaMountainCityValue = 8;
+#endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	int iPolyCoastCityValue = 10;
+#endif
 
 	int iCapitalArea = NULL;
 
@@ -634,6 +668,20 @@ int CvCitySiteEvaluator::PlotFoundValue(CvPlot* pPlot, CvPlayer* pPlayer, YieldT
 	{
 		rtnValue += (int)rtnValue * /*15*/ GC.getBUILD_ON_RIVER_PERCENT() / 100;
 	}
+
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	if (MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY && pPlot->isMountain() && pPlayer->GetCanFoundMountainCity())
+	{
+		rtnValue += (int)rtnValue * (iIncaMountainCityValue + pPlayer->GetCurrentEra());
+	}
+#endif
+
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	if (MOD_TRAITS_CAN_FOUND_COAST_CITY && pPlot->getTerrainType() == TERRAIN_COAST && pPlayer->GetCanFoundCoastCity())
+	{
+		rtnValue += (int)rtnValue * (iPolyCoastCityValue + pPlayer->GetCurrentEra());
+	}
+#endif
 
 	if (pPlot->isCoastalLand(GC.getMIN_WATER_SIZE_FOR_OCEAN()))
 	{

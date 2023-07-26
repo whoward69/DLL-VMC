@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -24,6 +24,7 @@
 #include "CvPreGame.h"
 #include "CvAchievementUnlocker.h"
 #include "CvUnitCycler.h"
+
 
 class CvPlayerPolicies;
 class CvEconomicAI;
@@ -65,7 +66,7 @@ typedef std::vector< std::pair<UnitClassTypes, PromotionTypes> > UnitClassPromot
 typedef std::vector< std::pair<CivilizationTypes, LeaderHeadTypes> > CivLeaderArray;
 typedef FStaticVector<int, 152* 96, true, c_eCiv5GameplayDLL, 0> CvPlotsVector; // allocate the size of HUGE Terra world just in case (this is max that we ship with)
 
-class CvPlayer
+class CvPlayer : public CvGameObjectExtractable
 {
 	friend class CvPlayerPolicies;
 
@@ -75,6 +76,12 @@ public:
 
 	CvPlayer();
 	virtual ~CvPlayer();
+
+	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
+	static void RegistInstanceFunctions();
+	static void RegistStaticFunctions();
+	static CvPlayerAI* Provide(PlayerTypes player);
 
 	void init(PlayerTypes eID);
 	void setupGraphical();
@@ -116,6 +123,9 @@ public:
 	int getWorkPlotDistance() const;
 	int GetNumWorkablePlots() const;
 #endif
+
+	int GetMinorFriendCount(const bool bExcludeNonAlive) const;
+	int GetMinorAllyCount(const bool bExcludeNonAlive) const;
 
 	void DoLiberatePlayer(PlayerTypes ePlayer, int iOldCityID);
 	bool CanLiberatePlayer(PlayerTypes ePlayer);
@@ -286,6 +296,13 @@ public:
 	int getProductionModifier(ProjectTypes eProject, CvString* toolTipSink = NULL) const;
 	int getProductionModifier(SpecialistTypes eSpecialist, CvString* toolTipSink = NULL) const;
 	int getProductionModifier(ProcessTypes eProcess, CvString* toolTipSink = NULL) const;
+
+#if defined(MOD_ROG_CORE)
+	int GetWorldWonderYieldChange(int iYield);
+
+	int GetBuildingClassYieldModifier(BuildingClassTypes eBuildingClass, YieldTypes eYieldType);
+	int GetBuildingClassYieldModifier(BuildingClassTypes eBuildingClass, YieldTypes eYieldType, const vector<int>& preexistingBuildingsCount);
+#endif
 
 	int getBuildingClassPrereqBuilding(BuildingTypes eBuilding, BuildingClassTypes ePrereqBuildingClass, int iExtra = 0) const;
 	void removeBuildingClass(BuildingClassTypes eBuildingClass);
@@ -459,6 +476,11 @@ public:
 	int GetYieldPerTurnFromTraits(YieldTypes eYield) const;
 #endif
 
+
+#if defined(MOD_ROG_CORE)
+	void DoHealGlobal(int iValue);
+#endif
+
 	// Faith
 	int GetTotalFaithPerTurn() const;
 	int GetFaithPerTurnFromCities() const;
@@ -517,6 +539,8 @@ public:
 	void ChangeExtraHappinessPerLuxury(int iChange);
 
 	int GetHappinessFromLuxury(ResourceTypes eResource) const;
+	int GetAdequateLuxuryKindCount(int threshold) const;
+	int GetStrengthModifierFromAlly() const;
 
 	int GetUnhappiness(CvCity* pAssumeCityAnnexed = NULL, CvCity* pAssumeCityPuppeted = NULL) const;
 
@@ -646,6 +670,11 @@ public:
 	int GetTourismBonusTurns() const;
 	void ChangeTourismBonusTurns(int iChange);
 
+
+#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
+	int GetGoldenAgePointPerTurnFromCitys() const;
+#endif	
+
 	// Golden Age Stuff
 
 	void DoProcessGoldenAge();
@@ -677,6 +706,14 @@ public:
 
 	int getGoldenAgeModifier() const;
 	void changeGoldenAgeModifier(int iChange);
+
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+	int CvPlayer::GetGoldenAgeUnitCombatModifier() const;
+
+	void CvPlayer::SetGoldenAgeUnitCombatModifier(int iValue);
+
+	void CvPlayer::ChangeGoldenAgeUnitCombatModifier(int iValue);
+#endif
 
 	// Great People Stuff
 #if defined(MOD_GLOBAL_TRULY_FREE_GP)
@@ -785,7 +822,7 @@ public:
 
 	// Unit Killed in Combat
 #if defined(MOD_API_EXTENSIONS)
-	void DoUnitKilledCombat(CvUnit* pKillingUnit, PlayerTypes eKilledPlayer, UnitTypes eUnitType);
+	void DoUnitKilledCombat(CvUnit* pKillingUnit, PlayerTypes eKilledPlayer, UnitTypes eUnitType, CvUnit* pKilledUnit);
 #else
 	void DoUnitKilledCombat(PlayerTypes eKilledPlayer, UnitTypes eUnit);
 #endif
@@ -837,6 +874,11 @@ public:
 
 	int getWorkerSpeedModifier() const;
 	void changeWorkerSpeedModifier(int iChange);
+
+#if defined(MOD_POLICY_WATER_BUILD_SPEED_MODIFIER)
+	int getWaterBuildSpeedModifier() const;
+	void changeWaterBuildSpeedModifier(int iChange);
+#endif
 
 	int getImprovementCostModifier() const;
 	void changeImprovementCostModifier(int iChange);
@@ -938,6 +980,14 @@ public:
 	bool isHalfSpecialistFood() const;
 	void changeHalfSpecialistFoodCount(int iChange);
 
+#if defined(MOD_ROG_CORE)
+	void ChangeDomainFreeExperiencePerGreatWorkGlobal(DomainTypes eDomain, int iChange);
+	int GetDomainFreeExperiencePerGreatWorkGlobal(DomainTypes eDomain) const;
+
+	void ChangeDomainFreeExperience(DomainTypes eDomain, int iChange);
+	int GetDomainFreeExperience(DomainTypes) const;
+#endif
+
 	int getMilitaryFoodProductionCount() const;
 	bool isMilitaryFoodProduction() const;
 	void changeMilitaryFoodProductionCount(int iChange);
@@ -1024,6 +1074,12 @@ public:
 	int GetOriginalCapitalX() const;
 	int GetOriginalCapitalY() const;
 
+
+
+	int GetYieldFromProcessModifierGlobal(YieldTypes eIndex1) const;
+	void ChangeYieldFromProcessModifierGlobal(YieldTypes eIndex, int iChange);
+
+
 	bool IsHasLostCapital() const;
 	void SetHasLostCapital(bool bValue, PlayerTypes eConqueror);
 #if defined(MOD_GLOBAL_NO_CONQUERED_SPACESHIPS)
@@ -1104,6 +1160,8 @@ public:
 	bool isMinorCiv() const;
 #if defined(MOD_API_EXTENSIONS)
 	bool isMajorCiv() const;
+	BuildingTypes GetCivBuilding(BuildingClassTypes eBuildingClass) const;
+	UnitTypes GetCivUnit(UnitClassTypes eUnitClass) const;
 #endif
 	bool IsHasBetrayedMinorCiv() const;
 	void SetHasBetrayedMinorCiv(bool bValue);
@@ -1211,11 +1269,21 @@ public:
 	int getYieldRateModifier(YieldTypes eIndex) const;
 	void changeYieldRateModifier(YieldTypes eIndex, int iChange);
 
+#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+	int getGoldenAgeYieldRateModifier(YieldTypes eIndex) const;
+	void changeGoldenAgeYieldRateModifier(YieldTypes eIndex, int iChange);
+#endif
+
 	int getCapitalYieldRateModifier(YieldTypes eIndex) const;
 	void changeCapitalYieldRateModifier(YieldTypes eIndex, int iChange);
 
 	int getExtraYieldThreshold(YieldTypes eIndex) const;
 	void updateExtraYieldThreshold(YieldTypes eIndex);
+
+#if defined(MOD_ROG_CORE)
+	int GetImprovementExtraYield(ImprovementTypes eImprovement, YieldTypes eYield) const;
+	void ChangeImprovementExtraYield(ImprovementTypes eImprovement, YieldTypes eYield, int iChange);
+#endif
 
 	// Science
 
@@ -1302,6 +1370,13 @@ public:
 	int getResourceSiphoned(ResourceTypes eIndex) const;
 	void changeResourceSiphoned(ResourceTypes eIndex, int iChange);
 
+#ifdef MOD_SPECIALIST_RESOURCES
+	int getResourceFromSpecialists(ResourceTypes eIndex) const;
+	void changeResourceFromSpecialists(ResourceTypes eIndex, int iChange);
+	void UpdateResourceFromSpecialists();
+	bool MeetSpecialistResourceRequirement(const CvSpecialistInfo::ResourceInfo& info) const;
+#endif
+
 	int getResourceInOwnedPlots(ResourceTypes eIndex);
 
 	int getTotalImprovementsBuilt() const;
@@ -1325,6 +1400,8 @@ public:
 	void changeUnitCombatFreeExperiences(UnitCombatTypes eIndex, int iChange);
 
 	int getUnitClassCount(UnitClassTypes eIndex) const;
+	int getUnitCountFromHasPromotion(PromotionTypes ePromotion) const;
+	void getUnitsListFromHasPromotion(PromotionTypes ePromotion, std::vector<const CvUnit*>& unitsListFromHasPromotion) const;
 	bool isUnitClassMaxedOut(UnitClassTypes eIndex, int iExtra = 0) const;
 	void changeUnitClassCount(UnitClassTypes eIndex, int iChange);
 	int getUnitClassMaking(UnitClassTypes eIndex) const;
@@ -1516,6 +1593,16 @@ public:
 	void SetCityStrengthMod(int iValue);
 	void ChangeCityStrengthMod(int iChange);
 
+#if defined(MOD_ROG_CORE)
+	int GetGlobalCityStrengthMod() const;
+	void SetGlobalCityStrengthMod(int iValue);
+	void ChangeGlobalCityStrengthMod(int iChange);
+
+	int GetGlobalRangedStrikeModifier() const;
+	void SetGlobalRangedStrikeModifier(int iValue);
+	void ChangeGlobalRangedStrikeModifier(int iChange);
+#endif
+
 	int GetCityGrowthMod() const;
 	void SetCityGrowthMod(int iValue);
 	void ChangeCityGrowthMod(int iChange);
@@ -1613,6 +1700,10 @@ public:
 
 	void DoAnnounceReligionAdoption();
 	// End New Religion Stuff
+
+#if defined(MOD_ROG_CORE)
+	std::vector<int> GetTotalBuildingCount(bool bIncludePuppets = false) const;
+#endif
 
 	int GetNumFreeTechs() const;
 	void SetNumFreeTechs(int iValue);
@@ -1781,6 +1872,19 @@ public:
 	int CountAllWorkedTerrain(TerrainTypes iTerrainType);
 #endif
 
+#if defined(MOD_ROG_CORE)
+	int CountAllOriginalCapitalCity();
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int GetNumWorldWonders();
+#endif
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	void SetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iValue);
+	void ChangePerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iChange);
+	int GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType) const;
+#endif
+
 	// for serialization
 	virtual void Read(FDataStream& kStream);
 	virtual void Write(FDataStream& kStream) const;
@@ -1819,11 +1923,59 @@ public:
 	std::string debugDump(const FAutoVariableBase&) const;
 	std::string stackTraceRemark(const FAutoVariableBase&) const;
 
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	int GetMinorsTradeRouteYieldRate(const YieldTypes eYieldType) const;
+	void ChangeMinorsTradeRouteYieldRate(const YieldTypes eYieldType, const int iChange);
+
+	int GetInternalTradeRouteDestYieldRate(const YieldTypes eYieldType) const;
+	void ChangeInternalTradeRouteDestYieldRate(const YieldTypes eYieldType, const int iChange);
+#endif
+
 #if !defined(NO_ACHIEVEMENTS)
 	CvPlayerAchievements& GetPlayerAchievements(){return m_kPlayerAchievements;}
 #endif
 
 	bool hasTurnTimerExpired();
+
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	bool GetCanFoundMountainCity() const;
+#endif
+
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	bool GetCanFoundCoastCity() const;
+#endif
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int GetWarCasualtiesCounter() const;
+	void ChangeWarCasualtiesCounter(const int iChange);
+	void SetWarCasualtiesCounter(const int iValue);
+	bool CheckAndUpdateWarCasualtiesCounter();
+
+	int GetWarCasualtiesModifier() const;
+	void SetWarCasualtiesModifier(const int iValue);
+	void ChangeWarCasualtiesModifier(const int iChange);
+#endif
+
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+	int GetIdeologyPressureModifier() const;
+	int GetIdeologyUnhappinessModifier() const;
+	void ChangeIdeologyPressureModifier(int iChange);
+	void ChangeIdeologyUnhappinessModifier(int iChange);
+#endif
+
+	std::vector<PolicyYieldInfo>& GetCityWithWorldWonderYieldModifier();
+	std::vector<PolicyYieldInfo>& GetTradeRouteCityYieldModifier();
+	int GetGlobalHappinessFromFaithPercent() const;
+	void ChangeGlobalHappinessFromFaithPercent(int iChange);
+
+	int GetHappinessInWLTKDCities() const;
+	void ChangeHappinessInWLTKDCities(int iChange);
+
+	int GetHappinessFromFaith() const;
+
+	CvCity* CvPlayer::GetRandomCity();
+
+	int GetRazeSpeedModifier() const;
 
 protected:
 	class ConqueredByBoolField
@@ -1928,6 +2080,7 @@ protected:
 	int m_iCultureBonusTurns;
 	int m_iTourismBonusTurns;
 	FAutoVariable<int, CvPlayer> m_iGoldenAgeProgressMeter;
+	FAutoVariable<int, CvPlayer> m_iGoldenAgeUnitCombatModifier;
 	FAutoVariable<int, CvPlayer> m_iGoldenAgeMeterMod;
 	FAutoVariable<int, CvPlayer> m_iNumGoldenAges;
 	FAutoVariable<int, CvPlayer> m_iGoldenAgeTurns;
@@ -1995,6 +2148,9 @@ protected:
 	FAutoVariable<int, CvPlayer> m_iFreeExperienceFromMinors;
 	FAutoVariable<int, CvPlayer> m_iFeatureProductionModifier;
 	FAutoVariable<int, CvPlayer> m_iWorkerSpeedModifier;
+#if defined(MOD_POLICY_WATER_BUILD_SPEED_MODIFIER)
+	FAutoVariable<int, CvPlayer> m_iWaterBuildSpeedModifier;
+#endif
 	FAutoVariable<int, CvPlayer> m_iImprovementCostModifier;
 	FAutoVariable<int, CvPlayer> m_iImprovementUpgradeRateModifier;
 	FAutoVariable<int, CvPlayer> m_iSpecialistProductionModifier;
@@ -2084,6 +2240,12 @@ protected:
 	FAutoVariable<int, CvPlayer> m_iCapitalGrowthMod;
 	FAutoVariable<int, CvPlayer> m_iNumPlotsBought;
 	FAutoVariable<int, CvPlayer> m_iPlotGoldCostMod;
+
+#if defined(MOD_ROG_CORE)
+	FAutoVariable<int, CvPlayer> m_iGlobalCityStrengthMod;
+	FAutoVariable<int, CvPlayer> m_iGlobalRangedStrikeModifier;
+#endif
+
 #if defined(MOD_TRAITS_CITY_WORKING) || defined(MOD_BUILDINGS_CITY_WORKING) || defined(MOD_POLICIES_CITY_WORKING) || defined(MOD_TECHS_CITY_WORKING)
 	int m_iCityWorkingChange;
 #endif
@@ -2149,6 +2311,10 @@ protected:
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiCapitalYieldChange;
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiCapitalYieldPerPopChange;
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiSeaPlotYield;
+
+	FAutoVariable<std::vector<int>, CvPlayer> m_aiYieldFromProcessModifierGlobal;
+
+
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiYieldRateModifier;
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiCapitalYieldRateModifier;
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiExtraYieldThreshold;
@@ -2160,6 +2326,16 @@ protected:
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiMinorFriendshipAnchors; // DEPRECATED
 	std::vector<int> m_aiSiphonLuxuryCount;
 	std::vector<int> m_aiGreatWorkYieldChange;
+
+#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+	std::vector<int> m_aiGoldenAgeYieldRateModifier;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	FAutoVariable<std::vector<int>, CvPlayer> m_aiDomainFreeExperiencePerGreatWorkGlobal;
+
+	std::map<int, int> m_piDomainFreeExperience;
+#endif
 
 	typedef std::pair<uint, int> PlayerOptionEntry;
 	typedef std::vector< PlayerOptionEntry > PlayerOptionsVector;
@@ -2177,6 +2353,9 @@ protected:
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiResourceImport;
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiResourceFromMinors;
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiResourcesSiphoned;
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::vector<int> m_paiResourcesFromSpecialists;
+#endif
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiImprovementCount;
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiFreeBuildingCount;
 	FAutoVariable<std::vector<int>, CvPlayer> m_paiFreePromotionCount;
@@ -2198,6 +2377,11 @@ protected:
 #if defined(MOD_API_UNIFIED_YIELDS) && defined(MOD_API_PLOT_YIELDS)
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppiPlotYieldChange;
 #endif
+
+#if defined(MOD_ROG_CORE)
+	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppiImprovementYieldChange;
+#endif
+
 #if defined(MOD_API_UNIFIED_YIELDS)
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppiFeatureYieldChange;
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppiResourceYieldChange;
@@ -2216,6 +2400,25 @@ protected:
 	FAutoVariable< std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > >, CvPlayer> m_ppiBuildingClassYieldChange;
 #endif
 	FAutoVariable< std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > >, CvPlayer> m_ppaaiImprovementYieldChange;
+
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	Firaxis::Array<int, YieldTypes::NUM_YIELD_TYPES> m_piMinorsTradeRouteYieldRate;
+	Firaxis::Array<int, YieldTypes::NUM_YIELD_TYPES> m_piInternalTradeRouteDestYieldRate;
+#endif
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int m_iWarCasualtiesModifier = 0;
+#endif
+
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+	int m_iIdeologyPressureModifier = 0;
+	int m_iIdeologyUnhappinessModifier = 0;
+#endif
+
+	std::vector<PolicyYieldInfo> m_vCityWithWorldWonderYieldModifier;
+	std::vector<PolicyYieldInfo> m_vTradeRouteCityYieldModifier;
+	int m_iGlobalHappinessFromFaithPercent = 0;
+	int m_iHappinessInWLTKDCities = 0;
 
 	// Obsolete: only used to read old saves
 	FAutoVariable< std::vector< Firaxis::Array< int, NUM_YIELD_TYPES > >, CvPlayer> m_ppaaiBuildingClassYieldMod;
@@ -2351,6 +2554,14 @@ protected:
 	friend const CvUnit* GetPlayerUnit(const IDInfo& unit);
 
 	CvPlayerAchievements m_kPlayerAchievements;
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int m_iWarCasualtiesCounter = 0;
+#endif
+
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	int m_piPerMajorReligionFollowerYieldModifier[NUM_YIELD_TYPES];
+#endif
 };
 
 extern bool CancelActivePlayerEndTurn();

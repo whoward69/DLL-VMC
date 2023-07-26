@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -336,6 +336,9 @@ public:
 	bool getUpdateGlobal(BattleUnitTypes unitType) const;
 	void setUpdateGlobal(BattleUnitTypes unitType, bool bUpdateGlobal);
 
+	BattleTypeTypes getBattleType() const;
+	void setBattleType(const BattleTypeTypes battleType);
+
 	bool getVisualizeCombat() const;
 	void setVisualizeCombat(bool bVisualize);
 
@@ -347,6 +350,8 @@ public:
 	int getDamageMemberCount() const;
 	int getMaxDamageMemberCount() const;
 	void setDamageMemberCount(int iDamageMemberCount);
+
+	void setBattleUnitInfo(BattleUnitTypes unitType, int& iPlayerID, int& iUnitOrCityID, bool& bIsCity, int& originalInflictDamage) const;
 
 protected:
 	CvUnit* 	m_pUnits[BATTLE_UNIT_COUNT];					//!< The units involved
@@ -374,6 +379,8 @@ protected:
 	bool		m_bVisualize;									//!< The combat should be visualized
 
 	bool		m_bAttackedAdvancedVis;							//!< If true, the attacker has already advanced its visualization of the unit (happened during combat sim).
+
+	BattleTypeTypes m_eBattleType;								//!< The type of battle that is occurring
 
 	CvCombatMemberEntry	m_kCombatMembers[BATTLE_UNIT_COUNT];
 	// Units/cities damaged in the attack.  0 for most attacks that have just the normal defenders.  Primarily used with area attacks such as the various nuclear attacks.

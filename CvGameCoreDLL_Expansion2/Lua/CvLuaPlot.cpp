@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -20,14 +20,51 @@
 #include "CvLuaUnit.h"
 #include "../CvGameCoreUtils.h"
 
+#include "NetworkMessageUtil.h"
+
 //Utility macro for registering methods
 #define Method(Name)			\
 	lua_pushcclosure(L, l##Name, 0);	\
 	lua_setfield(L, t, #Name);
 
+void CvLuaPlot::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetFeatureType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetTerrainType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetArea);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetOwnershipDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetImprovementDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetUpgradeProgress);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetStartingPlot);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetNEOfRiver);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetWOfRiver);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetNWOfRiver);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetOwner);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetPlotType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetResourceType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetNumResource);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetImprovementType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetImprovementPillaged);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetRouteType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetRevealed);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetScriptData);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetContinentArtType);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lSetCityPurchaseID);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeExtraMovePathCost);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeOwnershipDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeImprovementDuration);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeUpgradeProgress);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeNumResource);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeVisibilityCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeBuildProgress);
+	REGIST_STATIC_FUNCTION(CvLuaPlot::lChangeInvisibleVisibilityCount);
+}
+
 //------------------------------------------------------------------------------
 void CvLuaPlot::PushMethods(lua_State* L, int t)
 {
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+
 	Method(CanHaveFeature);
 	Method(GetFeatureType);
 	Method(GetTerrainType);
@@ -370,6 +407,16 @@ void CvLuaPlot::PushMethods(lua_State* L, int t)
 	Method(IsAdjacentToTerrain);
 	Method(IsWithinDistanceOfTerrain);
 #endif
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	Method(GetXP);
+	Method(GetXPGrowth);
+	Method(SetXP);
+	Method(ChangeXP);
+#endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	Method(ClearUnitPromotions);
+#endif
 }
 //------------------------------------------------------------------------------
 void CvLuaPlot::HandleMissingInstance(lua_State* L)
@@ -470,11 +517,10 @@ int CvLuaPlot::lSetFeatureType(lua_State* L)
 	const int featureType = lua_tointeger(L, 2);
 	const int variety = luaL_optinteger(L, 3, -1);
 
-
 	pkPlot->setFeatureType((FeatureTypes)featureType, variety);
-
 	return 0;
 }
+
 //------------------------------------------------------------------------------
 int CvLuaPlot::lSetTerrainType(lua_State* L)
 {
@@ -1456,6 +1502,7 @@ int CvLuaPlot::lSetResourceType(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::setResourceType);
 }
+
 //------------------------------------------------------------------------------
 //int getNumResource();
 int CvLuaPlot::lGetNumResource(lua_State* L)
@@ -1487,6 +1534,8 @@ int CvLuaPlot::lSetImprovementType(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::setImprovementType);
 }
+
+
 //------------------------------------------------------------------------------
 //void setImprovementType(bool b);
 int CvLuaPlot::lSetImprovementPillaged(lua_State* L)
@@ -1505,6 +1554,7 @@ int CvLuaPlot::lSetRouteType(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::setRouteType);
 }
+
 //------------------------------------------------------------------------------
 int CvLuaPlot::lIsRoutePillaged(lua_State* L)
 {
@@ -1808,7 +1858,7 @@ int CvLuaPlot::lSetRevealed(lua_State* L)
 	const bool bTerrainOnly = luaL_optint(L, 4, 0);
 	const TeamTypes eFromTeam = (TeamTypes)luaL_optint(L, 5, NO_TEAM);
 #if defined(MOD_API_EXTENSIONS)
-	if(lua_gettop(L) >= 6)
+	if (lua_gettop(L) >= 6)
 	{
 		CvUnit* pkUnit = CvLuaUnit::GetInstance(L, 6);
 		pkPlot->setRevealed(eTeam, bNewValue, pkUnit, bTerrainOnly, eFromTeam);
@@ -1820,9 +1870,9 @@ int CvLuaPlot::lSetRevealed(lua_State* L)
 #else
 	pkPlot->setRevealed(eTeam, bNewValue, bTerrainOnly, eFromTeam);
 #endif
-
 	return 0;
 }
+
 //------------------------------------------------------------------------------
 //ImprovementTypes getRevealedImprovementType(TeamTypes eTeam, bool bDebug);
 int CvLuaPlot::lGetRevealedImprovementType(lua_State* L)
@@ -1865,6 +1915,7 @@ int CvLuaPlot::lChangeBuildProgress(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlot::changeBuildProgress);
 }
+
 //------------------------------------------------------------------------------
 //int getInvisibleVisibilityCount(TeamTypes eTeam, InvisibleTypes eInvisible);
 int CvLuaPlot::lGetInvisibleVisibilityCount(lua_State* L)
@@ -2149,6 +2200,25 @@ int CvLuaPlot::lSetCityPurchaseID(lua_State* L)
 	return BasicLuaMethod(L, &CvPlot::SetCityPurchaseID);
 }
 
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+int CvLuaPlot::lGetXP(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlot::GetXP);
+}
+int CvLuaPlot::lGetXPGrowth(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlot::GetXPGrowth);
+}
+int CvLuaPlot::lSetXP(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlot::SetXP);
+}
+int CvLuaPlot::lChangeXP(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlot::ChangeXP);
+}
+#endif
+
 #if defined(MOD_API_LUA_EXTENSIONS)
 //------------------------------------------------------------------------------
 int CvLuaPlot::lAddMessage(lua_State* L)
@@ -2223,4 +2293,8 @@ LUAAPIIMPL(Plot, IsAdjacentToResource)
 LUAAPIIMPL(Plot, IsWithinDistanceOfResource)
 LUAAPIIMPL(Plot, IsAdjacentToTerrain)
 LUAAPIIMPL(Plot, IsWithinDistanceOfTerrain)
+#endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+LUAAPIIMPL(Plot, ClearUnitPromotions)
 #endif

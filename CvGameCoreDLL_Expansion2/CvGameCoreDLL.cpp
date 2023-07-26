@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -10,6 +10,7 @@
 #include "ICvDLLUserInterface.h"
 #include "Win32/FDebugHelper.h"
 #include "CvDllContext.h"
+
 
 // must be included after all other headers
 #include "LintFree.h"
@@ -24,6 +25,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
                       DWORD  ul_reason_for_call,
                       LPVOID)
 {
+	srand(17657230687);
 	switch(ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:

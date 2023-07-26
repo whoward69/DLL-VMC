@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -126,9 +126,14 @@ public:
 	int GetTradeRouteResourceModifier() const;
 	int GetUniqueLuxuryCities() const;
 	int GetUniqueLuxuryQuantity() const;
+	int GetAllyCityStateCombatModifier() const;
+	int GetAllyCityStateCombatModifierMax() const;
+	int	GetAdequateLuxuryCompleteQuestInfluenceModifier() const;
+	int GetAdequateLuxuryCompleteQuestInfluenceModifierMax() const;
 	int GetWorkerSpeedModifier() const;
 	int GetAfraidMinorPerTurnInfluence() const;
 	int GetLandTradeRouteRangeBonus() const;
+	int GetGoldenAgeMinorPerTurnInfluence() const;
 #if defined(MOD_TRAITS_TRADE_ROUTE_BONUSES)
 	int GetSeaTradeRouteRangeBonus() const;
 #endif
@@ -180,6 +185,9 @@ public:
 	int GetYieldChangePerTradePartner(int i) const;
 	int GetYieldChangeIncomingTradeRoute(int i) const;
 	int GetYieldModifier(int i) const;
+#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+	int GetGoldenAgeYieldModifier(int i) const;
+#endif
 	int GetStrategicResourceQuantityModifier(int i) const;
 	int GetObsoleteTech() const;
 	int GetPrereqTech() const;
@@ -230,7 +238,18 @@ public:
 	bool IsEnabledByPolicy(PlayerTypes ePlayer);
 #endif
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	bool IsCanFoundMountainCity() const;
+#endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	bool IsCanFoundCoastCity() const;
+#endif
+
 	bool NoTrain(UnitClassTypes eUnitClassType);
+
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	int GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYield) const;
+#endif
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
@@ -314,9 +333,14 @@ protected:
 	int m_iTradeRouteResourceModifier;
 	int m_iUniqueLuxuryCities;
 	int m_iUniqueLuxuryQuantity;
+	int m_iAllyCityStateCombatModifier;
+	int m_iAllyCityStateCombatModifierMax;
+	int	m_iAdequateLuxuryCompleteQuestInfluenceModifier;
+	int m_iAdequateLuxuryCompleteQuestInfluenceModifierMax;
 	int m_iWorkerSpeedModifier;
 	int m_iAfraidMinorPerTurnInfluence;
 	int m_iLandTradeRouteRangeBonus;
+	int m_iGoldenAgeMinorPerTurnInfluence;
 #if defined(MOD_TRAITS_TRADE_ROUTE_BONUSES)
 	int m_iSeaTradeRouteRangeBonus;
 #endif
@@ -356,6 +380,12 @@ protected:
 	bool m_bUniqueLuxuryRequiresNewArea;
 	bool m_bRiverTradeRoad;
 	bool m_bAngerFreeIntrusionOfCityStates;
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	bool m_bCanFoundMountainCity;
+#endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	bool m_bCanFoundCoastCity;
+#endif
 
 	CvString m_strShortDescription;
 
@@ -367,6 +397,9 @@ protected:
 	int* m_paiYieldChangePerTradePartner;
 	int* m_paiYieldChangeIncomingTradeRoute;
 	int* m_paiYieldModifier;
+#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+	int* m_paiGoldenAgeYieldModifier;
+#endif
 	int* m_piStrategicResourceQuantityModifier;
 	int* m_piResourceQuantityModifiers;
 	int* m_piMovesChangeUnitCombats;
@@ -401,6 +434,10 @@ protected:
 	std::multimap<int, int> m_FreePromotionUnitCombats;
 	std::vector<FreeResourceXCities> m_aFreeResourceXCities;
 	std::vector<bool> m_abNoTrainUnitClass;
+
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	int m_piPerMajorReligionFollowerYieldModifier[NUM_YIELD_TYPES];
+#endif
 
 private:
 	CvTraitEntry(const CvTraitEntry&);
@@ -726,6 +763,22 @@ public:
 	{
 		return m_iUniqueLuxuryQuantity;
 	}
+	int GetAllyCityStateCombatModifier() const
+	{
+		return m_iAllyCityStateCombatModifier;
+	}
+	int GetAllyCityStateCombatModifierMax() const
+	{
+		return m_iAllyCityStateCombatModifierMax;
+	}
+	int GetAdequateLuxuryCompleteQuestInfluenceModifier() const
+	{
+		return m_iAdequateLuxuryCompleteQuestInfluenceModifier;
+	}
+		int GetAdequateLuxuryCompleteQuestInfluenceModifierMax() const
+	{
+		return m_iAdequateLuxuryCompleteQuestInfluenceModifierMax;
+	}
 	int GetWorkerSpeedModifier() const
 	{
 		return m_iWorkerSpeedModifier;
@@ -737,6 +790,10 @@ public:
 	int GetLandTradeRouteRangeBonus() const
 	{
 		return m_iLandTradeRouteRangeBonus;
+	}
+	int GetGoldenAgeMinorPerTurnInfluence() const
+	{
+		return m_iGoldenAgeMinorPerTurnInfluence;
 	}
 #if defined(MOD_TRAITS_TRADE_ROUTE_BONUSES)
 	int GetSeaTradeRouteRangeBonus() const
@@ -876,6 +933,12 @@ public:
 	{
 		return m_iYieldRateModifier[(int)eYield];
 	};
+#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+	int GetGoldenAgeYieldRateModifier(YieldTypes eYield) const
+	{
+		return m_iGoldenAgeYieldRateModifier[(int)eYield];
+	};
+#endif
 	int GetStrategicResourceQuantityModifier(TerrainTypes eTerrain) const
 	{
 		return m_iStrategicResourceQuantityModifier[(int)eTerrain];
@@ -967,6 +1030,13 @@ public:
 
 	bool NoTrain(UnitClassTypes eUnitClassType);
 
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	int GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType) const
+	{
+		return m_piPerMajorReligionFollowerYieldModifier[eYieldType];
+	}
+#endif
+
 	// Maya calendar routines
 	bool IsUsingMayaCalendar() const;
 	bool IsEndOfMayaLongCount();
@@ -977,6 +1047,14 @@ public:
 	int GetUnitBaktun(UnitTypes eUnit) const;
 	void SetUnitBaktun(UnitTypes eUnit);
 	bool IsFreeMayaGreatPersonChoice() const;
+
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	bool IsCanFoundMountainCity() const;
+#endif
+
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	bool IsCanFoundCoastCity() const;
+#endif
 
 	// Serialization
 	void Read(FDataStream& kStream);
@@ -1065,10 +1143,15 @@ private:
 	int m_iTradeRouteResourceModifier;
 	int m_iUniqueLuxuryCities;
 	int m_iUniqueLuxuryQuantity;
-	int m_iUniqueLuxuryCitiesPlaced;  
+	int m_iAllyCityStateCombatModifier;
+	int m_iAllyCityStateCombatModifierMax;
+	int m_iUniqueLuxuryCitiesPlaced;
+	int	m_iAdequateLuxuryCompleteQuestInfluenceModifier;
+	int m_iAdequateLuxuryCompleteQuestInfluenceModifierMax;
 	int m_iWorkerSpeedModifier;
 	int m_iAfraidMinorPerTurnInfluence; 
 	int m_iLandTradeRouteRangeBonus;
+	int m_iGoldenAgeMinorPerTurnInfluence;
 #if defined(MOD_TRAITS_TRADE_ROUTE_BONUSES)
 	int m_iSeaTradeRouteRangeBonus;
 #endif
@@ -1105,6 +1188,13 @@ private:
 	bool m_bRiverTradeRoad;
 	bool m_bAngerFreeIntrusionOfCityStates;
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	bool m_bCanFoundMountainCity;
+#endif
+#ifdef MOD_TRAITS_CAN_FOUND_COAST_CITY
+	bool m_bCanFoundCoastCity;
+#endif
+
 	UnitTypes m_eCampGuardType;
 	unsigned int m_uiFreeUnitIndex;
 	TechTypes m_eFreeUnitPrereqTech;
@@ -1119,6 +1209,9 @@ private:
 	int m_iYieldChangePerTradePartner[NUM_YIELD_TYPES];
 	int m_iYieldChangeIncomingTradeRoute[NUM_YIELD_TYPES];
 	int m_iYieldRateModifier[NUM_YIELD_TYPES];
+#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+	int m_iGoldenAgeYieldRateModifier[NUM_YIELD_TYPES];
+#endif
 	int m_iStrategicResourceQuantityModifier[NUM_TERRAIN_TYPES];
 	std::vector<int> m_aiResourceQuantityModifier;
 	std::vector<bool> m_abNoTrain;
@@ -1165,6 +1258,10 @@ private:
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppaaiUnimprovedFeatureYieldChange;
 
 	std::vector<FreeResourceXCities> m_aFreeResourceXCities;
+
+#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
+	int m_piPerMajorReligionFollowerYieldModifier[NUM_YIELD_TYPES];
+#endif
 };
 
 #endif //CIV5_TRAIT_CLASSES_H

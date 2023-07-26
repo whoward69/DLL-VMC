@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -1086,18 +1086,18 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 	BuildTypes eBuild;
 	BuildTypes eOriginalBuildType;
 	int iBuildIndex;
-	for(iBuildIndex = 0; iBuildIndex < GC.getNumBuildInfos(); iBuildIndex++)
+	for (iBuildIndex = 0; iBuildIndex < GC.getNumBuildInfos(); iBuildIndex++)
 	{
 		eBuild = (BuildTypes)iBuildIndex;
 		eOriginalBuildType = eBuild;
 		CvBuildInfo* pkBuild = GC.getBuildInfo(eBuild);
-		if(pkBuild == NULL)
+		if (pkBuild == NULL)
 		{
 			continue;
 		}
 
 		ImprovementTypes eImprovement = (ImprovementTypes)pkBuild->getImprovement();
-		if(eImprovement == NO_IMPROVEMENT)
+		if (eImprovement == NO_IMPROVEMENT)
 		{
 			continue;
 		}
@@ -1111,11 +1111,11 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 		//}
 
 		// for bonus resources, check to see if this is the improvement that connects it
-		if(eResource != NO_RESOURCE)
+		if (eResource != NO_RESOURCE)
 		{
-			if(!pImprovement->IsImprovementResourceTrade(eResource))
+			if (!pImprovement->IsImprovementResourceTrade(eResource))
 			{
-				if(m_bLogging){
+				if (m_bLogging) {
 					CvString strTemp;
 					strTemp.Format("Weight,!pImprovement->IsImprovementResourceTrade(eResource),%s,%i,,,%i, %i", GC.getBuildInfo(eBuild)->GetType(), eResource, pPlot->getX(), pPlot->getY());
 					LogInfo(strTemp, m_pPlayer);
@@ -1124,15 +1124,15 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 			}
 		}
 
-		if(eImprovement == pPlot->getImprovementType())
+		if (eImprovement == pPlot->getImprovementType())
 		{
-			if(pPlot->IsImprovementPillaged())
+			if (pPlot->IsImprovementPillaged())
 			{
 				eBuild = m_eRepairBuild;
 			}
 			else
 			{
-				if(m_bLogging){
+				if (m_bLogging) {
 					CvString strTemp;
 					strTemp.Format("Weight,eImprovement == pPlot->getImprovementType(),%s,%i,,,%i, %i", GC.getBuildInfo(eBuild)->GetType(), eImprovement, pPlot->getX(), pPlot->getY());
 					LogInfo(strTemp, m_pPlayer);
@@ -1147,7 +1147,7 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 			{
 				if (pPlot->HasSpecialImprovement() || GET_PLAYER(pUnit->getOwner()).isOption(PLAYEROPTION_SAFE_AUTOMATION))
 				{
-					if(m_bLogging){
+					if (m_bLogging) {
 						CvString strTemp;
 						strTemp.Format("Weight,Improvement Type Blocked by Special Improvement,%s,,,,%i, %i", GC.getBuildInfo(eBuild)->GetType(), pPlot->getX(), pPlot->getY());
 						LogInfo(strTemp, m_pPlayer);
@@ -1158,9 +1158,9 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 		}
 
 		// Only check to make sure our unit can build this after possibly switching this to a repair build in the block of code above
-		if(!pUnit->canBuild(pPlot, eBuild))
+		if (!pUnit->canBuild(pPlot, eBuild))
 		{
-			if(m_bLogging){
+			if (m_bLogging) {
 				CvString strTemp;
 				strTemp.Format("Weight,!pUnit->canBuild(),%s,,,,%i, %i", GC.getBuildInfo(eBuild)->GetType(), pPlot->getX(), pPlot->getY());
 				LogInfo(strTemp, m_pPlayer);
@@ -1170,9 +1170,9 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 
 		bool bWillRemoveForestOrJungle = false;
 		FeatureTypes eFeature = pPlot->getFeatureType();
-		if(eFeature == FEATURE_FOREST || eFeature == FEATURE_JUNGLE)
+		if (eFeature == FEATURE_FOREST || eFeature == FEATURE_JUNGLE)
 		{
-			if(pkBuild->isFeatureRemove(eFeature))
+			if (pkBuild->isFeatureRemove(eFeature))
 			{
 				bWillRemoveForestOrJungle = true;
 			}
@@ -1183,7 +1183,7 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 		{
 			if (pkBuild->isFeatureRemove(FEATURE_MARSH))
 			{
-				if(m_bLogging){
+				if (m_bLogging) {
 					CvString strTemp;
 					strTemp.Format("Weight,Marsh Remove,%s,,,,%i, %i", GC.getBuildInfo(eBuild)->GetType(), pPlot->getX(), pPlot->getY());
 					LogInfo(strTemp, m_pPlayer);
@@ -1197,7 +1197,7 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 		{
 			if (pkBuild->isFeatureRemove(FEATURE_JUNGLE))
 			{
-				if(m_bLogging){
+				if (m_bLogging) {
 					CvString strTemp;
 					strTemp.Format("Weight,Jungle Remove,%s,,,,%i, %i", GC.getBuildInfo(eBuild)->GetType(), pPlot->getX(), pPlot->getY());
 					LogInfo(strTemp, m_pPlayer);
@@ -1209,13 +1209,13 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 			}
 		}
 
-		if(GET_PLAYER(pUnit->getOwner()).isOption(PLAYEROPTION_LEAVE_FORESTS))
+		if (GET_PLAYER(pUnit->getOwner()).isOption(PLAYEROPTION_LEAVE_FORESTS))
 		{
-			if(eFeature != NO_FEATURE)
+			if (eFeature != NO_FEATURE)
 			{
-				if(pkBuild->isFeatureRemove(eFeature))
+				if (pkBuild->isFeatureRemove(eFeature))
 				{
-					if(m_bLogging){
+					if (m_bLogging) {
 						CvString strTemp;
 						strTemp.Format("Weight,Keep Forests,%s,,,,%i, %i", GC.getBuildInfo(eBuild)->GetType(), pPlot->getX(), pPlot->getY());
 						LogInfo(strTemp, m_pPlayer);
@@ -1229,9 +1229,9 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 		int iScore = ScorePlot();
 
 		// if we're going backward, bail out!
-		if(iScore <= 0)
+		if (iScore <= 0)
 		{
-			if(m_bLogging){
+			if (m_bLogging) {
 				CvString strTemp;
 				strTemp.Format("Weight,Negative Score,%s,%i,,,%i, %i", GC.getBuildInfo(eBuild)->GetType(), iScore, pPlot->getX(), pPlot->getY());
 				LogInfo(strTemp, m_pPlayer);
@@ -1241,23 +1241,24 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 
 		BuilderDirective::BuilderDirectiveType eDirectiveType = BuilderDirective::BUILD_IMPROVEMENT;
 		int iWeight = GC.getBUILDER_TASKING_BASELINE_BUILD_IMPROVEMENTS();
-		if(eBuild == m_eRepairBuild)
+		if (eBuild == m_eRepairBuild)
 		{
 			eDirectiveType = BuilderDirective::REPAIR;
 			iWeight = GC.getBUILDER_TASKING_BASELINE_REPAIR();
 		}
+
 #if defined(MOD_API_UNIFIED_YIELDS)
 		else
 		{
-			for(int iI = 0; iI < NUM_YIELD_TYPES; iI++)
+			for (int iI = 0; iI < NUM_YIELD_TYPES; iI++)
 			{
-				YieldTypes eYield = (YieldTypes) iI;
-				if(pImprovement->GetYieldChange(iI) > 0)
+				YieldTypes eYield = (YieldTypes)iI;
+				if (pImprovement->GetYieldChange(iI) > 0)
 				{
 					iWeight = GC.getBUILDER_TASKING_BASELINE_ADDS_CULTURE() * GC.getImprovementInfo(eImprovement)->GetYieldChange(iI);
 					int iAdjacentCulture = pImprovement->GetYieldAdjacentSameType(eYield);
 
-					if(iAdjacentCulture > 0)
+					if (iAdjacentCulture > 0)
 					{
 						iScore *= (1 + pPlot->ComputeYieldFromAdjacentImprovement(*pImprovement, eImprovement, eYield));
 					}
@@ -1265,17 +1266,41 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 			}
 		}
 #else
-		else if(pImprovement->GetYieldChange(YIELD_CULTURE) > 0)
+		else if (pImprovement->GetYieldChange(YIELD_CULTURE) > 0)
 		{
 			iWeight = GC.getBUILDER_TASKING_BASELINE_ADDS_CULTURE() * GC.getImprovementInfo(eImprovement)->GetYieldChange(YIELD_CULTURE);
 			int iAdjacentCulture = pImprovement->GetCultureAdjacentSameType();
 
-			if(iAdjacentCulture > 0)
+			if (iAdjacentCulture > 0)
 			{
 				iScore *= (1 + pPlot->ComputeCultureFromAdjacentImprovement(*pImprovement, eImprovement));
 			}
 		}
 #endif
+		if (eBuild != m_eRepairBuild) {
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+
+			for (int iI = 0; iI < NUM_YIELD_TYPES; iI++)
+			{
+				YieldTypes eYield = (YieldTypes)iI;
+				if (pImprovement->GetYieldChange(iI) > 0)
+				{
+					for (int iJ = 0; iJ < GC.getNumImprovementInfos(); iJ++)
+					{
+						ImprovementTypes eThisImprovement = (ImprovementTypes)iJ;
+
+						if (eThisImprovement != NO_IMPROVEMENT)
+						{
+							iScore *= (1 + pPlot->ComputeYieldFromOtherAdjacentImprovement(*pImprovement, eYield));
+						}
+					}
+				}
+			}
+			
+#endif
+		}
+		min(iScore, 0x7FFF);
+
 		iWeight = GetBuildCostWeight(iWeight, pPlot, eBuild);
 		int iBuildTimeWeight = GetBuildTimeWeight(pUnit, pPlot, eBuild, DoesBuildHelpRush(pUnit, pPlot, eBuild), iMoveTurnsAway);
 		iWeight += iBuildTimeWeight;
@@ -1951,11 +1976,6 @@ int CvBuilderTaskingAI::GetBuildTimeWeight(CvUnit* pUnit, CvPlot* pPlot, BuildTy
 	int iBuildTimeNormal = pPlot->getBuildTime(eBuild, m_pPlayer->GetID());
 	int iBuildTurnsLeft = pPlot->getBuildTurnsLeft(eBuild, m_pPlayer->GetID(), pUnit->workRate(true), pUnit->workRate(true));
 	int iBuildTime = min(iBuildTimeNormal, iBuildTurnsLeft);
-	if(iBuildTime <= 0)
-	{
-		iBuildTime = 1;
-	}
-
 	if(bIgnoreFeatureTime)
 	{
 		if(pPlot->getFeatureType() != NO_FEATURE)
@@ -1963,9 +1983,12 @@ int CvBuilderTaskingAI::GetBuildTimeWeight(CvUnit* pUnit, CvPlot* pPlot, BuildTy
 			iBuildTime -= GC.getBuildInfo(eBuild)->getFeatureTime(pPlot->getFeatureType());
 		}
 	}
-
 	iBuildTime += iAdditionalTime;
 
+	if(iBuildTime <= 0)
+	{
+		iBuildTime = 1;
+	}
 	return 10000 / iBuildTime;
 }
 

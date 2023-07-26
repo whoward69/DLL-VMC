@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -12,6 +12,10 @@
 #include "CvDiplomacyAI.h"
 #include "CvTypes.h"
 #include "CvGameCoreUtils.h"
+
+#include "NetworkMessageUtil.h"
+
+using namespace FunctionPointers;
 
 CvDllNetMessageHandler::CvDllNetMessageHandler()
 {
@@ -246,8 +250,11 @@ void CvDllNetMessageHandler::ResponseDiploVote(PlayerTypes ePlayer, PlayerTypes 
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseDoCommand(PlayerTypes ePlayer, int iUnitID, CommandTypes eCommand, int iData1, int iData2, bool bAlt)
 {
+	PlayerTypes player = ePlayer;
+
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvUnit* pkUnit = kPlayer.getUnit(iUnitID);
+
 
 	if(pkUnit != NULL)
 	{
@@ -322,7 +329,9 @@ void CvDllNetMessageHandler::ResponseFoundPantheon(PlayerTypes ePlayer, BeliefTy
 		}
 	}
 }
+
 //------------------------------------------------------------------------------
+// Use this method for customized operations.
 void CvDllNetMessageHandler::ResponseFoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion, const char* szCustomName, BeliefTypes eBelief1, BeliefTypes eBelief2, BeliefTypes eBelief3, BeliefTypes eBelief4, int iCityX, int iCityY)
 {
 	CvGame& kGame(GC.getGame());
@@ -813,6 +822,87 @@ void CvDllNetMessageHandler::ResponseIdeologyChoice(PlayerTypes ePlayer, PolicyB
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID, const char* szName)
 {
+	bool isLua = false;
+	if (iCityID < 0) {
+		isLua = true;
+		char* senderFileName = nullptr;
+		auto senderFileLine = -1;
+		iCityID = -iCityID;
+		auto str = std::string(szName, iCityID);
+		if (NetworkMessageUtil::ReceiveLargeArgContainer.ParseFromString(str)) {
+			if (InvokeRecorder::getInvokeExist(str)) {
+				NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+				return;
+			}
+			auto L = luaL_newstate();
+			auto msgSize = NetworkMessageUtil::ReceiveLargeArgContainer.args_size();
+#ifdef LUA_NETWORKMSG_DEBUG
+			msgSize--;
+			auto& debugArg = NetworkMessageUtil::ReceiveLargeArgContainer.args().Get(msgSize);
+			if (msgSize >= 0 && debugArg.argtype() == "LuaNetworkDebugMsg") {
+				senderFileName = (char*)debugArg.longmessage().c_str();
+				senderFileLine = debugArg.identifier1();
+			}
+			else {
+				msgSize++;
+			}
+#endif
+			for (int i = 0; i < msgSize; i++) {
+				auto& arg = NetworkMessageUtil::ReceiveLargeArgContainer.args().Get(i);
+				auto& type = arg.argtype();
+				if (type == "int") {
+					lua_pushinteger(L, arg.identifier1());
+				}
+				else if (type == "string") {
+					lua_pushstring(L, arg.longmessage().c_str());
+				}
+				else if (type == "bool") {
+					lua_pushboolean(L, arg.identifier1());
+				}
+				else if (type == "nil") {
+					lua_pushnil(L);
+				}
+				else if (type == "LuaNetworkDebugMsg");//do nothing with debug message
+				else {
+					auto& name = type + "::PushToLua";
+					auto basicArgPtr = (BasicArguments*)&arg;
+					try {
+						staticFunctions.ExecuteFunction<void>((name), L, basicArgPtr);
+					}
+					catch (NoSuchMethodException e) {
+						CUSTOMLOG("Received an unknown fuction call with message: %s, sent at line %d, file %s", 
+							e.what(), senderFileLine, senderFileName ? senderFileName : "Unknown");
+						NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+						lua_close(L);
+						return;
+					}
+					catch (NetworkMessageNullPointerExceptopn e) {
+						CUSTOMLOG("Received a null pointer fuction call with message: %s, sent at line %d, file %s",
+							e.what(), senderFileLine, senderFileName ? senderFileName : "Unknown");
+						NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+						lua_close(L);
+						return;
+					}
+					//finally?
+				}
+			}
+			auto& funcName = NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall();
+			//CUSTOMLOG("Try to execute received fuction call with function name: %s", funcName);
+			try {
+				staticFunctions.ExecuteFunction<void>(funcName, L);
+			}
+			catch (NoSuchMethodException e) {
+				CUSTOMLOG("Received an unknown fuction call with message: %s, sent at line %d, file %s",
+					e.what(), senderFileLine, senderFileName ? senderFileName : "Unknown");
+			}
+			lua_close(L);
+			NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+			return;
+		}
+		NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+		//return;
+	}
+
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
 	if(pkCity)
@@ -820,6 +910,7 @@ void CvDllNetMessageHandler::ResponseRenameCity(PlayerTypes ePlayer, int iCityID
 		CvString strName = szName;
 		pkCity->setName(strName);
 	}
+
 }
 //------------------------------------------------------------------------------
 void CvDllNetMessageHandler::ResponseRenameUnit(PlayerTypes ePlayer, int iUnitID, const char* szName)

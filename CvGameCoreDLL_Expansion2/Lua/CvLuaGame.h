@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -22,8 +22,10 @@
 class CvLuaGame : public CvLuaStaticInstance<CvLuaGame, CvGame>
 {
 public:
+	static void RegistStaticFunctions();
 	//! Returns the name of the static instance.
 	static const char* GetInstanceName();
+	static const char* GetInstanceNameCv();
 
 	//! Returns the static instance
 	static CvGame* GetInstance(lua_State* L = NULL, int idx = 0);
@@ -35,6 +37,12 @@ protected:
 
 	static int lCanHandleAction(lua_State* L);
 	static int lHandleAction(lua_State* L);
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	static int lHandleMultiplayerTeamSignal(lua_State* L);
+	static int lHandleMultiplayerTeamSignalImpl(lua_State* L);
+#endif // MOD_API_MP_PLOT_SIGNAL
+
+	
 
 	static int lUpdateScore(lua_State* L);
 	static int lCycleCities(lua_State* L);
@@ -236,6 +244,7 @@ protected:
 	static int lSetName(lua_State* L);
 	static int lGetName(lua_State* L);
 	static int lRand(lua_State* L);
+	static int lGetAuthenticatedSeed(lua_State* L);
 	static int lCalculateSyncChecksum(lua_State* L);
 	static int lCalculateOptionsChecksum(lua_State* L);
 
@@ -249,6 +258,7 @@ protected:
 	static int lAddPlayer(lua_State* L);
 
 	static int lSetPlotExtraYield(lua_State* L);
+	static int lSetPlotExtraYieldSync(lua_State* L);
 	static int lChangePlotExtraCost(lua_State* L);
 
 	static int lIsCivEverActive(lua_State* L);

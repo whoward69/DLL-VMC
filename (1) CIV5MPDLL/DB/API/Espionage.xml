@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<!-- Text moved to AllText_en_US.xml -->
+
+	<CustomModDbUpdates>
+		<Row Name="API_ESPIONAGE" Value="1"/>
+	</CustomModDbUpdates>
+</GameData>

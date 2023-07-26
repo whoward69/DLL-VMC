@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -84,6 +84,29 @@ public:
 	int GetRequiresXAdjacentLand() const;
 #if defined(MOD_API_EXTENSIONS)
 	int GetRequiresXAdjacentWater() const;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int GetWonderProductionModifier() const;
+
+	int GetNearbyFriendHeal() const;
+
+	int GetResourceFromImprovement() const;
+	int GetResourceQuantityFromImprovement() const;
+#endif
+
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+	int GetCreateItemMod() const;
+	int GetCreatedResourceQuantity() const;
+	int GetNewImprovement() const;
+	int GetNewFeature() const;
+
+	int GetCreateResource(CvPlot* pPlot) const;
+	int* GetCreateResourceList() const;
+	int* GetCreateTerrainList() const;
+	bool* GetCreateTerrainOnlyList() const;
+	int* GetCreateFeatureList() const;
+	bool* GetCreateFeatureOnlyList() const;
 #endif
 
 #if defined(MOD_GLOBAL_RELOCATION)
@@ -178,6 +201,24 @@ public:
 	int GetAdjacentSameTypeYield(int i) const;
 #endif
 
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	int GetAdjacentImprovementYieldChanges(int i, int j) const;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int GetAdjacentResourceYieldChanges(int i, int j) const;
+	int* GetAdjacentResourceYieldChangesArray(int i);
+
+	int GetAdjacentTerrainYieldChanges(int i, int j) const;
+	int* GetAdjacentTerrainYieldChangesArray(int i);
+
+	int GetAdjacentFeatureYieldChanges(int i, int j) const;
+	int* GetAdjacentFeatureYieldChangesArray(int i);
+
+	int GetFeatureYieldChanges(int i, int j) const;
+	int* GetFeatureYieldChangesArray(int i);
+#endif
+
 	int GetTechYieldChanges(int i, int j) const;
 	int* GetTechYieldChangesArray(int i);
 	int GetTechNoFreshWaterYieldChanges(int i, int j) const;
@@ -187,12 +228,28 @@ public:
 	int GetRouteYieldChanges(int i, int j) const;
 	int* GetRouteYieldChangesArray(int i);				// For Moose - CvWidgetData XXX
 
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	int GetTradeRouteYieldChanges(int i, int j) const;
+	int* GetTradeRouteYieldChangesArray(int i);				// For Moose - CvWidgetData XXX
+#endif
+
 	int  GetImprovementResourceYield(int i, int j) const;
 	bool IsImprovementResourceMakesValid(int i) const;
 	bool IsImprovementResourceTrade(int i) const;
 	int  GetImprovementResourceDiscoverRand(int i) const;
 
 	int  GetFlavorValue(int i) const;
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	bool GetEnableXP() const;
+
+	bool GetEnableUpgrade() const;
+	int GetUpgradeXP() const;
+	ImprovementTypes GetUpgradeImprovementType() const;
+
+	bool GetEnableDowngrade() const;
+	ImprovementTypes GetDowngradeImprovementType() const;
+#endif
 
 	//---------------------------------------PROTECTED MEMBER VARIABLES---------------------------------
 protected:
@@ -224,6 +281,27 @@ protected:
 	int m_iRequiresXAdjacentLand;
 #if defined(MOD_API_EXTENSIONS)
 	int m_iRequiresXAdjacentWater;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int m_iWonderProductionModifier;
+	int m_iNearbyFriendHeal;
+
+	int m_iImprovementResource;
+	int m_iImprovementResourceQuantity;
+#endif
+
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+	int m_iCreateItemMod;
+	int m_iCreatedResourceQuantity;
+	int m_iSetNewImprovement;
+	int m_iSetNewFeature;
+
+	int* m_iCreateResourceList;
+	int* m_iCreateTerrainList;
+	bool* m_iCreateTerrainOnlyList;
+	int* m_iCreateFeatureList;
+	bool* m_iCreateFeatureOnlyList;
 #endif
 
 #if defined(MOD_GLOBAL_RELOCATION)
@@ -304,10 +382,36 @@ protected:
 	int* m_piAdjacentSameTypeYield;
 #endif
 
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	int** m_ppiAdjacentImprovementYieldChanges;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int** m_ppiAdjacentTerrainYieldChanges;
+	int** m_ppiAdjacentResourceYieldChanges;
+	int** m_ppiAdjacentFeatureYieldChanges;
+	int** m_ppiFeatureYieldChanges;
+#endif
+
 	int** m_ppiTechYieldChanges;
 	int** m_ppiTechNoFreshWaterYieldChanges;
 	int** m_ppiTechFreshWaterYieldChanges;
 	int** m_ppiRouteYieldChanges;
+
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	int** m_ppiTradeRouteYieldChanges;
+#endif
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	bool m_bEnableXP = false;
+
+	bool m_bEnableUpgrade = false;
+	int m_iUpgradeXP = -1;
+	ImprovementTypes m_eUpgradeImprovementType = NO_IMPROVEMENT;
+
+	bool m_bEnableDowngrade = false;
+	ImprovementTypes m_eDowngradeImprovementType = NO_IMPROVEMENT;
+#endif
 
 	CvImprovementResourceInfo* m_paImprovementResource;
 };

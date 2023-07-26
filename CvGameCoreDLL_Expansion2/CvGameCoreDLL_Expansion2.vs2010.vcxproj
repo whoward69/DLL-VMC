@@ -1,8 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Mod|Win32">
-      <Configuration>Mod</Configuration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
@@ -11,41 +15,74 @@
     <ProjectGuid>{F58F230D-EE4A-40E0-91D5-93626E790055}</ProjectGuid>
     <RootNamespace>CvGameCoreDLL_Expansion2</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v90</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">$(SolutionDir)\BuildOutput\VS2010_$(Configuration)$(Platform)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">$(SolutionDir)\BuildTemp\VS2010_$(ProjectName)$(Configuration)$(Platform)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">false</LinkIncremental>
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'" />
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">$(ProjectName)$(Platform)$(Configuration)</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\BuildOutput\VS2022_$(Configuration)$(Platform)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\BuildOutput\VS2022_$(Configuration)$(Platform)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\BuildTemp\VS2022_$(ProjectName)$(Configuration)$(Platform)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\BuildTemp\VS2022_$(ProjectName)$(Configuration)$(Platform)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)$(Platform)$(Configuration)</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectName)$(Platform)$(Configuration)</TargetName>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ExecutablePath>C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin;C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE;$(ExecutablePath)</ExecutablePath>
+    <IncludePath>C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\include;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Include</IncludePath>
+    <ExternalIncludePath>$(SolutionDir)CvGameCoreDLL_Expansion2;$(ExternalIncludePath)</ExternalIncludePath>
+    <ReferencePath>C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\lib;$(ReferencePath)</ReferencePath>
+    <LibraryPath>C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib;C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\lib</LibraryPath>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ExecutablePath>C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin;C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE;$(ExecutablePath)</ExecutablePath>
+    <IncludePath>C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\include;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Include</IncludePath>
+    <ExternalIncludePath>$(SolutionDir)CvGameCoreDLL_Expansion2;$(ExternalIncludePath)</ExternalIncludePath>
+    <ReferencePath>C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\lib;$(ReferencePath)</ReferencePath>
+    <LibraryPath>C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib;C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\lib</LibraryPath>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
-      <Optimization>Full</Optimization>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalOptions>/EHsc  /d2noftol3 %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <OmitFramePointers>false</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)CvWorldBuilderMap\include\;$(SolutionDir)CvGameCoreDLLUtil\include\;$(SolutionDir)CvLocalization\include\;$(SolutionDir)CvGameDatabase\include\;$(SolutionDir)FirePlace\include\;$(SolutionDir)FirePlace\include\FireWorks\;$(SolutionDir)ThirdPartyLibs\Lua51\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>FXS_IS_DLL;WIN32;NDEBUG;_WINDOWS;_USRDLL;CVGAMECOREDLL_EXPORTS;FINAL_RELEASE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)CvGameCoreDLL_Expansion2;$(SolutionDir)CvWorldBuilderMap\include\;$(SolutionDir)CvGameCoreDLLUtil\include\;$(SolutionDir)CvLocalization\include\;$(SolutionDir)CvGameDatabase\include\;$(SolutionDir)FirePlace\include\;$(SolutionDir)FirePlace\include\FireWorks\;$(SolutionDir)ThirdPartyLibs\Lua51\include\;$(SolutionDir)ThirdPartyLibs\protobuf25\include\;$(SolutionDir)CvGameCoreDLL_Expansion2\Lua\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;FXS_IS_DLL;FINAL_RELEASE;WIN32;NDEBUG;_WINDOWS;_USRDLL;CVGAMECOREDLL_EXPORTS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>
       </ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -60,10 +97,10 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>CvWorldBuilderMapWin32.lib;CvGameCoreDLLUtilWin32.lib;CvLocalizationWin32.lib;CvGameDatabaseWin32.lib;FireWorksWin32.lib;FLuaWin32.lib;lua51_Win32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CvWorldBuilderMapWin32.lib;CvGameCoreDLLUtilWin32.lib;CvLocalizationWin32.lib;CvGameDatabaseWin32.lib;FireWorksWin32.lib;FLuaWin32.lib;lua51_Win32.lib;winmm.lib;libprotobuf-lite.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)CvGameCore_Expansion2.dll</OutputFile>
-      <SuppressStartupBanner>false</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)\CvWorldBuilderMap\lib\;$(SolutionDir)\CvGameCoreDLLUtil\lib\;$(SolutionDir)\CvLocalization\lib\;$(SolutionDir)\CvGameDatabase\lib\;$(SolutionDir)FirePlace\lib\;$(SolutionDir)ThirdPartyLibs\Lua51\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(SolutionDir)\CvWorldBuilderMap\lib\;$(SolutionDir)\CvGameCoreDLLUtil\lib\;$(SolutionDir)\CvLocalization\lib\;$(SolutionDir)\CvGameDatabase\lib\;$(SolutionDir)FirePlace\lib\;$(SolutionDir)ThirdPartyLibs\Lua51\lib\;$(SolutionDir)ThirdPartyLibs\protobuf25\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -79,18 +116,79 @@
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
       <AdditionalOptions>/LTCG %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ResourceCompile>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/EHsc /d2noftol3 %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)CvGameCoreDLL_Expansion2;$(SolutionDir)CvWorldBuilderMap\include\;$(SolutionDir)CvGameCoreDLLUtil\include\;$(SolutionDir)CvLocalization\include\;$(SolutionDir)CvGameDatabase\include\;$(SolutionDir)FirePlace\include\;$(SolutionDir)FirePlace\include\FireWorks\;$(SolutionDir)ThirdPartyLibs\Lua51\include\;$(SolutionDir)ThirdPartyLibs\protobuf25\include\;$(SolutionDir)CvGameCoreDLL_Expansion2\Lua\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;FXS_IS_DLL;WIN32;NDEBUG;_WINDOWS;_USRDLL;CVGAMECOREDLL_EXPORTS;FINAL_RELEASE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FloatingPointModel>Strict</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>CvGameCoreDLLPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnablePREfast>true</EnablePREfast>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>CvWorldBuilderMapWin32.lib;CvGameCoreDLLUtilWin32.lib;CvLocalizationWin32.lib;CvGameDatabaseWin32.lib;FireWorksWin32.lib;FLuaWin32.lib;lua51_Win32.lib;winmm.lib;libprotobuf-lite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>C:/TempOut/CvGameCore_Expansion2.dll</OutputFile>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(SolutionDir)\CvWorldBuilderMap\lib\;$(SolutionDir)\CvGameCoreDLLUtil\lib\;$(SolutionDir)\CvLocalization\lib\;$(SolutionDir)\CvGameDatabase\lib\;$(SolutionDir)FirePlace\lib\;$(SolutionDir)ThirdPartyLibs\Lua51\lib\;$(SolutionDir)ThirdPartyLibs\protobuf25\lib\Release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>C:/TempOut/$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>C:/TempOut/$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ModuleDefinitionFile>$(ProjectDir)CvGameCoreDLL.def</ModuleDefinitionFile>
+      <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+      <AdditionalOptions>/LTCG %(AdditionalOptions)</AdditionalOptions>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+    </Link>
+    <ResourceCompile>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CustomMods.cpp" />
     <ClCompile Include="CvAchievementInfo.cpp" />
+    <ClCompile Include="CvBuildingClassCollectionsClasses.cpp" />
     <ClCompile Include="CvCityManager.cpp" />
+    <ClCompile Include="CvCityScaleClasses.cpp" />
     <ClCompile Include="CvEventLog.cpp" />
     <ClCompile Include="CvGreatPersonInfo.cpp" />
     <ClCompile Include="CvPlotInfo.cpp" />
+    <ClCompile Include="CvPromotionCollectionClasses.cpp" />
     <ClCompile Include="CvQuestInfo.cpp" />
     <ClCompile Include="CvTargeting.cpp" />
+    <ClCompile Include="FunctionsRef.cpp" />
+    <ClCompile Include="LargeArgContainer.pb.cpp" />
+    <ClCompile Include="NetworkMessageUtil.cpp" />
+    <ClCompile Include="StackWalker.cpp" />
     <ClCompile Include="_precompile.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mod|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="CvAchievementUnlocker.cpp" />
     <ClCompile Include="CvAdvisorCounsel.cpp" />
@@ -252,6 +350,85 @@
     <ClCompile Include="Lua\CvLuaUnit.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CustomModsGlobal.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvAssert.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvDllInterfaces.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvDllInterfaces2.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvDLLUtilDefines.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvEnums.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvEnumSerialization.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvGameCoreDLLUtil.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvGameCoreDLLUtil_Win32Headers.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaArgTemplates.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaMethodWrapper.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvLuaStaticInstance.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvString.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvStringUtils.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvStructs.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\CvWeightedVector.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLDatabaseUtility.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLScriptSystem.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLUserInterface.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\ICvDLLUtility.h" />
+    <ClInclude Include="..\CvGameCoreDLLUtil\include\LinkedList.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\EventSystem\FastDelegate.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FArray.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAssert.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAStarNode.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAtomic.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAutoArchive.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAutoArchiveClassContainer.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAutoVariable.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAutoVariableBase.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FAutoVector.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FBatchAllocate.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FBitFlags.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FCallStack.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FCrc32.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FCriticalSection.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FDataStream.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FDefNew.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FEndian.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFastAllocator.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFastList.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFastVector.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFileDefines.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFileStream.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFileSystem.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFireTypes.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFreeListArrayBase.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FFreeListTrashArray.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FIFile.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FIGameIniParser.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FILogFile.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FInputDevice.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLua.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaCommon.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaFStringSupport.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaGlobalData.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaPointerProtection.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaStaticFunctions.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaTypeExposure.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\Flua\include\FLuaTypes.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FMemHooks.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FMemoryStream.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FObjectHandle.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FObjectPool.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FPrefetch.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FRemark.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FSTLBlockAllocator.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FSTLBlockAllocatorMT.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FStlContainerSerialization.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FString.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FTempHeap.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FTimer.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FUncopyable.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FUndefNew.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\FVariableSystem.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\LintFree.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\Win32\FDebugHelper.h" />
+    <ClInclude Include="..\FirePlace\include\FireWorks\Win32\FKBInputDevice.h" />
+    <ClInclude Include="ArgumentAdaptor.h" />
     <ClInclude Include="banned.h" />
     <ClInclude Include="CustomMods.h" />
     <ClInclude Include="CvAchievementInfo.h" />
@@ -267,6 +444,7 @@
     <ClInclude Include="CvBeliefClasses.h" />
     <ClInclude Include="CvBitfield.h" />
     <ClInclude Include="CvBuilderTaskingAI.h" />
+    <ClInclude Include="CvBuildingClassCollectionsClasses.h" />
     <ClInclude Include="CvBuildingClasses.h" />
     <ClInclude Include="CvBuildingProductionAI.h" />
     <ClInclude Include="CvCity.h" />
@@ -274,6 +452,7 @@
     <ClInclude Include="CvCityCitizens.h" />
     <ClInclude Include="CvCityConnections.h" />
     <ClInclude Include="CvCityManager.h" />
+    <ClInclude Include="CvCityScaleClasses.h" />
     <ClInclude Include="CvCitySpecializationAI.h" />
     <ClInclude Include="CvCityStrategyAI.h" />
     <ClInclude Include="CvCultureClasses.h" />
@@ -297,6 +476,7 @@
     <ClInclude Include="CvGameCoreEnums.h" />
     <ClInclude Include="CvGameCoreEnumSerialization.h" />
     <ClInclude Include="CvGameCoreUtils.h" />
+    <ClInclude Include="CvGameObjectExtractable.h" />
     <ClInclude Include="CvGameQueries.h" />
     <ClInclude Include="CvGameTextMgr.h" />
     <ClInclude Include="CvGlobals.h" />
@@ -330,6 +510,7 @@
     <ClInclude Include="CvProjectClasses.h" />
     <ClInclude Include="CvProjectProductionAI.h" />
     <ClInclude Include="CvPromotionClasses.h" />
+    <ClInclude Include="CvPromotionCollectionClasses.h" />
     <ClInclude Include="CvQuestInfo.h" />
     <ClInclude Include="CvRandom.h" />
     <ClInclude Include="CvReligionClasses.h" />
@@ -359,6 +540,10 @@
     <ClInclude Include="CvVotingClasses.h" />
     <ClInclude Include="CvWonderProductionAI.h" />
     <ClInclude Include="CvWorldBuilderMapLoader.h" />
+    <ClInclude Include="FunctionsRef.h" />
+    <ClInclude Include="LargeArgContainer.pb.h" />
+    <ClInclude Include="LaterFeatures.h" />
+    <ClInclude Include="NetworkMessageUtil.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="CvDllBuildInfo.h" />
     <ClInclude Include="CvDllBuildingInfo.h" />
@@ -431,9 +616,17 @@
     <ClInclude Include="Lua\CvLuaTeam.h" />
     <ClInclude Include="Lua\CvLuaTeamTech.h" />
     <ClInclude Include="Lua\CvLuaUnit.h" />
+    <ClInclude Include="StackWalker.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CvGameCoreDLL.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.gitignore" />
+    <None Include="..\FirePlace\include\FireWorks\FCriticalSection.inl" />
+    <None Include="..\FirePlace\include\FireWorks\FStringA.inl" />
+    <None Include="..\FirePlace\include\FireWorks\FStringW.inl" />
+    <None Include="..\FirePlace\include\FireWorks\Win32\FDebugHelper.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

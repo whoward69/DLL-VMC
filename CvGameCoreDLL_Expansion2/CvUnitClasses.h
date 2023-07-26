@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -86,6 +86,10 @@ public:
 #endif
 	int GetXPValueAttack() const;
 	int GetXPValueDefense() const;
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+	int GetExtraXPValueAttack() const;
+	int GetExtraXPValueDefense() const;
+#endif
 	int GetSpecialCargo() const;
 	int GetDomainCargo() const;
 
@@ -156,7 +160,7 @@ public:
 	int GetUnitFlagIconOffset() const;
 	int GetUnitPortraitOffset() const;
 
-	const char* GetUnitNames(int i) const;
+	CvString* GetUnitNames(int i);
 	GreatWorkType GetGreatWorks(int i) const;
 
 	// Accessor Functions (Arrays)
@@ -185,6 +189,11 @@ public:
 	void DoUpdatePower();
 
 	UnitMoveRate GetMoveRate(int numHexes) const;
+
+#ifdef MOD_BALANCE_CORE
+	int GetScalingFromOwnedImprovements(int i) const;
+	int GetScaleFromNumGWs() const;
+#endif
 
 private:
 
@@ -245,6 +254,10 @@ private:
 #endif
 	int m_iXPValueAttack;
 	int m_iXPValueDefense;
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+	int m_iExtraXPValueAttack;
+	int m_iExtraXPValueDefense;
+#endif
 	int m_iSpecialCargo;
 
 	int m_iDomainCargo;
@@ -341,6 +354,11 @@ private:
 	CvString* m_paszMiddleArtDefineTags;
 	CvString* m_paszUnitNames;
 	GreatWorkType* m_paeGreatWorks;
+
+#ifdef MOD_BALANCE_CORE
+	int* m_piScalingFromOwnedImprovements;
+	int m_iScaleFromNumGWs;
+#endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

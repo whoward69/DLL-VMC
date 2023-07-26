@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -16,6 +16,8 @@
 #include "CvInfosSerializationHelper.h"
 
 #include "LintFree.h"
+#include "NetworkMessageUtil.h"
+#include "CvLuaTeamTech.h"
 
 /// Constructor
 CvTechEntry::CvTechEntry(void):
@@ -129,6 +131,7 @@ bool CvTechEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	m_bResearchAgreementTradingAllowed = kResults.GetBool("ResearchAgreementTradingAllowed");
 	m_bTradeAgreementTradingAllowed = kResults.GetBool("TradeAgreementTradingAllowed");
 	m_bPermanentAllianceTrading = kResults.GetBool("PermanentAllianceTradingAllowed");
+	m_iRazeSpeedModifier = kResults.GetInt("RazeSpeedModifier");
 #if defined(MOD_TECHS_CITY_WORKING)
 	m_iCityWorkingChange = kResults.GetInt("CityWorkingChange");
 #endif
@@ -212,6 +215,31 @@ bool CvTechEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 
 		pResults->Reset();
 	}
+
+
+#if defined(MOD_ROG_CORE)
+	{
+		kUtility.Initialize2DArray(m_ppiTechYieldChanges, "Specialists", "Yields");
+
+		std::string strKey("Tech_SpecialistYieldChanges");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Specialists.ID as SpecialistID, Yields.ID as YieldID, Yield from Tech_SpecialistYieldChanges inner join Specialists on Specialists.Type = SpecialistType inner join Yields on Yields.Type = YieldType where TechType = ?");
+		}
+
+		pResults->Bind(1, szTechType);
+
+		while (pResults->Step())
+		{
+			const int SpecialistID = pResults->GetInt(0);
+			const int YieldID = pResults->GetInt(1);
+			const int yield = pResults->GetInt(2);
+
+			m_ppiTechYieldChanges[SpecialistID][YieldID] = yield;
+		}
+	}
+#endif
 
 	return true;
 }
@@ -561,6 +589,23 @@ int CvTechEntry::GetPrereqAndTechs(int i) const
 {
 	return m_piPrereqAndTechs ? m_piPrereqAndTechs[i] : -1;
 }
+
+int CvTechEntry::GetRazeSpeedModifier() const
+{
+	return m_iRazeSpeedModifier;
+}
+
+#if defined(MOD_ROG_CORE)
+//------------------------------------------------------------------------------
+int CvTechEntry::GetTechYieldChanges(int i, int j) const
+{
+	CvAssertMsg(i < GC.getNumSpecialistInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiTechYieldChanges[i][j];
+}
+#endif
 
 //=====================================
 // CvTechXMLEntries
@@ -1583,7 +1628,7 @@ int CvPlayerTechs::GetMedianTechResearch() const
 	int iNumEntries = aiTechCosts.size();
 	if(iNumEntries > 0)
 	{
-		std::sort(aiTechCosts.begin(), aiTechCosts.end());
+		std::stable_sort(aiTechCosts.begin(), aiTechCosts.end());
 
 		// Odd number, take middle?
 		if((iNumEntries / 2) * 2 != iNumEntries)
@@ -1710,6 +1755,27 @@ void CvPlayerTechs::LogFlavors(FlavorTypes eFlavor)
 			pLog->Msg(strOutBuf);
 		}
 	}
+}
+void CvTeamTechs::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvTeamTechs::Provide);
+	REGIST_STATIC_FUNCTION(CvTeamTechs::PushToLua);
+	
+}
+
+void CvTeamTechs::PushToLua(lua_State* L, BasicArguments* arg) {
+	CvLuaTeamTech::PushLtwt(L, Provide((TeamTypes)arg->identifier1()));
+}
+
+CvTeamTechs* CvTeamTechs::Provide(TeamTypes team) {
+	if (team < 0 || team >= MAX_TEAMS) throw NetworkMessageNullPointerExceptopn("CvTeam", team);
+	auto rtn = GET_TEAM(team).GetTeamTechs();
+	if (!rtn) throw NetworkMessageNullPointerExceptopn("CvTeamTechs", team);
+	return rtn;
+}
+
+void CvTeamTechs::ExtractToArg(BasicArguments* arg) {
+	arg->set_argtype("CvTeamTechs");
+	arg->set_identifier1(m_pTeam->GetID());
 }
 
 //=====================================
@@ -1930,26 +1996,25 @@ void CvTeamTechs::SetHasTech(TechTypes eIndex, bool bNewValue)
 	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
 	CvAssertMsg(eIndex < GC.getNumTechInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
 
-	if(m_pabHasTech[eIndex] != bNewValue)
+	if (m_pabHasTech[eIndex] == bNewValue) return;
+
+	m_pabHasTech[eIndex] = bNewValue;
+
+	if(bNewValue)
+		SetLastTechAcquired(eIndex);
+
+	ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
+	if(pkScriptSystem)
 	{
-		m_pabHasTech[eIndex] = bNewValue;
+		CvLuaArgsHandle args;
+		args->Push(m_pTeam->GetID());
+		args->Push(eIndex);
+		args->Push(bNewValue);
 
-		if(bNewValue)
-			SetLastTechAcquired(eIndex);
-
-		ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
-		if(pkScriptSystem)
-		{
-			CvLuaArgsHandle args;
-			args->Push(m_pTeam->GetID());
-			args->Push(eIndex);
-			args->Push(bNewValue);
-
-			// Attempt to execute the game events.
-			// Will return false if there are no registered listeners.
-			bool bResult = false;
-			LuaSupport::CallHook(pkScriptSystem, "TeamSetHasTech", args.get(), bResult);
-		}
+		// Attempt to execute the game events.
+		// Will return false if there are no registered listeners.
+		bool bResult = false;
+		LuaSupport::CallHook(pkScriptSystem, "TeamSetHasTech", args.get(), bResult);
 	}
 }
 
@@ -2120,10 +2185,10 @@ void CvTeamTechs::SetResearchProgressTimes100(TechTypes eIndex, int iNewValue, P
 				// iNewValue = iPlayerBeakersThisTurn + ((iPlayerOverflow * iPlayerOverflowDivisorTimes100) / 100)
 				if (iOverflow > iPlayerOverflow) {
 					// If we completed the tech using only iBeakersThisTurn, we need to hand back the remaining iPlayerBeakersThisTurn and the scaled down iPlayerOverflow
-					iOverflow = (iOverflow - iPlayerOverflow) + (iPlayerOverflow * 100 / iPlayerOverflowDivisorTimes100); 
+					iOverflow = (iOverflow - iPlayerOverflow) + (iPlayerOverflow / iPlayerOverflowDivisorTimes100) * 100; 
 				} else {
 					// Otherwise we used all of iBeakersThisTurn and some of iPlayerOverflow, so we need to hand back the scaled down iOverflow
-					iOverflow = iOverflow * 100 / iPlayerOverflowDivisorTimes100;
+					iOverflow = iOverflow / iPlayerOverflowDivisorTimes100 * 100;
 				}
 			}
 #endif

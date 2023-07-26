@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -277,13 +277,13 @@ int CvMapGenerator::pGenerateRandomMap(lua_State* L)
 {
 	cvStopWatch stopWatch("CvMapGenerator - GenerateRandomMap()");
 	ICvEngineScriptSystem1* pkScriptSystem = (ICvEngineScriptSystem1*)lua_touserdata(L, 1);
-
+	CvRandom::isMapGenerating = true;
 	lua_getglobal(L, "GenerateMap");
 	if(lua_isnil(L, -1))
 		luaL_error(L, "Cannot find map script entry point GenerateMap()");
 
 	pkScriptSystem->CallFunction(L, 0, 0);
-
+	CvRandom::isMapGenerating = false;
 	return 0;
 }
 //------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -184,6 +184,18 @@ protected:
 class CvSpecialistInfo : public CvHotKeyInfo
 {
 public:
+#ifdef MOD_SPECIALIST_RESOURCES
+	struct ResourceInfo {
+		ResourceTypes m_eResource = NO_RESOURCE;
+		int m_iQuantity = 0;
+
+		// optional:
+		PolicyTypes m_eRequiredPolicy = NO_POLICY;
+		TechTypes m_eRequiredTech = NO_TECH;
+	};
+#endif
+
+public:
 
 	CvSpecialistInfo();
 	virtual ~CvSpecialistInfo();
@@ -226,6 +238,15 @@ protected:
 
 	int* m_piYieldChange;
 	int* m_piFlavorValue;
+
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::vector<ResourceInfo> m_vResourceInfo;
+#endif
+
+public:
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::vector<ResourceInfo>& GetResourceInfo() { return m_vResourceInfo; }
+#endif
 
 private:
 	CvSpecialistInfo(const CvSpecialistInfo&);
@@ -1124,6 +1145,11 @@ public:
 	int getMissionType() const;
 	void setMissionType(int iNewType);
 
+#if defined(MOD_ROG_CORE)
+	int getTechObsolete() const;
+#endif
+
+
 	bool isKill() const;
 	bool isRepair() const;
 	bool IsRemoveRoute() const;
@@ -1154,6 +1180,10 @@ protected:
 	int m_iRoute;
 	int m_iEntityEvent;
 	int m_iMissionType;
+
+#if defined(MOD_ROG_CORE)
+	int m_iTechObsolete;
+#endif
 
 	bool m_bKill;
 	bool m_bRepair;
@@ -1499,7 +1529,13 @@ public:
 	bool isVisibleAlways() const;
 	bool isNukeImmune() const;
 	bool IsRough() const;
+
+#if defined(MOD_PSEUDO_NATURAL_WONDER)
+	bool IsNaturalWonder(bool orPseudoNatural = false) const;
+	bool IsPseudoNaturalWonder() const;
+#else
 	bool IsNaturalWonder() const;
+#endif
 
 	const char* getArtDefineTag() const;
 	void setArtDefineTag(const char* szTag);
@@ -1564,7 +1600,9 @@ protected:
 	bool m_bNukeImmune;
 	bool m_bRough;
 	bool m_bNaturalWonder;
-
+#if defined(MOD_PSEUDO_NATURAL_WONDER)
+	bool m_bPseudoNaturalWonder;
+#endif
 	// Set each time the game is started
 	bool m_bClearable;
 
@@ -1618,6 +1656,7 @@ public:
 	int getGoldenAgeYieldThreshold() const;
 	int getGoldenAgeYieldMod() const;
 	int getAIWeightPercent() const;
+	int getGreakWorkYieldMod() const;
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
@@ -1637,6 +1676,10 @@ protected:
 	int m_iGoldenAgeYieldThreshold;
 	int m_iGoldenAgeYieldMod;
 	int m_iAIWeightPercent;
+
+#ifdef MOD_BALANCE_CORE
+	int m_iGreakWorkYieldMod;
+#endif
 };
 
 
@@ -2025,6 +2068,9 @@ public:
 
 	int getTechPrereq() const;
 
+#if defined(MOD_ROG_CORE)
+	int getDefenseValue() const;
+#endif
 	// Arrays
 	int getProductionToYieldModifier(int i) const;
 	int GetFlavorValue(int i) const;
@@ -2033,6 +2079,10 @@ public:
 
 protected:
 	int m_iTechPrereq;
+
+#if defined(MOD_ROG_CORE)
+	int m_iDefenseValue;
+#endif
 
 	// Arrays
 	int* m_paiProductionToYieldModifier;
@@ -2173,7 +2223,13 @@ public:
 	bool isNoReligion() const;
 
 	// Arrays
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int GetMountainCityYieldChange(const YieldTypes eYield) const;
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
 
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int GetCoastCityYieldChange(const YieldTypes eYield) const;
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
@@ -2223,6 +2279,14 @@ protected:
 	bool m_bNoReligion;
 
 	std::vector<CvString> m_vEraVOs;
+
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int m_iaMountainCityYieldChange[NUM_YIELD_TYPES];
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
+
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int m_iaCoastCityYieldChange[NUM_YIELD_TYPES];
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
 
 private:
 	CvEraInfo(const CvEraInfo&);
@@ -2345,6 +2409,29 @@ private:
 	CvVoteSourceInfo(const CvVoteSourceInfo&);
 	CvVoteSourceInfo& operator=(const CvVoteSourceInfo&);
 };
+
+struct PolicyYieldInfo
+{
+	PolicyTypes ePolicy;
+	YieldTypes eYield;
+	int iYield;
+};
+
+inline FDataStream& operator<<(FDataStream& os, const PolicyYieldInfo& kYield)
+{
+	os << (int)kYield.ePolicy;
+	os << (int)kYield.eYield;
+	os << kYield.iYield;
+	return os;
+}
+
+inline FDataStream& operator>>(FDataStream& is, PolicyYieldInfo& kYield)
+{
+	is >> (int&)kYield.ePolicy;
+	is >> (int&)kYield.eYield;
+	is >> kYield.iYield;
+	return is;
+}
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //  class : CvDomainInfo

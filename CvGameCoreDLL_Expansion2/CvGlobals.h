@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -151,6 +151,15 @@ class ICvPlot1;
 class ICvRandom1;
 class ICvUnit1;
 
+#ifdef MOD_GLOBAL_CITY_SCALES
+#include "CvCityScaleClasses.h"
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+#include "CvPromotionCollectionClasses.h"
+#endif
+
+#include "CvBuildingClassCollectionsClasses.h"
 
 class CvGlobals
 {
@@ -404,6 +413,29 @@ public:
 	CvImprovementEntry* getImprovementInfo(ImprovementTypes eImprovementNum);
 	CvImprovementXMLEntries* GetGameImprovements() const;
 
+#ifdef MOD_GLOBAL_CITY_SCALES
+	int getNumCityScales();
+	std::vector<CvCityScaleEntry*>& getCityScaleInfo();
+	_Ret_maybenull_ CvCityScaleEntry* getCityScaleInfo(CityScaleTypes eCityScale);
+
+	void sortAndUpdateOrderedCityScale(const std::vector<CvCityScaleEntry*>&);
+	CvCityScaleEntry* getCityScaleInfoByPopulation(int iPopulation) const;
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+	std::vector<CvPromotionCollectionEntry*>& GetPromotionCollections();
+	CvPromotionCollectionEntry* GetPromotionCollection(PromotionCollectionsTypes ePromotionCollection);
+	int GetNumPromotionCollections();
+	void InitPromotion2CollectionMapping();
+	std::tr1::unordered_map<PromotionTypes, std::tr1::unordered_set<PromotionCollectionsTypes> >& GetPromotion2CollectionsMapping();
+#endif
+
+#ifdef MOD_BUILDINGCLASS_COLLECTIONS
+	std::vector<CvBuildingClassCollectionsEntry*>& GetBuildingClassCollections();
+	CvBuildingClassCollectionsEntry* GetBuildingClassCollection(BuildingClassCollectionsTypes eBuildingClassCollection);
+	int GetNumBuildingClassCollections();
+#endif
+
 	int getNumBuildInfos();
 	std::vector<CvBuildInfo*>& getBuildInfo();
 	CvBuildInfo* getBuildInfo(BuildTypes eBuildNum);
@@ -586,6 +618,12 @@ public:
 	std::vector<CvAchievementInfo*>& getAchievementInfo();
 	_Ret_maybenull_ CvAchievementInfo* getAchievementInfo(EAchievement eAchievementNum);
 	CvAchievementXMLEntries* GetGameAchievements() const;
+#endif
+
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::tr1::unordered_set<PolicyTypes>& getSpecialistResourcesPolicies();
+	std::tr1::unordered_set<TechTypes>& getSpecialistResourcesTechnologies();
+	void initSpecialistResourcesDependencies();
 #endif
 
 	//
@@ -5425,6 +5463,27 @@ public:
 	{
 		return m_iGOLDEN_AGE_LENGTH;
 	}
+#if defined(MOD_GLOBAL_TRIGGER_NEW_GOLDEN_AGE_IN_GA)
+	inline int getGOLDEN_AGE_POINT_MULTIPLE_IN_GA()
+	{
+		return m_iGOLDEN_AGE_POINT_MULTIPLE_IN_GA;
+	}
+#endif
+#if defined(MOD_GLOBAL_UNIT_MOVES_AFTER_DISEMBARK)
+	inline int getUNIT_MOVES_AFTER_DISEMBARK()
+	{
+		return m_iUNIT_MOVES_AFTER_DISEMBARK;
+	}
+#endif
+
+#if defined(MOD_ROG_CORE)
+	inline int getORIGINAL_CAPITAL_MODMAX()
+	{
+		return m_iORIGINAL_CAPITAL_MODMAX;
+	}
+#endif
+
+
 	inline int getGOLDEN_AGE_GREAT_PEOPLE_MODIFIER()
 	{
 		return m_iGOLDEN_AGE_GREAT_PEOPLE_MODIFIER;
@@ -6324,6 +6383,10 @@ public:
 	inline int getCITY_STRENGTH_HILL_CHANGE()
 	{
 		return m_iCITY_STRENGTH_HILL_CHANGE;
+	}
+	inline int getCITY_STRENGTH_MOUNTAIN_CHANGE()
+	{
+		return m_iCITY_STRENGTH_MOUNTAIN_CHANGE;
 	}
 	inline int getCITY_ATTACKING_DAMAGE_MOD()
 	{
@@ -7491,6 +7554,13 @@ public:
 	GD_INT_DEF(TRADE_ROUTE_PLUNDER_TURNS_COUNTER)
 #endif
 
+#if defined(MOD_GLOBAL_INTERNAL_TRADE_ROUTE_BONUS_FROM_ORIGIN_CITY)
+	GD_INT_DEF(INTERNAL_TRADE_ROUTE_FOOD_BONUS_BASE_FROM_ORIGIN)
+	GD_INT_DEF(INTERNAL_TRADE_ROUTE_FOOD_BONUS_MOD_FROM_ORIGIN)
+	GD_INT_DEF(INTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_BASE_FROM_ORIGIN)
+	GD_INT_DEF(INTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_MOD_FROM_ORIGIN)
+#endif
+
 #if defined(MOD_GLOBAL_CS_GIFTS)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_BONUS_CULTURE)
@@ -7524,6 +7594,12 @@ public:
 
 #if defined(MOD_UI_CITY_EXPANSION)
 	GD_INT_DEF(PLOT_INFLUENCE_COST_VISIBLE_DIVISOR)
+#endif
+
+#if defined(MOD_GLOBAL_WAR_CASUALTIES)
+	GD_INT_DEF(WAR_CASUALTIES_THRESHOLD);
+	GD_INT_DEF(WAR_CASUALTIES_DELTA_BASE);
+	GD_INT_DEF(WAR_CASUALTIES_POPULATION_LOSS);
 #endif
 
 	////////////// END DEFINES //////////////////
@@ -7752,6 +7828,25 @@ protected:
 	CvNotificationXMLEntries* m_pNotifications;
 #if defined(MOD_API_ACHIEVEMENTS) || defined(ACHIEVEMENT_HACKS)
 	CvAchievementXMLEntries* m_pAchievements;
+#endif
+
+#ifdef MOD_GLOBAL_CITY_SCALES
+	CvCityScaleXMLEntries* m_pCityScales;
+	std::vector<CvCityScaleEntry*> m_vOrderedCityScales; // order by min population
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+	CvPromotionCollectionEntries* m_pPromotionCollections;
+	std::tr1::unordered_map<PromotionTypes, std::tr1::unordered_set<PromotionCollectionsTypes> > m_mPromotion2CollectionsMapping;
+#endif
+
+#ifdef MOD_BUILDINGCLASS_COLLECTIONS
+	CvBuildingClassCollectionsXMLEntries* m_pBuildingClassCollections;
+#endif
+
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::tr1::unordered_set<PolicyTypes> m_vSpecialistResourcesPolicies;
+	std::tr1::unordered_set<TechTypes> m_vSpecialistResourcesTechnologies;
 #endif
 
 	//////////////////////////////////////////////////////////////////////////
@@ -8975,6 +9070,18 @@ protected:
 	int m_iBASE_GOLDEN_AGE_UNITS;
 	int m_iGOLDEN_AGE_UNITS_MULTIPLIER;
 	int m_iGOLDEN_AGE_LENGTH;
+#if defined(MOD_GLOBAL_TRIGGER_NEW_GOLDEN_AGE_IN_GA)
+	int m_iGOLDEN_AGE_POINT_MULTIPLE_IN_GA;
+#endif
+#if defined(MOD_GLOBAL_UNIT_MOVES_AFTER_DISEMBARK)
+	int m_iUNIT_MOVES_AFTER_DISEMBARK;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int m_iORIGINAL_CAPITAL_MODMAX;
+#endif
+
+
 	int m_iGOLDEN_AGE_GREAT_PEOPLE_MODIFIER;
 	int m_iMIN_UNIT_GOLDEN_AGE_TURNS;
 	int m_iGOLDEN_AGE_CULTURE_MODIFIER;
@@ -9200,6 +9307,7 @@ protected:
 	int m_iCITY_STRENGTH_POPULATION_CHANGE;
 	int m_iCITY_STRENGTH_UNIT_DIVISOR;
 	int m_iCITY_STRENGTH_HILL_CHANGE;
+	int m_iCITY_STRENGTH_MOUNTAIN_CHANGE;
 	int m_iCITY_ATTACKING_DAMAGE_MOD;
 	int m_iATTACKING_CITY_MELEE_DAMAGE_MOD;
 	int m_iCITY_ATTACK_RANGE;
@@ -9553,6 +9661,13 @@ protected:
 	GD_INT_DECL(TRADE_ROUTE_PLUNDER_TURNS_COUNTER);
 #endif
 
+#if defined(MOD_GLOBAL_INTERNAL_TRADE_ROUTE_BONUS_FROM_ORIGIN_CITY)
+	GD_INT_DECL(INTERNAL_TRADE_ROUTE_FOOD_BONUS_BASE_FROM_ORIGIN);
+	GD_INT_DECL(INTERNAL_TRADE_ROUTE_FOOD_BONUS_MOD_FROM_ORIGIN);
+	GD_INT_DECL(INTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_BASE_FROM_ORIGIN);
+	GD_INT_DECL(INTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_MOD_FROM_ORIGIN);
+#endif
+
 #if defined(MOD_GLOBAL_CS_GIFTS)
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP);
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_BONUS_CULTURE);
@@ -9586,6 +9701,12 @@ protected:
 
 #if defined(MOD_UI_CITY_EXPANSION)
 	GD_INT_DECL(PLOT_INFLUENCE_COST_VISIBLE_DIVISOR);
+#endif
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	GD_INT_DECL(WAR_CASUALTIES_THRESHOLD);
+	GD_INT_DECL(WAR_CASUALTIES_DELTA_BASE);
+	GD_INT_DECL(WAR_CASUALTIES_POPULATION_LOSS);
 #endif
 
 	// DLL interface

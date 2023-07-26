@@ -1,0 +1,4 @@
+ALTER TABLE Policies
+  ADD Dummy INTEGER DEFAULT 0;
+  
+INSERT INTO CustomModDbUpdates(Name, Value) VALUES('BUGFIX_DUMMY_POLICIES', 1);

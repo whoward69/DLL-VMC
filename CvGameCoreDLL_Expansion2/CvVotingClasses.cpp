@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -18,6 +18,10 @@
 #include "cvStopWatch.h"
 
 #include "LintFree.h"
+#include "Lua/CvLuaLeague.h"
+#include "NetworkMessageUtil.h"
+
+
 
 
 // ================================================================================
@@ -1800,6 +1804,27 @@ FDataStream& operator<<(FDataStream& saveTo, const CvRepealProposal& readFrom)
 // ================================================================================
 //			CvLeague
 // ================================================================================
+CvLeague* CvLeague::Provide(LeagueTypes league) {
+	auto rtn = GC.getGame().GetGameLeagues()->GetLeague(league);
+	if (!rtn) throw NetworkMessageNullPointerExceptopn("CvLeague", league);
+	return rtn;
+}
+
+void CvLeague::ExtractToArg(BasicArguments* arg) {
+	arg->set_argtype("CvLeague");
+	arg->set_identifier1(GetID());
+}
+
+void CvLeague::PushToLua(lua_State* L, BasicArguments* arg) {
+	CvLuaLeague::PushLtwt(L, Provide(LeagueTypes(arg->identifier1())));
+}
+
+void CvLeague::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLeague::Provide);
+	REGIST_STATIC_FUNCTION(CvLeague::PushToLua);
+}
+
+
 CvLeague::CvLeague(void)
 {
 	m_eID = NO_LEAGUE;

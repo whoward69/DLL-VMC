@@ -36,7 +36,7 @@
 #include	"FCrc32.h"
 
 #ifdef		_DEBUG
-#define		ENABLE_FSTRING_STATS
+//#define		ENABLE_FSTRING_STATS
 #endif	//	_DEBUG
 
 //---------------------------------------------------------------------------------------

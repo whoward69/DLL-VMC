@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -73,6 +73,9 @@ public:
 	int GetCapitalUnhappinessMod() const;
 	int GetFreeExperience() const;
 	int GetWorkerSpeedModifier() const;
+#if defined(MOD_POLICY_WATER_BUILD_SPEED_MODIFIER)
+	int GetWaterBuildSpeedModifier() const;
+#endif
 	int GetAllFeatureProduction() const;
 	int GetImprovementCostModifier() const;
 	int GetImprovementUpgradeRateModifier() const;
@@ -149,6 +152,7 @@ public:
 	int GetProtectedMinorPerTurnInfluence() const;
 	int GetAfraidMinorPerTurnInfluence() const;
 	int GetMinorBullyScoreModifier() const;
+	int GetMinorBullyInfluenceLossModifier() const;
 	int GetThemingBonusMultiplier() const;
 	int GetInternalTradeRouteYieldModifier() const;
 	int GetSharedReligionTourismModifier() const;
@@ -261,6 +265,25 @@ public:
 
 	BuildingTypes GetFreeBuildingOnConquest() const;
 
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	int GetMinorsTradeRouteYieldRate(const YieldTypes eYieldType) const;
+	int GetInternalTradeRouteDestYieldRate(const YieldTypes eYieldType) const;
+#endif
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int GetWarCasualtiesModifier() const;
+#endif
+
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+	int GetIdeologyPressureModifier() const;
+	int GetIdeologyUnhappinessModifier() const;
+#endif
+
+	std::vector<PolicyYieldInfo>& GetCityWithWorldWonderYieldModifier();
+	std::vector<PolicyYieldInfo>& GetTradeRouteCityYieldModifier();
+	int GetGlobalHappinessFromFaithPercent() const;
+	int GetHappinessInWLTKDCities() const;
+
 private:
 	int m_iTechPrereq;
 	int m_iCultureCost;
@@ -305,6 +328,9 @@ private:
 	int m_iCapitalUnhappinessMod;
 	int m_iFreeExperience;
 	int m_iWorkerSpeedModifier;
+#if defined(MOD_POLICY_WATER_BUILD_SPEED_MODIFIER)
+	int m_iWaterBuildSpeedModifier;
+#endif
 	int m_iAllFeatureProduction;
 	int m_iImprovementCostModifier;
 	int m_iImprovementUpgradeRateModifier;
@@ -378,6 +404,7 @@ private:
 	int m_iProtectedMinorPerTurnInfluence;
 	int m_iAfraidMinorPerTurnInfluence;
 	int m_iMinorBullyScoreModifier;
+	int m_iMinorBullyInfluenceLossModifier;
 	int m_iThemingBonusMultiplier;
 	int m_iInternalTradeRouteYieldModifier;
 	int m_iSharedReligionTourismModifier;
@@ -476,6 +503,26 @@ private:
 	int** m_ppiBuildingClassYieldModifiers;
 	int** m_ppiBuildingClassYieldChanges;
 	int* m_piFlavorValue;
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int m_iWarCasualtiesModifier;
+#endif
+
+
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+	int m_iIdeologyPressureModifier = 0;
+	int m_iIdeologyUnhappinessModifier = 0;
+#endif
+
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	Firaxis::Array<int, YieldTypes::NUM_YIELD_TYPES> m_piMinorsTradeRouteYieldRate;
+	Firaxis::Array<int, YieldTypes::NUM_YIELD_TYPES> m_piInternalTradeRouteDestYieldRate;
+#endif
+
+	std::vector<PolicyYieldInfo> m_vCityWithWorldWonderYieldModifier;
+	std::vector<PolicyYieldInfo> m_vTradeRouteCityYieldModifier;
+	int m_iGlobalHappinessFromFaithPercent = 0;
+	int m_iHappinessInWLTKDCities = 0;
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -604,6 +651,7 @@ enum PolicyModifierType
 	POLICYMOD_PROTECTED_MINOR_INFLUENCE,
 	POLICYMOD_AFRAID_INFLUENCE,
 	POLICYMOD_MINOR_BULLY_SCORE_MODIFIER,
+	POLICYMOD_MINOR_BULLY_INFLUENCE_LOSS_MODIFIER,
 	POLICYMOD_STEAL_TECH_FASTER_MODIFIER,
 	POLICYMOD_THEMING_BONUS,
 	POLICYMOD_CITY_STATE_TRADE_CHANGE,

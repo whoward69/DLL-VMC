@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -146,7 +146,7 @@ void CvDllGameContext::InitializeSingleton()
 
 	}
 	s_pSingleton = FNEW(CvDllGameContext(), c_eCiv5GameplayDLL, 0);
-
+	//container = FNEW(InvokeRecorder(), c_eCiv5GameplayDLL, 0);
 #if defined(CUSTOM_MODS_H)
 	CUSTOMLOG("%s - Startup (Version %u%s - Build %s %s%s)", MOD_DLL_NAME, MOD_DLL_VERSION_NUMBER, MOD_DLL_VERSION_STATUS, __DATE__, __TIME__, MOD_DLL_CUSTOM_BUILD_NAME);
 #if defined(MOD_GLOBAL_MAX_MAJOR_CIVS)
@@ -904,204 +904,35 @@ bool CvDllGameContext::RandomNumberGeneratorSyncCheck(PlayerTypes ePlayer, ICvRa
 
 		char formatBuf[128] = {"\0"};
 		std::string rngLogMessage = "Game Random Number Generators are out of sync : local.seed=";
-		rngLogMessage += _itoa_s(localSimRandomNumberGenerator.getSeed(), formatBuf, 10);
+		_itoa_s(localSimRandomNumberGenerator.getSeed(), formatBuf, 10);
+		rngLogMessage += formatBuf;
+
 		rngLogMessage += ", remote.seed=";
-		rngLogMessage += _itoa_s(pkRandom->getSeed(), formatBuf, 10);
+		_itoa_s(pkRandom->getSeed(), formatBuf, 10);
+		rngLogMessage += formatBuf;
+
 		rngLogMessage += "\n\tlocal.callCount=";
-		rngLogMessage += _itoa_s(localSimRandomNumberGenerator.getCallCount(), formatBuf, 10);
+		_itoa_s(localSimRandomNumberGenerator.getCallCount(), formatBuf, 10);
+		rngLogMessage += formatBuf;
+
 		rngLogMessage += ", remote.callCount=";
-		rngLogMessage += _itoa_s(pkRandom->getCallCount(), formatBuf, 10);
+		_itoa_s(pkRandom->getCallCount(), formatBuf, 10);
+		rngLogMessage += formatBuf;
+
 		rngLogMessage += "\n\tlocal.resetCount=";
-		rngLogMessage += _itoa_s(localSimRandomNumberGenerator.getResetCount(), formatBuf, 10);
+		_itoa_s(localSimRandomNumberGenerator.getResetCount(), formatBuf, 10);
+		rngLogMessage += formatBuf;
+
 		rngLogMessage += ", remote.resetCount=";
-		rngLogMessage += _itoa_s(pkRandom->getResetCount(), formatBuf, 10);
+		_itoa_s(pkRandom->getResetCount(), formatBuf, 10);
+		rngLogMessage += formatBuf;
 		rngLogMessage += "\n";
 
-		if(localSimRandomNumberGenerator.callStackDebuggingEnabled() && pkRandom->callStackDebuggingEnabled())
+		if (logFile)
 		{
-			std::string localCallStack("");
-			std::string remoteCallStack("");
-			localSimRandomNumberGenerator.resolveCallStacks();
-			const std::vector<std::string>& localCallStacks = localSimRandomNumberGenerator.getResolvedCallStacks();
-			const std::vector<std::string>& remoteCallStacks =  pkRandom->getResolvedCallStacks();
-			const std::vector<unsigned long>& localSeedHistory = localSimRandomNumberGenerator.getSeedHistory();
-			const std::vector<unsigned long>& remoteSeedHistory = pkRandom->getSeedHistory();
-			std::vector<unsigned long>::const_iterator localSeedIterator = localSeedHistory.begin();
-			std::vector<unsigned long>::const_iterator remoteSeedIterator = remoteSeedHistory.begin();
-			unsigned int callNumber = 0;
-			for(localSeedIterator = localSeedHistory.begin(), remoteSeedIterator = remoteSeedHistory.begin(); localSeedIterator != localSeedHistory.end() && remoteSeedIterator != remoteSeedHistory.end(); ++localSeedIterator, ++remoteSeedIterator, ++callNumber)
-			{
-				if(*localSeedIterator != *remoteSeedIterator)
-				{
-					if(callNumber < localCallStacks.size() && callNumber < remoteCallStacks.size())
-					{
-						rngLogMessage += "At Call #";
-						rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
-						rngLogMessage += " random number seeds are different.\n";
-						if(callNumber > 0)
-						{
-							rngLogMessage += "Call #";
-							rngLogMessage += _itoa_s(callNumber - 1, formatBuf, 10);
-							rngLogMessage += "\nLocal:\n";
-							rngLogMessage += localCallStacks[callNumber - 1];
-							rngLogMessage += "\nRemote:\n";
-							rngLogMessage += remoteCallStacks[callNumber - 1];
-						}
-						rngLogMessage += "Call #";
-						rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
-						rngLogMessage += "\nLocal:\n";
-						rngLogMessage += localCallStacks[callNumber];
-						rngLogMessage += "\nRemote:\n";
-						rngLogMessage += remoteCallStacks[callNumber];
-						break;
-					}
-				}
-			}
-			if(localSeedIterator != localSeedHistory.end() && remoteSeedIterator == remoteSeedHistory.end())
-			{
-				rngLogMessage += "\nLocal random number generator called more than remote at call #";
-				rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
-				rngLogMessage += "\n";
-				if(callNumber < localSeedHistory.size())
-				{
-					rngLogMessage += "Local CallStack:\n";
-					rngLogMessage += localCallStacks[callNumber];
-				}
-			}
-			else if(remoteSeedIterator != remoteSeedHistory.end() && localSeedIterator == localSeedHistory.end())
-			{
-				rngLogMessage += "\nremote random number generator called more than local at call #";
-				rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
-				rngLogMessage += "\n";
-				if(callNumber < remoteSeedHistory.size())
-				{
-					rngLogMessage += "remote CallStack:\n";
-					rngLogMessage += remoteCallStacks[callNumber];
-				}
-			}
-
-			// find first different call
-			std::vector<std::string>::const_iterator localCallStackIterator;
-			std::vector<std::string>::const_iterator remoteCallStackIterator;
-			for(localCallStackIterator = localCallStacks.begin(), remoteCallStackIterator = remoteCallStacks.begin(), callNumber = 0; localCallStackIterator != localCallStacks.end() && remoteCallStackIterator != remoteCallStacks.end(); ++localCallStackIterator, ++remoteCallStackIterator, ++callNumber)
-			{
-				if(*localCallStackIterator != *remoteCallStackIterator)
-				{
-					rngLogMessage += "\nFirst different callstack at call #";
-					rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
-					rngLogMessage += "\n";
-					rngLogMessage += "Local :\n";
-					rngLogMessage += *localCallStackIterator;
-					rngLogMessage += "Remote :\n";
-					rngLogMessage += *remoteCallStackIterator;
-					break;
-				}
-			}
-
-			if(logFile)
-			{
-				logFile->DebugMsg(rngLogMessage.c_str());
-			}
-
-			CvAssertMsg(false, rngLogMessage.c_str());
-
-			if(logFile)
-			{
-				rngLogMessage = "\nDebug dump:\n";
-
-
-				// add full history
-				rngLogMessage += "Seed History -\n";
-				localSeedIterator = localSeedHistory.begin();
-				remoteSeedIterator = remoteSeedHistory.begin();
-				callNumber = 0;
-				while(localSeedIterator != localSeedHistory.end() || remoteSeedIterator != remoteSeedHistory.end())
-				{
-					++callNumber;
-					rngLogMessage += "\t Call #";
-					rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
-					rngLogMessage += " LOCAL=";
-					if(localSeedIterator != localSeedHistory.end())
-					{
-						rngLogMessage += _itoa_s(*localSeedIterator, formatBuf, 10);
-						++localSeedIterator;
-					}
-					rngLogMessage += "\tREMOTE=";
-					if(remoteSeedIterator != remoteSeedHistory.end())
-					{
-						rngLogMessage += _itoa_s(*remoteSeedIterator, formatBuf, 10);
-						++remoteSeedIterator;
-					}
-					rngLogMessage += "\n";
-				}
-
-				rngLogMessage += "\nLocal callstack history\n";
-				callNumber = 0;
-				std::string lastCallStackLogged;
-				unsigned int repeatCount = 0;
-				std::vector<std::string>::const_iterator i;
-				for(i = localCallStacks.begin(); i != localCallStacks.end(); ++i)
-				{
-					if(lastCallStackLogged != *i)
-					{
-						if(repeatCount > 0)
-						{
-							rngLogMessage += "Last message repeated ";
-							rngLogMessage += _itoa_s(repeatCount, formatBuf, 10);
-							rngLogMessage += " times\n";
-						}
-						rngLogMessage += "Call #";
-						rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
-						rngLogMessage += "\n";
-						rngLogMessage += *i;
-						lastCallStackLogged = *i;
-						repeatCount = 0;
-					}
-					else
-					{
-						repeatCount++;
-					}
-					++callNumber;
-				}
-
-				rngLogMessage += "\nRemote callstack history\n";
-				callNumber = 0;
-				repeatCount = 0;
-				for(i = remoteCallStacks.begin(); i != remoteCallStacks.end(); ++i)
-				{
-					if(lastCallStackLogged != *i)
-					{
-						if(repeatCount > 0)
-						{
-							rngLogMessage += "Last message repeated ";
-							rngLogMessage += _itoa_s(repeatCount, formatBuf, 10);
-							rngLogMessage += " times\n";
-						}
-						rngLogMessage += "Call #";
-						rngLogMessage += _itoa_s(callNumber, formatBuf, 10);
-						rngLogMessage += "\n";
-						rngLogMessage += *i;
-						lastCallStackLogged = *i;
-						repeatCount = 0;
-					}
-					else
-					{
-						repeatCount++;
-					}
-					++callNumber;
-				}
-				logFile->DebugMsg(rngLogMessage.c_str());
-			}
-
+			logFile->DebugMsg(rngLogMessage.c_str());
 		}
-		else
-		{
-			if(logFile)
-			{
-				logFile->DebugMsg(rngLogMessage.c_str());
-			}
-			CvAssertMsg(false, rngLogMessage.c_str());
-		}
+		CvAssertMsg(false, rngLogMessage.c_str());
 
 
 		/* If this point has been reached, the OOS may be nearly unrecoverable

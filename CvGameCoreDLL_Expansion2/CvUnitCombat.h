@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -12,6 +12,23 @@
 
 #include "CvUnit.h"
 #include "CvPlot.h"
+
+struct InflictDamageContext
+{
+	CvUnit* pAttackerUnit = nullptr;
+	CvCity* pAttackerCity = nullptr;
+	CvUnit* pDefenderUnit = nullptr;
+	CvCity *pDefenderCity = nullptr;
+
+	// battle type
+	bool bRanged = false;
+	bool bMelee = false;
+	bool bAirCombat = false;
+
+	// output
+	int *piAttackInflictDamage = nullptr;
+	int *piDefenseInflictDamage = nullptr;
+};
 
 // Combat controller for CvUnits
 class CvUnitCombat
@@ -54,6 +71,28 @@ public:
 	//	Return a ranged unit that will defend the supplied location against the attacker at the specified location.
 	static CvUnit*		GetFireSupportUnit(PlayerTypes eDefender, int iDefendX, int iDefendY, int iAttackX, int iAttackY);
 	static uint			ApplyNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDamageLevel, CvUnit* pkAttacker = NULL);
+
+#ifdef MOD_NEW_BATTLE_EFFECTS
+	static void DoNewBattleEffects(const CvCombatInfo& kInfo);
+	static bool ShouldDoNewBattleEffects(const CvCombatInfo& kInfo);
+
+	static void DoSplashDamage(const CvCombatInfo& kInfo);
+	static void DoCollateralDamage(const CvCombatInfo& kInfo);
+	static void DoAddEnemyPromotions(const CvCombatInfo& kInfo);
+	static void DoDestroyBuildings(const CvCombatInfo& kInfo);
+	static void DoKillCitizens(const CvCombatInfo& kInfo);
+	static void DoStackingFightBack(const CvCombatInfo& kInfo);
+	static void DoStopAttacker(const CvCombatInfo& kInfo);
+	static void DoHeavyChargeEffects(CvUnit* attacker, CvUnit* defender, CvPlot* battlePlot);
+
+#endif
+#if defined(MOD_PROMOTION_GET_INSTANCE_FROM_ATTACK)
+	static void DoInstantYieldFromCombat(const CvCombatInfo& kInfo);
+#endif
+
+#ifdef MOD_ROG_CORE
+	static void InterveneInflictDamage(InflictDamageContext* ctx);
+#endif
 
 protected:
 	static void ResolveRangedUnitVsCombat(const CvCombatInfo& kInfo, uint uiParentEventID);

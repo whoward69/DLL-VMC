@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -33,13 +33,94 @@
 #include "CvDllInterfaces.h"
 
 
+#include "NetworkMessageUtil.h"
+
 // include this last to turn warnings into errors for code analysis
 #include "LintFree.h"
+#include <ctime>
+#include <FunctionsRef.h>
 
 //Utility macro for registering methods
 #define Method(Name)			\
 	lua_pushcclosure(L, l##Name, 0);	\
 	lua_setfield(L, t, #Name);
+
+void CvLuaPlayer::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lAcquireCity);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lAddCityName);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lAddNotification);
+
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumWorldWonders);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeBaseBuildingGoldMaintenance);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNewCityExtraPopulation);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGold);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulturePerTurnForFree);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulturePerTurnFromMinorCivs);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeJONSCulture);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeFaith);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeExtraHappinessPerCity);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeUnhappinessFromUnits);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeHappinessPerGarrisonedUnit);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeHappinessPerTradeRoute);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeBarbarianCombatBonus);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGarrisonedCityRangeStrikeModifier);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAlwaysSeeBarbCampsCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAnarchyNumTurns);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeAdvancedStartPoints);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldenAgeProgressMeter);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumGoldenAges);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldenAgeTurns);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumUnitGoldenAges);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeGoldPerUnitTimes100);
+	
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lInitUnit);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lInitCity);
+
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lKillCities);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lKillUnits);
+
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lRaze);
+
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumWondersBeatenTo);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetFaithPurchaseType);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetFaithPurchaseIndex);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetBaseBuildingGoldMaintenance);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetGreatGeneralCombatBonus);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetStartingPlot);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetGold);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetJONSCulture);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetFaith);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetHappiness);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetHappinessPerGarrisonedUnit);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetHappinessPerTradeRoute);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetBarbarianCombatBonus);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetAlwaysSeeBarbCampsCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetPolicyBranchUnlocked);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetHasPolicy);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetAnarchyNumTurns);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetAdvancedStartPoints);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetGoldenAgeProgressMeter);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumGoldenAges);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetConscriptCount);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetMinorCivUniqueUnit);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetPersonalityType);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetOption);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetPlayable);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetResearchingTech);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetCombatExperience);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNavalCombatExperience);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetReplayDataValue);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetScriptData);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumPlotsBought);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumFreeTechs);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumFreePolicies);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumFreeTenets);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumFreeGreatPeople);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumMayaBoosts);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetNumFaithGreatPeople);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetEmbarkedGraphicOverride);
+
+}
 
 //------------------------------------------------------------------------------
 void CvLuaPlayer::Register(lua_State* L)
@@ -49,6 +130,9 @@ void CvLuaPlayer::Register(lua_State* L)
 //------------------------------------------------------------------------------
 void CvLuaPlayer::PushMethods(lua_State* L, int t)
 {
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+
 	Method(InitCity);
 	Method(AcquireCity);
 	Method(KillCities);
@@ -250,6 +334,12 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 	Method(GetJONSCultureEverGenerated);
 
+#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
+	Method(GetGoldenAgePointPerTurnFromReligion);
+	Method(GetGoldenAgePointPerTurnFromTraits);
+	Method(GetGoldenAgePointPerTurnFromCitys);
+#endif	
+
 	Method(GetLastTurnLifetimeCulture);
 	Method(GetInfluenceOn);
 	Method(GetLastTurnInfluenceOn);
@@ -371,6 +461,8 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetHappinessFromMinorCivs);
 	Method(GetHappinessFromMinor);
 
+
+
 	// END Happiness
 
 	Method(GetBarbarianCombatBonus);
@@ -396,6 +488,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetNumPolicies);
 	Method(GetNumPoliciesInBranch);
 	Method(HasPolicy);
+
 	Method(SetHasPolicy);
 	Method(GetNextPolicyCost);
 	Method(CanAdoptPolicy);
@@ -576,6 +669,8 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 	Method(IsMajorCiv);
+	Method(GetCivBuilding);
+	Method(GetCivUnit);
 #endif
 	Method(IsMinorCiv);
 	Method(GetMinorCivType);
@@ -596,6 +691,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetFriendshipChangePerTurnTimes100);
 	Method(GetMinorCivFriendshipWithMajor);
 	Method(ChangeMinorCivFriendshipWithMajor);
+	Method(GetMinorBullyInfluenceLoss);
 	Method(GetMinorCivFriendshipAnchorWithMajor);
 	Method(GetMinorCivFriendshipLevelWithMajor);
 	Method(GetActiveQuestForPlayer);
@@ -707,6 +803,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetScienceFromHappinessTimes100);
 	Method(GetScienceFromResearchAgreementsTimes100);
 	Method(GetScienceFromBudgetDeficitTimes100);
+	Method(GetScienceFromReligion);
 
 	// END Science
 
@@ -734,6 +831,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 	Method(IsBuildingFree);
 	Method(GetUnitClassCount);
+	Method(GetUnitCountFromHasPromotion);
 	Method(IsUnitClassMaxedOut);
 	Method(GetUnitClassMaking);
 	Method(GetUnitClassCountPlusMaking);
@@ -775,11 +873,21 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(Cities);
 	Method(GetNumCities);
 	Method(GetCityByID);
+
+	Method(GetMinorFriendCount);
+	Method(GetMinorAllyCount);
+
+#if defined(MOD_ROG_CORE)
+	Method(GetNumOriginalCapital);
+#endif
+
 #if defined(MOD_API_LUA_EXTENSIONS)
 	Method(GetNumPuppetCities);
 #endif
 
+
 	Method(Units);
+	Method(GetUnitsListFromHasPromotion);
 	Method(GetNumUnits);
 	Method(GetUnitByID);
 
@@ -959,6 +1067,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 	Method(GetTraitGoldenAgeCombatModifier);
 	Method(GetTraitCityStateCombatModifier);
+	Method(GetTraitCityStateFriendshipModifier);
 	Method(GetTraitGreatGeneralExtraBonus);
 	Method(GetTraitGreatScientistRateModifier);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_TRAITS_ANY_BELIEF)
@@ -1158,6 +1267,23 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(ActivateMilitaryStrategy);
 	Method(DeactivateMilitaryStrategy);
 #endif
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+	Method(IsSecondReligionPantheon);
+#endif // MOD_API_RELIGION_EXTENSIONS
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	Method(GetWarCasualtiesCounter);
+	Method(ChangeWarCasualtiesCounter);
+	Method(SetWarCasualtiesCounter);
+	Method(CheckAndUpdateWarCasualtiesCounter);
+#endif
+
+#if defined(MOD_SPECIALIST_RESOURCES)
+	Method(GetSpecialistResources);
+#endif
+
+	Method(GetHappinessFromFaith);
 }
 //------------------------------------------------------------------------------
 void CvLuaPlayer::HandleMissingInstance(lua_State* L)
@@ -1276,6 +1402,7 @@ int CvLuaPlayer::lInitUnit(lua_State* L)
 	CvLuaUnit::Push(L, pkUnit);
 	return 1;
 }
+
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //CvUnit* initUnitWithNameOffset(UnitTypes eUnit, int iX, int iY, UnitAITypes eUnitAI = NO_UNITAI, DirectionTypes eFacingDirection = NO_DIRECTION);
@@ -2322,6 +2449,7 @@ int CvLuaPlayer::lChangeGold(lua_State* L)
 
 	return 1;
 }
+
 //------------------------------------------------------------------------------
 //int CalculateGrossGold();
 int CvLuaPlayer::lCalculateGrossGold(lua_State* L)
@@ -2519,6 +2647,7 @@ int CvLuaPlayer::lSetJONSCulture(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlayerAI::setJONSCulture);
 }
+
 //------------------------------------------------------------------------------
 //void changeJONSCulture(int iChange);
 int CvLuaPlayer::lChangeJONSCulture(lua_State* L)
@@ -2532,6 +2661,29 @@ int CvLuaPlayer::lGetJONSCultureEverGenerated(lua_State* L)
 	return BasicLuaMethod(L, &CvPlayerAI::GetJONSCultureEverGenerated);
 }
 //------------------------------------------------------------------------------
+#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
+int CvLuaPlayer::lGetGoldenAgePointPerTurnFromReligion(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const int iResult = pkPlayer->GetYieldPerTurnFromReligion(YIELD_GOLDEN_AGE_POINTS);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+int CvLuaPlayer::lGetGoldenAgePointPerTurnFromTraits(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const int iResult = pkPlayer->GetYieldPerTurnFromTraits(YIELD_GOLDEN_AGE_POINTS);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+int CvLuaPlayer::lGetGoldenAgePointPerTurnFromCitys(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const int iResult = pkPlayer->GetGoldenAgePointPerTurnFromCitys();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+#endif
 //int GetLastTurnLifetimeCulture();
 int CvLuaPlayer::lGetLastTurnLifetimeCulture(lua_State* L)
 {
@@ -4468,6 +4620,11 @@ int CvLuaPlayer::lGetTradeRoutes(lua_State* L)
 		lua_pushinteger(L, pToPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_SCIENCE, false));
 		lua_setfield(L, t, "ToScience");
 
+		lua_pushinteger(L, pkPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_CULTURE, true));
+		lua_setfield(L, t, "FromCulture");
+		lua_pushinteger(L, pToPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_CULTURE, false));
+		lua_setfield(L, t, "ToCulture");
+
 
 		ReligionTypes eToReligion = NO_RELIGION;
 		int iToPressure = 0;
@@ -4639,6 +4796,11 @@ int CvLuaPlayer::lGetTradeRoutesAvailable(lua_State* L)
 						lua_pushinteger(L, GET_PLAYER(eOtherPlayer).GetTrade()->GetTradeConnectionValueTimes100(kConnection, YIELD_SCIENCE, false));
 						lua_setfield(L, t, "ToScience");
 
+						lua_pushinteger(L, GET_PLAYER(eOtherPlayer).GetTrade()->GetTradeConnectionValueTimes100(kConnection, YIELD_CULTURE, true));
+						lua_setfield(L, t, "FromCulture");
+						lua_pushinteger(L, GET_PLAYER(eOtherPlayer).GetTrade()->GetTradeConnectionValueTimes100(kConnection, YIELD_CULTURE, false));
+						lua_setfield(L, t, "ToCulture");
+
 						ReligionTypes eToReligion = NO_RELIGION;
 						int iToPressure = 0;
 						ReligionTypes eFromReligion = NO_RELIGION;
@@ -4764,6 +4926,11 @@ int CvLuaPlayer::lGetTradeRoutesToYou(lua_State* L)
 		lua_setfield(L, t, "FromScience");
 		lua_pushinteger(L, pToPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_SCIENCE, false));
 		lua_setfield(L, t, "ToScience");
+
+		lua_pushinteger(L, pFromPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_CULTURE, true));
+		lua_setfield(L, t, "FromCulture");
+		lua_pushinteger(L, pToPlayer->GetTrade()->GetTradeConnectionValueTimes100(*pConnection, YIELD_CULTURE, false));
+		lua_setfield(L, t, "ToCulture");
 
 		ReligionTypes eToReligion = NO_RELIGION;
 		int iToPressure = 0;
@@ -5208,7 +5375,7 @@ int CvLuaPlayer::lHasPolicy(lua_State* L)
 	return 1;
 }
 //------------------------------------------------------------------------------
-//void setHasPolicy(PolicyTypes  eIndex, bool bNewValue);
+//void setHasPolicy(PolicyTypes  eIndex, bool bNewValue, bool bFree);
 int CvLuaPlayer::lSetHasPolicy(lua_State* L)
 {
 #if defined(MOD_API_EXTENSIONS)
@@ -5223,6 +5390,7 @@ int CvLuaPlayer::lSetHasPolicy(lua_State* L)
 	return BasicLuaMethod(L, &CvPlayerAI::setHasPolicy);
 #endif
 }
+
 //------------------------------------------------------------------------------
 //int getNextPolicyCost();
 int CvLuaPlayer::lGetNextPolicyCost(lua_State* L)
@@ -5487,6 +5655,7 @@ int CvLuaPlayer::lSetAnarchyNumTurns(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlayerAI::SetAnarchyNumTurns);
 }
+
 //------------------------------------------------------------------------------
 //int ChangeAnarchyNumTurns();
 int CvLuaPlayer::lChangeAnarchyNumTurns(lua_State* L)
@@ -6361,6 +6530,16 @@ int CvLuaPlayer::lIsMajorCiv(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlayerAI::isMajorCiv);
 }
+
+int CvLuaPlayer::lGetCivBuilding(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlayerAI::GetCivBuilding);
+}
+
+int CvLuaPlayer::lGetCivUnit(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlayerAI::GetCivUnit);
+}
 #endif
 //------------------------------------------------------------------------------
 //bool isMinorCiv();
@@ -6523,6 +6702,19 @@ int CvLuaPlayer::lChangeMinorCivFriendshipWithMajor(lua_State* L)
 	pkPlayer->GetMinorCivAI()->ChangeFriendshipWithMajor(ePlayer, iChange);
 	return 1;
 }
+
+//void GetMinorBullyInfluenceLoss(PlayerTypes eMajor, int iOriginalLoss);
+int CvLuaPlayer::lGetMinorBullyInfluenceLoss(lua_State* L)
+{
+	CvPlayerAI* pMinor = GetInstance(L);
+	PlayerTypes eMajor = (PlayerTypes) lua_tointeger(L, 2);
+	int iOriginalLoss = lua_tointeger(L, 3);
+
+	int iResult = pMinor->GetMinorCivAI()->GetBullyInfluenceLoss(eMajor, iOriginalLoss);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
 //------------------------------------------------------------------------------
 //void GetMinorCivFriendshipAnchorWithMajor(PlayerTypes eMajor);
 int CvLuaPlayer::lGetMinorCivFriendshipAnchorWithMajor(lua_State* L)
@@ -7288,7 +7480,7 @@ int CvLuaPlayer::lGetCurrentEra(lua_State* L)
 //int getTeam();
 int CvLuaPlayer::lGetTeam(lua_State* L)
 {
-	return BasicLuaMethod(L, &CvPlayerAI::getTeam);
+	return CvLuaMethodWrapper<CvLuaPlayer, CvPlayerAI>::BasicLuaMethod<TeamTypes>(L, &CvPlayerAI::getTeam);
 }
 //------------------------------------------------------------------------------
 //ColorTypes GetPlayerColor();
@@ -7417,6 +7609,14 @@ int CvLuaPlayer::lGetScienceFromBudgetDeficitTimes100(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlayerAI::GetScienceFromBudgetDeficitTimes100);
 }
+//int GetScienceFromReligion();
+int CvLuaPlayer::lGetScienceFromReligion(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const int iResult = pkPlayer->GetYieldPerTurnFromReligion(YIELD_SCIENCE);
+	lua_pushinteger(L, iResult);
+	return 1;
+}
 //------------------------------------------------------------------------------
 //int GetProximityToPlayer(PlayerTypes  eIndex);
 int CvLuaPlayer::lGetProximityToPlayer(lua_State* L)
@@ -7483,6 +7683,7 @@ int CvLuaPlayer::lChangeNumResourceTotal(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlayerAI::changeNumResourceTotal);
 }
+
 //------------------------------------------------------------------------------
 //int getNumResourceAvailable(ResourceTypes  iIndex, bool bIncludeImport);
 int CvLuaPlayer::lGetNumResourceAvailable(lua_State* L)
@@ -7527,6 +7728,12 @@ int CvLuaPlayer::lIsBuildingFree(lua_State* L)
 int CvLuaPlayer::lGetUnitClassCount(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlayerAI::getUnitClassCount);
+}
+//------------------------------------------------------------------------------
+//int getUnitCountFromHasPromotion(UnitClassTypes eIndex);
+int CvLuaPlayer::lGetUnitCountFromHasPromotion(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlayerAI::getUnitCountFromHasPromotion);
 }
 //------------------------------------------------------------------------------
 //bool isUnitClassMaxedOut(UnitClassTypes  eIndex, int iExtra);
@@ -7837,6 +8044,14 @@ int CvLuaPlayer::lGetNumCities(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvPlayerAI::getNumCities);
 }
+
+#if defined(MOD_ROG_CORE)
+int CvLuaPlayer::lGetNumOriginalCapital(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlayerAI::CountAllOriginalCapitalCity);
+}
+#endif
+
 #if defined(MOD_API_LUA_EXTENSIONS)
 //------------------------------------------------------------------------------
 //int getNumCities();
@@ -7895,6 +8110,28 @@ int CvLuaPlayer::lUnits(lua_State* L)
 	lua_pushcclosure(L, lUnitsAux, 1);		/* generator, */
 	lua_pushvalue(L, 1);					/* state (self)*/
 	return 2;
+}
+//------------------------------------------------------------------------------
+// Method for iterating through units have given Promotion (behaves like pairs)
+int CvLuaPlayer::lGetUnitsListFromHasPromotion(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const PromotionTypes ePromotion = (PromotionTypes)lua_tointeger(L, 2);
+
+	lua_createtable(L, 0, 0);
+	const int t = lua_gettop(L);
+	int idx = 1;
+
+	std::vector<const CvUnit*> unitsListFromHasPromotion;
+	pkPlayer->getUnitsListFromHasPromotion(ePromotion, unitsListFromHasPromotion);
+
+	for(std::vector<const CvUnit*>::iterator it = unitsListFromHasPromotion.begin();
+	        it!= unitsListFromHasPromotion.end(); ++it)
+	{
+		CvLuaUnit::Push(L, const_cast<CvUnit*>(*it));
+		lua_rawseti(L, t, idx++);
+	}
+	return 1;
 }
 //------------------------------------------------------------------------------
 //CvUnit GetUnitByID();
@@ -9740,6 +9977,7 @@ int CvLuaPlayer::lSetNumFreeTechs(lua_State* L)
 	pkPlayer->SetNumFreeTechs(iNumTechs);
 	return 1;
 }
+
 //------------------------------------------------------------------------------
 int CvLuaPlayer::lGetNumFreePolicies(lua_State* L)
 {
@@ -9912,6 +10150,16 @@ int CvLuaPlayer::lGetTraitCityStateCombatModifier(lua_State* L)
 	if(pkPlayer)
 	{
 		lua_pushinteger(L, pkPlayer->GetPlayerTraits()->GetCityStateCombatModifier());
+	}
+	return 1;
+}
+//------------------------------------------------------------------------------
+int CvLuaPlayer::lGetTraitCityStateFriendshipModifier(lua_State* L)
+{
+	CvPlayer* pkPlayer = GetInstance(L);
+	if(pkPlayer)
+	{
+		lua_pushinteger(L, pkPlayer->GetStrengthModifierFromAlly());
 	}
 	return 1;
 }
@@ -10206,6 +10454,9 @@ int CvLuaPlayer::lGetPolicyBuildingClassYieldModifier(lua_State* L)
 	if(pkPlayer)
 	{
 		int modifier = pkPlayer->GetPlayerPolicies()->GetBuildingClassYieldModifier(eBuildingClass, eYieldType);
+#if defined(MOD_ROG_CORE)
+		modifier += pkPlayer->GetBuildingClassYieldModifier(eBuildingClass, eYieldType);
+#endif
 		lua_pushinteger(L, modifier);
 
 		return 1;
@@ -10213,6 +10464,8 @@ int CvLuaPlayer::lGetPolicyBuildingClassYieldModifier(lua_State* L)
 
 	return 0;
 }
+
+
 
 //------------------------------------------------------------------------------
 int CvLuaPlayer::lGetPolicyBuildingClassYieldChange(lua_State* L)
@@ -11898,6 +12151,20 @@ int CvLuaPlayer::lAddMessage(lua_State* L)
 }
 #endif
 
+#ifdef MOD_API_RELIGION_EXTENSIONS
+int CvLuaPlayer::lIsSecondReligionPantheon(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvPlayerAI::IsSecondReligionPantheon);
+}
+#endif // MOD_API_RELIGION_EXTENSIONS
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+LUAAPIIMPL(Player, GetWarCasualtiesCounter)
+LUAAPIIMPL(Player, ChangeWarCasualtiesCounter)
+LUAAPIIMPL(Player, SetWarCasualtiesCounter)
+LUAAPIIMPL(Player, CheckAndUpdateWarCasualtiesCounter)
+#endif
+
 #if defined(MOD_API_LUA_EXTENSIONS)
 LUAAPIIMPL(Player, HasBelief)
 LUAAPIIMPL(Player, HasBuilding)
@@ -12081,3 +12348,65 @@ int CvLuaPlayer::lDeactivateMilitaryStrategy(lua_State* L)
 	return 0;
 }
 #endif
+
+int CvLuaPlayer::lGetMinorFriendCount(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	bool bExcludeNonAlive = lua_toboolean(L, 2);
+
+	lua_pushinteger(L, pkPlayer->GetMinorFriendCount(bExcludeNonAlive));
+
+	return 1;
+}
+
+int CvLuaPlayer::lGetMinorAllyCount(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	bool bExcludeNonAlive = lua_toboolean(L, 2);
+
+	lua_pushinteger(L, pkPlayer->GetMinorAllyCount(bExcludeNonAlive));
+
+	return 1;
+}
+
+#ifdef MOD_SPECIALIST_RESOURCES
+int CvLuaPlayer::lGetSpecialistResources(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	SpecialistTypes eSpecialist = static_cast<SpecialistTypes>(lua_tointeger(L, 2));
+	CvSpecialistInfo* pkSpecialistInfo = GC.getSpecialistInfo(eSpecialist);
+	if (pkSpecialistInfo == nullptr) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	std::tr1::unordered_map<ResourceTypes, int> mapResources;
+    for (auto& info : pkSpecialistInfo->GetResourceInfo())
+    {
+        if (pkPlayer->MeetSpecialistResourceRequirement(info))
+        {
+			mapResources[info.m_eResource] += info.m_iQuantity;
+        }
+    }
+
+	lua_createtable(L, mapResources.size(), 2);
+	int index = 1;
+	for (auto& pair : mapResources)
+	{
+		lua_createtable(L, 0, 0);
+		const int t = lua_gettop(L);
+
+		lua_pushinteger(L, pair.first);
+		lua_setfield(L, t, "ResourceType");
+
+		lua_pushinteger(L, pair.second);
+		lua_setfield(L, t, "Quantity");
+
+		lua_rawseti(L, -2, index++);
+	}
+
+	return 1;
+}
+#endif
+
+LUAAPIIMPL(Player, GetHappinessFromFaith)

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<!-- Espionage.xml -->
+	<Language_RU_RU>
+		<Row Tag="TXT_KEY_SPY_STATE_TERMINATED">
+			<Text>Устранён!</Text>
+		</Row>
+	</Language_RU_RU>
+
+	<!-- GoodyHutMessages.xml -->
+	<Language_RU_RU>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_GOLD"/>
+			<Set>
+				<Text>В руинах вы находите сокровища древней империи!</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_PROPHET_FAITH"/>
+			<Set>
+				<Text>Вы нашли тайное религиозное сообщество. Проповедник предсказывает приход Великого Пророка.</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_FAITH"/>
+			<Set>
+				<Text>Вы нашли древний оракул. Жрица благословила вас божественным откровением.</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_CULTURE"/>
+			<Set>
+				<Text>Вы нашли культурные артефакты, перед которыми трепещут ваши граждане!</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_MISC_RECEIVED_GOLD"/>
+			<Set>
+				<Text>[SPACE]Вы получили {1_Num} [ICON_GOLD] золота!</Text>
+			</Set>
+		</Update>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_CULTURE">
+			<Text>[SPACE]Вы получили {1_Num} [ICON_CULTURE] культуры!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_FAITH">
+			<Text>[SPACE]Вы получили {1_Num} [ICON_PEACE] веры!</Text>
+		</Row>
+	</Language_RU_RU>
+
+	<!-- Religion.xml -->
+	<Language_RU_RU>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_ACTIVE_PLAYER">
+			<Text>Вы расширили свой пантеон, добавив новое верование.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED">
+			<Text>Цивилизация {1_CivName} расширила свой пантеон, добавив новое верование.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_UNKNOWN">
+			<Text>Неизвестная цивилизация расширила свой пантеон, добавив новое верование.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_S">
+			<Text>Расширение пантеона</Text>
+		</Row>
+	</Language_RU_RU>
+
+	<!-- SpyNames.xml -->
+	<Language_RU_RU>
+		<Row Tag="TXT_KEY_SPY_NAME_UNKNOWN">
+			<Text>Неизвестно</Text>
+		</Row>
+	</Language_RU_RU>
+    
+	<!-- UnifiedYieldsGoldenAge.xml -->
+	<Language_RU_RU>
+		<Row Tag="TXT_KEY_YIELD_GOLDEN_AGE_POINTS">
+			<Text>Золотой век</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_GOLDEN_AGE_POINTS_YIELD_TT">
+			<Text>{1_Num} [ICON_GOLDEN_AGE] золотого века</Text>
+		</Row>
+		<Row Tag="TXT_KEY_GOLDEN_AGE_POINTS_FROM_TRADE_ROUTES">
+			<Text>{1_perTurn:number "#.##"} [ICON_GOLDEN_AGE] от торговых путей, проложенных в этот город</Text>
+		</Row>
+	</Language_RU_RU>
+    
+	<!-- UnifiedYieldsTourism.xml -->
+	<Language_RU_RU>
+		<Row Tag="TXT_KEY_YIELD_TOURISM">
+			<Text>Туризм</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_TOURISM_YIELD_TT">
+			<Text>{1_Num} [ICON_TOURISM] туризма</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOURISM_FROM_TRADE_ROUTES">
+			<Text>{1_perTurn:number "#.##"} [ICON_TOURISM] от торговых путей, проложенных в этот город</Text>
+		</Row>
+	</Language_RU_RU>
+    
+	<!-- UnitclassNotUnit.xml -->
+	<Language_RU_RU>
+		<Row Tag="TXT_KEY_TP_FAITH_NEXT_PROPHET_PARAM">
+			<Text>{1_Num} [ICON_PEACE] веры минимум требуется для следующего шанса появления {2_UNITCLASS_PROPHET}.</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_RO_FAITH_TOOLTIP_PARAM">
+			<Text>Требутся минимум {1_MinFaith} [ICON_PEACE] веры для следующего {2_UNITCLASS_PROPHET}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PROPHET_PARAM">
+			<Text>Отложить на {1_UNITCLASS_PROPHET}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PURCHASE_PROPHET_PARAM">
+			<Text>Купить {1_UNITCLASS_PROPHET}</Text>
+		</Row>
+	</Language_RU_RU>
+
+	<!-- UnitNaming.xml -->
+	<Language_RU_RU>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_INVULNERABIILITY">
+			<Text>Защитный крис</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_SNEAK_ATTACK">
+			<Text>Фланговый крис</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_HEROISM">
+			<Text>Героический крис</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_AMBITION">
+			<Text>Атакующий крис</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_RESTLESSNESS">
+			<Text>Неспокойный крис</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_RECRUITMENT">
+			<Text>Регенерирующий крис</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_ENEMY_BLADE">
+			<Text>Проклятый крис</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_EVIL_SPIRITS">
+			<Text>Одержимый крис</Text>
+		</Row>
+	</Language_RU_RU>
+
+	<!-- VariableRecon.xml -->
+	<Language_RU_RU>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_SHORT_RANGE">
+			<Text>Ближняя разведка</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_SHORT_RANGE_HELP">
+			<Text>Ближняя разведка (-2 видимости).</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PEDIA_PROMOTION_RECON_SHORT_RANGE">
+			<Text>Ближняя разведка</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_LONG_RANGE">
+			<Text>Дальняя разведка</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_LONG_RANGE_HELP">
+			<Text>Дальняя разведка (+2 видимости).</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PEDIA_PROMOTION_RECON_LONG_RANGE">
+			<Text>Дальняя разведка</Text>
+		</Row>
+	</Language_RU_RU>
+</GameData>

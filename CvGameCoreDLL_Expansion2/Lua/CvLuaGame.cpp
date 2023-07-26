@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -27,16 +27,70 @@
 #include "../CvGameTextMgr.h"
 #include "../CvReplayMessage.h"
 
+#include "NetworkMessageUtil.h"
+
 #if defined(MOD_DIPLOMACY_STFU)
 #include "../CvDiplomacyAI.h"
 #endif
 
 #define Method(func) RegisterMethod(L, l##func, #func);
 
+void CvLuaGame::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeMaxTurns);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNoNukesCount);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNukesExploded);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNumVotesForTeam);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangePlotExtraCost);
+
+	REGIST_STATIC_FUNCTION(CvLuaGame::lHandleAction);
+
+	REGIST_STATIC_FUNCTION(CvLuaGame::lHandleMultiplayerTeamSignalImpl);
+
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetUnitedNationsCountdown);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetGameTurn);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMaxTurns);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMaxCityElimination);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetNumAdvancedStartPoints);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetStartYear);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetEstimateEndTurn);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetTargetScore);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetStaticTutorialActive);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetEverRightClickMoved);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorMessageHasBeenSeen);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorBadAttackInterrupt);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorCityAttackInterrupt);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAIAutoPlay);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetScoreDirty);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetDebugMode);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetPitbossTurnTime);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetActivePlayer);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetPausePlayer);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetWinner);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetGameState);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetNumVotesForTeam);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetOption);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetVictoryValid);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetName);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetPlotExtraYield);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetCombatWarned);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorRecommenderCity);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorRecommenderTech);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMinimumFaithNextPantheon);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetHolyCity);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetFounder);
+	
+	
+
+}
 //------------------------------------------------------------------------------
 const char* CvLuaGame::GetInstanceName()
 {
 	return "Game";
+}
+
+const char* CvLuaGame::GetInstanceNameCv()
+{
+	return "CvGame";
 }
 //------------------------------------------------------------------------------
 CvGame* CvLuaGame::GetInstance(lua_State* L, int idx)
@@ -46,8 +100,15 @@ CvGame* CvLuaGame::GetInstance(lua_State* L, int idx)
 //------------------------------------------------------------------------------
 void CvLuaGame::RegisterMembers(lua_State* L)
 {
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+
 	Method(CanHandleAction);
 	Method(HandleAction);
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	Method(HandleMultiplayerTeamSignal);
+#endif // MOD_API_MP_PLOT_SIGNAL
+
 	Method(UpdateScore);
 	Method(CycleCities);
 	Method(CycleUnits);
@@ -443,7 +504,9 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 	Method(AnyoneHasTech);
 	Method(AnyoneHasUnit);
 	Method(AnyoneHasUnitClass);
+	
 #endif
+	Method(GetAuthenticatedSeed);
 }
 //------------------------------------------------------------------------------
 
@@ -469,6 +532,37 @@ int CvLuaGame::lHandleAction(lua_State* L)
 	return 0;
 }
 //------------------------------------------------------------------------------
+// 
+#ifdef MOD_API_MP_PLOT_SIGNAL
+int CvLuaGame::lHandleMultiplayerTeamSignal(lua_State* L) {
+	auto pKGame = GetInstance();
+	const PlayerTypes iPlayer = (PlayerTypes)lua_tointeger(L, 1);
+	const int iPlotX = lua_tointeger(L, 2);
+	const int iPlotY = lua_tointeger(L, 3);
+	
+	uint64 curTime = GetTickCount64();
+	if (curTime - pKGame->GetLastMPSignalInvokeTime() >= 500 && iPlayer != NO_PLAYER) {
+		//pKGame->GenerateMPSignalNotification(iPlayer, iPlotX, iPlotY);
+		lua_pushstring(L, "CvLuaGame::lHandleMultiplayerTeamSignalImpl");
+		lua_insert(L, 1);
+		lSendAndExecuteLuaFunctionPostpone(L);
+		pKGame->SetLastMPSignalInvokeTime(curTime);
+	}
+	return 0;
+}
+
+int CvLuaGame::lHandleMultiplayerTeamSignalImpl(lua_State* L) {
+	auto pKGame = GetInstance();
+	const PlayerTypes iPlayer = (PlayerTypes)lua_tointeger(L, 1);
+	const int iPlotX = lua_tointeger(L, 2);
+	const int iPlotY = lua_tointeger(L, 3);
+	pKGame->GenerateMPSignalNotification(iPlayer, iPlotX, iPlotY);
+	
+	return 0;
+}
+#endif // DEBUG
+
+
 // void updateScore(bool bForce);
 int CvLuaGame::lUpdateScore(lua_State* L)
 {
@@ -1589,6 +1683,11 @@ int CvLuaGame::lGetName(lua_State* L)
 {
 	luaL_error(L, "NYI");
 	return 0;
+}
+
+int CvLuaGame::lGetAuthenticatedSeed(lua_State* L) {
+	lua_pushinteger(L, GetInstance()->getJonRand().getSeed());
+	return 1;
 }
 //------------------------------------------------------------------------------
 //int Rand(max_num, log);

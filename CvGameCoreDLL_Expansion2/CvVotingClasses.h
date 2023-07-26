@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -403,9 +403,16 @@ typedef FStaticVector<CvRepealProposal, 2, false, c_eCiv5GameplayDLL> RepealProp
 //!  - Tracks members and their statuses
 //!  - Queried for certain effects of active Resolutions by other game classes
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-class CvLeague
+class CvLeague : public CvGameObjectExtractable
 {
 public:
+	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
+	static void RegistInstanceFunctions();
+	static void RegistStaticFunctions();
+	static void GetArgumentsAndExecute(LeagueTypes league);
+	static CvLeague* Provide(LeagueTypes league);
+
 	CvLeague(void);
 	CvLeague(LeagueTypes eID);
 	~CvLeague(void);

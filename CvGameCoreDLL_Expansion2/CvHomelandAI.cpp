@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -215,7 +215,7 @@ bool CvHomelandAI::IsAnyValidExploreMoves(const CvUnit* pUnit) const
 
 		if (aDistanceList.size())
 		{
-			std::sort(aDistanceList.begin(), aDistanceList.end(), SortUnitDistance);
+			std::stable_sort(aDistanceList.begin(), aDistanceList.end(), SortUnitDistance);
 
 			for (DistanceSortedPlotArray::const_iterator itr = aDistanceList.begin(); itr != aDistanceList.end(); ++itr)
 			{

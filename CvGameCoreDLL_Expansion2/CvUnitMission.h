@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -36,17 +36,20 @@ public:
 	/// Have a unit wait for another units missions to complete
 	static void WaitFor(UnitHandle hUnit, UnitHandle hWaitForUnit);
 	static bool HasCompletedMoveMission(UnitHandle hUnit);
+	static const MissionQueueNode* HeadMissionQueueNode(const MissionQueue& kQueue);
+	static MissionQueueNode* HeadMissionQueueNode(MissionQueue& kQueue);
+	static MissionQueueNode* DeleteMissionQueueNode(UnitHandle hUnit, MissionData* pNode);
 
 private:
 	static void						InsertAtEndMissionQueue(UnitHandle hUnit, MissionData mission, bool bStart = true);
-	static MissionQueueNode*		DeleteMissionQueueNode(UnitHandle hUnit, MissionData* pNode);
+	
 	static void						ActivateHeadMission(UnitHandle hUnit);
 	static void						DeactivateHeadMission(UnitHandle hUnit, int iUnitCycleTimer);
 
 	static const MissionQueueNode*	NextMissionQueueNode(const MissionQueue& kQueue, const MissionQueueNode* pNode);
 	static const MissionQueueNode*	PrevMissionQueueNode(const MissionQueue& kQueue, const MissionQueueNode* pNode);
-	static const MissionQueueNode*	HeadMissionQueueNode(const MissionQueue& kQueue);
-	static MissionQueueNode*		HeadMissionQueueNode(MissionQueue& kQueue);
+	
+	
 	static const MissionQueueNode*	TailMissionQueueNode(const MissionQueue& kQueue);
 	static MissionQueueNode*		TailMissionQueueNode(MissionQueue& kQueue);
 	static MissionData*				GetMissionFromQueue(MissionQueue& kQueue, int iIndex);

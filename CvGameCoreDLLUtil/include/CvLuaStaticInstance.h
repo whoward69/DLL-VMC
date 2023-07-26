@@ -3,6 +3,9 @@
 #ifndef CVLUASTATICINSTANCE_H
 
 #include "CvLuaMethodWrapper.h"
+#include "NetworkMessageUtil.h"
+
+using namespace FunctionPointers;
 
 template<class Derived, class InstanceType>
 class CvLuaStaticInstance : public CvLuaMethodWrapper<Derived, InstanceType>
@@ -15,6 +18,9 @@ public:
 
 protected:
 	static int pRegister(lua_State* L);
+
+	static int lSendAndExecuteLuaFunction(lua_State* L);
+	static int lSendAndExecuteLuaFunctionPostpone(lua_State* L);
 
 	//! Called inside of pRegisterMembers to register a method.
 	static void RegisterMethod(lua_State* L, lua_CFunction func, const char* funcName);
@@ -61,5 +67,36 @@ void CvLuaStaticInstance<Derived, InstanceType>::RegisterMethod(lua_State *L, lu
 }
 //------------------------------------------------------------------------------
 
+template<class Derived, class InstanceType>
+int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_State* L) {
+	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 1) < 0;
+	if (fault) return 0;
+	int time = GetTickCount();
+	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
+	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
+	InvokeRecorder::pushInvoke(str);
+	gDLL->SendRenameCity(-str.length(), str);
+	auto rtn = 0;
+	try {
+		rtn = staticFunctions.ExecuteFunction<int>(NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall(), L);
+	}
+	catch (NoSuchMethodException e) {
+		CUSTOMLOG(e.what());
+	}
+	NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+	return rtn;
+}
+
+template<class Derived, class InstanceType>
+int CvLuaStaticInstance<Derived, InstanceType>::lSendAndExecuteLuaFunctionPostpone(lua_State* L) {
+	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 1) < 0;
+	if (fault) return 0;
+	int time = GetTickCount();
+	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
+	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
+	gDLL->SendRenameCity(-str.length(), str);
+	NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+	return 0;
+}
 
 #endif //CVLUASTATICINSTANCE_H

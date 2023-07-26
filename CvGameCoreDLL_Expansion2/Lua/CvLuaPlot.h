@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -21,6 +21,8 @@
 class CvLuaPlot : public CvLuaScopedInstance<CvLuaPlot, CvPlot>
 {
 public:
+	static void RegistStaticFunctions();
+
 	//! Push CvPlot methods into table t
 	static void PushMethods(lua_State* L, int t);
 
@@ -57,6 +59,7 @@ protected:
 
 	//! (LUA) CvPlot::SetFeatureType.
 	static int lSetFeatureType(lua_State* L);
+	static int lSetFeatureTypeSync(lua_State* L);
 
 	//! (LUA) CvPlot::SetTerrainType.
 	static int lSetTerrainType(lua_State* L);
@@ -229,15 +232,19 @@ protected:
 	static int lGetResourceType(lua_State* L);
 	static int lGetNonObsoleteResourceType(lua_State* L);
 	static int lSetResourceType(lua_State* L);
+	static int lSetResourceTypeSync(lua_State* L);
 	static int lGetNumResource(lua_State* L);
 	static int lSetNumResource(lua_State* L);
 	static int lChangeNumResource(lua_State* L);
+	static int lChangeNumResourceSync(lua_State* L);
 
 	static int lGetImprovementType(lua_State* L);
 	static int lSetImprovementType(lua_State* L);
+	static int lSetImprovementTypeSync(lua_State* L);
 	static int lSetImprovementPillaged(lua_State* L);
 	static int lGetRouteType(lua_State* L);
 	static int lSetRouteType(lua_State* L);
+	static int lSetRouteTypeSync(lua_State* L);
 	static int lIsRoutePillaged(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(SetRoutePillaged, void, bPillage);
@@ -287,10 +294,12 @@ protected:
 
 	static int lIsRevealed(lua_State* L);
 	static int lSetRevealed(lua_State* L);
+	static int lSetRevealedSync(lua_State* L);
 	static int lGetRevealedImprovementType(lua_State* L);
 	static int lGetRevealedRouteType(lua_State* L);
 	static int lGetBuildProgress(lua_State* L);
 	static int lChangeBuildProgress(lua_State* L);
+	static int lChangeBuildProgressSync(lua_State* L);
 
 	static int lGetCultureRangeCities(lua_State* L);
 	static int lIsCultureRangeCity(lua_State* L);
@@ -332,6 +341,13 @@ protected:
 
 	static int lGetCityPurchaseID(lua_State* L);
 	static int lSetCityPurchaseID(lua_State* L);
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	static int lGetXP(lua_State* L);
+	static int lGetXPGrowth(lua_State* L);
+	static int lSetXP(lua_State* L);
+	static int lChangeXP(lua_State* L);
+#endif
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(AddMessage, void, sMessage, iNotifyPlayer);
@@ -388,6 +404,10 @@ protected:
 	LUAAPIEXTN(IsWithinDistanceOfResource, bool, iResourceType, iDistance);
 	LUAAPIEXTN(IsAdjacentToTerrain, bool, iTerrainType);
 	LUAAPIEXTN(IsWithinDistanceOfTerrain, bool, iTerrainType, iDistance);
+#endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	LUAAPIEXTN(ClearUnitPromotions, void);
 #endif
 };
 #endif

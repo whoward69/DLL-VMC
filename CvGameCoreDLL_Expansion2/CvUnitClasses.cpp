@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -70,6 +70,10 @@ CvUnitEntry::CvUnitEntry(void) :
 #endif
 	m_iXPValueAttack(0),
 	m_iXPValueDefense(0),
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+	m_iExtraXPValueAttack(0),
+	m_iExtraXPValueDefense(0),
+#endif
 	m_iSpecialCargo(0),
 	m_iDomainCargo(0),
 	m_iConscriptionValue(0),
@@ -143,6 +147,10 @@ CvUnitEntry::CvUnitEntry(void) :
 	m_bUnitArtInfoCulturalVariation(false),
 	m_iUnitFlagIconOffset(0),
 	m_iUnitPortraitOffset(0)
+#ifdef MOD_BALANCE_CORE
+	,m_piScalingFromOwnedImprovements(NULL)
+	,m_iScaleFromNumGWs(0)
+#endif
 {
 }
 
@@ -168,6 +176,9 @@ CvUnitEntry::~CvUnitEntry(void)
 	SAFE_DELETE_ARRAY(m_paszUnitNames);
 	SAFE_DELETE_ARRAY(m_paeGreatWorks);
 
+#if defined(MOD_BALANCE_CORE)
+	SAFE_DELETE_ARRAY(m_piScalingFromOwnedImprovements);
+#endif
 }
 
 bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility)
@@ -247,6 +258,10 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 #endif
 	m_iXPValueAttack = kResults.GetInt("XPValueAttack");
 	m_iXPValueDefense = kResults.GetInt("XPValueDefense");
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+	m_iExtraXPValueAttack = kResults.GetInt("ExtraXPValueAttack");
+	m_iExtraXPValueDefense = kResults.GetInt("ExtraXPValueDefense");
+#endif
 	m_iConscriptionValue = kResults.GetInt("Conscription");
 	m_iExtraMaintenanceCost = kResults.GetInt("ExtraMaintenanceCost");
 	m_bNoMaintenance = kResults.GetBool("NoMaintenance");
@@ -370,6 +385,14 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	kUtility.PopulateArrayByExistence(m_pbGreatPeoples, "Specialists", "Unit_GreatPersons", "GreatPersonType", "UnitType", szUnitType);
 	kUtility.PopulateArrayByExistence(m_pbBuildings, "Buildings", "Unit_Buildings", "BuildingType", "UnitType", szUnitType);
 	kUtility.PopulateArrayByExistence(m_pbBuildingClassRequireds, "BuildingClasses", "Unit_BuildingClassRequireds", "BuildingClassType", "UnitType", szUnitType);
+
+#if defined(MOD_BALANCE_CORE)
+    if (MOD_BALANCE_CORE)
+	{
+		kUtility.PopulateArrayByValue(m_piScalingFromOwnedImprovements, "Improvements", "Unit_ScalingFromOwnedImprovements", "ImprovementType", "UnitType", szUnitType, "Amount");
+		m_iScaleFromNumGWs = kResults.GetInt("ScaleFromNumGWs");
+	}
+#endif
 
 	//TechTypes
 	{
@@ -776,6 +799,20 @@ int CvUnitEntry::GetXPValueDefense() const
 {
 	return m_iXPValueDefense;
 }
+
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+/// Extra Experience point value when attacking
+int CvUnitEntry::GetExtraXPValueAttack() const
+{
+	return m_iExtraXPValueAttack;
+}
+
+/// Extra Experience point value when defending
+int CvUnitEntry::GetExtraXPValueDefense() const
+{
+	return m_iExtraXPValueDefense;
+}
+#endif
 
 /// Is there a special unit this unit carries (e.g. Nuclear Sub carries Nuclear missile)
 int CvUnitEntry::GetSpecialCargo() const
@@ -1245,11 +1282,11 @@ const bool CvUnitEntry::GetUnitArtInfoEraVariation() const
 
 
 /// Unique names for individual units (for great people)
-const char* CvUnitEntry::GetUnitNames(int i) const
+CvString* CvUnitEntry::GetUnitNames(int i)
 {
 	CvAssertMsg(i < GetNumUnitNames(), "Index out of bounds");
 	CvAssertMsg(i > -1, "Index out of bounds");
-	return (m_paszUnitNames) ? m_paszUnitNames[i] : NULL;
+	return (m_paszUnitNames) ? m_paszUnitNames + i : nullptr;
 }
 
 /// Unique great works created by individual units.
@@ -1303,6 +1340,20 @@ int CvUnitEntry::GetPower() const
 {
 	return m_iCachedPower;
 }
+
+#ifdef MOD_BALANCE_CORE
+int CvUnitEntry::GetScalingFromOwnedImprovements(int i) const
+{
+	CvAssertMsg(i < GC.getNumImprovementInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piScalingFromOwnedImprovements ? m_piScalingFromOwnedImprovements[i] : -1;
+}
+
+int CvUnitEntry::GetScaleFromNumGWs() const
+{
+	return m_iScaleFromNumGWs;
+}
+#endif
 
 /// Update military Power
 void CvUnitEntry::DoUpdatePower()

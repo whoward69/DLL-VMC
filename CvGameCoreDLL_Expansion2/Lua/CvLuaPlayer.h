@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -22,6 +22,7 @@
 class CvLuaPlayer : public CvLuaScopedInstance<CvLuaPlayer, CvPlayerAI>
 {
 public:
+	static void RegistStaticFunctions();
 	//! Push all player instances to Lua
 	static void Register(lua_State* L);
 
@@ -236,6 +237,12 @@ protected:
 
 	static int lGetJONSCultureEverGenerated(lua_State* L);
 
+#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
+	static int lGetGoldenAgePointPerTurnFromReligion(lua_State* L);
+	static int lGetGoldenAgePointPerTurnFromTraits(lua_State* L);
+	static int lGetGoldenAgePointPerTurnFromCitys(lua_State* L);
+#endif	
+
 	static int lGetLastTurnLifetimeCulture(lua_State* L);
 	static int lGetInfluenceOn(lua_State* L);
 	static int lGetLastTurnInfluenceOn(lua_State* L);
@@ -293,6 +300,10 @@ protected:
 	static int lGetMinimumFaithNextGreatProphet(lua_State* L);
 	static int lHasReligionInMostCities(lua_State* L);
 	static int lDoesUnitPassFaithPurchaseCheck(lua_State* L);
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+	static int lIsSecondReligionPantheon(lua_State* L);
+#endif // MOD_API_RELIGION_EXTENSIONS
 
 	static int lGetHappiness(lua_State* L);
 	static int lSetHappiness(lua_State* L);
@@ -378,6 +389,7 @@ protected:
 	static int lGetNumPoliciesInBranch(lua_State* L);
 	static int lHasPolicy(lua_State* L);
 	static int lSetHasPolicy(lua_State* L);
+
 	static int lGetNextPolicyCost(lua_State* L);
 	static int lCanAdoptPolicy(lua_State* L);
 	static int lDoAdoptPolicy(lua_State* L);
@@ -559,6 +571,8 @@ protected:
 	// Minor Civ stuff
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(IsMajorCiv, bool);
+	LUAAPIEXTN(GetCivBuilding, int);
+	LUAAPIEXTN(GetCivUnit, int);
 #endif
 	static int lIsMinorCiv(lua_State* L);
 	static int lGetMinorCivType(lua_State* L);
@@ -579,6 +593,7 @@ protected:
 	static int lGetFriendshipChangePerTurnTimes100(lua_State* L);
 	static int lGetMinorCivFriendshipWithMajor(lua_State* L);
 	static int lChangeMinorCivFriendshipWithMajor(lua_State* L);
+	static int lGetMinorBullyInfluenceLoss(lua_State* L);
 	static int lGetMinorCivFriendshipAnchorWithMajor(lua_State* L);
 	static int lGetFriendshipNeededForNextLevel(lua_State* L);
 	static int lGetMinorCivFriendshipLevelWithMajor(lua_State* L);
@@ -690,6 +705,7 @@ protected:
 	static int lGetScienceFromHappinessTimes100(lua_State* L);
 	static int lGetScienceFromResearchAgreementsTimes100(lua_State* L);
 	static int lGetScienceFromBudgetDeficitTimes100(lua_State* L);
+	static int lGetScienceFromReligion(lua_State* L);
 
 	// END Science
 
@@ -717,6 +733,7 @@ protected:
 
 	static int lIsBuildingFree(lua_State* L);
 	static int lGetUnitClassCount(lua_State* L);
+	static int lGetUnitCountFromHasPromotion(lua_State* L);
 	static int lIsUnitClassMaxedOut(lua_State* L);
 	static int lGetUnitClassMaking(lua_State* L);
 	static int lGetUnitClassCountPlusMaking(lua_State* L);
@@ -729,6 +746,9 @@ protected:
 	static int lIsHasAccessToHurry(lua_State* L);
 	static int lIsCanHurry(lua_State* L);
 	static int lGetHurryGoldCost(lua_State* L);
+
+	static int lGetMinorFriendCount(lua_State* L);
+	static int lGetMinorAllyCount(lua_State* L);
 
 	static int lIsResearchingTech(lua_State* L);
 	static int lSetResearchingTech(lua_State* L);
@@ -759,6 +779,12 @@ protected:
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(GetNumPuppetCities, int);
 #endif
+
+
+#if defined(MOD_ROG_CORE)
+	static int lGetNumOriginalCapital(lua_State* L);
+#endif
+
 	static int lGetCityByID(lua_State* L);
 
 	static int lGetUnits(lua_State* L);
@@ -950,12 +976,15 @@ protected:
 	static int lUnitsAux(lua_State* L);
 	static int lUnits(lua_State* L);
 
+	static int lGetUnitsListFromHasPromotion(lua_State* L);
+
 	static int lCitiesAux(lua_State* L);
 	static int lCities(lua_State* L);
 
 	static int lHasReceivedNetTurnComplete(lua_State* L);
 	static int lGetTraitGoldenAgeCombatModifier(lua_State* L);
 	static int lGetTraitCityStateCombatModifier(lua_State* L);
+	static int lGetTraitCityStateFriendshipModifier(lua_State* L);
 	static int lGetTraitGreatGeneralExtraBonus(lua_State* L);
 	static int lGetTraitGreatScientistRateModifier(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_TRAITS_ANY_BELIEF)
@@ -1089,6 +1118,12 @@ protected:
 	static int lGetWarmongerPreviewString(lua_State* L);
 	static int lGetLiberationPreviewString(lua_State* L);
 
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	static int lGetWarCasualtiesCounter(lua_State* L);
+	static int lChangeWarCasualtiesCounter(lua_State* L);
+	static int lSetWarCasualtiesCounter(lua_State* L);
+	static int lCheckAndUpdateWarCasualtiesCounter(lua_State* L);
+#endif
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(AddMessage, void, sMessage);
@@ -1163,6 +1198,12 @@ protected:
 	LUAAPIEXTN(ActivateMilitaryStrategy, void, iStrategy);
 	LUAAPIEXTN(DeactivateMilitaryStrategy, void, iStrategy);
 #endif
+
+#if defined(MOD_SPECIALIST_RESOURCES)
+	LUAAPIEXTN(GetSpecialistResources, table, eSpecialist);
+#endif
+
+	LUAAPIEXTN(GetHappinessFromFaith, int);
 };
 
 #endif //CVLUAPLAYER_H

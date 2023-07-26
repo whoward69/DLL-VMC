@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -1179,7 +1179,7 @@ void CvCityStrategyAI::ChooseProduction(bool bUseAsyncRandom, BuildingTypes eIgn
 		if (!GET_PLAYER(m_pCity->getOwner()).isMinorCiv())
 		{
 			//I cannot use the yield rate since it adds in set process yield, which is what I am trying to set...
-			int iBaseYield = GetCity()->getBaseYieldRate(YIELD_PRODUCTION) * 100;
+			int iBaseYield = GetCity()->getBaseYieldRate(YIELD_PRODUCTION, false) * 100;
 			iBaseYield += (GetCity()->GetYieldPerPopTimes100(YIELD_PRODUCTION) * GetCity()->getPopulation());
 			int iModifiedYield = iBaseYield * GetCity()->getBaseYieldRateModifier(YIELD_PRODUCTION);
 			iModifiedYield /= 100;
@@ -1212,7 +1212,25 @@ void CvCityStrategyAI::ChooseProduction(bool bUseAsyncRandom, BuildingTypes eIgn
 	{
 		// Choose from the best options (currently 2)
 		int iNumChoices = GC.getGame().getHandicapInfo().GetCityProductionNumOptions();
+		int iRandLogging = GC.getRandLogging();
+		FILogFile* pLog = LOGFILEMGR.GetLog("RandCalls.csv", FILogFile::kDontTimeStamp);
+		if (iRandLogging > 0 && pLog) {
+			char buffer[1024] = { 0 };
+			string msg = "Processing city Choose Production: City Name: ";
+			string strCityName = GetCity()->getName();
+			msg += strCityName;
+			msg += " City ID: ";
+			_itoa_s(GetCity()->GetID(), buffer, 10);
+			msg += buffer;
+			msg += " iNumChoices: ";
+			_itoa_s(iNumChoices, buffer, 10);
+			msg += buffer;
+			pLog->Msg(msg.c_str());
+			pLog->Msg("\n");
+		}
+
 		selection = m_Buildables.ChooseFromTopChoices(iNumChoices, &fcn, "Choosing city build from Top Choices");
+		
 		int iRushIfMoreThanXTurns = GC.getAI_ATTEMPT_RUSH_OVER_X_TURNS_TO_BUILD();
 		if(GET_PLAYER(m_pCity->getOwner()).isMinorCiv())
 		{
@@ -2964,7 +2982,8 @@ bool CityStrategyAIHelpers::IsTestCityStrategy_UnderBlockade(CvCity* pCity)
 }
 
 /// "Is Puppet" City Strategy: build gold buildings and not military training buildings
-bool CityStrategyAIHelpers::IsTestCityStrategy_IsPuppet(CvCity* pCity)
+//bool CityStrategyAIHelpers::IsTestCityStrategy_IsPuppet(CvCity* pCity)
+bool CityStrategyAIHelpers::IsTestCityStrategy_IsPuppet(const CvCity* pCity)
 {
 	if(pCity->IsPuppet())
 	{

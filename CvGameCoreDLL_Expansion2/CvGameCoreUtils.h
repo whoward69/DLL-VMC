@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -13,8 +13,13 @@
 #include "CvGlobals.h"
 #include "CvMap.h"
 #include <CvLocalization.h>
-
+//#include <CvWorldBuilderMap.h>
 #undef min
+
+//Avoiding string truncation.
+
+extern "C" unsigned int _ftoui3(const float x);
+extern "C" double _ltod3(const __int64 x);
 
 inline int range(int iNum, int iLow, int iHigh)
 {
@@ -68,6 +73,7 @@ inline int wrapCoordDifference(int iDiff, uint uiRange, bool bWrap)
 
 	return iDiff;
 }
+
 
 inline int dxWrap(int iDX)
 {
@@ -342,6 +348,8 @@ inline DirectionTypes hexspaceSpikeDirection(const int iXOffset, const int iYOff
 
 CvPlot* plotCity(int iX, int iY, int iIndex);
 
+CvPlot* iterateRingPlots(int iX, int iY, int iIndex);
+
 int plotCityXY(const CvCity* pCity, const CvPlot* pPlot);
 
 DirectionTypes estimateDirection(int iDX, int iDY);
@@ -375,6 +383,11 @@ inline const CvUnit* GetPlayerUnit(const IDInfo& unit)
 bool isBeforeUnitCycle(const CvUnit* pFirstUnit, const CvUnit* pSecondUnit);
 bool IsPromotionValidForUnitCombatType(PromotionTypes ePromotion, UnitTypes eUnit);
 bool IsPromotionValidForCivilianUnitType(PromotionTypes ePromotion, UnitTypes eUnit);
+
+
+bool IsPromotionValidForUnitType(PromotionTypes ePromotion, UnitTypes eUnit);
+
+
 bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, bool bTestingPrereq=false);
 
 int getPopulationAsset(int iPopulation);

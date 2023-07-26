@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -22,9 +22,28 @@
 #include "CvGlobals.h"
 
 #include "ICvDLLUserInterface.h"
-
 // must be included after all other headers
 #include "LintFree.h"
+#include <emmintrin.h>
+
+extern "C" unsigned int _ftoui3(const float x) {
+	return (unsigned int)_mm_cvt_ss2si(_mm_set_ss(x));
+}
+static const unsigned long long _Int32ToUInt32[] = { 0ULL, 0x41F0000000000000ULL };
+extern "C"  __declspec(naked) double _cdecl _ltod3(const __int64 x) {
+	__asm
+	{
+		xorps   xmm1, xmm1
+		cvtsi2sd xmm1, edx
+		xorps   xmm0, xmm0
+		cvtsi2sd xmm0, ecx
+		shr     ecx, 31
+		mulsd   xmm1, ds:_Int32ToUInt32[8]          //_DP2to32
+		addsd   xmm0, ds : _Int32ToUInt32[ecx * 8]
+		addsd   xmm0, xmm1
+		retn
+	}
+}
 
 /// This function will return the CvPlot associated with the Index (0 to 36) of a City at iX,iY.  The lower the Index the closer the Plot is to the City (roughly)
 CvPlot* plotCity(int iX, int iY, int iIndex)
@@ -182,6 +201,83 @@ CvCity* getCity(IDInfo city)
 	return NULL;
 }
 
+
+
+CvPlot* iterateRingPlots(int iX, int iY, int iIndex)
+{
+	int iDeltaHexX = 0;
+	int iDeltaHexY = 0;
+
+	if (iIndex < MAX_CITY_PLOTS)
+	{
+		iDeltaHexX = GC.getCityPlotX()[iIndex]; // getCityPlotX now uses hex-space coords
+		iDeltaHexY = GC.getCityPlotY()[iIndex];
+	}
+	else
+	{
+		// loop till we find the ring this is on
+		int iThisRing = 0;
+		int iHighestValueOnThisRing = 0;
+		int iLowestValueOnThisRing = 0;
+		while (iHighestValueOnThisRing < iIndex)
+		{
+			iThisRing++;
+			iLowestValueOnThisRing = iHighestValueOnThisRing + 1;
+			iHighestValueOnThisRing += iThisRing * 6;
+		}
+		// determine what side of the hex we are on
+		int iDiff = (iIndex - iLowestValueOnThisRing);
+		int iSide = iDiff / iThisRing;
+		int iOffset = iDiff % iThisRing;
+
+		switch (iSide)
+		{
+		case 0:
+			iDeltaHexX = 0 + iOffset;
+			iDeltaHexY = iThisRing - iOffset;
+			break;
+		case 1:
+			iDeltaHexX = iThisRing;
+			iDeltaHexY = 0 - iOffset;
+			break;
+		case 2:
+			iDeltaHexX = iThisRing - iOffset;
+			iDeltaHexY = -iThisRing;
+			break;
+		case 3:
+			iDeltaHexX = 0 - iOffset;
+			iDeltaHexY = -iThisRing + iOffset;
+			break;
+		case 4:
+			iDeltaHexX = -iThisRing;
+			iDeltaHexY = 0 + iOffset;
+			break;
+		case 5:
+			iDeltaHexX = -iThisRing + iOffset;
+			iDeltaHexY = iThisRing;
+			break;
+		default:
+			return 0;
+		}
+
+	}
+	// convert the city coord to hex-space coordinates
+	int iCityHexX = xToHexspaceX(iX, iY);
+
+	int iPlotHexX = iCityHexX + iDeltaHexX;
+	int iPlotY = iY + iDeltaHexY; // Y is the same in both coordinate systems
+
+	// convert from hex-space coordinates to the storage array
+	int iPlotX = hexspaceXToX(iPlotHexX, iPlotY);
+
+	return GC.getMap().plot(iPlotX, iPlotY);
+}
+
+
+
+
+
+
 CvUnit* getUnit(const IDInfo& unit)
 {
 	if((unit.eOwner >= 0) && unit.eOwner < MAX_PLAYERS)
@@ -241,6 +337,10 @@ bool isBeforeUnitCycle(const CvUnit* pFirstUnit, const CvUnit* pSecondUnit)
 	return (pFirstUnit->GetID() < pSecondUnit->GetID());
 }
 
+
+
+
+
 /// Is this a valid Promotion for the UnitCombatType?
 bool IsPromotionValidForUnitCombatType(PromotionTypes ePromotion, UnitTypes eUnit)
 {
@@ -268,6 +368,25 @@ bool IsPromotionValidForUnitCombatType(PromotionTypes ePromotion, UnitTypes eUni
 
 	return true;
 }
+
+
+
+/// Is this a valid Promotion for the Unit Type?
+bool IsPromotionValidForUnitType(PromotionTypes ePromotion, UnitTypes eUnit)
+{
+	CvPromotionEntry* promotionInfo = GC.getPromotionInfo(ePromotion);
+
+	if (promotionInfo == NULL)
+		return false;
+
+	if (!(promotionInfo->GetUnitType((int)eUnit)))
+	{
+		return false;
+	}
+
+	return true;
+}
+
 
 /// Is this a valid Promotion for this civilian?
 bool IsPromotionValidForCivilianUnitType(PromotionTypes ePromotion, UnitTypes eUnit)
@@ -349,6 +468,13 @@ bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, 
 	PromotionTypes ePrereq7 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion7();
 	PromotionTypes ePrereq8 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion8();
 	PromotionTypes ePrereq9 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion9();
+
+
+	PromotionTypes ePrereq10 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion10();
+	PromotionTypes ePrereq11 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion11();
+	PromotionTypes ePrereq12 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion12();
+	PromotionTypes ePrereq13 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion13();
+
 	if(ePrereq1 != NO_PROMOTION ||
 		ePrereq2 != NO_PROMOTION ||
 		ePrereq3 != NO_PROMOTION ||
@@ -357,7 +483,11 @@ bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, 
 		ePrereq6 != NO_PROMOTION ||
 		ePrereq7 != NO_PROMOTION ||
 		ePrereq8 != NO_PROMOTION ||
-		ePrereq9 != NO_PROMOTION)
+		ePrereq9 != NO_PROMOTION ||
+		ePrereq10 != NO_PROMOTION ||
+		ePrereq11 != NO_PROMOTION ||
+		ePrereq12 != NO_PROMOTION || 
+		ePrereq13 != NO_PROMOTION )
 	{
 		bool bValid = false;
 		if(!bValid)
@@ -431,6 +561,39 @@ bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, 
 				bValid = true;
 			}
 		}
+
+		if (!bValid)
+		{
+			if (NO_PROMOTION != ePrereq10 && isPromotionValid(ePrereq10, eUnit, bLeader, true))
+			{
+				bValid = true;
+			}
+		}
+
+		if (!bValid)
+		{
+			if (NO_PROMOTION != ePrereq11 && isPromotionValid(ePrereq11, eUnit, bLeader, true))
+			{
+				bValid = true;
+			}
+		}
+
+		if (!bValid)
+		{
+			if (NO_PROMOTION != ePrereq12 && isPromotionValid(ePrereq12, eUnit, bLeader, true))
+			{
+				bValid = true;
+			}
+		}
+
+		if (!bValid)
+		{
+			if (NO_PROMOTION != ePrereq13 && isPromotionValid(ePrereq13, eUnit, bLeader, true))
+			{
+				bValid = true;
+			}
+		}
+
 
 		if(!bValid)
 		{

@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -67,7 +67,7 @@
 // Public Functions...
 // must be included after all other headers
 #include "LintFree.h"
-
+#include "NetworkMessageUtil.h"
 //------------------------------------------------------------------------------
 // CvGame Version History
 // Version 1 
@@ -101,6 +101,10 @@ CvGame::CvGame() :
 	, m_bFOW(true)
 	, m_bArchaeologyTriggered(false)
 	, m_lastTurnAICivsProcessed(-1)
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	, m_uiLastMPSignalInvokeTime(0)
+#endif // MOD_API_MP_PLOT_SIGNAL
+	
 {
 	m_aiEndTurnMessagesReceived = FNEW(int[MAX_PLAYERS], c_eCiv5GameplayDLL, 0);
 	m_aiRankPlayer = FNEW(int[MAX_PLAYERS], c_eCiv5GameplayDLL, 0);        // Ordered by rank...
@@ -167,7 +171,7 @@ void CvGame::init(HandicapTypes eHandicap)
 	int iStartTurn;
 	int iEstimateEndTurn;
 	int iI;
-
+	InvokeRecorder::clear();
 	//--------------------------------
 	// Init saved data
 	reset(eHandicap);
@@ -1900,9 +1904,9 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 
 				//NOTE:  These times exclude the time used for AI processing.
 				//Time since the current player's turn started.  Used for measuring time for players in sequential turn mode.
-				float timeSinceCurrentTurnStart = m_curTurnTimer.Peek() + m_fCurrentTurnTimerPauseDelta; 
+				float timeSinceCurrentTurnStart = m_curTurnTimer.Peek() + m_fCurrentTurnTimerPauseDelta;
 				//Time since the game (year) turn started.  Used for measuring time for players in simultaneous turn mode.
-				float timeSinceGameTurnStart = m_timeSinceGameTurnStart.Peek() + m_fCurrentTurnTimerPauseDelta; 
+				float timeSinceGameTurnStart = m_timeSinceGameTurnStart.Peek() + m_fCurrentTurnTimerPauseDelta;
 				
 				float timeElapsed = (curPlayer.isSimultaneousTurns() ? timeSinceGameTurnStart : timeSinceCurrentTurnStart);
 				if(curPlayer.isTurnActive())
@@ -1956,7 +1960,7 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 				if(isLocalPlayer)
 				{//update the local end turn timer.
 					CvPreGame::setEndTurnTimerLength(gameTurnEnd);
-					iface->updateEndTurnTimer(timeElapsed / gameTurnEnd);
+					iface->updateEndTurnTimer (timeElapsed / gameTurnEnd);
 				}
 			}
 		}
@@ -4071,6 +4075,20 @@ int CvGame::goldenAgeLength() const
 	return iLength;
 }
 
+
+#if defined(MOD_ROG_CORE)
+int CvGame::NumOriginalCapitalModMax() const
+{
+	int iMax;
+
+	iMax = GC.getORIGINAL_CAPITAL_MODMAX();
+
+	return iMax;
+}
+#endif
+
+
+
 //	--------------------------------------------------------------------------------
 int CvGame::victoryDelay(VictoryTypes eVictory) const
 {
@@ -4409,7 +4427,8 @@ int CvGame::getNumSequentialHumans(PlayerTypes ignorePlayer)
 }
 
 //	------------------------------------------------------------------------------------------------
-int CvGame::getGameTurn()
+//int CvGame::getGameTurn()
+int CvGame::getGameTurn() const
 {
 	return CvPreGame::gameTurn();
 }
@@ -9267,6 +9286,60 @@ int CvGame::getAsyncRandNum(int iNum, const char* pszLog)
 #endif
 }
 
+
+
+//	--------------------------------------------------------------------------------
+// Get a fake random number which depends only on game state
+// for small numbers (e.g. direction rolls) this should be good enough
+// most importantly, it should reduce desyncs in multiplayer
+
+//this is the pcg hash function which is supposed to be better than wang or jenkins; not that it matters much ...
+unsigned long hash32(uint input)
+{
+	unsigned long state = input * 747796405u + 2891336453u;
+	unsigned long word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+	return (word >> 22u) ^ word;
+}
+
+static unsigned long giLastState = 0;
+
+int CvGame::getSmallFakeRandNum(int iNum, const CvPlot& input) const
+{
+	//do not use turnslice here, it changes after reload!
+	unsigned long iState = input.getX() * 17 + input.getY() * 23 + getGameTurn() * 37 + getActivePlayer() * 73;
+
+	int iResult = 0;
+	if (iNum > 0)
+		iResult = hash32(iState) % iNum;
+	else if (iNum < 0)
+		iResult = -int(hash32(iState) % (-iNum));
+
+	return iResult;
+}
+
+int CvGame::getSmallFakeRandNum(int iNum, int iExtraSeed) const
+{
+	//do not use turnslice here, it changes after reload!
+	unsigned long iState = getGameTurn() * 11 + getActivePlayer() * 19 + abs(iExtraSeed);
+
+	/*
+	//safety check
+	if (iState == giLastState)
+		OutputDebugString("warning rng seed repeated\n");
+	giLastState = iState;
+	*/
+
+	int iResult = 0;
+	if (iNum > 0)
+		iResult = hash32(iState) % iNum;
+	else if (iNum < 0)
+		iResult = -int(hash32(iState) % (-iNum));
+
+	return iResult;
+}
+
+
+
 //	--------------------------------------------------------------------------------
 int CvGame::calculateSyncChecksum()
 {
@@ -12212,3 +12285,28 @@ bool CvGame::AnyoneHasUnitClass(UnitClassTypes iUnitClassType) const
 	return false;
 }
 #endif
+
+#ifdef MOD_API_MP_PLOT_SIGNAL
+void CvGame::GenerateMPSignalNotification(PlayerTypes iFromPlayer, int iPlotX, int iPlotY) {
+	CvNotifications* pNotifications = GET_PLAYER(getActivePlayer()).GetNotifications();
+	CvPlayer& pFromPlayer = GET_PLAYER(iFromPlayer);
+	if (pNotifications)
+	{
+		Localization::String strMessage = Localization::Lookup("TXT_KEY_SP_NOTIFICATION_MP_PLOT_SIGNAL");
+		Localization::String strSummary = Localization::Lookup("TXT_KEY_SP_NOTIFICATION_MP_PLOT_SIGNAL_SUMMARY");
+		if (GC.getGame().isGameMultiPlayer() && pFromPlayer.isHuman())
+		{
+			strMessage << pFromPlayer.getNickName();
+		}
+		else
+		{
+			strMessage << pFromPlayer.getNameKey();
+		}
+		pNotifications->Add(
+			NOTIFICATION_CITY_GROWTH, strMessage.toUTF8(), strSummary.toUTF8(),
+			iPlotX, iPlotY, 0, iFromPlayer);
+	}
+}
+#endif // MOD_API_MP_PLOT_SIGNAL
+
+

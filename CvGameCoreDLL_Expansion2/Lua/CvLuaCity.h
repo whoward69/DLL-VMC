@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -15,6 +15,7 @@
 class CvLuaCity : public CvLuaScopedInstance<CvLuaCity, CvCity>
 {
 public:
+	static void RegistStaticFunctions();
 	//! Push CvCity methods into table t
 	static void PushMethods(lua_State* L, int t);
 
@@ -188,6 +189,7 @@ protected:
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(GetNumBuildingClass, int, iBuildingClassType);
 	LUAAPIEXTN(IsHasBuildingClass, bool, iBuildingClassType);
+	LUAAPIEXTN(SetNumRealBuildingClass, int, iBuildingClassType, iNum);
 #endif
 	static int lGetNumActiveBuilding(lua_State* L);
 	static int lGetID(lua_State* L);
@@ -223,6 +225,11 @@ protected:
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
 	LUAAPIEXTN(GetAutomatons, int);
 	LUAAPIEXTN(SetAutomatons, void, iAutomatons, bReassignPop);
+#endif
+
+#if defined(MOD_ROG_CORE)
+	static int lGetForcedDamageValue(lua_State* L);
+	static int lGetChangeDamageValue(lua_State* L);
 #endif
 
 	static int lGetHighestPopulation(lua_State* L);
@@ -477,6 +484,7 @@ protected:
 
 	static int lGetDamage(lua_State* L);
 	static int lSetDamage(lua_State* L);
+
 	static int lChangeDamage(lua_State* L);
 	static int lGetMaxHitPoints(lua_State* L);
 
@@ -547,7 +555,9 @@ protected:
 	static int lGetCultureFromSpecialist(lua_State* L);
 
 	static int lGetReligionCityRangeStrikeModifier(lua_State* L);
-
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	static int lGetBaseYieldRateFromOtherYield(lua_State* L);
+#endif
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(AddMessage, void, sMessage, iNotifyPlayer);
 #endif
@@ -608,6 +618,18 @@ protected:
 	LUAAPIEXTN(CountWorkedResource, int, iResource);
 	LUAAPIEXTN(CountTerrain, int, iTerrain);
 	LUAAPIEXTN(CountWorkedTerrain, int, iTerrain);
+#endif
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+	static int lGetMajorReligionPantheonBelief(lua_State* L);
+	static int lIsHasMajorBelief(lua_State* L);
+	static int lIsHasSecondaryBelief(lua_State* L);
+	static int lIsSecondaryReligionActive(lua_State* L);
+#endif
+
+#ifdef MOD_GLOBAL_CITY_SCALES
+	LUAAPIEXTN(GetScale, int);
+	LUAAPIEXTN(CanGrowNormally, bool);
 #endif
 };
 

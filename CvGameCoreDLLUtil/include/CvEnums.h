@@ -1325,7 +1325,7 @@ enum TraitTypes
 	NO_TRAIT = -1,
 };
 
-enum ReligionTypes					
+enum ReligionTypes
 {
 	NO_RELIGION = -1,
 	RELIGION_PANTHEON = 0,
@@ -1596,6 +1596,24 @@ enum ActivityTypes
 	NUM_ACTIVITY_TYPES
 };
 
+#ifdef MOD_GLOBAL_CITY_SCALES
+enum CityScaleTypes {
+	NO_CITY_SCALE = -1
+};
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+enum PromotionCollectionsTypes {
+	NO_PROMOTION_COLLECTION = -1
+};
+#endif
+
+#ifdef MOD_BUILDINGCLASS_COLLECTIONS
+enum BuildingClassCollectionsTypes {
+	NO_BUILDINGCLASS_COLLECTION = -1
+};
+#endif
+
 enum AutomateTypes
 {
 	NO_AUTOMATE = -1,
@@ -1660,6 +1678,10 @@ enum CommandTypes
 	COMMAND_DELETE,
 	COMMAND_GIFT,
 	COMMAND_HOTKEY,
+
+
+	//COMMAND_KILL,
+	//COMMAND_TELEPORT,
 
 	NUM_COMMAND_TYPES
 };

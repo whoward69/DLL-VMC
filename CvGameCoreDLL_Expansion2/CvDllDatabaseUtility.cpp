@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -405,6 +405,20 @@ bool CvDllDatabaseUtility::PrefetchGameData()
 
 #if defined(MOD_API_ACHIEVEMENTS) || defined(ACHIEVEMENT_HACKS)
 	PrefetchCollection(GC.getAchievementInfo(), "Achievements");
+#endif
+
+#ifdef MOD_GLOBAL_CITY_SCALES
+	PrefetchCollection(GC.getCityScaleInfo(), "CityScales");
+	GC.sortAndUpdateOrderedCityScale(GC.getCityScaleInfo());
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+	PrefetchCollection(GC.GetPromotionCollections(), "PromotionCollections");
+	GC.InitPromotion2CollectionMapping();
+#endif
+
+#ifdef MOD_BUILDINGCLASS_COLLECTIONS
+	PrefetchCollection(GC.GetBuildingClassCollections(), "BuildingClassCollections");
 #endif
 
 	//Copy flavors into string array

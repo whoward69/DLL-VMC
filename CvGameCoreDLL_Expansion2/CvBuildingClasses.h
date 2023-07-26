@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -13,6 +13,14 @@
 #include "CvDatabaseUtility.h"
 
 #define MAX_THEMING_BONUSES 12
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+enum YieldFromYield {
+	IN_VALUE = 0,
+	OUT_VALUE,
+	LENGTH,
+};
+#endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //  class : CvThemingBonusInfo
@@ -169,6 +177,70 @@ public:
 	int GetGlobalCityAutomatonWorkersChange() const;
 	int GetCityAutomatonWorkersChange() const;
 #endif
+
+#if defined(MOD_GLOBAL_BUILDING_INSTANT_YIELD)
+	int GetInstantYield(int i) const;
+	int* GetInstantYieldArray() const;
+	bool IsAllowInstantYield() const;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int GetGreatWorkYieldChange(int i) const;
+	int* GetGreatWorkYieldChangeArray() const;
+
+	int GetYieldChangePerPopInEmpire(int i) const;
+#endif
+
+	int  GetExtraAttacks() const;
+	int GetNukeInterceptionChance() const;
+
+#if defined(MOD_ROG_CORE)
+	int GetExtraDamageHeal() const;
+	int CityRangedStrikeModifier() const;
+	int GetPopulationChange() const;
+
+	int GetGlobalCityStrengthMod() const;
+	int GetGlobalRangedStrikeModifier() const;
+
+	int GetResetDamageValue() const;
+	int GetReduceDamageValue() const;
+
+	int GetWaterTileDamage() const;
+	int GetWaterTileMovementReduce() const;
+	int GetWaterTileTurnDamage() const;
+	int GetLandTileDamage() const;
+	int GetLandTileMovementReduce() const;
+	int GetLandTileTurnDamage() const;
+#endif
+
+
+#if defined(MOD_ROG_CORE)
+	int GetResourceQuantityFromPOP(int i) const;
+	int GetYieldChangeWorldWonder(int i) const;
+	int GetYieldChangeWorldWonderGlobal(int i) const;
+#endif
+
+	int GetYieldFromProcessModifier(int i) const;
+	int* GetYieldFromProcessModifierArray() const;
+
+	int GetYieldFromProcessModifierGlobal(int i) const;
+	int* GetYieldFromProcessModifierArrayGlobal() const;
+
+
+#if defined(MOD_ROG_CORE)
+	int GetResourceYieldChangeGlobal(int iResource, int iYieldType) const;
+	int GetImprovementYieldChange(int i, int j) const;
+	int* GetImprovementYieldChangeArray(int i) const;
+
+	int GetImprovementYieldChangeGlobal(int i, int j) const;
+	int* GetImprovementYieldChangeGlobalArray(int i) const;
+	int GetSpecialistYieldChangeLocal(int i, int j) const;
+	int* GetSpecialistYieldChangeLocalArray(int i) const;
+
+	int GetBuildingClassYieldModifier(int i, int j) const;
+#endif
+
+
 	int GetMinAreaSize() const;
 	int GetConquestProbability() const;
 	int GetHealRateChange() const;
@@ -192,6 +264,8 @@ public:
 	int GetGlobalDefenseModifier() const;
 	int GetExtraCityHitPoints() const;
 	int GetMinorFriendshipChange() const;
+	int GetMinorFriendshipAnchorChange() const;
+	int GetMinorQuestFriendshipMod() const;
 	int GetVictoryPoints() const;
 	int GetExtraMissionarySpreads() const;
 	int GetReligiousPressureModifier() const;
@@ -292,6 +366,12 @@ public:
 	int GetUnitCombatProductionModifier(int i) const;
 	int GetDomainFreeExperience(int i) const;
 	int GetDomainFreeExperiencePerGreatWork(int i) const;
+
+#if defined(MOD_ROG_CORE)
+	int GetDomainFreeExperiencePerGreatWorkGlobal(int i) const;
+	int GetDomainFreeExperienceGlobal(int i) const;
+#endif
+
 	int GetDomainProductionModifier(int i) const;
 	int GetLockedBuildingClasses(int i) const;
 	int GetPrereqAndTechs(int i) const;
@@ -327,6 +407,29 @@ public:
 
 	CvThemingBonusInfo *GetThemingBonusInfo(int i) const;
 	int GetNumThemingBonuses() const {return m_iNumThemingBonuses;};
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+	int GetNumAllowPurchaseUnitsByYieldType(YieldTypes iType);
+	std::pair<UnitClassTypes, int>* GetAllowPurchaseUnitsByYieldType(YieldTypes iType);
+#endif
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	int GetYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType) const;
+	bool HasYieldFromOtherYield() const;
+#endif
+
+#ifdef MOD_GLOBAL_CITY_SCALES
+	CityScaleTypes GetEnableCityScaleGrowth() const;
+	bool GetEnableAllCityScaleGrowth() const;
+#endif
+
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+	int GetGoldenAgeUnitCombatModifier() const;
+	int GetGoldenAgeMeterMod() const;
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+	int GetSiegeKillCitizensModifier() const;
+#endif
 
 private:
 	int m_iBuildingClassType;
@@ -403,6 +506,62 @@ private:
 	int m_iGlobalCityAutomatonWorkersChange;
 	int m_iCityAutomatonWorkersChange;
 #endif
+
+#if defined(MOD_GLOBAL_BUILDING_INSTANT_YIELD)
+	int* m_piInstantYield;
+	bool m_bAllowInstantYield;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int* m_piGreatWorkYieldChange;
+
+	int m_iExtraDamageHeal;
+	int m_iRangedStrikeModifier;
+	int m_iPopulationChange;
+
+	int m_iResetDamageValue;
+	int m_iReduceDamageValue;
+
+	int m_iGlobalCityStrengthMod;
+	int m_iGlobalRangedStrikeModifier;
+
+
+
+	int m_iWaterTileDamage;
+	int m_iWaterTileMovementReduce;
+	int m_iWaterTileTurnDamage;
+	int m_iLandTileDamage;
+	int m_iLandTileMovementReduce;
+	int m_iLandTileTurnDamage;
+#endif
+
+	int m_iNukeInterceptionChance;
+	int m_iExtraAttacks;
+
+#if defined(MOD_ROG_CORE)
+	std::map<int, std::map<int, int>> m_ppiResourceYieldChangeGlobal;
+
+	std::map<int, int> m_piYieldChangePerPopInEmpire;
+
+	int** m_ppaiImprovementYieldChange;
+	int** m_ppaiImprovementYieldChangeGlobal;
+	int** m_ppaiSpecialistYieldChangeLocal;
+#endif
+
+	int* m_piYieldFromProcessModifier;
+	int* m_piYieldFromProcessModifierGlobal;
+
+#if defined(MOD_ROG_CORE)
+	int* m_piYieldChangeWorldWonder;
+	int* m_piYieldChangeWorldWonderGlobal;
+
+	int* m_piResourceQuantityFromPOP;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int** m_ppiBuildingClassYieldModifiers;
+#endif
+
 	int m_iMinAreaSize;
 	int m_iConquestProbability;
 	int m_iHealRateChange;
@@ -427,6 +586,8 @@ private:
 	int m_iExtraCityHitPoints;
 	int m_iMissionType;
 	int m_iMinorFriendshipChange;
+	int m_iMinorFriendshipAnchorChange;
+	int m_iMinorQuestFriendshipMod;
 	int m_iVictoryPoints;
 	int m_iExtraMissionarySpreads;
 	int m_iReligiousPressureModifier;
@@ -436,9 +597,18 @@ private:
 	int m_iSpyRankChange;
 	int m_iInstantSpyRankChange;
 
+#ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
+	int m_iGoldenAgeUnitCombatModifier;
+	int m_iGoldenAgeMeterMod;
+#endif
+
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	int m_iConversionModifier;
 	int m_iGlobalConversionModifier;
+#endif
+
+#ifdef MOD_PROMOTION_CITY_DESTROYER
+	int m_iSiegeKillCitizensModifier = 0;
 #endif
 
 	int m_iLandmarksTourismPercent;
@@ -523,12 +693,24 @@ private:
 	int* m_piUnitCombatProductionModifiers;
 	int* m_piDomainFreeExperience;
 	int* m_piDomainFreeExperiencePerGreatWork;
+
+#if defined(MOD_ROG_CORE)
+	int* m_piDomainFreeExperiencePerGreatWorkGlobal;
+	std::map<int, int> m_piDomainFreeExperienceGlobal;
+#endif
+
+
 	int* m_piDomainProductionModifier;
 	int* m_piPrereqNumOfBuildingClass;
 	int* m_piFlavorValue;
 	int* m_piLocalResourceAnds;
 	int* m_piLocalResourceOrs;
 	int* m_paiHurryModifier;
+
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+	int m_iNumAllowPurchaseUnits[NUM_YIELD_TYPES];
+	std::pair<UnitClassTypes, int>* m_piAllowPurchaseUnits[NUM_YIELD_TYPES];
+#endif 
 
 	bool* m_pbBuildingClassNeededInCity;
 	int* m_piNumFreeUnits;
@@ -546,6 +728,16 @@ private:
 
 	CvThemingBonusInfo* m_paThemingBonusInfo;
 	int m_iNumThemingBonuses;
+
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	int m_ppiYieldFromOtherYield[NUM_YIELD_TYPES][NUM_YIELD_TYPES][YieldFromYield::LENGTH];
+	bool m_bHasYieldFromOtherYield = false;
+#endif
+
+#ifdef MOD_GLOBAL_CITY_SCALES
+	CityScaleTypes m_eEnableCityScaleGrowth = NO_CITY_SCALE;
+	bool m_bEnableAllCityScaleGrowth = false;
+#endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -693,6 +885,10 @@ public:
 	bool CheckForAllWondersBuilt();
 	bool CheckForSevenAncientWondersBuilt();
 
+#if defined(MOD_ROG_CORE)
+	const std::vector<BuildingTypes>& GetAllBuildingsHere() const { return m_buildingsThatExistAtLeastOnce; }
+#endif
+
 private:
 	void NotifyNewBuildingStarted(BuildingTypes eIndex);
 
@@ -712,6 +908,10 @@ private:
 	int* m_paiBuildingOriginalTime;
 	int* m_paiNumRealBuilding;
 	int* m_paiNumFreeBuilding;
+
+#if defined(MOD_ROG_CORE)
+	std::vector<BuildingTypes> m_buildingsThatExistAtLeastOnce;
+#endif
 
 	std::vector<BuildingYieldChange> m_aBuildingYieldChange;
 	std::vector<BuildingGreatWork> m_aBuildingGreatWork;

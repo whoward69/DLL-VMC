@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -16,12 +16,40 @@
 #include "CvLuaSupport.h"
 #include "CvLuaTeam.h"
 #include "CvLuaTeamTech.h"
+#include "NetworkMessageUtil.h"
 
 //Utility macro for registering methods
 #define Method(Name)			\
 	lua_pushcclosure(L, l##Name, 0);	\
 	lua_setfield(L, t, #Name);
 
+void CvLuaTeam::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lSetMapCentering);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lSetPermanentWarPeace);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lSetProjectDefaultArtType);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lSetProjectArtType);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lSetHasTech);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lSetCurrentEra);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeNukeInterception);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeForceTeamVoteEligibilityCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeExtraWaterSeeFromCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeMapTradingCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeTechTradingCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeGoldTradingCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeAllowEmbassyTradingAllowedCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeOpenBordersTradingAllowedCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeDefensivePactTradingAllowedCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangePermanentAllianceTradingCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeBridgeBuildingCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeWaterWorkCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeBorderObstacleCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeTechShareCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeExtraMoves);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeRouteChange);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeProjectCount);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeImprovementYieldChange);
+	REGIST_STATIC_FUNCTION(CvLuaTeam::lChangeVictoryPoints);
+}
 //------------------------------------------------------------------------------
 void CvLuaTeam::Register(lua_State* L)
 {
@@ -35,6 +63,9 @@ void CvLuaTeam::HandleMissingInstance(lua_State* L)
 //------------------------------------------------------------------------------
 void CvLuaTeam::PushMethods(lua_State* L, int t)
 {
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+
 	Method(IsNone);
 
 	Method(AddTeam);

@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -174,6 +174,12 @@ void checkBattleUnitType(BattleUnitTypes unitType)
 	CvAssertMsg((unitType >= 0) && (unitType < BATTLE_UNIT_COUNT), "Invalid battle unit type.");
 }
 
+void checkBattleType(const BattleTypeTypes battleType)
+{
+	DEBUG_VARIABLE(battleType);
+	CvAssertMsg((battleType >= 0) && (battleType <= BATTLE_TYPE_NUKE), "Invalid battle type.");
+}
+
 //------------------------------------------------------------------------------------------------
 // FUNCTION:    CvCombatInfo::CvCombatInfo
 //! \brief      Constructor
@@ -189,7 +195,8 @@ CvCombatInfo::CvCombatInfo() :
 	m_iNuclearDamageLevel(0),
 	m_bVisualize(false),
 	m_bAttackedAdvancedVis(false),
-	m_iDamageMemberCount(0)
+	m_iDamageMemberCount(0),
+	m_eBattleType(BattleTypeTypes::BATTLE_TYPE_MELEE)
 {
 	for(int i=0; i<BATTLE_UNIT_COUNT; i++)
 	{
@@ -342,12 +349,37 @@ bool CvCombatInfo::getDefenderCaptured() const
 	return m_bDefenderCaptured;
 }
 
+void CvCombatInfo::setBattleUnitInfo(BattleUnitTypes unitType, int& iPlayerID, int& iUnitOrCityID, bool& bIsCity, int& originalInflictDamage) const
+{
+	auto unit = getUnit(unitType);
+	bIsCity = unit == nullptr;
+	originalInflictDamage = m_iDamageInflicted[unitType];
+
+	if (unit == nullptr)
+	{
+		auto city = getCity(unitType);
+		if (city == nullptr)
+		{
+			iPlayerID = -1;
+			iUnitOrCityID = -1;
+			return;
+		}
+
+		iPlayerID = city->getOwner();
+		iUnitOrCityID = city->GetID();
+		return;
+	}
+
+	iPlayerID = unit->getOwner();
+	iUnitOrCityID = unit->GetID();
+}
+
 int CvCombatInfo::getDamageInflicted(BattleUnitTypes unitType) const
 {
 	checkBattleUnitType(unitType);
-#if defined(MOD_EVENTS_BATTLES)
 	int iDamage = m_iDamageInflicted[unitType];
-
+#ifdef MOD_EVENTS_BATTLES_DAMAGE
+#ifndef MOD_EVENTS_BATTLES_CUSTOM_DAMAGE
 	if (MOD_EVENTS_BATTLES_DAMAGE) {
 		int iValue = 0;
 		if (GAMEEVENTINVOKE_VALUE(iValue, GAMEEVENT_BattleDamageDelta, unitType, iDamage) == GAMEEVENTRETURN_VALUE) {
@@ -387,11 +419,46 @@ int CvCombatInfo::getDamageInflicted(BattleUnitTypes unitType) const
 			}
 		}
 	}
+#endif
+#endif
+
+#ifdef MOD_EVENTS_BATTLES_CUSTOM_DAMAGE
+	if (MOD_EVENTS_BATTLES_CUSTOM_DAMAGE)
+	{
+		int iAttackPlayerID = 0;
+		int iAttackUnitOrCityID = 0;
+		bool bAttackIsCity = false;
+		int iAttackDamage = 0;
+
+		int iDefensePlayerID = 0;
+		int iDefenseUnitOrCityID = 0;
+		bool bDefenseIsCity = false;
+		int iDefenseDamage = 0;
+
+		int iInterceptorPlayerID = 0;
+		int iInterceptorUnitOrCityID = 0;
+		bool bInterceptorIsCity = false;
+		int iInterceptorDamage = 0;
+
+		BattleUnitTypes iBattleUnitType = unitType;
+		BattleTypeTypes iBattleType = getBattleType();
+
+		setBattleUnitInfo(BATTLE_UNIT_ATTACKER, iAttackPlayerID, iAttackUnitOrCityID, bAttackIsCity, iAttackDamage);
+		setBattleUnitInfo(BATTLE_UNIT_DEFENDER, iDefensePlayerID, iDefenseUnitOrCityID, bDefenseIsCity, iDefenseDamage);
+		setBattleUnitInfo(BATTLE_UNIT_INTERCEPTOR, iInterceptorPlayerID, iInterceptorUnitOrCityID, bInterceptorIsCity, iInterceptorDamage);
+
+		int iDelta = 0;
+		if (GAMEEVENTINVOKE_VALUE(iDelta, GAMEEVENT_BattleCustomDamage, 
+								iBattleUnitType, iBattleType,
+								iAttackPlayerID, iAttackUnitOrCityID, bAttackIsCity, iAttackDamage,
+								iDefensePlayerID, iDefenseUnitOrCityID, bDefenseIsCity, iDefenseDamage,
+								iInterceptorPlayerID, iInterceptorUnitOrCityID, bInterceptorIsCity, iInterceptorDamage) == GAMEEVENTRETURN_VALUE) {
+			iDamage += iDelta;
+		}
+	}
+#endif
 
 	return iDamage;
-#else
-	return m_iDamageInflicted[unitType];
-#endif
 }
 void CvCombatInfo::setDamageInflicted(BattleUnitTypes unitType, int iDamage)
 {
@@ -464,6 +531,17 @@ void CvCombatInfo::setUpdateGlobal(BattleUnitTypes unitType, bool bUpdateGlobal)
 {
 	checkBattleUnitType(unitType);
 	m_bUpdateGlobal[unitType] = bUpdateGlobal;
+}
+
+BattleTypeTypes CvCombatInfo::getBattleType() const
+{
+	return m_eBattleType;
+}
+
+void CvCombatInfo::setBattleType(const BattleTypeTypes battleType)
+{
+	checkBattleType(battleType);
+	m_eBattleType = battleType;
 }
 
 bool CvCombatInfo::getVisualizeCombat() const

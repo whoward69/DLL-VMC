@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -10,17 +10,28 @@
 #ifndef CVLUASCOPEDNSTANCE_H
 
 #include "CvLuaMethodWrapper.h"
+#include "NetworkMessageUtil.h"
+
+using namespace FunctionPointers;
 
 template<class Derived, class InstanceType>
 class CvLuaScopedInstance : public CvLuaMethodWrapper<Derived, InstanceType>
 {
 public:
 	static void Push(lua_State* L, InstanceType* pkType);
+
+/**
+Simply push instance pointer without involving information like method table into a lua state.
+Only for GetInstance() to correctly retrieve the game object.
+**/
+	static void PushLtwt(lua_State* L, InstanceType* pkType);
 	static void Push(lua_State* L, FObjectHandle<InstanceType> handle)
 	{
 		Push(L, handle.pointer());
 	}
 	static InstanceType* GetInstance(lua_State* L, int idx = 1, bool bErrorOnFail = true);
+	static int lSendAndExecuteLuaFunction(lua_State* L);
+	static int lSendAndExecuteLuaFunctionPostpone(lua_State* L);
 
 	//! Used by CvLuaMethodWrapper to know where first argument is.
 	static const int GetStartingArgIndex();
@@ -96,7 +107,6 @@ void CvLuaScopedInstance<Derived, InstanceType>::Push(lua_State* L, InstanceType
 			lua_createtable(L, 0, 1);
 			lua_pushlightuserdata(L, pkType);
 			lua_setfield(L, -2, "__instance");
-
 			lua_createtable(L, 0, 1);			// create mt
 			lua_pushstring(L, "__index");
 			lua_pushvalue(L, type_index);
@@ -119,6 +129,23 @@ void CvLuaScopedInstance<Derived, InstanceType>::Push(lua_State* L, InstanceType
 	else
 	{
 		lua_pushnil(L);
+	}
+}
+
+
+template<class Derived, class InstanceType>
+void CvLuaScopedInstance<Derived, InstanceType>::PushLtwt(lua_State* L, InstanceType* pkType)
+{
+	if (pkType)
+	{
+		lua_createtable(L, 0, 1);
+		lua_pushlightuserdata(L, pkType);
+		lua_setfield(L, -2, "__instance");
+	}
+	else
+	{
+		lua_pushnil(L);
+		throw NoSuchMethodException("Null ptr");
 	}
 }
 //------------------------------------------------------------------------------
@@ -163,6 +190,39 @@ template<class Derived, class InstanceType>
 void CvLuaScopedInstance<Derived, InstanceType>::DefaultHandleMissingInstance(lua_State* L)
 {
 	luaL_error(L, "Instance does not exist.");
+}
+
+template<class Derived, class InstanceType>
+int CvLuaScopedInstance<Derived, InstanceType>::lSendAndExecuteLuaFunction(lua_State* L) {
+	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 2) < 0;
+	if (fault) return 0;
+	int time = GetTickCount();
+	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
+	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
+	InvokeRecorder::pushInvoke(str);
+	gDLL->SendRenameCity(-str.length(), str);
+	auto rtn = 0;
+	try {
+		rtn = staticFunctions.ExecuteFunction<int>(NetworkMessageUtil::ReceiveLargeArgContainer.functiontocall(), L);
+	}
+	catch (NoSuchMethodException e) {
+		CUSTOMLOG(e.what());
+	}
+	NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+	return rtn;
+}
+
+
+template<class Derived, class InstanceType>
+int CvLuaScopedInstance<Derived, InstanceType>::lSendAndExecuteLuaFunctionPostpone(lua_State* L) {
+	auto fault = NetworkMessageUtil::ProcessLuaArgForReflection(L, 2) < 0;
+	if (fault) return 0;
+	int time = GetTickCount();
+	NetworkMessageUtil::ReceiveLargeArgContainer.set_invokestamp(time);
+	auto str = NetworkMessageUtil::ReceiveLargeArgContainer.SerializeAsString();
+	gDLL->SendRenameCity(-str.length(), str);
+	NetworkMessageUtil::ReceiveLargeArgContainer.Clear();
+	return 0;
 }
 
 

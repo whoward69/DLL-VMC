@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -11,6 +11,7 @@
 #include "CvImprovementClasses.h"
 #include "FireWorks/FRemark.h"
 #include "CvInfosSerializationHelper.h"
+#include <string>
 
 // must be included after all other headers
 #include "LintFree.h"
@@ -84,6 +85,28 @@ CvImprovementEntry::CvImprovementEntry(void):
 	m_iFreshWaterUpgradeMod(0),
 	m_iDefenseModifier(0),
 	m_iNearbyEnemyDamage(0),
+
+#if defined(MOD_ROG_CORE)
+	m_iWonderProductionModifier(0),
+	m_iNearbyFriendHeal(0),
+
+	m_iImprovementResource(NO_RESOURCE),
+	m_iImprovementResourceQuantity(0),
+#endif
+
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+	m_iCreateItemMod(0),
+	m_iCreatedResourceQuantity(0),
+	m_iSetNewImprovement(NO_IMPROVEMENT),
+	m_iSetNewFeature(NO_FEATURE),
+
+	m_iCreateResourceList(NULL),
+	m_iCreateTerrainList(NULL),
+	m_iCreateTerrainOnlyList(NULL),
+	m_iCreateFeatureList(NULL),
+	m_iCreateFeatureOnlyList(NULL),
+#endif
+
 	m_iPillageGold(0),
 	m_iResourceExtractionMod(0),
 	m_iLuxuryCopiesSiphonedFromMinor(0),
@@ -157,10 +180,26 @@ CvImprovementEntry::CvImprovementEntry(void):
 #if defined(MOD_API_UNIFIED_YIELDS)
 	m_piAdjacentSameTypeYield(NULL),
 #endif
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	m_ppiAdjacentImprovementYieldChanges(NULL),
+#endif
+
+#if defined(MOD_ROG_CORE)
+	m_ppiAdjacentTerrainYieldChanges(NULL),
+	m_ppiAdjacentResourceYieldChanges(NULL),
+	m_ppiAdjacentFeatureYieldChanges(NULL),
+	m_ppiFeatureYieldChanges(NULL),
+#endif
+
 	m_ppiTechYieldChanges(NULL),
 	m_ppiTechNoFreshWaterYieldChanges(NULL),
 	m_ppiTechFreshWaterYieldChanges(NULL),
 	m_ppiRouteYieldChanges(NULL),
+
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	m_ppiTradeRouteYieldChanges(NULL),
+#endif
+
 	m_paImprovementResource(NULL)
 {
 }
@@ -186,6 +225,40 @@ CvImprovementEntry::~CvImprovementEntry(void)
 	SAFE_DELETE_ARRAY(m_piAdjacentSameTypeYield);
 #endif
 
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+	SAFE_DELETE_ARRAY(m_iCreateResourceList);
+	SAFE_DELETE_ARRAY(m_iCreateTerrainList);
+	SAFE_DELETE_ARRAY(m_iCreateTerrainOnlyList);
+	SAFE_DELETE_ARRAY(m_iCreateFeatureList);
+	SAFE_DELETE_ARRAY(m_iCreateFeatureOnlyList);
+#endif
+
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	if (m_ppiAdjacentImprovementYieldChanges != nullptr) {
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiAdjacentImprovementYieldChanges);
+	}
+#endif
+
+#if defined(MOD_ROG_CORE)
+	if (m_ppiAdjacentResourceYieldChanges != nullptr)
+	{
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiAdjacentResourceYieldChanges);
+	}
+	if (m_ppiAdjacentTerrainYieldChanges != nullptr)
+	{
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiAdjacentTerrainYieldChanges);
+	}
+	if (m_ppiAdjacentFeatureYieldChanges != nullptr)
+	{
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiAdjacentFeatureYieldChanges);
+	}
+	if (m_ppiFeatureYieldChanges != nullptr)
+	{
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiFeatureYieldChanges);
+	}
+#endif
+
+
 	if(m_paImprovementResource != NULL)
 	{
 		SAFE_DELETE_ARRAY(m_paImprovementResource); // XXX make sure this isn't leaking memory...
@@ -210,6 +283,14 @@ CvImprovementEntry::~CvImprovementEntry(void)
 	{
 		CvDatabaseUtility::SafeDelete2DArray(m_ppiRouteYieldChanges);
 	}
+
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	if(m_ppiTradeRouteYieldChanges != NULL)
+	{
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiTradeRouteYieldChanges);
+	}
+#endif
+
 }
 
 /// Read from XML file
@@ -290,6 +371,72 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 	m_iFreshWaterUpgradeMod = kResults.GetInt("FreshWaterUpgradeMod");
 	m_iDefenseModifier = kResults.GetInt("DefenseModifier");
 	m_iNearbyEnemyDamage = kResults.GetInt("NearbyEnemyDamage");
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	if (MOD_IMPROVEMENTS_UPGRADE)
+	{
+		m_bEnableXP = kResults.GetBool("EnableXP");
+
+		m_bEnableUpgrade = kResults.GetBool("EnableUpgrade");
+		m_iUpgradeXP = kResults.GetInt("UpgradeXP");
+		std::string strUpgradeImprovement = kResults.GetText("UpgradeImprovementType");
+		if (!strUpgradeImprovement.empty())
+		{
+			std::string strKey = "Improvements - Upgrade";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select ID "
+					"from Improvements "
+					"where Type = ?;");
+			}
+			pResults->Bind(1, strUpgradeImprovement.c_str(), strUpgradeImprovement.size(), false);
+			if (pResults->Step())
+			{
+				m_eUpgradeImprovementType = static_cast<ImprovementTypes>(pResults->GetInt(0));
+			}
+		}
+
+		m_bEnableDowngrade = kResults.GetBool("EnableDowngrade");
+		std::string strDowngradeImprovement = kResults.GetText("DowngradeImprovementType");
+		if (!strDowngradeImprovement.empty())
+		{
+			std::string strKey = "Improvements - Downgrade";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select ID "
+					"from Improvements "
+					"where Type = ?;");
+			}
+			pResults->Bind(1, strDowngradeImprovement.c_str(), strDowngradeImprovement.size(), false);
+
+			if (pResults->Step())
+			{
+				m_eDowngradeImprovementType = static_cast<ImprovementTypes>(pResults->GetInt(0));
+			}
+		}
+	}
+#endif
+
+#if defined(MOD_ROG_CORE)
+	m_iWonderProductionModifier = kResults.GetInt("WonderProductionModifier");
+	m_iNearbyFriendHeal = kResults.GetInt("NearbyFriendHeal");
+
+	const char* szImprovementResource = kResults.GetText("ImprovementResource");
+	m_iImprovementResource = (ResourceTypes)GC.getInfoTypeForString(szImprovementResource, true);
+	m_iImprovementResourceQuantity = kResults.GetInt("ImprovementResourceQuantity");
+#endif
+
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+	m_iCreateItemMod = kResults.GetInt("CreatedItemMod");
+	m_iCreatedResourceQuantity = kResults.GetInt("CreatedResourceQuantity");
+	const char* szSetNewImprovement = kResults.GetText("SetNewImprovement");
+	m_iSetNewImprovement = GC.getInfoTypeForString(szSetNewImprovement, true);
+	const char* szSetNewFeature = kResults.GetText("SetNewFeature");
+	m_iSetNewFeature = GC.getInfoTypeForString(szSetNewFeature, true);
+#endif
+
 	m_iPillageGold = kResults.GetInt("PillageGold");
 	m_bOutsideBorders = kResults.GetBool("OutsideBorders");
 	m_bInAdjacentFriendly = kResults.GetBool("InAdjacentFriendly");
@@ -423,6 +570,210 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 	const int iNumTechs = GC.getNumTechInfos();
 	CvAssertMsg(iNumTechs > 0, "Num Tech Infos <= 0");
 
+	//Adjacent improvement changes
+	{
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+		if (MOD_API_VP_ADJACENT_YIELD_BOOST) {
+			const int iNumImprovements = kUtility.MaxRows("Improvements");
+			CvAssertMsg(iNumImprovements > 0, "Num Improvement Infos <= 0");
+			kUtility.Initialize2DArray(m_ppiAdjacentImprovementYieldChanges, iNumImprovements, iNumYields);
+
+			std::string strKey = "Improvements - AdjacentImprovementYieldChanges";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Improvements.ID as ImprovementID, Yield from Improvement_AdjacentImprovementYieldChanges inner join Yields on YieldType = Yields.Type inner join Improvements on OtherImprovementType = Improvements.Type where ImprovementType = ?");
+			}
+
+			pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+			while (pResults->Step())
+			{
+				const int yield_idx = pResults->GetInt(0);
+				CvAssert(yield_idx > -1);
+
+				const int improvement_idx = pResults->GetInt(1);
+				CvAssert(improvement_idx > -1);
+
+				const int yield = pResults->GetInt(2);
+
+				m_ppiAdjacentImprovementYieldChanges[improvement_idx][yield_idx] = yield;
+			}
+
+			pResults->Reset();
+		}
+#endif
+	}
+
+	{
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+		kUtility.InitializeArray(m_iCreateResourceList, kUtility.MaxRows("Resources"));
+		kUtility.InitializeArray(m_iCreateTerrainList, kUtility.MaxRows("Resources"));
+		kUtility.InitializeArray(m_iCreateTerrainOnlyList, kUtility.MaxRows("Resources"));
+		kUtility.InitializeArray(m_iCreateFeatureList, kUtility.MaxRows("Resources"));
+		kUtility.InitializeArray(m_iCreateFeatureOnlyList, kUtility.MaxRows("Resources"));
+
+		std::string strImprovementCreateKey("Improvements - Improvements_Create_Collection");
+		Database::Results* pResults = kUtility.GetResults(strImprovementCreateKey);
+		if(pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strImprovementCreateKey, "select Resources.ID as ResourceID, Terrains.ID as TerrainID, TerrainOnly, Features.ID as FeatureID, FeatureOnly from Improvements_Create_Collection inner join Resources on Resources.Type = ResourceType left join Terrains on Terrains.Type = TerrainType left join Features on Features.Type = FeatureType where ImprovementType = ?");
+		}
+
+		pResults->Bind(1, szImprovementType, false);
+		int iResultLoop = 0;
+		while(pResults->Step())
+		{
+			const int ResourceID = pResults->GetInt(0);
+			CvAssert(ResourceID > -1);
+
+			const int TerrainID = pResults->GetInt(1);
+			CvAssert(TerrainID > -1);
+			const bool TerrainOnly = pResults->GetBool(2);
+
+			const int FeatureID = pResults->GetInt(3);
+			CvAssert(FeatureID > -1);
+			const bool FeatureOnly = pResults->GetBool(4);
+			
+			//ResourceID + 1 to distinguish between default value and RESOURCE_IRON(0)
+			m_iCreateResourceList[iResultLoop] = ResourceID + 1;
+			m_iCreateTerrainList[iResultLoop] = TerrainID;
+			m_iCreateTerrainOnlyList[iResultLoop] = TerrainOnly;
+			m_iCreateFeatureList[iResultLoop] = FeatureID;
+			m_iCreateFeatureOnlyList[iResultLoop] = FeatureOnly;
+			iResultLoop = iResultLoop + 1;
+		}
+		pResults->Reset();
+#endif
+	}
+
+
+#if defined(MOD_ROG_CORE)
+	if (MOD_ROG_CORE) {
+		//m_ppiAdjacentResourceYieldChanges
+		{
+			const int iNumResources = kUtility.MaxRows("Resources");
+			CvAssertMsg(iNumResources > 0, "Num Resource Infos <= 0");
+			kUtility.Initialize2DArray(m_ppiAdjacentResourceYieldChanges, iNumResources, iNumYields);
+
+			std::string strKey = "Improvements - AdjacentResourceYieldChanges";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Resources.ID as ResourceID, Yield from Improvement_AdjacentResourceYieldChanges inner join Yields on YieldType = Yields.Type inner join Resources on ResourceType = Resources.Type where ImprovementType = ?");
+			}
+
+			pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+			while (pResults->Step())
+			{
+				const int yield_idx = pResults->GetInt(0);
+				CvAssert(yield_idx > -1);
+
+				const int resource_idx = pResults->GetInt(1);
+				CvAssert(resource_idx > -1);
+
+				const int yield = pResults->GetInt(2);
+
+				m_ppiAdjacentResourceYieldChanges[resource_idx][yield_idx] = yield;
+			}
+
+			pResults->Reset();
+		}
+		//m_ppiAdjacentTerrainYieldChanges
+		{
+			const int iNumTerrains = kUtility.MaxRows("Terrains");
+			CvAssertMsg(iNumTerrains > 0, "Num Terrain Infos <= 0");
+			kUtility.Initialize2DArray(m_ppiAdjacentTerrainYieldChanges, iNumTerrains, iNumYields);
+
+			std::string strKey = "Terrains - AdjacentTerrainYieldChanges";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Terrains.ID as TerrainID, Yield from Improvement_AdjacentTerrainYieldChanges inner join Yields on YieldType = Yields.Type inner join Terrains on TerrainType = Terrains.Type where ImprovementType = ?");
+			}
+
+			pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+			while (pResults->Step())
+			{
+				const int yield_idx = pResults->GetInt(0);
+				CvAssert(yield_idx > -1);
+
+				const int terrain_idx = pResults->GetInt(1);
+				CvAssert(terrain_idx > -1);
+
+				const int yield = pResults->GetInt(2);
+
+				m_ppiAdjacentTerrainYieldChanges[terrain_idx][yield_idx] = yield;
+			}
+
+			pResults->Reset();
+		}
+
+		//m_ppiAdjacentFeatureYieldChanges
+		{
+			const int iNumFeatures = kUtility.MaxRows("Features");
+			CvAssertMsg(iNumFeatures > 0, "Num Feature Infos <= 0");
+			kUtility.Initialize2DArray(m_ppiAdjacentFeatureYieldChanges, iNumFeatures, iNumYields);
+
+			std::string strKey = "Features - AdjacentFeatureYieldChanges";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Features.ID as FeatureID, Yield from Improvement_AdjacentFeatureYieldChanges inner join Yields on YieldType = Yields.Type inner join Features on FeatureType = Features.Type where ImprovementType = ?");
+			}
+
+			pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+			while (pResults->Step())
+			{
+				const int yield_idx = pResults->GetInt(0);
+				CvAssert(yield_idx > -1);
+
+				const int feature_idx = pResults->GetInt(1);
+				CvAssert(feature_idx > -1);
+
+				const int yield = pResults->GetInt(2);
+
+				m_ppiAdjacentFeatureYieldChanges[feature_idx][yield_idx] = yield;
+			}
+
+			pResults->Reset();
+		}
+
+		//m_ppiFeatureYieldChanges
+		{
+			const int iNumFeatures = kUtility.MaxRows("Features");
+			CvAssertMsg(iNumFeatures > 0, "Num Feature Infos <= 0");
+			kUtility.Initialize2DArray(m_ppiFeatureYieldChanges, iNumFeatures, iNumYields);
+
+			std::string strKey = "Features - FeatureYieldChanges";
+			Database::Results* pResults = kUtility.GetResults(strKey);
+			if (pResults == NULL)
+			{
+				pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Features.ID as FeatureID, Yield from Improvement_FeatureYieldChanges inner join Yields on YieldType = Yields.Type inner join Features on FeatureType = Features.Type where ImprovementType = ?");
+			}
+
+			pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+			while (pResults->Step())
+			{
+				const int yield_idx = pResults->GetInt(0);
+				CvAssert(yield_idx > -1);
+
+				const int feature_idx = pResults->GetInt(1);
+				CvAssert(feature_idx > -1);
+
+				const int yield = pResults->GetInt(2);
+
+				m_ppiFeatureYieldChanges[feature_idx][yield_idx] = yield;
+			}
+
+			pResults->Reset();
+		}
+	}
+#endif
 
 	//TechYieldChanges
 	{
@@ -542,6 +893,39 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 
 	}
 
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	//TradeRouteYieldChanges
+	{
+		// const int iNumRoutes = kUtility.MaxRows("Routes");
+		kUtility.Initialize2DArray(m_ppiTradeRouteYieldChanges, "Domains", "Yields");
+
+		std::string strKey = "Improvements - TradeRouteYieldChanges";
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if(pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Domains.ID as DomainID, Yield from Improvement_TradeRouteYieldChanges inner join Yields on YieldType = Yields.Type inner join Domains on Domains.Type = DomainType where ImprovementType = ?;");
+		}
+
+		pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+		while(pResults->Step())
+		{
+			const int yield_idx = pResults->GetInt(0);
+			CvAssert(yield_idx > -1);
+
+			const int domain_idx = pResults->GetInt(1);
+			CvAssert(domain_idx > -1);
+
+			const int yield = pResults->GetInt(2);
+
+			m_ppiTradeRouteYieldChanges[domain_idx][yield_idx] = yield;
+		}
+
+		pResults->Reset();
+
+	}
+#endif
+
 	return true;
 }
 
@@ -653,6 +1037,107 @@ int CvImprovementEntry::GetDefenseModifier() const
 {
 	return m_iDefenseModifier;
 }
+
+#if defined(MOD_ROG_CORE)
+
+int CvImprovementEntry::GetWonderProductionModifier() const
+{
+	return m_iWonderProductionModifier;
+}
+
+/// heal done to nearby our units
+int CvImprovementEntry::GetNearbyFriendHeal() const
+{
+	return m_iNearbyFriendHeal;
+}
+
+// Does this improvement create a resource when construced?
+int CvImprovementEntry::GetResourceFromImprovement() const
+{
+	return m_iImprovementResource;
+}
+// Does this improvement create a resource when construced?
+int CvImprovementEntry::GetResourceQuantityFromImprovement() const
+{
+	return m_iImprovementResourceQuantity;
+}
+#endif
+
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+// get the items generate mod 0 = disable, 1 = only improvement, 2 = only feature, 3 = enable all
+int CvImprovementEntry::GetCreateItemMod() const
+{
+	return m_iCreateItemMod;
+}
+int CvImprovementEntry::GetCreatedResourceQuantity() const
+{
+	return m_iCreatedResourceQuantity;
+}
+int CvImprovementEntry::GetNewImprovement() const
+{
+	return m_iSetNewImprovement;
+}
+int CvImprovementEntry::GetNewFeature() const
+{
+	return m_iSetNewFeature;
+}
+
+
+int CvImprovementEntry::GetCreateResource(CvPlot* pPlot) const
+{
+	std::vector<int> CanCreateResourceList;
+	CanCreateResourceList.clear();
+	if(pPlot)
+	{
+		int iNumResources = GC.getNumResourceInfos();
+		for(int iResourceLoop = 0; iResourceLoop < iNumResources; iResourceLoop++)
+		{
+			if(m_iCreateResourceList[iResourceLoop] == 0)
+			{
+				break;
+			}
+			TerrainTypes thisTerrain = (TerrainTypes)m_iCreateTerrainList[iResourceLoop];
+			if(m_iCreateTerrainOnlyList[iResourceLoop] && pPlot->getTerrainType() != thisTerrain)
+			{
+				continue;
+			}
+			FeatureTypes thisFeature = (FeatureTypes)m_iCreateFeatureList[iResourceLoop];
+			if(m_iCreateFeatureOnlyList[iResourceLoop] && pPlot->getFeatureType() != thisFeature)
+			{
+				continue;
+			}
+
+			CanCreateResourceList.push_back(m_iCreateResourceList[iResourceLoop] - 1);
+		}
+		if(!CanCreateResourceList.empty())
+		{
+			int randSelect = CanCreateResourceList.size() > 1 ? GC.getGame().getJonRandNum(CanCreateResourceList.size(), "Get random create source when constructed") : 0; 
+			return CanCreateResourceList[randSelect];
+		}
+	}
+	return -1;
+}
+int* CvImprovementEntry::GetCreateResourceList() const
+{
+	return m_iCreateResourceList;
+}
+int* CvImprovementEntry::GetCreateTerrainList() const
+{
+	return m_iCreateTerrainList;
+}
+bool* CvImprovementEntry::GetCreateTerrainOnlyList() const
+{
+	return m_iCreateTerrainOnlyList;
+}
+int* CvImprovementEntry::GetCreateFeatureList() const
+{
+	return m_iCreateFeatureList;
+}
+bool* CvImprovementEntry::GetCreateFeatureOnlyList() const
+{
+	return m_iCreateFeatureOnlyList;
+}
+#endif
 
 /// Damage done to nearby enemy units
 int CvImprovementEntry::GetNearbyEnemyDamage() const
@@ -1110,6 +1595,66 @@ int CvImprovementEntry::GetAdjacentSameTypeYield(int i) const
 }
 #endif
 
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+int CvImprovementEntry::GetAdjacentImprovementYieldChanges(int i, int j) const
+{
+	if (!MOD_API_VP_ADJACENT_YIELD_BOOST) return 0;
+	CvAssertMsg(i < GC.getNumImprovementInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiAdjacentImprovementYieldChanges[i][j];
+}
+#endif
+
+
+/// How much an improvement yields if built next to a resource
+#if defined(MOD_ROG_CORE)
+int CvImprovementEntry::GetAdjacentResourceYieldChanges(int i, int j) const
+{
+	if (!MOD_ROG_CORE) return 0;
+	CvAssertMsg(i < GC.getNumResourceInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiAdjacentResourceYieldChanges[i][j];
+}
+
+
+int CvImprovementEntry::GetAdjacentTerrainYieldChanges(int i, int j) const
+{
+	if (!MOD_ROG_CORE) return 0;
+	CvAssertMsg(i < GC.getNumTerrainInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiAdjacentTerrainYieldChanges[i][j];
+}
+
+
+int CvImprovementEntry::GetAdjacentFeatureYieldChanges(int i, int j) const
+{
+	if (!MOD_ROG_CORE) return 0;
+	CvAssertMsg(i < GC.getNumPlotInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiAdjacentFeatureYieldChanges[i][j];
+}
+
+
+int CvImprovementEntry::GetFeatureYieldChanges(int i, int j) const
+{
+	if (!MOD_ROG_CORE) return 0;
+	CvAssertMsg(i < GC.getNumFeatureInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiFeatureYieldChanges[i][j];
+}
+
+#endif
+
 /// How much a tech improves the yield of this improvement
 int CvImprovementEntry::GetTechYieldChanges(int i, int j) const
 {
@@ -1169,6 +1714,23 @@ int* CvImprovementEntry::GetRouteYieldChangesArray(int i)				// For Moose - CvWi
 {
 	return m_ppiRouteYieldChanges[i];
 }
+
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+/// How much a type of trade route improves the yield of this improvement
+int CvImprovementEntry::GetTradeRouteYieldChanges(int i, int j) const
+{
+	CvAssertMsg(i < GC.getNumUnitDomainInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiTradeRouteYieldChanges[i][j];
+}
+
+int* CvImprovementEntry::GetTradeRouteYieldChangesArray(int i)				// For Moose - CvWidgetData XXX
+{
+	return m_ppiTradeRouteYieldChanges[i];
+}
+#endif
 
 /// How much a yield improves when a resource is present with the improvement
 int CvImprovementEntry::GetImprovementResourceYield(int i, int j) const
@@ -1260,6 +1822,38 @@ CvImprovementEntry* CvImprovementXMLEntries::GetImprovementForResource(int eReso
 
 	return NULL;
 }
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+bool CvImprovementEntry::GetEnableXP() const
+{
+	return this->m_bEnableXP;
+}
+
+bool CvImprovementEntry::GetEnableUpgrade() const
+{
+	return this->m_bEnableUpgrade;
+}
+
+int CvImprovementEntry::GetUpgradeXP() const
+{
+	return this->m_iUpgradeXP;
+}
+
+ImprovementTypes CvImprovementEntry::GetUpgradeImprovementType() const
+{
+	return this->m_eUpgradeImprovementType;
+}
+
+bool CvImprovementEntry::GetEnableDowngrade() const
+{
+	return this->m_bEnableDowngrade;
+}
+
+ImprovementTypes CvImprovementEntry::GetDowngradeImprovementType() const
+{
+	return this->m_eDowngradeImprovementType;
+}
+#endif
 
 /// Clear improvement entries
 void CvImprovementXMLEntries::DeleteArray()

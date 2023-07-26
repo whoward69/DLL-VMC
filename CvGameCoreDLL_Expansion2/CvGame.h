@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -131,6 +131,11 @@ public:
 	TeamTypes getActiveTeam();
 	CivilizationTypes getActiveCivilizationType();
 
+#if defined(MOD_ROG_CORE)
+	int NumOriginalCapitalModMax() const;
+#endif
+
+
 #if defined(MOD_API_EXTENSIONS)
 	bool isReallyNetworkMultiPlayer() const;
 #endif
@@ -147,7 +152,9 @@ public:
 	int getNumHumansInHumanWars(PlayerTypes ignorePlayer = NO_PLAYER);
 	int getNumSequentialHumans(PlayerTypes ignorePlayer = NO_PLAYER);
 
-	int getGameTurn();
+	//int getGameTurn();
+	int getGameTurn() const;
+
 	void setGameTurn(int iNewValue);
 	void incrementGameTurn();
 	int getTurnYear(int iGameTurn);
@@ -431,6 +438,13 @@ public:
 	int getJonRandNumVA(int iNum, const char* pszLog, ...);
 	int getAsyncRandNum(int iNum, const char* pszLog);
 
+
+#if defined(MOD_ROG_CORE)
+	//get random number from gamestate without a seed in the generator
+	int	getSmallFakeRandNum(int iNum, const CvPlot& input) const;
+	int	getSmallFakeRandNum(int iNum, int iExtraSeed) const;
+#endif
+
 	int calculateSyncChecksum();
 	int calculateOptionsChecksum();
 
@@ -610,12 +624,18 @@ public:
 	bool AnyoneHasUnit(UnitTypes iUnitType) const;
 	bool AnyoneHasUnitClass(UnitClassTypes iUnitClassType) const;
 #endif
-
 public:
 
 	//Function to determine city size from city population
 	unsigned int GetVariableCitySizeFromPopulation(unsigned int nPopulation);
 
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	uint64 GetLastMPSignalInvokeTime() { return m_uiLastMPSignalInvokeTime; }
+	void SetLastMPSignalInvokeTime(uint64 uiNewValue) { m_uiLastMPSignalInvokeTime = uiNewValue; }
+	void GenerateMPSignalNotification(PlayerTypes iFromPlayer, int iPlotX, int iPlotY);
+#endif // MOD_API_MP_PLOT_SIGNAL
+
+	
 	//------------------------------------------------------------
 	//------------------------------------------------------------
 	//------------------------------------------------------------
@@ -727,6 +747,11 @@ protected:
 
 	int** m_apaiPlayerVote;
 	int** m_ppaaiTeamVictoryRank;
+
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	uint64 m_uiLastMPSignalInvokeTime;
+#endif // MOD_API_MP_PLOT_SIGNAL
+
 
 	Database::Results* m_pDiploResponseQuery;
 

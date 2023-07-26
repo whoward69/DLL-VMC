@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -156,6 +156,7 @@ public:
 	    FOUNDING_NAME_IN_USE,
 	    FOUNDING_RELIGION_ENHANCED,
 		FOUNDING_NO_BELIEFS_AVAILABLE,
+		FOUNDING_NO_CAPITAL_CITY,
 	};
 
 	void Init();
@@ -410,9 +411,9 @@ public:
 	bool IsHolyCityAnyReligion();
 	bool IsReligionHereOtherThan(ReligionTypes eReligion);
 	bool IsDefendedAgainstSpread(ReligionTypes eReligion);
-	ReligionTypes GetReligiousMajority();
+	ReligionTypes GetReligiousMajority() const;
 	ReligionTypes GetSimulatedReligiousMajority();
-	ReligionTypes GetSecondaryReligion();
+	ReligionTypes GetSecondaryReligion() const;
 	BeliefTypes GetSecondaryReligionPantheonBelief();
 	int GetFollowersOtherReligions(ReligionTypes eReligion);
 	bool HasPaidAdoptionBonus() const
@@ -468,6 +469,15 @@ public:
 
 	ReligionInCityList m_ReligionStatus;
 	ReligionInCityList m_SimulatedStatus;
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+	BeliefTypes GetMajorReligionPantheonBelief() const; // reference: GetSecondaryReligionPantheonBelief
+
+	bool IsHasMajorBelief(const BeliefTypes eBelief) const;
+	bool IsHasSecondaryBelief(const BeliefTypes eBelief) const;
+
+	bool IsSecondaryReligionActive() const;
+#endif // MOD_API_RELIGION_EXTENSIONS
 
 private:
 	void RecomputeFollowers(CvReligiousFollowChangeReason eReason, ReligionTypes eOldMajorityReligion, PlayerTypes eResponsibleParty=NO_PLAYER);

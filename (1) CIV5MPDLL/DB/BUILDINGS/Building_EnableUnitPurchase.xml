@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created by ModBuddy on 5/7/2013 8:55:35 PM -->
+<GameData>
+	<!-- New Table Definitions -->
+    <Table name="Building_EnableUnitPurchase">
+        <Column name="BuildingType" type="text" reference="Buildings(Type)"/>
+        <Column name="UnitClassType" type="text" reference="UnitClasses(Type)"/>
+        <Column name="YieldType" type="text" reference="Yields(Type)"/>
+        <Column name="CostModifier" type="integer" default = "-1"/>
+    </Table>
+
+</GameData>

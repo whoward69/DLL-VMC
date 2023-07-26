@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -8,6 +8,7 @@
 #pragma once
 #include "CvDllInterfaces.h"
 #include "CvDllVersion.h"
+#include "CvGameCoreUtils.h"
 
 class CvDllNetworkSyncronization;
 class CvDllNetInitInfo;
@@ -28,7 +29,7 @@ public:
 	static void InitializeSingleton();
 	static void DestroySingleton();
 	static CvDllGameContext* GetSingleton();
-
+	//static InvokeRecorder* container;
 	//Memory management functions used by adapters.
 	_Check_return_ static void* Allocate(size_t bytes);
 	static void Free(_In_ void* p);
