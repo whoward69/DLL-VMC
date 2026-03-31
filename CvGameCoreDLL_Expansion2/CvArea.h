@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -31,13 +31,19 @@ struct CvAreaBoundaries
 };
 
 //////////////////////////////////////////////////////////////////////////
-class CvArea
+class CvArea : public CvGameObjectExtractable
 {
 
 public:
 
 	CvArea();
 	~CvArea();
+
+	void ExtractToArg(BasicArguments* arg); // This class's lua wrapper seems to has no setter method.
+	static void PushToLua(lua_State* L, BasicArguments* arg);
+	static void RegistInstanceFunctions();
+	static void RegistStaticFunctions();
+	static CvArea* Provide(int id);
 
 	void init(int iID, bool bWater);
 	void uninit();

@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -531,9 +531,7 @@ void CvNotifications::Dismiss(int iLookupIndex, bool bUserInvoked)
 				{
 					GC.GetEngineUserInterface()->SetPolicyNotificationSeen(true);
 				}
-#if defined(MOD_BUGFIX_MINOR)
 				break;
-#endif
 			}
 #if defined(MOD_AI_MP_DIPLOMACY)
 			case NOTIFICATION_PLAYER_DEAL_RECEIVED:
@@ -571,6 +569,16 @@ bool CvNotifications::MayUserDismiss(int iLookupIndex)
 			case NOTIFICATION_TECH:
 			case NOTIFICATION_FREE_TECH:
 			case NOTIFICATION_FREE_POLICY:
+				if(GC.getGame().isOption(GAMEOPTION_POLICY_SAVING))
+				{
+					return true;
+					break;
+				}
+				else
+				{
+					return false;
+					break;
+				}
 			case NOTIFICATION_FREE_GREAT_PERSON:
 			case NOTIFICATION_FOUND_PANTHEON:
 			case NOTIFICATION_FOUND_RELIGION:
@@ -1854,6 +1862,7 @@ bool CvNotifications::IsNotificationExpired(int iIndex)
 			}
 		}
 	}
+	break;
 
 	case NOTIFICATION_FOUND_PANTHEON:
 	{
@@ -1869,6 +1878,7 @@ bool CvNotifications::IsNotificationExpired(int iIndex)
 		CvGameReligions* pkReligions(kGame.GetGameReligions());
 		return pkReligions->HasAddedReformationBelief(m_ePlayer);
 	}
+	break;
 
 	case NOTIFICATION_FOUND_RELIGION:
 	{

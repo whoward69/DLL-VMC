@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -56,6 +56,18 @@ void InitializeArray(T*& pArray, const char* szTableName, T default = (T)0);
 	//!Allocates an array to Count(szTypeTableName) and initializes to false.
 	//!Then assigns pArray[i++] = Type.ID for all resulting rows.
 	bool PopulateArrayByExistence(int*& pArray,	const char* szTypeTableName,
+	                              const char* szDataTableName,
+	                              const char* szTypeColumn,
+	                              const char* szFilterColumn,
+	                              const char* szFilterValue);
+
+	bool PopulateArrayByExistence(std::tr1::unordered_set<int>& set, const char* szTypeTableName,
+	                              const char* szDataTableName,
+	                              const char* szTypeColumn,
+	                              const char* szFilterColumn,
+	                              const char* szFilterValue);
+
+	bool PopulateArrayByExistence(std::vector<int>& vector, const char* szTypeTableName,
 	                              const char* szDataTableName,
 	                              const char* szTypeColumn,
 	                              const char* szFilterColumn,

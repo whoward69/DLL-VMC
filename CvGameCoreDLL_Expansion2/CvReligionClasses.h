@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -90,6 +90,7 @@ public:
 	// Public data
 	ReligionTypes m_eReligion;
 	PlayerTypes m_eFounder;
+	PlayerTypes m_eOriginalFounder;
 	int m_iHolyCityX;
 	int m_iHolyCityY;
 	int m_iTurnFounded;
@@ -156,6 +157,7 @@ public:
 	    FOUNDING_NAME_IN_USE,
 	    FOUNDING_RELIGION_ENHANCED,
 		FOUNDING_NO_BELIEFS_AVAILABLE,
+		FOUNDING_NO_CAPITAL_CITY,
 	};
 
 	void Init();
@@ -287,19 +289,23 @@ FDataStream& operator<<(FDataStream&, const CvGameReligions&);
 
 enum CvReligiousFollowChangeReason
 {
-    FOLLOWER_CHANGE_POP_CHANGE,
-    FOLLOWER_CHANGE_HOLY_CITY,
-    FOLLOWER_CHANGE_ADJACENT_PRESSURE,
-    FOLLOWER_CHANGE_RELIGION_FOUNDED,
-    FOLLOWER_CHANGE_PANTHEON_FOUNDED,
-    FOLLOWER_CHANGE_CONQUEST,
-    FOLLOWER_CHANGE_MISSIONARY,
-    FOLLOWER_CHANGE_PROPHET,
-    FOLLOWER_CHANGE_REMOVE_HERESY,
-	FOLLOWER_CHANGE_SCRIPTED_CONVERSION,
-	FOLLOWER_CHANGE_SPY_PRESSURE,
+  FOLLOWER_CHANGE_POP_CHANGE,
+  FOLLOWER_CHANGE_HOLY_CITY,
+  FOLLOWER_CHANGE_ADJACENT_PRESSURE,
+  FOLLOWER_CHANGE_RELIGION_FOUNDED,
+  FOLLOWER_CHANGE_PANTHEON_FOUNDED,
+  FOLLOWER_CHANGE_CONQUEST,
+  FOLLOWER_CHANGE_MISSIONARY,
+  FOLLOWER_CHANGE_PROPHET,
+  FOLLOWER_CHANGE_REMOVE_HERESY,
+  FOLLOWER_CHANGE_SCRIPTED_CONVERSION,
+  FOLLOWER_CHANGE_SPY_PRESSURE,
 #if defined(MOD_GLOBAL_RELIGIOUS_SETTLERS)
-	FOLLOWER_CHANGE_ADOPT_FULLY,
+  FOLLOWER_CHANGE_ADOPT_FULLY,
+#endif
+
+#ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
+  FOLLOWER_CHANGE_KILLING,
 #endif
 };
 
@@ -323,15 +329,10 @@ public:
 	void Write(FDataStream& kStream);
 
 	// Data accessors
-#if defined(MOD_GLOBAL_TRULY_FREE_GP)
 	int GetNumProphetsSpawned(bool bExcludeFree) const;
 	void ChangeNumProphetsSpawned(int iValue, bool bIsFree);
-	int GetCostNextProphet(bool bIncludeBeliefDiscounts, bool bAdjustForSpeedDifficulty, bool bExcludeFree) const;
-#else
-	int GetNumProphetsSpawned() const;
-	void ChangeNumProphetsSpawned(int iValue);
-	int GetCostNextProphet(bool bIncludeBeliefDiscounts, bool bAdjustForSpeedDifficulty) const;
-#endif
+	int GetCostNextProphet(bool bIncludeBeliefDiscounts, bool bAdjustForSpeedDifficulty, bool bExcludeFree = MOD_GLOBAL_TRULY_FREE_GP) const;
+
 	bool IsFoundingReligion() const
 	{
 		return m_bFoundingReligion;
@@ -370,13 +371,12 @@ public:
 	int GetSpyPressure() const;
 	int GetNumForeignCitiesFollowing() const;
 	int GetNumForeignFollowers(bool bAtPeace) const;
+	int GetNumNativeFollowers() const;
 
 private:
 	CvPlayer* m_pPlayer;
 
-#if defined(MOD_GLOBAL_TRULY_FREE_GP)
 	int m_iNumFreeProphetsSpawned;
-#endif
 	int m_iNumProphetsSpawned;
 	int m_bFoundingReligion;
 #if defined(MOD_RELIGION_RECURRING_PURCHASE_NOTIFIY)
@@ -408,11 +408,12 @@ public:
 	bool IsReligionInCity();
 	bool IsHolyCityForReligion(ReligionTypes eReligion);
 	bool IsHolyCityAnyReligion();
+	ReligionTypes GetReligionFoundedHere() const;
 	bool IsReligionHereOtherThan(ReligionTypes eReligion);
-	bool IsDefendedAgainstSpread(ReligionTypes eReligion);
-	ReligionTypes GetReligiousMajority();
+	bool IsDefendedAgainstSpread(ReligionTypes eReligion, bool bTestVisible = false);
+	ReligionTypes GetReligiousMajority() const;
 	ReligionTypes GetSimulatedReligiousMajority();
-	ReligionTypes GetSecondaryReligion();
+	ReligionTypes GetSecondaryReligion() const;
 	BeliefTypes GetSecondaryReligionPantheonBelief();
 	int GetFollowersOtherReligions(ReligionTypes eReligion);
 	bool HasPaidAdoptionBonus() const
@@ -468,6 +469,15 @@ public:
 
 	ReligionInCityList m_ReligionStatus;
 	ReligionInCityList m_SimulatedStatus;
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+	BeliefTypes GetMajorReligionPantheonBelief() const; // reference: GetSecondaryReligionPantheonBelief
+
+	bool IsHasMajorBelief(const BeliefTypes eBelief) const;
+	bool IsHasSecondaryBelief(const BeliefTypes eBelief) const;
+
+	bool IsSecondaryReligionActive() const;
+#endif // MOD_API_RELIGION_EXTENSIONS
 
 private:
 	void RecomputeFollowers(CvReligiousFollowChangeReason eReason, ReligionTypes eOldMajorityReligion, PlayerTypes eResponsibleParty=NO_PLAYER);
@@ -589,9 +599,10 @@ private:
 	bool BuyAnyAvailableFaithBuilding();
 
 	int ScoreBelief(CvBeliefEntry* pEntry);
-	int ScoreBeliefAtPlot(CvBeliefEntry* pEntry, CvPlot* pPlot);
+	int ScoreBeliefAtPlot(CvBeliefEntry* pEntry, CvPlot* pPlot, const std::vector<ImprovementTypes>& vEnhanceImprovements);
 	int ScoreBeliefAtCity(CvBeliefEntry* pEntry, CvCity* pCity);
 	int ScoreBeliefForPlayer(CvBeliefEntry* pEntry);
+	int BeliefExtraScore(CvBeliefEntry* pEntry);
 
 	int ScoreCityForMissionary(CvCity* pCity, UnitHandle pUnit);
 	int ScoreCityForInquisitor(CvCity* pCity, UnitHandle pUnit);

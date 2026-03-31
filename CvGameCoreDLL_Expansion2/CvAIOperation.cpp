@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -3106,7 +3106,10 @@ void CvAIOperationFoundCity::Init(int iID, PlayerTypes eOwner, PlayerTypes /*eEn
 /// If at target, found city; if at muster point, merge settler and escort and move out
 bool CvAIOperationFoundCity::ArmyInPosition(CvArmyAI* pArmy)
 {
-	int iUnitID = 0;
+	if (pArmy == NULL) return false;
+	int iUnitID = pArmy->GetFirstUnitID();
+	if(iUnitID ==-1 || GET_PLAYER(m_eOwner).getUnit(iUnitID) == NULL) return false;
+
 	bool bStateChanged = false;
 	CvUnit* pSettler = 0, *pEscort = 0;
 	CvString strMsg;
@@ -3181,6 +3184,7 @@ bool CvAIOperationFoundCity::ArmyInPosition(CvArmyAI* pArmy)
 
 		if(pSettler != NULL)
 		{
+			CvPlot* pPlot = pSettler->plot();
 			if((GetTargetPlot()->getOwner() != NO_PLAYER && GetTargetPlot()->getOwner() != m_eOwner) || GetTargetPlot()->IsAdjacentOwnedByOtherTeam(pSettler->getTeam()))
 			{
 				if(GC.getLogging() && GC.getAILogging())
@@ -3198,21 +3202,20 @@ bool CvAIOperationFoundCity::ArmyInPosition(CvArmyAI* pArmy)
 				}
 			}
 			// If the settler made it, we don't care about the entire army
-			else if(pSettler->plot() == GetTargetPlot() && pSettler->canMove() && pSettler->canFound(pSettler->plot()))
+			else if(pPlot == GetTargetPlot() && pSettler->canMove() && pSettler->canFound(pPlot))
 			{
-				CvPlot* pCityPlot = pSettler->plot();
-				int iPlotValue = GC.getGame().GetSettlerSiteEvaluator()->PlotFoundValue(pCityPlot, &GET_PLAYER(m_eOwner), NO_YIELD, false);
+				int iPlotValue = GC.getGame().GetSettlerSiteEvaluator()->PlotFoundValue(pPlot, &GET_PLAYER(m_eOwner), NO_YIELD, false);
 
 				pSettler->PushMission(CvTypes::getMISSION_FOUND());
 
 				if(GC.getLogging() && GC.getAILogging())
 				{
-					CvArea* pArea = pCityPlot->area();
-					CvCity* pCity = pCityPlot->getPlotCity();
+					CvArea* pArea = pPlot->area();
+					CvCity* pCity = pPlot->getPlotCity();
 
 					if (pCity != NULL)
 					{
-						strMsg.Format("City founded, At X=%d, At Y=%d, %s, %d, %d", pCityPlot->getX(), pCityPlot->getY(), pCity->getName().GetCString(), iPlotValue, pArea->getTotalFoundValue());
+						strMsg.Format("City founded, At X=%d, At Y=%d, %s, %d, %d", pPlot->getX(), pPlot->getY(), pCity->getName().GetCString(), iPlotValue, pArea->getTotalFoundValue());
 						LogOperationSpecialMessage(strMsg);
 					}
 				}
@@ -3221,7 +3224,7 @@ bool CvAIOperationFoundCity::ArmyInPosition(CvArmyAI* pArmy)
 
 			// If we're at our target but can no longer found a city, might be someone else beat us to this area
 			// So move back out, picking a new target
-			else if(pSettler->plot() == GetTargetPlot() && !pSettler->canFound(pSettler->plot()))
+			else if(pPlot == GetTargetPlot() && !pSettler->canFound(pPlot))
 			{
 				if(GC.getLogging() && GC.getAILogging())
 				{
@@ -3237,6 +3240,7 @@ bool CvAIOperationFoundCity::ArmyInPosition(CvArmyAI* pArmy)
 					pEscort->finishMoves();
 				}
 			}
+			
 		}
 		break;
 
@@ -5674,6 +5678,7 @@ CvPlot* CvAIOperationNukeAttack::FindBestTarget()
 						iThisCityValue -= pLoopCity->getDamage() / 5; // No point nuking a city that is already trashed unless it is good city
 
 						// check to see if there is anything good or bad in the radius that we should account for
+						iBlastRadius = GC.getNUKE_BLAST_RADIUS()+ pLoopUnit->GetExtraNukeBlastRadius();
 
 						for(int iDX = -iBlastRadius; iDX <= iBlastRadius; iDX++)
 						{

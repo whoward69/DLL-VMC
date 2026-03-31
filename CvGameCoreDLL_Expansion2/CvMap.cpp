@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -1588,7 +1588,7 @@ void CvMap::DoPlaceNaturalWonders()
 	{
 		eFeature = (FeatureTypes) iFeatureLoop;
 		CvFeatureInfo* feature = GC.getFeatureInfo(eFeature);
-		if(feature && feature->IsNaturalWonder())
+		if (feature && feature->IsNaturalWonder(true))
 		{
 			eNWFeature = eFeature;
 
@@ -1783,7 +1783,7 @@ void CvMap::DoPlaceNaturalWonders()
 
 				if(pLoopPlot != NULL)
 				{
-					if(pLoopPlot->IsNaturalWonder())
+					if(pLoopPlot->IsNaturalWonder(true))
 					{
 						// Found a NW too close
 						bValid = false;

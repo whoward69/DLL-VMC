@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -316,10 +316,11 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 	CvTeam* pFromTeam = &GET_TEAM(eFromTeam);
 	CvTeam* pToTeam = &GET_TEAM(eToTeam);
 
-	CvDeal* pRenewDeal = pFromPlayer->GetDiplomacyAI()->GetDealToRenew();
+	int iDealType = 0;
+	CvDeal* pRenewDeal = pFromPlayer->GetDiplomacyAI()->GetDealToRenew(&iDealType);
 	if (!pRenewDeal)
 	{
-		pRenewDeal = pToPlayer->GetDiplomacyAI()->GetDealToRenew();
+		pRenewDeal = pToPlayer->GetDiplomacyAI()->GetDealToRenew(&iDealType);
 	}
 
 	int iGoldAvailable = GetGoldAvailable(ePlayer, eItem);
@@ -388,7 +389,8 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 			int iNumInRenewDeal = 0;
 			int iNumInExistingDeal = 0;
 
-			if (pRenewDeal)
+			// We should not count this in history Deal
+			if (pRenewDeal && iDealType != 0)
 			{
 				// count any that are in the renew deal
 				TradedItemList::iterator it;
@@ -437,6 +439,26 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 			if (!pFromTeam->isHuman() && pFromTeam->IsResourceObsolete(eResource))
 			{
 				return false;
+			}
+
+			if(MOD_SP_SMART_AI_DEAL)
+			{
+				// AI try to avoid human deception: never accept a not enough resource when trade done
+				int iTrueAvailable = iNumAvailable + iNumInRenewDeal - iNumInExistingDeal;
+				TradedItemList::iterator itCityLoop;
+				for(itCityLoop = m_TradedItems.begin(); itCityLoop != m_TradedItems.end(); ++itCityLoop)
+				{
+					if(itCityLoop->m_eItemType != TRADE_ITEM_CITIES) continue;
+					if(itCityLoop->m_eFromPlayer != ePlayer) continue;
+					
+					CvCity* pCity = NULL;
+					CvPlot* pPlot = GC.getMap().plot(itCityLoop->m_iData1, itCityLoop->m_iData2);
+					if(pPlot == NULL) continue;
+					pCity = pPlot->getPlotCity();
+					if(pCity == NULL) continue;
+					iTrueAvailable -= pCity->GetNumResourceLocal(eResource);
+					if(iTrueAvailable < iResourceQuantity) return false;
+				}
 			}
 		}
 	}
@@ -820,6 +842,77 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 		if(!pFromPlayer->GetLeagueAI()->CanCommitVote(eToPlayer))
 			return false;
 	}
+	else if (eItem == TRADE_ITEM_DIPLOMATIC_MARRIAGE)
+	{
+		if (!GET_PLAYER(ePlayer).GetPlayerTraits()->CanDiplomaticMarriage() && !GET_PLAYER(eToPlayer).GetPlayerTraits()->CanDiplomaticMarriage())
+		{
+			return false;
+		}
+
+		// A player can only have one diplomatic marriage at a time
+		for (int i = 0; i < MAX_MAJOR_CIVS; ++i)
+		{
+			PlayerTypes otherPlayer = static_cast<PlayerTypes>(i);
+			if (!GET_PLAYER(otherPlayer).isAlive())
+			{
+				continue;
+			}
+			if (otherPlayer != ePlayer && GET_PLAYER(ePlayer).GetDiplomacyAI()->IsMarriageAccepted(otherPlayer))
+			{
+				return false;
+			}
+			if (otherPlayer != eToPlayer && GET_PLAYER(eToPlayer).GetDiplomacyAI()->IsMarriageAccepted(otherPlayer))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	else if (eItem == TRADE_ITEM_DUAL_EMPIRE_TREATY)
+	{
+		if (GET_PLAYER(ePlayer).GetDiplomacyAI()->GetMarriageFinishCounter(eToPlayer) < 2 ||
+			GET_PLAYER(eToPlayer).GetDiplomacyAI()->GetMarriageFinishCounter(ePlayer) < 2)
+		{
+			return false;
+		}
+
+		const int dualEmpireTimesLimit = 1;
+		if (GET_PLAYER(ePlayer).GetDiplomacyAI()->GetDualEmpireTreatyCounter() >= dualEmpireTimesLimit ||
+			GET_PLAYER(eToPlayer).GetDiplomacyAI()->GetDualEmpireTreatyCounter() >= dualEmpireTimesLimit)
+		{
+			return false;
+		}
+
+		CvPlayer* leader = nullptr;
+		CvPlayer* follower = nullptr;
+		if (GET_PLAYER(ePlayer).GetPlayerTraits()->IsAbleToDualEmpire())
+		{
+			leader = &GET_PLAYER(ePlayer);
+			follower = &GET_PLAYER(eToPlayer);
+		}
+		else if (GET_PLAYER(eToPlayer).GetPlayerTraits()->IsAbleToDualEmpire())
+		{
+			leader = &GET_PLAYER(eToPlayer);
+			follower = &GET_PLAYER(ePlayer);
+		}
+		else
+		{
+			return false;
+		}
+
+		if (follower->GetDiplomacyAI()->GetMajorCivApproach(leader->GetID(), false) <= MAJOR_CIV_APPROACH_HOSTILE)
+		{
+			return false;
+		}
+
+		if (leader->getTotalPopulation() < follower->getTotalPopulation() * 2
+			|| leader->getNumCities() < follower->getNumCities() * 2)
+		{
+			return false;
+		}
+
+		return true;
+	}
 
 	return true;
 }
@@ -831,18 +924,19 @@ int CvDeal::GetNumResource(PlayerTypes ePlayer, ResourceTypes eResource)
 	int iNumInRenewDeal = 0;
 	int iNumInExistingDeal = 0;
 
-
-	CvDeal* pRenewDeal = GET_PLAYER(ePlayer).GetDiplomacyAI()->GetDealToRenew();
+	int iDealType = 0;
+	CvDeal* pRenewDeal = GET_PLAYER(ePlayer).GetDiplomacyAI()->GetDealToRenew(&iDealType);
 	if (!pRenewDeal)
 	{
 		PlayerTypes eOtherPlayer = GetOtherPlayer(ePlayer);
 		if (eOtherPlayer != NO_PLAYER)
 		{
-			pRenewDeal = GET_PLAYER(eOtherPlayer).GetDiplomacyAI()->GetDealToRenew();
+			pRenewDeal = GET_PLAYER(eOtherPlayer).GetDiplomacyAI()->GetDealToRenew(&iDealType);
 		}
 	}
 
-	if (pRenewDeal)
+	// We should not count this in history Deal
+	if (pRenewDeal && iDealType != 0)
 	{
 		// count any that are in the renew deal
 		TradedItemList::iterator it;
@@ -1363,6 +1457,38 @@ void CvDeal::AddVoteCommitment(PlayerTypes eFrom, int iResolutionID, int iVoteCh
 	}
 }
 
+void CvDeal::AddDiplomaticMarriage(PlayerTypes eFrom, int iDuration)
+{
+	CvAssertMsg(eFrom == m_eFromPlayer || eFrom == m_eToPlayer, "DEAL: Adding deal item for a player that's not actually in this deal!");
+	if(IsPossibleToTradeItem(eFrom, GetOtherPlayer(eFrom), TRADE_ITEM_DIPLOMATIC_MARRIAGE))
+	{
+		CvTradedItem item;
+		item.m_eItemType = TRADE_ITEM_DIPLOMATIC_MARRIAGE;
+		item.m_eFromPlayer = eFrom;
+		m_TradedItems.push_back(item);
+	}
+	else
+	{
+		CvAssertMsg(false, "DEAL: Trying to add an invalid Vote Commitment item to a deal");
+	}
+}
+
+void CvDeal::AddDualEmpireTreaty(PlayerTypes eFrom)
+{
+	CvAssertMsg(eFrom == m_eFromPlayer || eFrom == m_eToPlayer, "DEAL: Adding deal item for a player that's not actually in this deal!");
+	if(IsPossibleToTradeItem(eFrom, GetOtherPlayer(eFrom), TRADE_ITEM_DUAL_EMPIRE_TREATY))
+	{
+		CvTradedItem item;
+		item.m_eItemType = TRADE_ITEM_DUAL_EMPIRE_TREATY;
+		item.m_eFromPlayer = eFrom;
+		m_TradedItems.push_back(item);
+	}
+	else
+	{
+		CvAssertMsg(false, "DEAL: Trying to add an invalid Dual Empire Treaty to a deal");
+	}
+}
+
 int CvDeal::GetGoldTrade(PlayerTypes eFrom)
 {
 	TradedItemList::iterator it;
@@ -1615,6 +1741,32 @@ bool CvDeal::IsVoteCommitmentTrade(PlayerTypes eFrom)
 	return false;
 }
 
+bool CvDeal::IsDiplomaticMarriage(PlayerTypes eFrom)
+{
+	TradedItemList::iterator it;
+	for(it = m_TradedItems.begin(); it != m_TradedItems.end(); ++it)
+	{
+		if(it->m_eItemType == TRADE_ITEM_DIPLOMATIC_MARRIAGE && it->m_eFromPlayer == eFrom)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool CvDeal::IsDualEmpireTreaty(PlayerTypes eFrom)
+{
+	TradedItemList::iterator it;
+	for(it = m_TradedItems.begin(); it != m_TradedItems.end(); ++it)
+	{
+		if(it->m_eItemType == TRADE_ITEM_DUAL_EMPIRE_TREATY && it->m_eFromPlayer == eFrom)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 CvDeal::DealRenewStatus CvDeal::GetItemTradeableState(TradeableItems eTradeItem)
 {
 	switch(eTradeItem)
@@ -1630,6 +1782,8 @@ CvDeal::DealRenewStatus CvDeal::GetItemTradeableState(TradeableItems eTradeItem)
 	case TRADE_ITEM_THIRD_PARTY_PEACE:
 	case TRADE_ITEM_THIRD_PARTY_WAR:
 	case TRADE_ITEM_VOTE_COMMITMENT:
+	case TRADE_ITEM_DIPLOMATIC_MARRIAGE:
+	case TRADE_ITEM_DUAL_EMPIRE_TREATY:
 		return DEAL_NONRENEWABLE;
 		break;
 
@@ -1800,6 +1954,34 @@ void CvDeal::RemoveVoteCommitment(PlayerTypes eFrom, int iResolutionID, int iVot
 			it->m_iData2 == iVoteChoice &&
 			it->m_iData3 == iNumVotes &&
 			it->m_bFlag1 == bRepeal)
+		{
+			m_TradedItems.erase(it);
+			break;
+		}
+	}
+}
+
+void CvDeal::RemoveDiplomaticMarriage(PlayerTypes eFrom)
+{
+	TradedItemList::iterator it;
+	for(it = m_TradedItems.begin(); it != m_TradedItems.end(); ++it)
+	{
+		if (it->m_eItemType == TRADE_ITEM_DIPLOMATIC_MARRIAGE &&
+			it->m_eFromPlayer == eFrom)
+		{
+			m_TradedItems.erase(it);
+			break;
+		}
+	}
+}
+
+void CvDeal::RemoveDualEmpireTreaty(PlayerTypes eFrom)
+{
+	TradedItemList::iterator it;
+	for(it = m_TradedItems.begin(); it != m_TradedItems.end(); ++it)
+	{
+		if (it->m_eItemType == TRADE_ITEM_DUAL_EMPIRE_TREATY &&
+			it->m_eFromPlayer == eFrom)
 		{
 			m_TradedItems.erase(it);
 			break;
@@ -2340,6 +2522,71 @@ void CvGameDeals::FinalizeDealValidAndAccepted(PlayerTypes eFromPlayer, PlayerTy
 		{
 			GET_PLAYER(eAcceptedFromPlayer).GetLeagueAI()->AddVoteCommitment(eAcceptedToPlayer, it->m_iData1, it->m_iData2, it->m_iData3, it->m_bFlag1);
 		}
+		else if (it->m_eItemType == TRADE_ITEM_DIPLOMATIC_MARRIAGE)
+		{
+			GET_PLAYER(eAcceptedFromPlayer).GetDiplomacyAI()->SetMarriageAccepted(eAcceptedToPlayer, true);
+			GET_PLAYER(eAcceptedFromPlayer).GetDiplomacyAI()->SetMarriageCounter(eAcceptedToPlayer, 0);
+			GET_PLAYER(eAcceptedToPlayer).GetDiplomacyAI()->SetMarriageAccepted(eAcceptedFromPlayer, true);
+			GET_PLAYER(eAcceptedToPlayer).GetDiplomacyAI()->SetMarriageCounter(eAcceptedFromPlayer, 0);
+
+			// let's forget the denounce
+			GET_PLAYER(eAcceptedFromPlayer).GetDiplomacyAI()->SetDenouncedPlayer(eAcceptedToPlayer, false);
+			GET_PLAYER(eAcceptedFromPlayer).GetDiplomacyAI()->SetDenouncedPlayerCounter(eAcceptedToPlayer, -1);
+			GET_PLAYER(eAcceptedToPlayer).GetDiplomacyAI()->SetDenouncedPlayer(eAcceptedFromPlayer, false);
+			GET_PLAYER(eAcceptedToPlayer).GetDiplomacyAI()->SetDenouncedPlayerCounter(eAcceptedFromPlayer, -1);
+		}
+		else if (it->m_eItemType == TRADE_ITEM_DUAL_EMPIRE_TREATY)
+		{
+			CvPlayer* pLeader = nullptr;
+			CvPlayer* pFollower = nullptr;
+			if (GET_PLAYER(eAcceptedFromPlayer).GetPlayerTraits()->IsAbleToDualEmpire())
+			{
+				pLeader = &GET_PLAYER(eAcceptedFromPlayer);
+				pFollower = &GET_PLAYER(eAcceptedToPlayer);
+			}
+			else if (GET_PLAYER(eAcceptedToPlayer).GetPlayerTraits()->IsAbleToDualEmpire())
+			{
+				pLeader = &GET_PLAYER(eAcceptedToPlayer);
+				pFollower = &GET_PLAYER(eAcceptedFromPlayer);
+			}
+
+			if (pLeader != nullptr && pFollower != nullptr)
+			{
+				auto* pFollowerCapital = pFollower->getCapitalCity();
+				auto* pNewSecondCapital = pLeader->acquireCity(pFollowerCapital, false, true, true, true);
+				if (pNewSecondCapital != nullptr)
+				{
+					pNewSecondCapital->SetSecondCapital(true);
+					pLeader->AddSecondCapital(pNewSecondCapital->GetID());
+				}
+
+				int iLoop = 0;
+				for (CvCity* pCity = pFollower->firstCity(&iLoop); pCity != NULL; pCity = pFollower->nextCity(&iLoop))
+				{
+					if(pCity->getOriginalOwner() == eAcceptedToPlayer)
+					{
+						pLeader->acquireCity(pCity, false, true, true, true, true);
+					}
+					else
+					{
+						pLeader->acquireCity(pCity, false, true, true, false, true);
+					}
+				}
+
+				iLoop = 0;
+				for (CvCity* pCity = pLeader->firstCity(&iLoop); pCity != NULL; pCity = pLeader->nextCity(&iLoop))
+				{
+					pCity->UpdateCorruption();
+				}
+
+				CvPlayer::GetUCTypesFromPlayer(*pFollower, &pLeader->GetUUFromDualEmpire(),
+					&pLeader->GetUBFromDualEmpire(),
+					&pLeader->GetUIFromDualEmpire());
+			}
+
+			GET_PLAYER(eAcceptedFromPlayer).GetDiplomacyAI()->ChangeDualEmpireTreatyCounter(1);
+			GET_PLAYER(eAcceptedToPlayer).GetDiplomacyAI()->ChangeDualEmpireTreatyCounter(1);
+		}
 		// Open Borders
 		else if(it->m_eItemType == TRADE_ITEM_OPEN_BORDERS)
 		{
@@ -2687,6 +2934,14 @@ bool CvGameDeals::FinalizeDeal(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, b
 				else if(it->m_eItemType == TRADE_ITEM_VOTE_COMMITMENT)
 				{
 					GET_PLAYER(eAcceptedFromPlayer).GetLeagueAI()->AddVoteCommitment(eAcceptedToPlayer, it->m_iData1, it->m_iData2, it->m_iData3, it->m_bFlag1);
+				}
+				else if (it->m_eItemType == TRADE_ITEM_DIPLOMATIC_MARRIAGE)
+				{
+					// NOTE: This scope will not be compile. leave it blank
+				}
+				else if (it->m_eItemType == TRADE_ITEM_DUAL_EMPIRE_TREATY)
+				{
+					// NOTE: This scope will not be compile. leave it blank
 				}
 				// Open Borders
 				else if(it->m_eItemType == TRADE_ITEM_OPEN_BORDERS)
@@ -3109,6 +3364,10 @@ void CvGameDeals::DoCancelDealsBetweenPlayers(PlayerTypes eFromPlayer, PlayerTyp
 	if(m_CurrentDeals.size() > 0)
 	{
 		bool bSomethingChanged = false;
+		int iGoldToCompensate = 0;
+		int iDealDuration = GC.getGame().GetDealDuration();
+		const PlayerTypes eAttackPlayer = eFromPlayer;
+		const PlayerTypes eDefensePlayer = eToPlayer;
 
 		// Copy the deals into a temporary container
 		for(it = m_CurrentDeals.begin(); it != m_CurrentDeals.end(); ++it)
@@ -3125,6 +3384,7 @@ void CvGameDeals::DoCancelDealsBetweenPlayers(PlayerTypes eFromPlayer, PlayerTyp
 			{
 				// Change final turn
 				it->m_iFinalTurn = GC.getGame().getGameTurn();
+				int iDurationTurn = it->m_iFinalTurn - it->m_iStartTurn;
 
 				// Cancel individual items
 				TradedItemList::iterator itemIter;
@@ -3138,6 +3398,11 @@ void CvGameDeals::DoCancelDealsBetweenPlayers(PlayerTypes eFromPlayer, PlayerTyp
 					eToPlayer = it->GetOtherPlayer(eFromPlayer);
 
 					DoEndTradedItem(&*itemIter, eToPlayer, true);
+
+					if(itemIter->m_eItemType == TRADE_ITEM_GOLD && eFromPlayer == eDefensePlayer)
+					{
+						iGoldToCompensate += itemIter->m_iData1 * (iDealDuration - iDurationTurn) / iDealDuration;
+					}
 				}
 				m_HistoricalDeals.push_back(*it);
 			}
@@ -3154,6 +3419,46 @@ void CvGameDeals::DoCancelDealsBetweenPlayers(PlayerTypes eFromPlayer, PlayerTyp
 			if(eFromPlayer == eActivePlayer || eToPlayer == eActivePlayer)
 			{
 				GC.GetEngineUserInterface()->setDirty(GameData_DIRTY_BIT, true);
+			}
+
+			if(MOD_SP_SMART_AI_DEAL && iGoldToCompensate > iDealDuration * iDealDuration)
+			{
+				CvPlayerAI& pAttackPlayer = GET_PLAYER(eAttackPlayer);
+				if(!pAttackPlayer.isHuman()) return;
+				CvPlayerAI& pDefensePlayer = GET_PLAYER(eDefensePlayer);
+				
+				int iAttackGold = pAttackPlayer.GetTreasury()->GetGold();
+				int iAttackGoldShort = iGoldToCompensate - iAttackGold;
+				if(iAttackGoldShort > 0)
+				{
+					pAttackPlayer.ChangeDishonestyCounter(iAttackGoldShort / iDealDuration);
+				}
+				pAttackPlayer.GetTreasury()->ChangeGold(-iGoldToCompensate);
+				pDefensePlayer.GetTreasury()->ChangeGold(iGoldToCompensate);
+				if (eAttackPlayer == eActivePlayer)
+				{
+					CvNotifications *pNotifications = pAttackPlayer.GetNotifications();
+					if (pNotifications)
+					{
+						Localization::String strMessage = Localization::Lookup("TXT_KEY_NOTIFICATION_CLOSE_TRANSACTION_EARLY");
+						strMessage << pDefensePlayer.getName();
+						strMessage << iGoldToCompensate;
+						Localization::String strSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_CLOSE_TRANSACTION_EARLY_SHORT");
+						pNotifications->Add(NOTIFICATION_DEAL_EXPIRED_GPT, strMessage.toUTF8(), strSummary.toUTF8(), -1, -1, -1);
+					}
+				}
+				if(eDefensePlayer == eActivePlayer)
+				{
+					CvNotifications *pNotifications = pDefensePlayer.GetNotifications();
+					if (pNotifications)
+					{
+						Localization::String strMessage = Localization::Lookup("TXT_KEY_NOTIFICATION_CLOSE_TRANSACTION_EARLY_2");
+						strMessage << pAttackPlayer.getName();
+						strMessage << iGoldToCompensate;
+						Localization::String strSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_CLOSE_TRANSACTION_EARLY_SHORT");
+						pNotifications->Add(NOTIFICATION_DEAL_EXPIRED_GPT, strMessage.toUTF8(), strSummary.toUTF8(), -1, -1, -1);
+					}
+				}
 			}
 		}
 	}
@@ -3797,6 +4102,7 @@ void CvGameDeals::LogDealComplete(CvDeal* pDeal)
 #if defined(MOD_AI_MP_DIPLOMACY)
 void CvGameDeals::LogDealFailed(CvDeal* pDeal, bool bNoRenew, bool bNotAccepted, bool bNotValid)
 {
+	if (!pDeal) return;
 	if(GC.getLogging() && GC.getAILogging())
 	{
 		CvString strLogName;
@@ -3977,6 +4283,12 @@ void CvGameDeals::LogDealFailed(CvDeal* pDeal, bool bNoRenew, bool bNotAccepted,
 				break;
 			case TRADE_ITEM_VOTE_COMMITMENT:
 				strTemp.Format("***** Vote Commitment: ID %d, Choice %d *****", itemIter->m_iData1, itemIter->m_iData2);
+				break;
+			case TRADE_ITEM_DIPLOMATIC_MARRIAGE:
+				strTemp.Format("***** Diplomatic Marriage *****");
+				break;
+			case TRADE_ITEM_DUAL_EMPIRE_TREATY:
+				strTemp.Format("***** Dual Empire Treaty *****");
 				break;
 			default:
 				strTemp.Format("***** UNKNOWN TRADE!!! *****");

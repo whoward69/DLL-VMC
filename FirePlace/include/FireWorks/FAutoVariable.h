@@ -31,58 +31,58 @@ template<typename ObjectType, typename ContainerType>
 class FAutoVariable : public FAutoVariableBase
 {
 public:
-	FAutoVariable(const std::string & name, FAutoArchiveClassContainer<ContainerType> &);
-	FAutoVariable(const std::string & name, FAutoArchiveClassContainer<ContainerType> &, const ObjectType &);
+	FAutoVariable(const std::string& name, FAutoArchiveClassContainer<ContainerType>&);
+	FAutoVariable(const std::string& name, FAutoArchiveClassContainer<ContainerType>&, const ObjectType&);
 
 	// used for extended debugging out of sync errors. Does nothing in release builds
-	FAutoVariable(const std::string & name, FAutoArchiveClassContainer<ContainerType> &, bool callStackTracking);
-	FAutoVariable(const std::string & name, FAutoArchiveClassContainer<ContainerType> &, const ObjectType &, bool callStackTracking);
+	FAutoVariable(const std::string& name, FAutoArchiveClassContainer<ContainerType>&, bool callStackTracking);
+	FAutoVariable(const std::string& name, FAutoArchiveClassContainer<ContainerType>&, const ObjectType&, bool callStackTracking);
 
 	~FAutoVariable();
 
-	const ObjectType & get() const;
-	
-	ObjectType & dirtyGet();
+	const ObjectType& get() const;
+
+	ObjectType& dirtyGet();
 
 	operator const ObjectType& () const;
 
-	void set(const ObjectType & source);
-	ObjectType & operator=(const ObjectType &);
+	void set(const ObjectType& source);
+	ObjectType& operator=(const ObjectType&);
 
-	void load(FDataStream & loadFrom);
-	void loadDelta(FDataStream & loadFrom);
-	void save(FDataStream & saveTo) const;
-	void saveDelta(FDataStream & saveTo) const;
+	void load(FDataStream& loadFrom);
+	void loadDelta(FDataStream& loadFrom);
+	void save(FDataStream& saveTo) const;
+	void saveDelta(FDataStream& saveTo) const;
 	void clearDelta();
-	bool compare(FDataStream & otherValue) const;
+	bool compare(FDataStream& otherValue) const;
 	void reset();
 
-	const std::string & name() const;
-	std::string  debugDump(const std::vector<std::pair<std::string, std::string> > &) const;
+	const std::string& name() const;
+	std::string  debugDump(const std::vector<std::pair<std::string, std::string> >&) const;
 	std::string toString() const;
 
 	void setStackTraceRemark();
 
-	FAutoVariable & operator-=(const ObjectType & rhs);
-	FAutoVariable & operator+=(const ObjectType & rhs);
-	FAutoVariable & operator++(int);
-	FAutoVariable & operator--(int);
-	FAutoVariable & operator=(const FAutoVariable &);
+	FAutoVariable& operator-=(const ObjectType& rhs);
+	FAutoVariable& operator+=(const ObjectType& rhs);
+	FAutoVariable& operator++(int);
+	FAutoVariable& operator--(int);
+	FAutoVariable& operator=(const FAutoVariable&);
 
 private:
 	// keep these out of containers by value, they won't do what is expected
-	FAutoVariable(const FAutoVariable &);
+	FAutoVariable(const FAutoVariable&);
 
 private:
 	ObjectType  m_value;
-	FAutoArchiveClassContainer<ContainerType> &  m_owner;
+	FAutoArchiveClassContainer<ContainerType>& m_owner;
 
 	// let's help the debugger find the name of the variable
 	// name() still works in non-debug builds. Excluding it
 	// in Release is a memory optimization. It's here strictly
 	// for debugging and development purposes.
 #ifdef _DEBUG
-	const std::string & m_name;
+	const std::string& m_name;
 #endif
 #if !defined(FINAL_RELEASE)
 	mutable ObjectType m_remoteValue;
@@ -92,7 +92,7 @@ private:
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-FDataStream & operator<<(FDataStream & archive, const FAutoVariable<ObjectType, ContainerType> & object)
+FDataStream& operator<<(FDataStream& archive, const FAutoVariable<ObjectType, ContainerType>& object)
 {
 	object.save(archive);
 	return archive;
@@ -101,7 +101,7 @@ FDataStream & operator<<(FDataStream & archive, const FAutoVariable<ObjectType, 
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-FDataStream & operator>>(FDataStream & archive, FAutoVariable<ObjectType, ContainerType> & object)
+FDataStream& operator>>(FDataStream& archive, FAutoVariable<ObjectType, ContainerType>& object)
 {
 	object.load(archive);
 	return archive;
@@ -110,12 +110,12 @@ FDataStream & operator>>(FDataStream & archive, FAutoVariable<ObjectType, Contai
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-FAutoVariable<ObjectType, ContainerType>::FAutoVariable(const std::string & name, FAutoArchiveClassContainer<ContainerType> & owner) :
-FAutoVariableBase(name, owner)
-, m_value()
-, m_owner(owner)
+FAutoVariable<ObjectType, ContainerType>::FAutoVariable(const std::string& name, FAutoArchiveClassContainer<ContainerType>& owner) :
+	FAutoVariableBase(name, owner)
+	, m_value()
+	, m_owner(owner)
 #ifdef _DEBUG
-, m_name(*owner.getVariableName(*this))
+	, m_name(*owner.getVariableName(*this))
 #endif//_DEBUG
 {
 }
@@ -123,26 +123,12 @@ FAutoVariableBase(name, owner)
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-FAutoVariable<ObjectType, ContainerType>::FAutoVariable(const std::string & name, FAutoArchiveClassContainer<ContainerType> & owner, const ObjectType & source) :
-FAutoVariableBase(name, owner)
-, m_value(source)
-, m_owner(owner)
+FAutoVariable<ObjectType, ContainerType>::FAutoVariable(const std::string& name, FAutoArchiveClassContainer<ContainerType>& owner, const ObjectType& source) :
+	FAutoVariableBase(name, owner)
+	, m_value(source)
+	, m_owner(owner)
 #ifdef _DEBUG
-, m_name(*owner.getVariableName(*this))
-#endif//_DEBUG
-{
-}
-
-//---------------------------------------------------------------------------------------
-
-// used for extended debugging out of sync errors. Does nothing in release builds
-template<typename ObjectType, typename ContainerType>
-FAutoVariable<ObjectType, ContainerType>::FAutoVariable(const std::string & name, FAutoArchiveClassContainer<ContainerType> & owner, bool callStackTracking) :
-FAutoVariableBase(name, owner, callStackTracking)
-, m_value()
-, m_owner(owner)
-#ifdef _DEBUG
-, m_name(*owner.getVariableName(*this))
+	, m_name(*owner.getVariableName(*this))
 #endif//_DEBUG
 {
 }
@@ -151,12 +137,26 @@ FAutoVariableBase(name, owner, callStackTracking)
 
 // used for extended debugging out of sync errors. Does nothing in release builds
 template<typename ObjectType, typename ContainerType>
-FAutoVariable<ObjectType, ContainerType>::FAutoVariable(const std::string & name, FAutoArchiveClassContainer<ContainerType> & owner, const ObjectType & source, bool callStackTracking) :
-FAutoVariableBase(name, owner, callStackTracking)
-, m_value(source)
-, m_owner(owner)
+FAutoVariable<ObjectType, ContainerType>::FAutoVariable(const std::string& name, FAutoArchiveClassContainer<ContainerType>& owner, bool callStackTracking) :
+	FAutoVariableBase(name, owner, callStackTracking)
+	, m_value()
+	, m_owner(owner)
 #ifdef _DEBUG
-, m_name(*owner.getVariableName(*this))
+	, m_name(*owner.getVariableName(*this))
+#endif//_DEBUG
+{
+}
+
+//---------------------------------------------------------------------------------------
+
+// used for extended debugging out of sync errors. Does nothing in release builds
+template<typename ObjectType, typename ContainerType>
+FAutoVariable<ObjectType, ContainerType>::FAutoVariable(const std::string& name, FAutoArchiveClassContainer<ContainerType>& owner, const ObjectType& source, bool callStackTracking) :
+	FAutoVariableBase(name, owner, callStackTracking)
+	, m_value(source)
+	, m_owner(owner)
+#ifdef _DEBUG
+	, m_name(*owner.getVariableName(*this))
 #endif//_DEBUG
 {
 }
@@ -172,7 +172,7 @@ FAutoVariable<ObjectType, ContainerType>::~FAutoVariable()
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-__forceinline const ObjectType & FAutoVariable<ObjectType, ContainerType>::get() const
+__forceinline const ObjectType& FAutoVariable<ObjectType, ContainerType>::get() const
 {
 	return m_value;
 }
@@ -180,7 +180,7 @@ __forceinline const ObjectType & FAutoVariable<ObjectType, ContainerType>::get()
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-ObjectType & FAutoVariable<ObjectType, ContainerType>::dirtyGet()
+ObjectType& FAutoVariable<ObjectType, ContainerType>::dirtyGet()
 {
 	m_owner.touch(*this);
 	return m_value;
@@ -189,7 +189,7 @@ ObjectType & FAutoVariable<ObjectType, ContainerType>::dirtyGet()
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-__forceinline FAutoVariable<ObjectType, ContainerType>::operator const ObjectType &() const
+__forceinline FAutoVariable<ObjectType, ContainerType>::operator const ObjectType& () const
 {
 	return m_value;
 }
@@ -197,9 +197,9 @@ __forceinline FAutoVariable<ObjectType, ContainerType>::operator const ObjectTyp
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-__forceinline ObjectType & FAutoVariable<ObjectType, ContainerType>::operator=(const ObjectType & rhs)
+__forceinline ObjectType& FAutoVariable<ObjectType, ContainerType>::operator=(const ObjectType& rhs)
 {
-	if(rhs != m_value)
+	if (rhs != m_value)
 	{
 		set(rhs);
 	}
@@ -209,9 +209,9 @@ __forceinline ObjectType & FAutoVariable<ObjectType, ContainerType>::operator=(c
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-__forceinline FAutoVariable<ObjectType, ContainerType> & FAutoVariable<ObjectType, ContainerType>::operator=(const FAutoVariable<ObjectType, ContainerType> & rhs)
+__forceinline FAutoVariable<ObjectType, ContainerType>& FAutoVariable<ObjectType, ContainerType>::operator=(const FAutoVariable<ObjectType, ContainerType>& rhs)
 {
-	if(&rhs != this)
+	if (&rhs != this)
 	{
 		set(rhs.get());
 	}
@@ -221,9 +221,9 @@ __forceinline FAutoVariable<ObjectType, ContainerType> & FAutoVariable<ObjectTyp
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-__forceinline void FAutoVariable<ObjectType, ContainerType>::set(const ObjectType & source)
+__forceinline void FAutoVariable<ObjectType, ContainerType>::set(const ObjectType& source)
 {
-	if(m_value != source)
+	if (m_value != source)
 	{
 		m_owner.touch(*this);
 		m_value = source;
@@ -233,7 +233,7 @@ __forceinline void FAutoVariable<ObjectType, ContainerType>::set(const ObjectTyp
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-__forceinline FAutoVariable<typename ObjectType, typename ContainerType> & FAutoVariable<typename ObjectType, typename ContainerType>::operator-=(const ObjectType & rhs)
+__forceinline FAutoVariable<ObjectType, ContainerType>& FAutoVariable<ObjectType, ContainerType>::operator-=(const ObjectType& rhs)
 {
 	set(m_value - rhs);
 	return *this;
@@ -242,7 +242,7 @@ __forceinline FAutoVariable<typename ObjectType, typename ContainerType> & FAuto
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-__forceinline FAutoVariable<typename ObjectType, typename ContainerType> & FAutoVariable<typename ObjectType, typename ContainerType>::operator+=(const ObjectType & rhs)
+__forceinline FAutoVariable<ObjectType, ContainerType>& FAutoVariable<ObjectType, ContainerType>::operator+=(const ObjectType& rhs)
 {
 	set(m_value + rhs);
 	return *this;
@@ -251,7 +251,7 @@ __forceinline FAutoVariable<typename ObjectType, typename ContainerType> & FAuto
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-__forceinline FAutoVariable<typename ObjectType, typename ContainerType> & FAutoVariable<typename ObjectType, typename ContainerType>::operator++(int)
+__forceinline FAutoVariable<ObjectType, ContainerType>& FAutoVariable<ObjectType, ContainerType>::operator++(int)
 {
 	// prefix and postfix operators are not guaranteed to be applied before being passed to a function
 	ObjectType tmp = m_value;
@@ -263,7 +263,7 @@ __forceinline FAutoVariable<typename ObjectType, typename ContainerType> & FAuto
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-__forceinline FAutoVariable<typename ObjectType, typename ContainerType> & FAutoVariable<typename ObjectType, typename ContainerType>::operator--(int)
+__forceinline FAutoVariable<ObjectType, ContainerType>& FAutoVariable<ObjectType, ContainerType>::operator--(int)
 {
 	// prefix and postfix operators are not guaranteed to be applied before being passed to a function
 	ObjectType tmp = m_value;
@@ -275,7 +275,7 @@ __forceinline FAutoVariable<typename ObjectType, typename ContainerType> & FAuto
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-void FAutoVariable<ObjectType, ContainerType>::load(FDataStream & loadFrom)
+void FAutoVariable<ObjectType, ContainerType>::load(FDataStream& loadFrom)
 {
 	loadFrom >> m_value;
 }
@@ -283,7 +283,7 @@ void FAutoVariable<ObjectType, ContainerType>::load(FDataStream & loadFrom)
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-void FAutoVariable<ObjectType, ContainerType>::save(FDataStream & saveTo) const
+void FAutoVariable<ObjectType, ContainerType>::save(FDataStream& saveTo) const
 {
 	saveTo << m_value;
 }
@@ -291,7 +291,7 @@ void FAutoVariable<ObjectType, ContainerType>::save(FDataStream & saveTo) const
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-void FAutoVariable<ObjectType, ContainerType>::loadDelta(FDataStream & loadFrom)
+void FAutoVariable<ObjectType, ContainerType>::loadDelta(FDataStream& loadFrom)
 {
 	load(loadFrom);
 }
@@ -315,7 +315,7 @@ void FAutoVariable<ObjectType, ContainerType>::reset()
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-void FAutoVariable<ObjectType, ContainerType>::saveDelta(FDataStream & saveTo) const
+void FAutoVariable<ObjectType, ContainerType>::saveDelta(FDataStream& saveTo) const
 {
 	save(saveTo);
 }
@@ -331,7 +331,7 @@ std::string FAutoVariable<ObjectType, ContainerType>::toString() const
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-bool FAutoVariable<ObjectType, ContainerType>::compare(FDataStream & otherValue) const
+bool FAutoVariable<ObjectType, ContainerType>::compare(FDataStream& otherValue) const
 {
 	ObjectType compareWith;
 	otherValue >> compareWith;
@@ -345,7 +345,7 @@ bool FAutoVariable<ObjectType, ContainerType>::compare(FDataStream & otherValue)
 //---------------------------------------------------------------------------------------
 
 template<typename ObjectType, typename ContainerType>
-const std::string & FAutoVariable<ObjectType, ContainerType>::name() const
+const std::string& FAutoVariable<ObjectType, ContainerType>::name() const
 {
 	// dereferenced because if this variable exists, it MUST be in the map
 	// (or it could never have been constructed in the first place)
@@ -354,7 +354,7 @@ const std::string & FAutoVariable<ObjectType, ContainerType>::name() const
 
 //---------------------------------------------------------------------------------------
 template<typename ObjectType, typename ContainerType>
-std::string FAutoVariable<ObjectType, ContainerType>::debugDump(const std::vector<std::pair<std::string, std::string> > & callStacks) const
+std::string FAutoVariable<ObjectType, ContainerType>::debugDump(const std::vector<std::pair<std::string, std::string> >& callStacks) const
 {
 	std::string result = FAutoVariableBase::debugDump(callStacks);
 	result += std::string("\n") + m_owner.debugDump(*this) + std::string("\n");
@@ -378,3 +378,4 @@ void FAutoVariable<ObjectType, ContainerType>::setStackTraceRemark()
 //---------------------------------------------------------------------------------------
 
 #endif//_INCLUDED_FAutoVariable_H
+

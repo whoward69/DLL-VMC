@@ -63,6 +63,11 @@ void CvUnitMovement::GetCostsForMove(const CvUnit* pUnit, const CvPlot* pFromPlo
 			iRegularCost /= 2;
 		}
 
+		else if(pToPlot->isRiver() && pFromPlot->isRiver() && pUnit->isRiverDoubleMove())
+		{
+			iRegularCost /= 2;
+		}
+
 		else if((eFeature == NO_FEATURE) ? pUnit->isTerrainDoubleMove(eTerrain) : pUnit->isFeatureDoubleMove(eFeature))
 		{
 			iRegularCost /= 2;
@@ -76,7 +81,7 @@ void CvUnitMovement::GetCostsForMove(const CvUnit* pUnit, const CvPlot* pFromPlo
 #endif
 	}
 
-	iRegularCost = std::min(iRegularCost, (iBaseMoves * iMoveDenominator));
+	iRegularCost = std::min(iRegularCost, (iBaseMoves * iMoveDenominator + pUnit->GetExtraMoveTimesXX()));
 
 	if(pFromPlot->isValidRoute(pUnit) && pToPlot->isValidRoute(pUnit) && ((kUnitTeam.isBridgeBuilding() || !(pFromPlot->isRiverCrossing(directionXY(pFromPlot, pToPlot))))))
 	{
@@ -91,11 +96,12 @@ void CvUnitMovement::GetCostsForMove(const CvUnit* pUnit, const CvPlot* pFromPlo
 
 		int iMovementCost = (pRouteInfo != NULL)? pRouteInfo->getMovementCost() : 0;
 		int iFlatMovementCost = (pRouteInfo != NULL)? pRouteInfo->getFlatMovementCost() : 0;
-
-		iRouteCost = std::max(iFromMovementCost + kUnitTeam.getRouteChange(pFromPlot->getRouteType()), iMovementCost + kUnitTeam.getRouteChange(pToPlot->getRouteType()));
+		iFromMovementCost += kUnitTeam.getRouteChange(pFromPlot->getRouteType()) + pUnit->getRouteMovementChanges(pFromPlot->getRouteType());
+		iMovementCost += kUnitTeam.getRouteChange(pToPlot->getRouteType()) + pUnit->getRouteMovementChanges(pToPlot->getRouteType());
+		iRouteCost = std::max(iFromMovementCost,iMovementCost);
 		iRouteFlatCost = std::max(iFromFlatMovementCost * iBaseMoves, iFlatMovementCost * iBaseMoves);
 	}
-	else if(pUnit->getOwner() == pToPlot->getOwner() && (eFeature == FEATURE_FOREST || eFeature == FEATURE_JUNGLE) && pTraits->IsMoveFriendlyWoodsAsRoad())
+	else if((MOD_TRAIT_WOOD_AS_ROAD_SP || pUnit->getOwner() == pToPlot->getOwner()) && (eFeature == FEATURE_FOREST || eFeature == FEATURE_JUNGLE) && pTraits->IsMoveFriendlyWoodsAsRoad())
 	{
 		CvRouteInfo* pRoadInfo = GC.getRouteInfo(ROUTE_ROAD);
 		iRouteCost = pRoadInfo->getMovementCost();
@@ -125,6 +131,34 @@ void CvUnitMovement::GetCostsForMove(const CvUnit* pUnit, const CvPlot* pFromPlo
 				}
 			}
 		}
+
+#if defined(MOD_ROG_CORE)
+
+		CvCity* pOwner = pToPlot->getWorkingCity();
+
+		if (pOwner != NULL && GET_TEAM(pOwner->getTeam()).isAtWar(kPlayer.getTeam()))
+		{
+			if (pToPlot->isWater())
+			{
+				int iTempCost = pToPlot->getWorkingCity()->getWaterTileMovementReduce();
+				iTempCost += GET_PLAYER(pOwner->getOwner()).GetWaterTileMovementReduceGlobal();
+				if (iTempCost > 0)
+				{
+					iRegularCost += iMoveDenominator * iTempCost;
+				}
+			}
+
+			else
+			{
+				int iTempCost = pToPlot->getWorkingCity()->getLandTileMovementReduce();
+				iTempCost += GET_PLAYER(pOwner->getOwner()).GetLandTileMovementReduceGlobal();
+				if (iTempCost > 0)
+				{
+				  iRegularCost += iMoveDenominator * iTempCost;
+				}
+			}
+		}
+#endif
 	}
 }
 

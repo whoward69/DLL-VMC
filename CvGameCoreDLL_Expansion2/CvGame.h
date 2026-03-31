@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -69,6 +69,23 @@ public:
 
 	int GetMapScoreMod() const;
 
+#if defined(MOD_NUCLEAR_WINTER_FOR_SP)
+	int GetNuclearWinterProcess() const;
+	void ChangeNuclearWinterProcess(int iChange, bool bUpdate = false, bool bAllowLevelReduce = false);
+	int GetNuclearWinterNaturalReduction() const;
+	void ChangeNuclearWinterNaturalReduction(int iChange);
+	int GetNowNuclearWinterLevelIndex();
+	void DoNuclearWinterTurn();
+	void UpdateNuclearWinterLevel();
+	int GetNuclearWinterYieldMultiplier(YieldTypes eIndex);
+	int GetYieldFromNuclearWinter(YieldTypes eIndex);
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	bool IsPlotExceedMaxBuild(PlayerTypes ePlayer, CvPlot *pPlot) const;
+	void IncreasePlotBuildNum(PlayerTypes ePlayer, CvPlot *pPlot);
+	void DoPlotBuildNumTurn();
+#endif
+
 	void updateCitySight(bool bIncrement);
 	void updateSelectionList();
 	void updateTestEndTurn();
@@ -131,6 +148,11 @@ public:
 	TeamTypes getActiveTeam();
 	CivilizationTypes getActiveCivilizationType();
 
+#if defined(MOD_ROG_CORE)
+	int NumOriginalCapitalModMax() const;
+#endif
+
+
 #if defined(MOD_API_EXTENSIONS)
 	bool isReallyNetworkMultiPlayer() const;
 #endif
@@ -147,7 +169,9 @@ public:
 	int getNumHumansInHumanWars(PlayerTypes ignorePlayer = NO_PLAYER);
 	int getNumSequentialHumans(PlayerTypes ignorePlayer = NO_PLAYER);
 
-	int getGameTurn();
+	//int getGameTurn();
+	int getGameTurn() const;
+
 	void setGameTurn(int iNewValue);
 	void incrementGameTurn();
 	int getTurnYear(int iGameTurn);
@@ -431,6 +455,22 @@ public:
 	int getJonRandNumVA(int iNum, const char* pszLog, ...);
 	int getAsyncRandNum(int iNum, const char* pszLog);
 
+
+	uint randCore(const CvSeeder& extraSeed) const;
+	uint urandLimitExclusive(uint limit, const CvSeeder& extraSeed) const;
+	uint urandLimitInclusive(uint limit, const CvSeeder& extraSeed) const;
+	uint urandRangeExclusive(uint min, uint max, const CvSeeder& extraSeed) const;
+	uint urandRangeInclusive(uint min, uint max, const CvSeeder& extraSeed) const;
+	int randRangeExclusive(int min, int max, const CvSeeder& extraSeed) const;
+	int randRangeInclusive(int min, int max, const CvSeeder& extraSeed) const;
+
+
+#if defined(MOD_ROG_CORE)
+	//get random number from gamestate without a seed in the generator
+	int	getSmallFakeRandNum(int iNum, const CvPlot& input) const;
+	int	getSmallFakeRandNum(int iNum, int iExtraSeed) const;
+#endif
+
 	int calculateSyncChecksum();
 	int calculateOptionsChecksum();
 
@@ -481,17 +521,9 @@ public:
 	void SetBarbarianReleaseTurn(int iValue);
 
 	UnitTypes GetRandomSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, bool bIncludeRanged);
-#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
 	UnitTypes GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, bool bIncludeRanged, bool bIncludeShips);
-#else
-	UnitTypes GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, bool bIncludeRanged);
-#endif
 #if defined(MOD_GLOBAL_CS_GIFTS)
-#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
 	UnitTypes GetCsGiftSpawnUnitType(PlayerTypes ePlayer, bool bIncludeShips);
-#else
-	UnitTypes GetCsGiftSpawnUnitType(PlayerTypes ePlayer);
-#endif
 #endif
 	UnitTypes GetRandomUniqueUnitType(bool bIncludeCivsInGame, bool bIncludeStartEra, bool bIncludeOldEras, bool bIncludeRanged);
 
@@ -610,12 +642,18 @@ public:
 	bool AnyoneHasUnit(UnitTypes iUnitType) const;
 	bool AnyoneHasUnitClass(UnitClassTypes iUnitClassType) const;
 #endif
-
 public:
 
 	//Function to determine city size from city population
 	unsigned int GetVariableCitySizeFromPopulation(unsigned int nPopulation);
 
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	uint64 GetLastMPSignalInvokeTime() { return m_uiLastMPSignalInvokeTime; }
+	void SetLastMPSignalInvokeTime(uint64 uiNewValue) { m_uiLastMPSignalInvokeTime = uiNewValue; }
+	void GenerateMPSignalNotification(PlayerTypes iFromPlayer, int iPlotX, int iPlotY);
+#endif // MOD_API_MP_PLOT_SIGNAL
+
+	
 	//------------------------------------------------------------
 	//------------------------------------------------------------
 	//------------------------------------------------------------
@@ -657,6 +695,15 @@ protected:
 	int m_iNumVictoryVotesExpected;
 	int m_iVotesNeededForDiploVictory;
 	int m_iMapScoreMod;
+
+#if defined(MOD_NUCLEAR_WINTER_FOR_SP)
+	int m_iNuclearWinterProcess;
+	int m_iNuclearWinterNaturalReduction;
+	int m_iNuclearWinterLevelIndex;
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	std::tr1::unordered_map<int, int> m_mapPlotBuildNum;
+#endif
 
 	unsigned int m_uiInitialTime;
 
@@ -727,6 +774,11 @@ protected:
 
 	int** m_apaiPlayerVote;
 	int** m_ppaaiTeamVictoryRank;
+
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	uint64 m_uiLastMPSignalInvokeTime;
+#endif // MOD_API_MP_PLOT_SIGNAL
+
 
 	Database::Results* m_pDiploResponseQuery;
 

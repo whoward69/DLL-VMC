@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -94,10 +94,16 @@ public:
 #if defined(MOD_API_UNIFIED_YIELDS)
 	int GetYieldPerFollowingCity(int i) const;
 	int GetYieldPerXFollowers(int i) const;
+	int GetHolyCityYieldPerForeignFollowers(int i) const;
+	int GetHolyCityYieldPerNativeFollowers(int i) const;
+	int GetCityYieldPerOtherReligion(int i) const;
 	int GetYieldPerOtherReligionFollower(int i) const;
+	int GetCuttingInstantYieldModifier(int i) const;
+	int GetCuttingInstantYield(int i) const;
 #endif
 	int GetResourceQuantityModifier(int i) const;
 	int GetImprovementYieldChange(ImprovementTypes eIndex1, YieldTypes eIndex2) const;
+	int GetImprovementAdjacentCityYieldChange(ImprovementTypes eIndex1, YieldTypes eIndex2) const;
 	int GetBuildingClassYieldChange(int i, int j) const;
 	int GetBuildingClassHappiness(int i) const;
 	int GetBuildingClassTourism(int i) const;
@@ -108,6 +114,8 @@ public:
 #endif
 	int GetResourceYieldChange(int i, int j) const;
 	int GetTerrainYieldChange(int i, int j) const;
+	int GetTerrainYieldChangeAdditive(int i, int j) const;
+	int GetTerrainCityYieldChanges(int i, int j) const;
 #if defined(MOD_API_UNIFIED_YIELDS)
 	int GetTradeRouteYieldChange(int i, int j) const;
 	int GetSpecialistYieldChange(int i, int j) const;
@@ -122,6 +130,32 @@ public:
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 	int GetPlotYieldChange(int i, int j) const;
 #endif
+#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
+	int GetGoldenAgeModifier() const;
+	int GetExtraSpies() const;
+	bool IsGreatPersonPointsCapital() const;
+	bool IsGreatPersonPointsPerCity() const;
+	bool IsGreatPersonPointsHolyCity() const;
+	bool IsInquisitorProhibitSpreadInAlly() const;
+	int GetGreatPersonPoints(int i, bool bCapital, bool bHolyCity) const;
+	int GetTerrainCityFoodConsumption(int i) const;
+	int GetFreePromotionForProphet() const;
+	int GetFounderFreePromotion() const;
+	int GetFollowingCityFreePromotion() const;
+	int GetLandmarksTourismPercent() const;
+	int GetHolyCityUnitExperence() const;
+	int GetHolyCityPressureModifier() const;
+	int GetSameReligionMinorRecoveryModifier() const;
+	int GetInquisitionFervorTimeModifier() const;
+	int GetCuttingBonusModifier() const;
+	int GetCityExtraMissionarySpreads() const;
+	bool AllowYieldPerBirth() const;
+	int GetYieldPerBirth(int i) const;
+	int GetLakePlotYieldChange(int i) const;
+	int GetRiverPlotYieldChange(int i) const;
+#endif
+	int GetExtraFlavorValue(int i) const;
+	int GetCivilizationFlavorValue(int i) const;
 	int GetResourceHappiness(int i) const;
 	int GetYieldChangeAnySpecialist(int i) const;
 	int GetYieldChangeTradeRoute(int i) const;
@@ -129,6 +163,7 @@ public:
 	int GetYieldChangeWorldWonder(int i) const;
 	int GetYieldModifierNaturalWonder(int i) const;
 	int GetMaxYieldModifierPerFollower(int i) const;
+	int GetYieldModifierPerFollowerTimes100(int i) const;
 	bool IsFaithUnitPurchaseEra(int i) const;
 	bool IsBuildingClassEnabled(int i) const;
 
@@ -175,6 +210,30 @@ protected:
 	int m_iSpyPressure;
 	int m_iInquisitorPressureRetention;
 	int m_iFaithBuildingTourism;
+#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
+	int m_iGoldenAgeModifier;
+	int m_iExtraSpies;
+	bool m_bGreatPersonPointsCapital;
+	bool m_bGreatPersonPointsPerCity;
+	bool m_bGreatPersonPointsHolyCity;
+	bool m_bInquisitorProhibitSpreadInAlly;
+	int* m_piGreatPersonPoints;
+	int* m_piTerrainCityFoodConsumption;
+	int m_iFreePromotionForProphet;
+	int m_iFounderFreePromotion;
+	int m_iFollowingCityFreePromotion;
+	int m_iLandmarksTourismPercent;
+	int m_iHolyCityUnitExperence;
+	int m_iHolyCityPressureModifier;
+	int m_iSameReligionMinorRecoveryModifier;
+	int m_iInquisitionFervorTimeModifier;
+	int m_iCuttingBonusModifier;
+	int m_iCityExtraMissionarySpreads;
+	bool m_bAllowYieldPerBirth;
+	int* m_piYieldPerBirth;
+	int* m_piLakePlotYieldChange;
+	int* m_piRiverPlotYieldChange;
+#endif
 
 	bool m_bPantheon;
 	bool m_bFounder;
@@ -199,10 +258,16 @@ protected:
 #if defined(MOD_API_UNIFIED_YIELDS)
 	int* m_piYieldPerFollowingCity;
 	int* m_piYieldPerXFollowers;
+	int* m_piHolyCityYieldPerForeignFollowers;
+	int* m_piHolyCityYieldPerNativeFollowers;
+	int* m_piCityYieldPerOtherReligion;
 	int* m_piYieldPerOtherReligionFollower;
+	int* m_piCuttingInstantYieldModifier;
+	int* m_piCuttingInstantYield;
 #endif
 	int* m_piResourceQuantityModifiers;
 	int** m_ppiImprovementYieldChanges;
+	int** m_ppiImprovementAdjacentCityYieldChanges;
 	int** m_ppiBuildingClassYieldChanges;
 	int* m_paiBuildingClassHappiness;
 	int* m_paiBuildingClassTourism;
@@ -213,6 +278,8 @@ protected:
 #endif
 	int** m_ppaiResourceYieldChange;
 	int** m_ppaiTerrainYieldChange;
+	int** m_ppaiTerrainYieldChangeAdditive;
+	int** m_ppaiTerrainCityYieldChanges;
 #if defined(MOD_API_UNIFIED_YIELDS)
 	int** m_ppiTradeRouteYieldChange;
 	int** m_ppiSpecialistYieldChange;
@@ -227,6 +294,9 @@ protected:
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 	int** m_ppiPlotYieldChange;
 #endif
+	int* m_piExtraFlavorValue;
+	int* m_piCivilizationFlavorValue;
+
 	int* m_piResourceHappiness;
 	int* m_piYieldChangeAnySpecialist;
 	int* m_piYieldChangeTradeRoute;
@@ -234,6 +304,7 @@ protected:
 	int* m_piYieldChangeWorldWonder;
 	int* m_piYieldModifierNaturalWonder;
 	int* m_piMaxYieldModifierPerFollower;
+	int* m_piYieldModifierPerFollowerTimes100;
 	bool* m_pbFaithPurchaseUnitEraEnabled;
     bool* m_pbBuildingClassEnabled;
 
@@ -287,7 +358,7 @@ public:
 	CvReligionBeliefs(const CvReligionBeliefs& source);
 	void Uninit();
 	void Reset();
-	void AddBelief(BeliefTypes eBelief);
+	void AddBelief(BeliefTypes eBelief, PlayerTypes ePlayer);
 
 	// Accessor functions
 	bool HasBelief(BeliefTypes eBelief) const;
@@ -387,6 +458,69 @@ public:
 		return m_iFaithBuildingTourism;
 	}
 
+#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
+	int GetGoldenAgeModifier() const
+	{
+		return m_iGoldenAgeModifier;
+	}
+	int GetExtraSpies() const
+	{
+		return m_iExtraSpies;
+	}
+	bool HasGreatPersonPoints() const
+	{
+		return m_bGreatPersonPoints;
+	}
+	bool IsInquisitorProhibitSpreadInAlly() const
+	{
+		return m_iNumInquisitorProhibitSpreadInAlly > 0;
+	}
+	const std::vector<int>& GetFreePromotionForProphet() const
+	{
+		return m_vFreePromotionForProphet;
+	}
+	int GetFounderFreePromotion() const
+	{
+		return m_iFounderFreePromotion;
+	}
+	const std::tr1::unordered_set<int>& GetFollowingCityFreePromotion() const
+	{
+		return m_vFollowingCityFreePromotion;
+	}
+	int GetLandmarksTourismPercent() const
+	{
+		return m_iLandmarksTourismPercent;
+	}
+	int GetHolyCityUnitExperence() const
+	{
+		return m_iHolyCityUnitExperence;
+	}
+	int GetHolyCityPressureModifier() const
+	{
+		return m_iHolyCityPressureModifier;
+	}
+	int GetSameReligionMinorRecoveryModifier() const
+	{
+		return m_iSameReligionMinorRecoveryModifier;
+	}
+	int GetInquisitionFervorTimeModifier() const
+	{
+		return m_iInquisitionFervorTimeModifier;
+	}
+	int GetCuttingBonusModifier() const
+	{
+		return m_iCuttingBonusModifier;
+	}
+	int GetCityExtraMissionarySpreads() const
+	{
+		return m_iCityExtraMissionarySpreads;
+	}
+	bool AllowYieldPerBirth() const
+	{
+		return m_bAllowYieldPerBirth;
+	}
+#endif
+
 	EraTypes GetObsoleteEra() const
 	{
 		return m_eObsoleteEra;
@@ -420,10 +554,16 @@ public:
 #if defined(MOD_API_UNIFIED_YIELDS)
 	int GetYieldPerFollowingCity(YieldTypes eYield) const;
 	int GetYieldPerXFollowers(YieldTypes eYield) const;
+	int GetHolyCityYieldPerForeignFollowers(YieldTypes eYield) const;
+	int GetHolyCityYieldPerNativeFollowers(YieldTypes eYield) const;
+	int GetCityYieldPerOtherReligion(YieldTypes eYield) const;
 	int GetYieldPerOtherReligionFollower(YieldTypes eYield) const;
+	int GetCuttingInstantYieldModifier(YieldTypes eYield) const;
+	int GetCuttingInstantYield(YieldTypes eYield) const;
 #endif
 	int GetResourceQuantityModifier(ResourceTypes eResource) const;
 	int GetImprovementYieldChange(ImprovementTypes eImprovement, YieldTypes eYield) const;
+	int GetImprovementAdjacentCityYieldChange(ImprovementTypes eIndex1, YieldTypes eIndex2) const;
 	int GetBuildingClassYieldChange(BuildingClassTypes eBuildingClass, YieldTypes eYieldType, int iFollowers) const;
 	int GetBuildingClassHappiness(BuildingClassTypes eBuildingClass, int iFollowers) const;
 	int GetBuildingClassTourism(BuildingClassTypes eBuildingClass) const;
@@ -434,6 +574,8 @@ public:
 #endif
 	int GetResourceYieldChange(ResourceTypes eResource, YieldTypes eYieldType) const;
 	int GetTerrainYieldChange(TerrainTypes eTerrain, YieldTypes eYieldType) const;
+	int GetTerrainYieldChangeAdditive(TerrainTypes eTerrain, YieldTypes eYieldType) const;
+	int GetTerrainCityYieldChanges(TerrainTypes eTerrain, YieldTypes eYieldType) const;
 #if defined(MOD_API_UNIFIED_YIELDS)
 	int GetTradeRouteYieldChange(DomainTypes eDomain, YieldTypes eYieldType) const;
 	int GetSpecialistYieldChange(SpecialistTypes eSpecialist, YieldTypes eYieldType) const;
@@ -448,6 +590,13 @@ public:
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 	int GetPlotYieldChange(PlotTypes ePlot, YieldTypes eYieldType) const;
 #endif
+#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
+	int GetGreatPersonPoints(GreatPersonTypes eGreatPersonTypes, bool bCapital, bool bHolyCity) const;
+	int GetTerrainCityFoodConsumption(TerrainTypes eTerrain) const;
+	int GetYieldPerBirth(YieldTypes eYieldType) const;
+	int GetLakePlotYieldChange(YieldTypes eYieldType) const;
+	int GetRiverPlotYieldChange(YieldTypes eYieldType) const;
+#endif
 	int GetResourceHappiness(ResourceTypes eResource) const;
 	int GetYieldChangeAnySpecialist(YieldTypes eYieldType) const;
 	int GetYieldChangeTradeRoute(YieldTypes eYieldType) const;
@@ -455,6 +604,7 @@ public:
 	int GetYieldChangeWorldWonder(YieldTypes eYieldType) const;
 	int GetYieldModifierNaturalWonder(YieldTypes eYieldType) const;
 	int GetMaxYieldModifierPerFollower(YieldTypes eYieldType) const;
+	int GetYieldModifierPerFollowerTimes100(YieldTypes eYieldType) const;
 
 	bool IsBuildingClassEnabled(BuildingClassTypes eType) const;
 	bool IsFaithBuyingEnabled(EraTypes eEra) const;
@@ -490,6 +640,26 @@ private:
 	int m_iSpyPressure;
 	int m_iInquisitorPressureRetention;
 	int m_iFaithBuildingTourism;
+
+#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
+	int m_iGoldenAgeModifier;
+	int m_iExtraSpies;
+	bool m_bGreatPersonPoints;
+	std::vector<int> m_vFreePromotionForProphet;
+	int m_iFounderFreePromotion;
+	std::tr1::unordered_set<int> m_vFollowingCityFreePromotion;
+	int m_iLandmarksTourismPercent;
+	int m_iHolyCityUnitExperence;
+	int m_iHolyCityPressureModifier;
+	int m_iSameReligionMinorRecoveryModifier;
+	int m_iInquisitionFervorTimeModifier;
+	int m_iNumInquisitorProhibitSpreadInAlly;
+	int m_iCuttingBonusModifier;
+	int m_iCityExtraMissionarySpreads;
+	bool m_bAllowYieldPerBirth;
+#endif
+	std::vector<std::vector<int>> m_vImprovementYieldChanges;
+	std::vector<std::vector<int>> m_vImprovementAdjacentCityYieldChanges;
 
 	EraTypes m_eObsoleteEra;
 	ResourceTypes m_eResourceRevealed;

@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -724,7 +724,7 @@ int CvGrandStrategyAI::GetSpaceshipPriority()
 
 	// If SS Victory isn't even available then don't bother with anything
 	VictoryTypes eVictory = (VictoryTypes) GC.getInfoTypeForString("VICTORY_SPACE_RACE", true);
-	if(eVictory == NO_VICTORY || !GC.getGame().isVictoryValid(eVictory))
+	if(eVictory == NO_VICTORY || !GC.getGame().isVictoryValid(eVictory) || GC.getGame().getGameState() != GAMESTATE_ON)
 	{
 		return -100;
 	}
@@ -732,11 +732,9 @@ int CvGrandStrategyAI::GetSpaceshipPriority()
 	int iFlavorScience =  m_pPlayer->GetFlavorManager()->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_SCIENCE"));
 
 	// the later the game the greater the chance
-#if defined(MOD_AI_SMART_V3)
 	if (MOD_AI_SMART_V3)
 		iPriority += (4 + m_pPlayer->GetCurrentEra()) * iFlavorScience * 150 / 100;
 	else
-#endif
 		iPriority += m_pPlayer->GetCurrentEra() * iFlavorScience * 150 / 100;
 
 	// if I already built the Apollo Program I am very likely to follow through
@@ -745,12 +743,22 @@ int CvGrandStrategyAI::GetSpaceshipPriority()
 	{
 		if(GET_TEAM(m_pPlayer->getTeam()).getProjectCount(eApolloProgram) > 0)
 		{
-#if defined(MOD_AI_SMART_V3)
 			if (MOD_AI_SMART_V3)
 				iPriority += /*75*/ (GC.getAI_GS_SS_HAS_APOLLO_PROGRAM() / 2);
 			else
-#endif
 				iPriority += /*150*/ GC.getAI_GS_SS_HAS_APOLLO_PROGRAM();
+		}
+	}
+	// For SP, add Starship Project Priority
+	if(MOD_SP_SMART_AI)
+	{
+		ProjectTypes eSpaceshipProgram = (ProjectTypes) GC.getInfoTypeForString("PROJECT_STARSHIP_PROGRAM", true);
+		if(eSpaceshipProgram != NO_PROJECT)
+		{
+			if(GET_TEAM(m_pPlayer->getTeam()).getProjectCount(eSpaceshipProgram) > 0)
+			{
+				iPriority *= 2;
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -184,6 +184,18 @@ protected:
 class CvSpecialistInfo : public CvHotKeyInfo
 {
 public:
+#ifdef MOD_SPECIALIST_RESOURCES
+	struct ResourceInfo {
+		ResourceTypes m_eResource = NO_RESOURCE;
+		int m_iQuantity = 0;
+
+		// optional:
+		PolicyTypes m_eRequiredPolicy = NO_POLICY;
+		TechTypes m_eRequiredTech = NO_TECH;
+	};
+#endif
+
+public:
 
 	CvSpecialistInfo();
 	virtual ~CvSpecialistInfo();
@@ -192,7 +204,6 @@ public:
 
 	int getGreatPeopleUnitClass() const;
 	int getGreatPeopleRateChange() const;
-	int getCulturePerTurn() const;
 	int getMissionType() const;
 	void setMissionType(int iNewType);
 	int getExperience() const;
@@ -214,7 +225,6 @@ protected:
 
 	int m_iGreatPeopleUnitClass;
 	int m_iGreatPeopleRateChange;
-	int m_iCulturePerTurn;
 	int m_iMissionType;
 	int m_iExperience;
 
@@ -226,6 +236,15 @@ protected:
 
 	int* m_piYieldChange;
 	int* m_piFlavorValue;
+
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::vector<ResourceInfo> m_vResourceInfo;
+#endif
+
+public:
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::vector<ResourceInfo>& GetResourceInfo() { return m_vResourceInfo; }
+#endif
 
 private:
 	CvSpecialistInfo(const CvSpecialistInfo&);
@@ -856,6 +875,7 @@ public:
 	int getAIUnhappinessPercent() const;
 	int getAIGrowthPercent() const;
 	int getAITrainPercent() const;
+	int getAIFirstProphetPercent() const;
 	int getAIWorldTrainPercent() const;
 	int getAIConstructPercent() const;
 	int getAIWorldConstructPercent() const;
@@ -871,6 +891,8 @@ public:
 	int getAIFreeXP() const;
 	int getAIFreeXPPercent() const;
 	int getNumGoodies() const;
+	int getStrategicResourceMod() const;
+	int getStrategicResourceModPerEra() const;
 
 	// Arrays
 	int getGoodies(int i) const;
@@ -926,6 +948,7 @@ protected:
 	int m_iAIUnhappinessPercent;
 	int m_iAIGrowthPercent;
 	int m_iAITrainPercent;
+	int m_iAIFirstProphetPercent;
 	int m_iAIWorldTrainPercent;
 	int m_iAIConstructPercent;
 	int m_iAIWorldConstructPercent;
@@ -941,6 +964,8 @@ protected:
 	int m_iAIFreeXP;
 	int m_iAIFreeXPPercent;
 	int m_iNumGoodies;
+	int m_iStrategicResourceMod;
+	int m_iStrategicResourceModPerEra;
 
 	CvString m_strHandicapName;
 
@@ -966,6 +991,7 @@ public:
 
 	int GetDealDuration() const;
 	int getGrowthPercent() const;
+	int getSetterExtraPercent() const;
 	int getTrainPercent() const;
 	int getConstructPercent() const;
 	int getCreatePercent() const;
@@ -998,6 +1024,7 @@ public:
 #endif
 	int getLeaguePercent() const;
 	int getNumTurnIncrements() const;
+	int getFreePromotion() const;
 
 	GameTurnInfo& getGameTurnInfo(int iIndex) const;
 	void allocateGameTurnInfos(const int iSize);
@@ -1007,6 +1034,7 @@ public:
 protected:
 	int m_iDealDuration;
 	int m_iGrowthPercent;
+	int m_iSetterExtraPercent;
 	int m_iTrainPercent;
 	int m_iConstructPercent;
 	int m_iCreatePercent;
@@ -1040,6 +1068,7 @@ protected:
 	int m_iLeaguePercent;
 
 	int m_iNumTurnIncrements;
+	int m_iFreePromotion;
 
 	CvString m_strGameSpeedName;
 	GameTurnInfo* m_pGameTurnInfo;
@@ -1124,6 +1153,11 @@ public:
 	int getMissionType() const;
 	void setMissionType(int iNewType);
 
+#if defined(MOD_ROG_CORE)
+	int getTechObsolete() const;
+#endif
+
+
 	bool isKill() const;
 	bool isRepair() const;
 	bool IsRemoveRoute() const;
@@ -1142,6 +1176,7 @@ public:
 	int getFeatureObsoleteTech(int i) const;
 	bool isFeatureRemoveOnly(int i) const;
 #endif
+	bool isResourceRemove(int i) const;
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
@@ -1154,6 +1189,10 @@ protected:
 	int m_iRoute;
 	int m_iEntityEvent;
 	int m_iMissionType;
+
+#if defined(MOD_ROG_CORE)
+	int m_iTechObsolete;
+#endif
 
 	bool m_bKill;
 	bool m_bRepair;
@@ -1172,6 +1211,7 @@ protected:
 	int* m_paiFeatureObsoleteTech;
 	bool* m_pabFeatureRemoveOnly;
 #endif
+	bool* m_pabResourceRemove;
 
 private:
 	CvBuildInfo(const CvBuildInfo&);
@@ -1211,6 +1251,9 @@ public:
 	int getRevealNearbyBarbariansRange() const;
 	int getBarbarianUnitProb() const;
 	int getMinBarbarians() const;
+	int getMinGameTurns() const;
+	int getScience() const;
+	int getProduction() const;
 	int getUnitClassType() const;
 	int getBarbarianUnitClass() const;
 
@@ -1245,6 +1288,9 @@ protected:
 	int m_iRevealNearbyBarbariansRange;
 	int m_iBarbarianUnitProb;
 	int m_iMinBarbarians;
+	int m_iMinGameTurns;
+	int m_iScience;
+	int m_iProduction;
 	int m_iUnitClassType;
 	int m_iBarbarianUnitClass;
 
@@ -1394,8 +1440,28 @@ public:
 
 	int getFlavorValue(int i) const;
 
-	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
+#ifdef MOD_RESOURCE_EXTRA_BUFF
+	struct YieldInfo {
+		YieldTypes eYield = NO_YIELD;
+		LuaFormulaTypes eFormula = NO_LUA_FORMULA;
+		EraTypes eStartEra = NO_ERA;
+		EraTypes eEndEra = NO_ERA;
+	};
 
+	LuaFormulaTypes GetUnHappinessModifierFormula() const;
+	LuaFormulaTypes GetCityConnectionTradeRouteGoldModifierFormula() const;
+	LuaFormulaTypes GetGoldHurryCostModifierFormula() const;
+
+	const std::vector<YieldInfo>& GetGlobalYieldModifiers() const;
+#endif
+	int getNotificationTurn() const;
+	bool isNoDefaultNotification() const;
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	int GetCorruptionScoreChange() const;
+#endif
+
+	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 protected:
 	int m_iResourceClassType;
 	int m_iChar;
@@ -1453,6 +1519,20 @@ protected:
 	bool* m_pbFeature;
 	bool* m_pbFeatureTerrain;
 
+#ifdef MOD_RESOURCE_EXTRA_BUFF
+	LuaFormulaTypes m_eUnHappinessModifierFormula = NO_LUA_FORMULA;
+	LuaFormulaTypes m_eCityConnectionTradeRouteGoldModifierFormula = NO_LUA_FORMULA;
+	LuaFormulaTypes m_eGoldHurryCostModifierFormula = NO_LUA_FORMULA;
+
+	std::vector<YieldInfo> m_vGlobalYieldModifiers;
+#endif
+	int m_iNotificationTurn = 0;
+	bool m_bNoDefaultNotification = false;
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	int m_iCorruptionScoreChange = 0;
+#endif
+
 private:
 	CvResourceInfo(const CvResourceInfo&);
 	CvResourceInfo& operator=(const CvResourceInfo&);
@@ -1499,7 +1579,15 @@ public:
 	bool isVisibleAlways() const;
 	bool isNukeImmune() const;
 	bool IsRough() const;
-	bool IsNaturalWonder() const;
+
+#if defined(MOD_VOLCANO_BREAK)
+	bool IsVolcano() const;
+#endif
+#if defined(MOD_MORE_NATURAL_WONDER)
+	bool IsPseudoNaturalWonder() const;
+	int getPromotionIfOwned() const;
+#endif
+	bool IsNaturalWonder(bool orPseudoNatural = false) const;
 
 	const char* getArtDefineTag() const;
 	void setArtDefineTag(const char* szTag);
@@ -1563,8 +1651,14 @@ protected:
 	bool m_bVisibleAlways;
 	bool m_bNukeImmune;
 	bool m_bRough;
+#if defined(MOD_VOLCANO_BREAK)
+	bool m_bVolcano;
+#endif
+#if defined(MOD_MORE_NATURAL_WONDER)
+	bool m_bPseudoNaturalWonder;
+	int m_iPromotionIfOwned;
+#endif
 	bool m_bNaturalWonder;
-
 	// Set each time the game is started
 	bool m_bClearable;
 
@@ -1618,6 +1712,9 @@ public:
 	int getGoldenAgeYieldThreshold() const;
 	int getGoldenAgeYieldMod() const;
 	int getAIWeightPercent() const;
+	int getGreakWorkYieldMod() const;
+
+	LuaFormulaTypes GetExcessHappinessModifierFormula() const;
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
@@ -1637,6 +1734,12 @@ protected:
 	int m_iGoldenAgeYieldThreshold;
 	int m_iGoldenAgeYieldMod;
 	int m_iAIWeightPercent;
+
+#ifdef MOD_BALANCE_CORE
+	int m_iGreakWorkYieldMod;
+#endif
+
+	LuaFormulaTypes m_eExcessHappinessModifierFormula = NO_LUA_FORMULA;
 };
 
 
@@ -1856,6 +1959,8 @@ public:
 	int getTradeRouteDistanceMod() const;
 #endif
 	int GetEstimatedNumCities() const;
+	int GetExtraCityDistance() const;
+	int GetHandicapExtraAIStartingUnit(int i) const;
 
 	static CvWorldInfo CreateCustomWorldSize(const CvWorldInfo& kTemplate, int iWidth, int iHeight);
 	static CvWorldInfo CreateCustomWorldSize(const CvWorldInfo& kTemplate, int iWidth, int iHeight, int iPlayers, int iMinorCivs);
@@ -1897,6 +2002,8 @@ protected:
 	int m_iTradeRouteDistanceMod;
 #endif
 	int m_iEstimatedNumCities;
+	int m_iExtraCityDistance;
+	std::vector<int> m_viHandicapExtraAIStartingUnit;
 };
 
 FDataStream& operator<<(FDataStream&, const CvWorldInfo&);
@@ -2025,6 +2132,9 @@ public:
 
 	int getTechPrereq() const;
 
+#if defined(MOD_ROG_CORE)
+	int getDefenseValue() const;
+#endif
 	// Arrays
 	int getProductionToYieldModifier(int i) const;
 	int GetFlavorValue(int i) const;
@@ -2033,6 +2143,10 @@ public:
 
 protected:
 	int m_iTechPrereq;
+
+#if defined(MOD_ROG_CORE)
+	int m_iDefenseValue;
+#endif
 
 	// Arrays
 	int* m_paiProductionToYieldModifier;
@@ -2173,7 +2287,13 @@ public:
 	bool isNoReligion() const;
 
 	// Arrays
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int GetMountainCityYieldChange(const YieldTypes eYield) const;
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
 
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int GetCoastCityYieldChange(const YieldTypes eYield) const;
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
@@ -2223,6 +2343,14 @@ protected:
 	bool m_bNoReligion;
 
 	std::vector<CvString> m_vEraVOs;
+
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int m_iaMountainCityYieldChange[NUM_YIELD_TYPES];
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
+
+#ifdef MOD_ERA_EFFECTS_EXTENSIONS
+	int m_iaCoastCityYieldChange[NUM_YIELD_TYPES];
+#endif // MOD_ERA_EFFECTS_EXTENSIONS
 
 private:
 	CvEraInfo(const CvEraInfo&);
@@ -2345,6 +2473,66 @@ private:
 	CvVoteSourceInfo(const CvVoteSourceInfo&);
 	CvVoteSourceInfo& operator=(const CvVoteSourceInfo&);
 };
+
+struct PolicyYieldInfo
+{
+	PolicyTypes ePolicy;
+	YieldTypes eYield;
+	int iYield;
+	LuaFormulaTypes eLuaFormula = NO_LUA_FORMULA;
+};
+
+inline FDataStream& operator<<(FDataStream& os, const PolicyYieldInfo& kYield)
+{
+	os << (int)kYield.ePolicy;
+	os << (int)kYield.eYield;
+	os << kYield.iYield;
+	os << (int)kYield.eLuaFormula;
+	return os;
+}
+
+inline FDataStream& operator>>(FDataStream& is, PolicyYieldInfo& kYield)
+{
+	is >> (int&)kYield.ePolicy;
+	is >> (int&)kYield.eYield;
+	is >> kYield.iYield;
+	is >> (int&)kYield.eLuaFormula;
+	return is;
+}
+
+struct PolicyResourceInfo
+{
+	PolicyTypes ePolicy = NO_POLICY;
+	ResourceTypes eResource = NO_RESOURCE;
+	int iQuantity = 0;
+
+	// optional conditions
+	bool bMustCoastal = false;
+	CityScaleTypes eCityScale = NO_CITY_SCALE;
+	bool bLargerScaleValid = false;
+};
+
+inline FDataStream& operator<<(FDataStream& os, const PolicyResourceInfo& kResourceInfo)
+{
+	os << (int)kResourceInfo.ePolicy;
+	os << (int)kResourceInfo.eResource;
+	os << kResourceInfo.iQuantity;
+	os << kResourceInfo.bMustCoastal;
+	os << (int)kResourceInfo.eCityScale;
+	os << kResourceInfo.bLargerScaleValid;
+	return os;
+}
+
+inline FDataStream& operator>>(FDataStream& is, PolicyResourceInfo& kResourceInfo)
+{
+	is >> (int&)kResourceInfo.ePolicy;
+	is >> (int&)kResourceInfo.eResource;
+	is >> kResourceInfo.iQuantity;
+	is >> kResourceInfo.bMustCoastal;
+	is >> (int&)kResourceInfo.eCityScale;
+	is >> kResourceInfo.bLargerScaleValid;
+	return is;
+}
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //  class : CvDomainInfo

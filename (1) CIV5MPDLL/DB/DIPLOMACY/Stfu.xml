@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<Table name="Responses">
+		<Column name="ID" type="integer" primarykey="true" autoincrement="true"/>
+		<Column name="Type" type="text" notnull="true" unique="true"/>
+	</Table>
+
+	<Table name="Diplomacy_Stfu">
+		<Column name="ID" type="integer" primarykey="true" autoincrement="true"/>
+		<Column name="Type" type="text" unique="true" notnull="true"/>
+		<!-- If SendEvent is true, an accumulator GameEvent is generated, and the result is the Diplomacy_Stfu type to use.  Any event is sent first. -->
+		<!-- Note that only one event will be generated, even if the result of the handler includes SendEvent=true -->
+		<Column name="SendEvent" type="boolean" default="false"/>
+		<!-- If Ignore is true, the DLL treats the diplomacy as never having been triggered. -->
+		<Column name="Ignore" type="boolean" default="false"/>
+		<!-- Only checked if Ignore is false, if Respond is true, the DLL uses the ResponseXyz values to construct an automated response from the player -->
+		<Column name="Respond" type="boolean" default="false"/>
+		<!-- Only needed if Respond is true -->
+		<!-- Parameters passed to Game.DoFromUIDiploEvent(ResponseEvent, ResponseAI, ResponseData1, ResponseData2); -->
+		<!-- NOTE: If ResponseAI=true, the associated AI player ID will be passed, not the value 'true' -->
+		<Column name="ResponseEvent" type="integer" default="0"/>
+		<Column name="ResponseAI" type="boolean" default="false"/>
+		<Column name="ResponseData1" type="integer" default="0"/>
+		<Column name="ResponseData2" type="integer" default="0"/>
+	</Table>
+	
+	<Table name="Diplomacy_StfuResponses">
+		<Column name="ResponseType" type="text" reference="Responses(Type)"/>
+		<Column name="StfuType" type="text" reference="Diplomacy_Stfu(Type)"/>
+	</Table>
+
+	<Responses>
+		<Row>
+			<!-- Do NOT remove or change this entry.  YOU HAVE BEEN WARNED!!! -->
+			<Type>RESPONSE_DEFAULT</Type>
+			<ID>0</ID>
+		</Row>
+		
+		<!-- The rest of this table is populated via SQL -->
+	</Responses>
+	
+	<Diplomacy_Stfu>
+		<!-- Generic actions available to Lua event handlers -->
+		<Row>
+			<!-- Do NOT remove or change this entry.  YOU HAVE BEEN WARNED!!! -->
+			<Type>STFU_DEFAULT</Type>
+			<ID>0</ID>
+		</Row>
+		<Row>
+			<Type>STFU_IGNORE</Type>
+			<Ignore>true</Ignore>
+		</Row>
+		<Row>
+			<Type>STFU_EVENT</Type>
+			<SendEvent>true</SendEvent>
+		</Row>
+		<Row>
+			<Type>STFU_EVENT_ONLY</Type>
+			<SendEvent>true</SendEvent>
+			<Ignore>true</Ignore>
+		</Row>
+	</Diplomacy_Stfu>
+		
+	<CustomModDbUpdates>
+		<Row Name="DIPLOMACY_STFU_XML" Value="1"/>
+	</CustomModDbUpdates>
+</GameData>

@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -31,9 +31,7 @@ public:
 	int GetProductionCost() const;
 	int GetFaithCost() const;
 	bool IsRequiresFaithPurchaseEnabled() const;
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 	bool IsNoMinorGifts() const;
-#endif
 	bool IsPurchaseOnly() const;
 	bool CanMoveAfterPurchase() const;
 #if defined(MOD_GLOBAL_MOVE_AFTER_UPGRADE)
@@ -42,6 +40,7 @@ public:
 #if defined(MOD_GLOBAL_CANNOT_EMBARK)
 	bool CannotEmbark() const;
 #endif
+	int GetProductionCostPerEra() const;
 	int GetHurryCostModifier() const;
 	int GetAdvancedStartCost() const;
 	int GetMinAreaSize() const;
@@ -60,6 +59,7 @@ public:
 	int GetHurryMultiplier() const;
 	bool IsRushBuilding() const;
 	int GetBaseGold() const;
+	int GetExtraNukeBlastRadius() const;
 	int GetNumGoldPerEra() const;
 	bool IsSpreadReligion() const;
 	int GetReligionSpreads() const;
@@ -86,6 +86,29 @@ public:
 #endif
 	int GetXPValueAttack() const;
 	int GetXPValueDefense() const;
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+	int GetExtraXPValueAttack() const;
+	int GetExtraXPValueDefense() const;
+#endif
+#if defined(MOD_UNIT_BOUND_IMPROVEMENT)
+	int GetBoundLandImprovement() const;
+	int GetBoundWaterImprovement() const;
+#endif
+	int GetTrainPopulationConsume() const;
+	int GetNoSpreadTurnPopModifierAfterRemovingHeresy() const;
+	bool IsNoAggressive() const;
+	bool IsForbidRebase() const;
+	bool IsFaithCostIncrease() const;
+	int GetFaithCostIncrease() const;
+
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	bool IsNoTroops() const;
+	bool IsCannotBeEstablishedCorps() const;
+#endif
+#if defined(MOD_NUCLEAR_WINTER_FOR_SP)
+	int GetNuclearWinterProcess() const;
+#endif
+
 	int GetSpecialCargo() const;
 	int GetDomainCargo() const;
 
@@ -100,6 +123,8 @@ public:
 #if defined(MOD_GLOBAL_PROMOTION_CLASSES)
 	int GetUnitPromotionType() const;
 #endif
+	bool IsGivePoliciesWithSpreaded() const;
+	bool IsGoldenAgeWithSpreaded() const;
 #if defined(MOD_EVENTS_CAN_MOVE_INTO)
 	bool IsSendCanMoveIntoEvent() const;
 #endif
@@ -110,6 +135,7 @@ public:
 	int GetPrereqAndTech() const;
 	int GetObsoleteTech() const;
 	int GetPolicyType() const;
+	int GetPolicyBranchType() const;
 	int GetGoodyHutUpgradeUnitClass() const;
 	int GetGroupSize() const;			// the initial number of individuals in the unit group
 	int GetGroupDefinitions() const;	// the number of UnitMeshGroups for this unit
@@ -132,10 +158,12 @@ public:
 	int GetFreePolicies() const;
 	int GetOneShotTourism() const;
 	int GetOneShotTourismPercentOthers() const;
+	int GetGoldFromTourismModifier() const;
 	bool IsIgnoreBuildingDefense() const;
 	bool IsPrereqResources() const;
 	bool IsMechUnit() const;
 	bool IsSuicide() const;
+	bool IsNoFallout() const;
 	bool IsCaptureWhileEmbarked() const;
 	bool IsRangeAttackOnlyInDomain() const;
 	bool IsTrade() const;
@@ -155,8 +183,10 @@ public:
 	const bool GetUnitArtInfoEraVariation() const;
 	int GetUnitFlagIconOffset() const;
 	int GetUnitPortraitOffset() const;
+	bool IsBarbarianCanTrait() const;
+	bool IsBarbarianTraitTechObsolete() const;
 
-	const char* GetUnitNames(int i) const;
+	CvString* GetUnitNames(int i);
 	GreatWorkType GetGreatWorks(int i) const;
 
 	// Accessor Functions (Arrays)
@@ -167,6 +197,7 @@ public:
 #if defined(MOD_API_UNIFIED_YIELDS)
 	int GetYieldFromBarbarianKills(YieldTypes eYield) const;
 #endif
+	int GetInstantYieldFromTrainings(YieldTypes eYield) const;
 	int GetProductionTraits(int i) const;
 	int GetFlavorValue(int i) const;
 	int GetUnitGroupRequired(int i) const;
@@ -176,8 +207,13 @@ public:
 	bool GetBuilds(int i) const;
 	bool GetGreatPeoples(int i) const;
 	bool GetBuildings(int i) const;
-	bool GetBuildingClassRequireds(int i) const;
+	const std::vector<int> GetBuildingClassRequireds() const;
+	int GetTechCombatStrength(int i) const;
+	int GetTechRangedCombatStrength(int i) const;
+	bool IsPuppetPurchaseOverride() const;
+	bool IsUnitTechUpgrade() const;
 	bool GetFreePromotions(int i) const;
+	int GetUnitNameFreePromotion(int iIndex) const;
 
 	// Derived fields (not in XML)
 	int GetCargoSpace() const;  // (from free promotions)
@@ -186,14 +222,20 @@ public:
 
 	UnitMoveRate GetMoveRate(int numHexes) const;
 
+	int GetCombatStrengthChangeAfterKilling() const;
+	int GetRangedCombatStrengthChangeAfterKilling() const;
+
+#ifdef MOD_BALANCE_CORE
+	int GetScalingFromOwnedImprovements(int i) const;
+	int GetScaleFromNumGWs() const;
+#endif
+
 private:
 
 	int m_iProductionCost;
 	int m_iFaithCost;
 	bool m_bRequiresFaithPurchaseEnabled;
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 	bool m_bNoMinorGifts;
-#endif
 	bool m_bPurchaseOnly;
 	bool m_bMoveAfterPurchase;
 #if defined(MOD_GLOBAL_MOVE_AFTER_UPGRADE)
@@ -202,6 +244,7 @@ private:
 #if defined(MOD_GLOBAL_CANNOT_EMBARK)
 	bool m_bCannotEmbark;
 #endif
+	int m_iProductionCostPerEra;
 	int m_iHurryCostModifier;
 	int m_iAdvancedStartCost;
 	int m_iMinAreaSize;
@@ -220,6 +263,7 @@ private:
 	int m_iHurryMultiplier;
 	bool m_bRushBuilding;
 	int m_iBaseGold;
+	int m_iExtraNukeBlastRadius;
 	int m_iNumGoldPerEra;
 	bool m_bSpreadReligion;
 	int m_iReligionSpreads;
@@ -245,6 +289,28 @@ private:
 #endif
 	int m_iXPValueAttack;
 	int m_iXPValueDefense;
+#ifdef MOD_GLOBAL_UNIT_EXTRA_ATTACK_DEFENSE_EXPERENCE
+	int m_iExtraXPValueAttack;
+	int m_iExtraXPValueDefense;
+#endif
+#if defined(MOD_UNIT_BOUND_IMPROVEMENT)
+	int m_iBoundLandImprovement;
+	int m_iBoundWaterImprovement;
+#endif
+	int m_iTrainPopulationConsume;
+	int m_iNoSpreadTurnPopModifierAfterRemovingHeresy;
+	bool m_bNoAggressive;
+	bool m_bForbidRebase;
+	int m_iFaithCostIncrease;
+
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	bool m_bNoTroops;
+	bool m_bCannotBeEstablishedCorps;
+#endif
+#if defined(MOD_NUCLEAR_WINTER_FOR_SP)
+	int m_iNuclearWinterProcess;
+#endif
+
 	int m_iSpecialCargo;
 
 	int m_iDomainCargo;
@@ -259,6 +325,8 @@ private:
 #if defined(MOD_GLOBAL_PROMOTION_CLASSES)
 	int m_iUnitPromotionType;
 #endif
+	bool m_bGivePoliciesWithSpreaded;
+	bool m_bGoldenAgeWithSpreaded;
 #if defined(MOD_EVENTS_CAN_MOVE_INTO)
 	bool m_bSendCanMoveIntoEvent;
 #endif
@@ -269,6 +337,7 @@ private:
 	int m_iPrereqAndTech;
 	int m_iObsoleteTech;
 	int m_iPolicyType;
+	int m_iPolicyBranchType;
 	int m_iGoodyHutUpgradeUnitClass;
 	int m_iGroupSize;
 	int m_iGroupDefinitions;
@@ -291,10 +360,12 @@ private:
 	int m_iFreePolicies;
 	int m_iOneShotTourism;
 	int m_iOneShotTourismPercentOthers;
+	int m_iGoldFromTourismModifier;
 	bool m_bIgnoreBuildingDefense;
 	bool m_bPrereqResources;
 	bool m_bMechanized;
 	bool m_bSuicide;
+	bool m_bNoFallout;
 	bool m_bCaptureWhileEmbarked;
 	bool m_bRangeAttackOnlyInDomain;
 	int m_iProjectPrereq;
@@ -308,6 +379,8 @@ private:
 
 	int m_iUnitFlagIconOffset;
 	int m_iUnitPortraitOffset;
+	bool m_bBarbarianCanTrait;
+	bool m_bBarbarianTraitTechObsolete;
 
 	CvString m_strUnitArtInfoTag;
 	bool m_bUnitArtInfoCulturalVariation;
@@ -326,6 +399,7 @@ private:
 #if defined(MOD_API_UNIFIED_YIELDS)
 	int* m_piYieldFromBarbarianKills;
 #endif
+	int* m_piInstantYieldFromTrainings;
 
 	bool* m_pbUpgradeUnitClass;
 	bool* m_pbUnitAIType;
@@ -333,14 +407,27 @@ private:
 	bool* m_pbBuilds;
 	bool* m_pbGreatPeoples;
 	bool* m_pbBuildings;
-	bool* m_pbBuildingClassRequireds;
+	std::vector<int> m_vBuildingClassRequireds;
+	int* m_piTechCombatStrength;
+	int* m_piTechRangedCombatStrength;
+	bool m_bPuppetPurchaseOverride;
+	bool m_bUnitTechUpgrade;
 	bool* m_pbFreePromotions;
 
 	CvString* m_paszEarlyArtDefineTags;
 	CvString* m_paszLateArtDefineTags;
 	CvString* m_paszMiddleArtDefineTags;
 	CvString* m_paszUnitNames;
+	int* m_piFreePromotions;
 	GreatWorkType* m_paeGreatWorks;
+
+	int m_iCombatStrengthChangeAfterKilling = 0;
+	int m_iRangedCombatStrengthChangeAfterKilling = 0;
+
+#ifdef MOD_BALANCE_CORE
+	int* m_piScalingFromOwnedImprovements;
+	int m_iScaleFromNumGWs;
+#endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

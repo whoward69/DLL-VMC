@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -18,14 +18,118 @@ enum YieldTypes
     YIELD_SCIENCE,
     YIELD_CULTURE,
     YIELD_FAITH,
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
     YIELD_TOURISM,
-#endif
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
     YIELD_GOLDEN_AGE_POINTS,
-#endif
 
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	YIELD_GREAT_GENERAL_POINTS,
+	YIELD_GREAT_ADMIRAL_POINTS,
+	YIELD_HEALTH,
+	YIELD_DISEASE,
+	YIELD_CRIME,
+	YIELD_LOYALTY,
+	YIELD_SOVEREIGNTY,
+	YIELD_VIOLENCE,
+	YIELD_HERESY,
+#endif
+	
     NUM_YIELD_TYPES
+};
+
+
+// Carries the value of an enum represented by type T.
+// Useful to communicate what a value is meant to represent while still
+// being able to specify exactly what kind of storage it occupies.
+// 
+// !! Please only use when you actually want to specify the storage type
+// !! Using this for temporaries such as stack values is not recommended
+template<typename Enum, typename T>
+class CvEnum
+{
+public:
+	inline CvEnum() {}
+	inline CvEnum(Enum src)
+		: m_value(static_cast<T>(src))
+	{}
+	inline CvEnum(const CvEnum<Enum, T>& src)
+		: m_value(src.m_value)
+	{}
+
+	inline const T& raw() const
+	{
+		return m_value;
+	}
+	inline T& raw()
+	{
+		return m_value;
+	}
+	inline operator Enum() const
+	{
+		return static_cast<Enum>(m_value);
+	}
+
+	inline CvEnum<Enum, T>& operator=(Enum rhs)
+	{
+		m_value = static_cast<T>(rhs);
+		return *this;
+	}
+	inline CvEnum<Enum, T>& operator=(const CvEnum<Enum, T>& rhs)
+	{
+		m_value = rhs.m_value;
+		return *this;
+	}
+
+	inline bool operator==(Enum rhs) const
+	{
+		return static_cast<Enum>(m_value) == rhs;
+	}
+	inline bool operator==(const CvEnum<Enum, T>& rhs) const
+	{
+		return m_value == rhs.m_value;
+	}
+	inline bool operator!=(Enum rhs) const
+	{
+		return static_cast<Enum>(m_value) != rhs;
+	}
+	inline bool operator!=(const CvEnum<Enum, T>& rhs) const
+	{
+		return m_value != rhs.m_value;
+	}
+	inline bool operator<=(Enum rhs) const
+	{
+		return static_cast<Enum>(m_value) <= rhs;
+	}
+	inline bool operator<=(const CvEnum<Enum, T>& rhs) const
+	{
+		return m_value <= rhs.m_value;
+	}
+	inline bool operator>=(Enum rhs) const
+	{
+		return static_cast<Enum>(m_value) >= rhs;
+	}
+	inline bool operator>=(const CvEnum<Enum, T>& rhs) const
+	{
+		return m_value >= rhs.m_value;
+	}
+	inline bool operator<(Enum rhs) const
+	{
+		return static_cast<Enum>(m_value) < rhs;
+	}
+	inline bool operator<(const CvEnum<Enum, T>& rhs) const
+	{
+		return m_value < rhs.m_value;
+	}
+	inline bool operator>(Enum rhs) const
+	{
+		return static_cast<Enum>(m_value) > rhs;
+	}
+	inline bool operator>(const CvEnum<Enum, T>& rhs) const
+	{
+		return m_value > rhs.m_value;
+	}
+
+private:
+	T m_value;
 };
 
 // Popups specific to this DLL

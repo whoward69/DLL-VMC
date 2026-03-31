@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -9,6 +9,7 @@
 // Author -	Mustafa Thamer
 //			Jon Shafer - 03/2005
 
+#include "CvCorruption.h"
 #include "CvGameCoreDLLPCH.h"
 #include "CvGlobals.h"
 #include "CvRandom.h"
@@ -257,6 +258,9 @@ CvGlobals::CvGlobals() :
 	m_iAI_CITIZEN_VALUE_SCIENCE(6),
 	m_iAI_CITIZEN_VALUE_CULTURE(8),
 	m_iAI_CITIZEN_VALUE_FAITH(6),
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	m_iAI_CITIZEN_VALUE_HEALTH(7),
+#endif
 	m_iAI_CITIZEN_FOOD_MOD_SIZE_CUTOFF(6),
 	m_iAI_CITIZEN_FOOD_MOD_SIZE_EXPONENT(5),
 	m_iAI_CITIZEN_MOD_FOOD_DEFICIT(300),
@@ -609,6 +613,7 @@ CvGlobals::CvGlobals() :
 	m_iOPINION_WEIGHT_DOF(-35),
 	m_iOPINION_WEIGHT_DOF_WITH_FRIEND(-15),
 	m_iOPINION_WEIGHT_DOF_WITH_ENEMY(15),
+	m_iOPINION_WEIGHT_MARRIAGE(-35),
 	m_iOPINION_WEIGHT_DENOUNCED_BY_FRIEND_EACH(25),
 	m_iOPINION_WEIGHT_DENOUNCED_BY_FRIEND_DONT_LIKE(-10),
 	m_iOPINION_WEIGHT_DENOUNCED_FRIEND_EACH(15),
@@ -637,6 +642,8 @@ CvGlobals::CvGlobals() :
 	m_iOPINION_THRESHOLD_FAVORABLE(-10),
 	m_iOPINION_THRESHOLD_FRIEND(-30),
 	m_iOPINION_THRESHOLD_ALLY(-50),
+	m_iDOF_WEIGHT_CHANGE_FROM_MARRIAGE(1),
+	m_iDOF_WEIGHT_MODIFIER_FROM_MARRIAGE(100),
 	m_iAPPROACH_NEUTRAL_DEFAULT(4),
 	m_iAPPROACH_BIAS_FOR_CURRENT(3),
 	m_iAPPROACH_WAR_CURRENTLY_DECEPTIVE(2),
@@ -668,6 +675,10 @@ CvGlobals::CvGlobals() :
 	m_iAPPROACH_FRIENDLY_WORKING_WITH_PLAYER(15),
 	m_iAPPROACH_HOSTILE_WORKING_WITH_PLAYER(-10),
 	m_iAPPROACH_GUARDED_WORKING_WITH_PLAYER(-10),
+	m_iAPPROACH_DECEPTIVE_MARRIAGE_WITH_PLAYER(15),
+	m_iAPPROACH_FRIENDLY_MARRIAGE_WITH_PLAYER(30),
+	m_iAPPROACH_HOSTILE_MARRIAGE_WITH_PLAYER(-50),
+	m_iAPPROACH_GUARDED_MARRIAGE_WITH_PLAYER(-50),
 	m_iAPPROACH_DECEPTIVE_WORKING_AGAINST_PLAYER(10),
 	m_iAPPROACH_HOSTILE_WORKING_AGAINST_PLAYER(10),
 	m_iAPPROACH_WAR_WORKING_AGAINST_PLAYER(10),
@@ -1260,6 +1271,14 @@ CvGlobals::CvGlobals() :
 	m_iVERY_UNHAPPY_MAX_PRODUCTION_PENALTY(-40),
 	m_iVERY_UNHAPPY_GOLD_PENALTY_PER_UNHAPPY(-2),
 	m_iVERY_UNHAPPY_MAX_GOLD_PENALTY(-40),
+	m_iVERY_UNHAPPY_DISEASE_PENALTY_PER_UNHAPPY(2),
+	m_iVERY_UNHAPPY_MAX_DISEASE_PENALTY(100),
+	m_iVERY_UNHAPPY_CRIME_PENALTY_PER_UNHAPPY(2),
+	m_iVERY_UNHAPPY_MAX_CRIME_PENALTY(100),
+
+	m_iHEALTH_DISEASE_CONNECTION_MOD(10),
+	m_iHEALTH_DISEASE_TRADE_MOD(10),
+
 	m_iWLTKD_GROWTH_MULTIPLIER(25),
 	m_iINDUSTRIAL_ROUTE_PRODUCTION_MOD(50),
 	m_iRESOURCE_DEMAND_COUNTDOWN_BASE(15),
@@ -1269,6 +1288,7 @@ CvGlobals::CvGlobals() :
 	m_iGREAT_GENERAL_RANGE(2),
 	m_iGREAT_GENERAL_STRENGTH_MOD(25),
 	m_iBONUS_PER_ADJACENT_FRIEND(15),
+	m_iBONUS_PER_ADJACENT_FRIEND_RANGED(15),
 	m_iPOLICY_ATTACK_BONUS_MOD(20),
 	m_iCONSCRIPT_MIN_CITY_POPULATION(5),
 	m_iCONSCRIPT_POPULATION_PER_COST(60),
@@ -1298,6 +1318,29 @@ CvGlobals::CvGlobals() :
 	m_iBASE_GOLDEN_AGE_UNITS(1),
 	m_iGOLDEN_AGE_UNITS_MULTIPLIER(1),
 	m_iGOLDEN_AGE_LENGTH(10),
+	m_iGOLDEN_AGE_POINT_MULTIPLE_IN_GA(50),
+#if defined(MOD_GLOBAL_UNIT_MOVES_AFTER_DISEMBARK)
+	m_iUNIT_MOVES_AFTER_DISEMBARK(60),
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	m_iNUM_OUTSIZE_PLOT_MAX_BUILD(0),
+#endif
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	m_iTROOP_RATE_TIMES100_LOW(50),
+	m_iTROOP_RATE_TIMES100_DEFAULT(100),
+	m_iTROOP_RATE_TIMES100_HIGH(150),
+	m_iTROOP_NUM_BASE(24),
+#endif
+#if defined(MOD_INTERNATIONAL_IMMIGRATION_FOR_SP)
+	m_iIMMIGRATION_BASE_RATE(30),
+#endif
+
+	m_iMAX_POPULATION_INCREASE_NOTIOFACATION(5),
+	m_iMAXIMUM_WORK_PLOT_DISTANCE_MINOR_REDUCE(0),
+
+#if defined(MOD_ROG_CORE)
+	m_iORIGINAL_CAPITAL_MODMAX(8),
+#endif
 	m_iGOLDEN_AGE_GREAT_PEOPLE_MODIFIER(100),
 	m_iMIN_UNIT_GOLDEN_AGE_TURNS(3),
 	m_iGOLDEN_AGE_CULTURE_MODIFIER(50),
@@ -1527,6 +1570,17 @@ CvGlobals::CvGlobals() :
 	m_iCITY_STRENGTH_POPULATION_CHANGE(25),
 	m_iCITY_STRENGTH_UNIT_DIVISOR(300),
 	m_iCITY_STRENGTH_HILL_CHANGE(3),
+	m_iCITY_FRESH_WATER_HEALTH_YIELD(2),
+	m_iCITY_CRIME_SPY_YIELD(6),
+
+	m_iCITY_CRIME_OPINION_REVOLUTIONARY_WAVE_YIELD(10),
+    m_iCITY_CRIME_OPINION_CIVIL_RESISTANCE_YIELD(4),
+	m_iCITY_CRIME_OPINION_DISSIDENTS_YIELD(1),
+
+	m_iCITY_CRIME_GOLDEN_AGE_YIELD(-10),
+	m_iCITY_LOYALTY_GOLDEN_AGE_YIELD(-10),
+
+	m_iCITY_STRENGTH_MOUNTAIN_CHANGE(6),
 	m_iCITY_ATTACKING_DAMAGE_MOD(50),
 	m_iATTACKING_CITY_MELEE_DAMAGE_MOD(100),
 	m_iCITY_ATTACK_RANGE(2),
@@ -1774,6 +1828,7 @@ CvGlobals::CvGlobals() :
 	m_iPROMOTION_ALLWATER_EMBARKATION(146),
 	m_iPROMOTION_OCEAN_IMPASSABLE_UNTIL_ASTRONOMY(115),
 	m_iPROMOTION_OCEAN_IMPASSABLE(116),
+	m_iPROMOTION_NEW_UNIT_CAPTURED(NO_PROMOTION),
 	m_iCOMBAT_CAPTURE_HEALTH(50),
 	m_iCOMBAT_CAPTURE_MIN_CHANCE(10),
 	m_iCOMBAT_CAPTURE_MAX_CHANCE(80),
@@ -1807,6 +1862,10 @@ CvGlobals::CvGlobals() :
 	m_iESPIONAGE_INFLUENCE_LOST_FOR_RIGGED_ELECTION(0),
 	m_iESPIONAGE_SURVEILLANCE_SIGHT_RANGE(0),
 	m_iESPIONAGE_COUP_OTHER_PLAYERS_INFLUENCE_DROP(10),
+	m_iINTERNAL_TRADE_ROUTE_FOOD_BONUS_BASE_FROM_ORIGIN(0),
+	m_iINTERNAL_TRADE_ROUTE_FOOD_BONUS_MOD_FROM_ORIGIN(0),
+	m_iINTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_BASE_FROM_ORIGIN(0),
+	m_iINTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_MOD_FROM_ORIGIN(0),
 
 #if defined(MOD_PROMOTIONS_DEEP_WATER_EMBARKATION)
 	GD_INT_INIT(PROMOTION_DEEPWATER_EMBARKATION, -1),
@@ -1856,15 +1915,23 @@ CvGlobals::CvGlobals() :
 	GD_INT_INIT(CITY_STARTING_RINGS, 1),
 #endif
 
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
 	GD_INT_INIT(TOURISM_START_TECH, 0), // TECH_AGRICULTURE
 	GD_INT_INIT(TOURISM_START_ERA, 0), // ERA_ANCIENT
 	GD_INT_INIT(PUPPET_TOURISM_MODIFIER, -25),
+	GD_INT_INIT(WONDER_GOLDEN_AGE_PURCHASE_MODIFIER, 200),
+	GD_INT_INIT(PUPPET_GOLDEN_AGE_MODIFIER, -50),
+
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	GD_INT_INIT(PUPPET_GREAT_GENERAL_POINTS_MODIFIER, -50),
+	GD_INT_INIT(PUPPET_GREAT_ADMIRAL_POINTS_MODIFIER, -50),
+	GD_INT_INIT(PUPPET_HEALTH_MODIFIER, -25),
+	GD_INT_INIT(PUPPET_DISEASE_MODIFIER, 25),
+	GD_INT_INIT(PUPPET_CRIME_MODIFIER, 50),
+	GD_INT_INIT(PUPPET_LOYALTY_MODIFIER, -25),
+	GD_INT_INIT(PUPPET_SOVEREIGNTY_MODIFIER, -25),
 #endif
 
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
-	GD_INT_INIT(PUPPET_GOLDEN_AGE_MODIFIER, -50),
-#endif
+
 
 #if defined(MOD_TRADE_ROUTE_SCALING)
 	GD_INT_INIT(TRADE_ROUTE_BASE_TARGET_TURNS, 30),
@@ -1882,36 +1949,23 @@ CvGlobals::CvGlobals() :
 #endif
 
 #if defined(MOD_GLOBAL_CS_GIFTS)
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP, 12),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_BONUS_CULTURE, 8),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_BONUS_FAITH, 8),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_BONUS_GOLD, 30),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_BONUS_FOOD, 8),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_BONUS_UNIT, 30),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_XP_PER_ERA, 5),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_XP_RANDOM, 10),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_PLAYER_MULTIPLIER, 2),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_PLAYER_DIVISOR, 1),
+	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_BONUS_CULTURE, 4),
+	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_BONUS_FAITH, 4),
+	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_BONUS_GOLD, 20),
+	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_BONUS_FOOD, 4),
+	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP, 20),
 	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_SUBSEQUENT_TEAM_MULTIPLIER, 1),
 	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_SUBSEQUENT_TEAM_DIVISOR, 2),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_MULTIPLIER, 3),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_DIVISOR, 2),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_FRIENDLY_UNIT_MULTIPLIER, 2),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_FRIENDLY_UNIT_DIVISOR, 1),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_MULTIPLIER, 1),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_DIVISOR, 2),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_HOSTILE_UNIT_MULTIPLIER, 0),
-	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_HOSTILE_UNIT_DIVISOR, 1),
+	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_MULTIPLIER, 5),
+	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_DIVISOR, 4),
+	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_MULTIPLIER, 3),
+	GD_INT_INIT(MINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_DIVISOR, 4),
 #endif
 
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	GD_INT_INIT(CITY_UNIT_LIMIT, 1),
 #endif
-
-#if defined(MOD_EVENTS_CITY_BOMBARD)
 	GD_INT_INIT(MAX_CITY_ATTACK_RANGE, 2),
-#endif
-
 #if defined(MOD_UI_CITY_EXPANSION)
 	GD_INT_INIT(PLOT_INFLUENCE_COST_VISIBLE_DIVISOR, 5),
 #endif
@@ -1954,6 +2008,8 @@ CvGlobals::~CvGlobals()
 /************************************************************************************************/
 
 #pragma comment (lib, "dbghelp.lib")
+//autogenerated
+#include "../commit_id.inc"
 void CreateMiniDump(EXCEPTION_POINTERS *pep)
 {
 	/* Open a file to store the minidump. */
@@ -1971,7 +2027,16 @@ void CreateMiniDump(EXCEPTION_POINTERS *pep)
 
 	MINIDUMP_TYPE mdt       = MiniDumpNormal;
 
-	MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, mdt, (pep != NULL) ? &mdei : NULL, NULL, NULL);
+	MINIDUMP_USER_STREAM userStream;
+	userStream.Type = CommentStreamA;
+	userStream.BufferSize = sizeof(CURRENT_GAMECORE_VERSION);
+	userStream.Buffer = (PVOID)CURRENT_GAMECORE_VERSION;
+
+	MINIDUMP_USER_STREAM_INFORMATION userStreams;
+    userStreams.UserStreamCount = 1;
+    userStreams.UserStreamArray = &userStream;
+
+	MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, mdt, (pep != NULL) ? &mdei : NULL, &userStreams, NULL);
 
 	CloseHandle(hFile);
 }
@@ -2038,6 +2103,7 @@ void CvGlobals::init()
 		//	61	62	63	64	65	66	67	68	69	70	71	72	73	74	75	76	77	78	79	80	81	82	83	84  85  86  87  88  89  90
 			0,  1,  2,  3,  4,  5,  5,  5,  5,  5,  5,  4,  3,  2,  1,  0,  -1, -2, -3, -4, -5, -5, -5, -5, -5, -5, -4, -3, -2, -1,
 		// The pattern for the Nth ring is 0 .. N, (N-1) * N, N .. -N, (N-1) * -N, -N .. -1
+			0,  1,  2,  3,  4,  5,  6,  6,  6,  6,  6,  6,  6,  5,  4,  3,   2,  1,  0, -1, -2, -3, -4, -5, -6, -6, -6, -6, -6, -6, -6, -5, -4, -3, -2, -1
 #else
 		//	37	38	39	40	41	42	43	44	45	46	47	48	49	50	51	52	53	54	55	56	57	58	59	60
 		//	0,  1,  2,  3,  4,  4,  4,  4,  4,  3,  2,  1,  0,  -1,  -2, -3, -4, -4, -4, -4, -4, -3, -2, -1,
@@ -2064,6 +2130,7 @@ void CvGlobals::init()
 		//	61	62	63	64	65	66	67	68	69	70	71	72	73	74	75	76	77	78	79	80	81	82	83	84  85  86  87  88  89  90
 			5,  4,  3,  2,  1,  0,  -1, -2, -3, -4, -5, -5, -5, -5, -5, -5, -4, -3, -2, -1,  0,  1,  2,  3, 4,  5,  5,  5,  5,  5,
 		// The pattern for the Nth ring is N .. -N, (N-1) * -N, -N .. N, (N-1) * N
+			6,  5,  4,  3,  2,  1,   0, -1, -2, -3, -4, -5, -6, -6, -6, -6, -6, -6, -6, -5, -4, -3, -2, -1, 0,  1,  2,  3,  4,  5, 6, 6, 6, 6, 6, 6,
 #else
 		//	37	38	39	40	41	42	43	44	45	46	47	48	49	50	51	52	53	54	55	56	57	58	59	60
 		//	4,  3,  2,  1,  0, -1, -2, -3, -4, -4, -4, -4, -4, -3, -2, -1,  0,  1,  2,  3,  4,  4,  4,  4,
@@ -2084,6 +2151,7 @@ void CvGlobals::init()
 		4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,
 		5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
 		// The pattern for the Nth ring is (6*N) N
+		6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,
 #else
 		//4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,
 #endif
@@ -2096,8 +2164,25 @@ void CvGlobals::init()
 #endif
 	{
 #if defined(MOD_GLOBAL_CITY_WORKING)
-		// this is the 5 ring layout
+		// this is the 6 ring layout
 		//	 -5  -4  -3  -2  -1   0   1   2   3  4  5  -- in the Y direction
+		{ -1,  -1,  -1,  -1,  -1,  -1, 115, 116, 117, 118, 119, 120, 121}, // -6 hex-space x
+		{ -1,  -1,  -1,  -1,  -1, 114,  81,  82,  83,  84,  85,  86, 122}, // -5 hex-space x
+		{ -1,  -1,  -1,  -1, 113,  80,  53,  54,  55,  56,  57,  87, 123}, // -4 hex-space x
+		{ -1,  -1,  -1, 112,  79,  52,  31,  32,  33,  34,  58,  88, 124}, // -3 hex-space x
+		{ -1,  -1, 111,  78,  51,  30,  15,  16,  17,  35,  59,  89, 125}, // -2 hex-space x
+		{ -1, 110,  77,  50,  29,  14,   5,   6,  18,  36,  60,  90, 126}, // -1 hex-space x
+		{109,  76,  49,  28,  13,   4,   0,   1,   7,  19,  37,  61,  91}, //  0 hex-space x
+		{108,  75,  48,  27,  12,   3,   2,   8,  20,  38,  62,  92,  -1}, //  1 hex-space x
+		{107,  74,  47,  26,  11,  10,   9,  21,  39,  63,  93,  -1,  -1}, //  2 hex-space x
+		{106,  73,  46,  25,  24,  23,  22,  40,  64,  94,  -1,  -1,  -1}, //  3 hex-space x
+		{105,  72,  45,  44,  43,  42,  41 , 65,  95,  -1,  -1,  -1,  -1}, //  4 hex-space x
+		{104,  71,  70,  69,  68,  67,  66,  96,  -1,  -1,  -1,  -1,  -1}, //  5 hex-space x
+		{103, 102, 101, 100,  99,  98,  97,  -1,  -1,  -1,  -1,  -1,  -1}, //  6 hex-space x
+		// There is no pattern to this, adding a ring requires adding a new row at the top and bottom AND a -1 entry at the start and end of each existing row
+#endif
+		// this is the 5 ring layout
+		/*
 		{-1, -1, -1, -1, -1, 81, 82, 83, 84, 85, 86,}, // -5 hex-space x
 		{-1, -1, -1, -1, 80, 53, 54, 55, 56, 57, 87,}, // -4 hex-space x
 		{-1, -1, -1, 79, 52, 31, 32, 33, 34, 58, 88,}, // -3 hex-space x
@@ -2109,8 +2194,7 @@ void CvGlobals::init()
 		{73, 46, 25, 24, 23, 22, 40, 64, -1, -1, -1,}, //  3 hex-space x
 		{72, 45, 44, 43, 42, 41, 65, -1, -1, -1, -1,}, //  4 hex-space x
 		{71, 70, 69, 68, 67, 66, -1, -1, -1, -1, -1,}, //  5 hex-space x
-		// There is no pattern to this, adding a ring requires adding a new row at the top and bottom AND a -1 entry at the start and end of each existing row
-#endif
+		*/
 		// this is the 4 ring layout
 		/*
 		//	 -4  -3  -2  -1   0   1   2   3  4  -- in the Y direction
@@ -2201,6 +2285,33 @@ void CvGlobals::init()
 	m_pAchievements = FNEW(CvAchievementXMLEntries, c_eCiv5GameplayDLL, 0);
 #endif
 
+#ifdef MOD_GLOBAL_CITY_SCALES
+	m_pCityScales = FNEW(CvCityScaleXMLEntries, c_eCiv5GameplayDLL, 0);
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	m_pCorruptionInfo = FNEW(CvCorruptionLevelXMLEntries, c_eCiv5GameplayDLL, 0);
+#endif
+
+#ifdef MOD_NUCLEAR_WINTER_FOR_SP
+	m_pNuclearWinterInfo= FNEW(CvNuclearWinterLevelXMLEntries, c_eCiv5GameplayDLL, 0);
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+	m_pPromotionCollections = FNEW(CvPromotionCollectionEntries, c_eCiv5GameplayDLL, 0);
+#endif
+
+#ifdef MOD_BUILDINGCLASS_COLLECTIONS
+	m_pBuildingClassCollections = FNEW(CvBuildingClassCollectionsXMLEntries, c_eCiv5GameplayDLL, 0);
+#endif
+
+	m_pLuaFormulaEntries = FNEW(CvLuaFormulaXMLEntries, c_eCiv5GameplayDLL, 0);
+
+	m_pLuaEvaluatorManager = FNEW(lua::EvaluatorManager, c_eCiv5GameplayDLL, 0);
+
+	m_pIndependentPromotion = FNEW(CvIndependentPromotionInfo, c_eCiv5GameplayDLL, 0);
+	m_pUnitPurchaseCollections = FNEW(CvUnitPurchaseCollections, c_eCiv5GameplayDLL, 0);
+
 	auto_ptr<ICvDLLDatabaseUtility1> pkLoader(getDatabaseLoadUtility());
 
 	Database::Connection* pDB = GetGameDatabase();
@@ -2211,6 +2322,12 @@ void CvGlobals::init()
 
 	CvPlayerAI::initStatics();
 	CvTeam::initStatics();
+
+#ifdef MOD_SPECIALIST_RESOURCES
+	GC.initSpecialistResourcesDependencies();
+#endif
+
+	m_pLuaEvaluatorManager->Init(this);
 
 	memcpy(m_aiPlotDirectionX, aiPlotDirectionX, sizeof(m_aiPlotDirectionX));
 	memcpy(m_aiPlotDirectionY, aiPlotDirectionY, sizeof(m_aiPlotDirectionY));
@@ -2292,6 +2409,32 @@ void CvGlobals::uninit()
 	SAFE_DELETE(m_internationalTradeRouteLandFinder);
 	SAFE_DELETE(m_internationalTradeRouteWaterFinder);
 	SAFE_DELETE(m_tacticalAnalysisMapFinder);
+
+#ifdef MOD_GLOBAL_CITY_SCALES
+	SAFE_DELETE(m_pCityScales);
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	SAFE_DELETE(m_pCorruptionInfo);
+#endif
+
+#ifdef MOD_NUCLEAR_WINTER_FOR_SP
+	SAFE_DELETE(m_pNuclearWinterInfo);
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+	SAFE_DELETE(m_pPromotionCollections);
+#endif
+
+#ifdef MOD_BUILDINGCLASS_COLLECTIONS
+	SAFE_DELETE(m_pBuildingClassCollections);
+#endif
+
+	SAFE_DELETE(m_pLuaFormulaEntries);
+	SAFE_DELETE(m_pLuaEvaluatorManager);
+
+	SAFE_DELETE(m_pIndependentPromotion);
+	SAFE_DELETE(m_pUnitPurchaseCollections);
 
 	// already deleted outside of the dll, set to null for safety
 	m_pathFinder=NULL;
@@ -3185,6 +3328,197 @@ CvImprovementXMLEntries* CvGlobals::GetGameImprovements() const
 	return m_pImprovements;
 }
 
+#ifdef MOD_GLOBAL_CITY_SCALES
+int CvGlobals::getNumCityScales() { return m_pCityScales->GetNumCityScales(); }
+
+std::vector<CvCityScaleEntry*>& CvGlobals::getCityScaleInfo()
+{
+	return m_pCityScales->GetEntries();
+}
+
+_Ret_maybenull_ CvCityScaleEntry* CvGlobals::getCityScaleInfo(CityScaleTypes eCityScale)
+{
+	if (eCityScale <= NO_CITY_SCALE || eCityScale >= getNumCityScales())
+		return nullptr;
+
+	return m_pCityScales->GetEntry(eCityScale);
+}
+
+void CvGlobals::sortAndUpdateOrderedCityScale(const std::vector<CvCityScaleEntry*>& vCityScale)
+{
+	// sort by population
+	int i = vCityScale.size();
+	m_vOrderedCityScales = vCityScale;
+	// The FirePlace code will insert a nullptr element into the vector,
+	// so we need to remove it before sorting.
+	for (auto iter = m_vOrderedCityScales.begin(); iter != m_vOrderedCityScales.end();)
+	{
+		CvCityScaleEntry* val = *iter;
+		if (val == nullptr)
+			iter = m_vOrderedCityScales.erase(iter);
+		else
+			iter++;
+	}
+	std::sort(m_vOrderedCityScales.begin(), m_vOrderedCityScales.end(), [](CvCityScaleEntry* a, CvCityScaleEntry* b) {
+		return a->GetMinPopulation() < b->GetMinPopulation();
+		});
+}
+
+CvCityScaleEntry* CvGlobals::getCityScaleInfoByPopulation(int iPopulation) const
+{
+	// binary search to find the first entry with a minPopulation <= iPopulation
+	if (iPopulation < 1 || m_vOrderedCityScales.empty())
+	{
+		return nullptr;
+	}
+
+	int iMin = 0;
+	int iMax = m_vOrderedCityScales.size() - 1;
+	while (iMin <= iMax)
+	{
+		int iMid = (iMin + iMax) / 2;
+		if (m_vOrderedCityScales[iMid]->GetMinPopulation() <= iPopulation)
+		{
+			if (iMid == m_vOrderedCityScales.size() - 1 || m_vOrderedCityScales[iMid + 1]->GetMinPopulation() > iPopulation)
+				return m_vOrderedCityScales[iMid];
+			else
+				iMin = iMid + 1;
+		}
+		else
+			iMax = iMid - 1;
+	}
+
+	return nullptr;
+}
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+int CvGlobals::getNumCorruptionLevel()
+{
+	return m_pCorruptionInfo->GetEntries().size();
+}
+
+std::vector<CvCorruptionLevel*>& CvGlobals::getCorruptionLevelInfo()
+{
+	return m_pCorruptionInfo->GetEntries();
+}
+
+CvCorruptionLevel* CvGlobals::getCorruptionLevelInfo(CorruptionLevelTypes eCorruptionLevel)
+{
+	return m_pCorruptionInfo->GetEntry(eCorruptionLevel);
+}
+
+std::vector<CvCorruptionLevel*>& CvGlobals::getOrderedNormalCityCorruptionLevels()
+{
+	return m_vOrderedNormalCityCorruptionLevels;
+}
+
+void CvGlobals::initCityCorruptionLevelsByCityType()
+{
+	m_vOrderedNormalCityCorruptionLevels.clear();
+	auto& corruptionLevels = getCorruptionLevelInfo();
+	for (auto* level : corruptionLevels)
+	{
+		if (level == nullptr)
+		{
+			continue;
+		}
+		if (level->IsCapital())
+		{
+			m_pCapitalCityCorruptionLevel = level;
+			continue;
+		}
+		if (level->IsPuppet())
+		{
+			m_pPuppetCityCorruptionLevel = level;
+			continue;
+		}
+		m_vOrderedNormalCityCorruptionLevels.push_back(level);
+	}
+
+	std::sort(m_vOrderedNormalCityCorruptionLevels.begin(), m_vOrderedNormalCityCorruptionLevels.end(), [](CvCorruptionLevel* a, CvCorruptionLevel* b) {
+		return a->GetScoreLowerBoundBase() < b->GetScoreLowerBoundBase();
+	});
+}
+
+CvCorruptionLevel* CvGlobals::getPuppetCityCorruptionLevel() const
+{
+	return m_pPuppetCityCorruptionLevel;
+}
+
+CvCorruptionLevel* CvGlobals::getCapitalCityCorruptionLevel() const
+{
+	return m_pCapitalCityCorruptionLevel;
+}
+
+#endif
+
+#ifdef MOD_NUCLEAR_WINTER_FOR_SP
+int CvGlobals::getNumNuclearWinterLevel()
+{
+	return m_pNuclearWinterInfo->GetEntries().size();
+}
+
+std::vector<CvNuclearWinterLevel*>& CvGlobals::getNuclearWinterLevelInfo()
+{
+	return m_pNuclearWinterInfo->GetEntries();
+}
+
+CvNuclearWinterLevel* CvGlobals::getNuclearWinterLevelInfo(NuclearWinterLevelTypes eLevel)
+{
+	return m_pNuclearWinterInfo->GetEntry(eLevel);
+}
+void CvGlobals::initGlobalNuclearWinterLevels()
+{
+	m_vOrderedNuclearWinterLevels.clear();
+	auto& nuclearWinterLevels = getNuclearWinterLevelInfo();
+	for (auto* level : nuclearWinterLevels)
+	{
+		if (level == nullptr)
+		{
+			continue;
+		}
+		m_vOrderedNuclearWinterLevels.push_back(level);
+	}
+
+	std::sort(m_vOrderedNuclearWinterLevels.begin(), m_vOrderedNuclearWinterLevels.end(), [](CvNuclearWinterLevel* a, CvNuclearWinterLevel* b) {
+		return a->GetTriggerThreshold() < b->GetTriggerThreshold();
+	});
+}
+std::vector<CvNuclearWinterLevel*>& CvGlobals::getOrderedNuclearWinterLevels()
+{
+	return m_vOrderedNuclearWinterLevels;
+}
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+std::vector<CvPromotionCollectionEntry*>& CvGlobals::GetPromotionCollections() { return m_pPromotionCollections->GetEntries();}
+CvPromotionCollectionEntry* CvGlobals::GetPromotionCollection(PromotionCollectionsTypes ePromotionCollection) { return m_pPromotionCollections->GetEntry(ePromotionCollection); }
+int CvGlobals::GetNumPromotionCollections() { return m_pPromotionCollections->GetNumEntries(); }
+std::tr1::unordered_map<PromotionTypes, std::tr1::unordered_set<PromotionCollectionsTypes> >& CvGlobals::GetPromotion2CollectionsMapping() { return m_mPromotion2CollectionsMapping; }
+
+void CvGlobals::InitPromotion2CollectionMapping()
+{
+	auto& vPromotionCollections = GetPromotionCollections();
+	for (auto* pPromotionCollection : vPromotionCollections)
+	{
+		if (pPromotionCollection == nullptr) continue;
+
+		auto& vPromotions = pPromotionCollection->GetPromotions();
+		for (auto& sPromotion : vPromotions)
+		{
+			m_mPromotion2CollectionsMapping[sPromotion.m_ePromotionType].insert((PromotionCollectionsTypes)pPromotionCollection->GetID());
+		}
+	}
+}
+#endif
+
+#ifdef MOD_BUILDINGCLASS_COLLECTIONS
+std::vector<CvBuildingClassCollectionsEntry*>& CvGlobals::GetBuildingClassCollections() { return m_pBuildingClassCollections->GetEntries(); }
+CvBuildingClassCollectionsEntry* CvGlobals::GetBuildingClassCollection(BuildingClassCollectionsTypes eBuildingClassCollection) { return m_pBuildingClassCollections->GetEntry((int)eBuildingClassCollection); }
+int CvGlobals::GetNumBuildingClassCollections() {return m_pBuildingClassCollections->GetNumEntries(); }
+#endif
+
 int CvGlobals::getNumBuildInfos()
 {
 	return (int)m_paBuildInfo.size();
@@ -4056,6 +4390,62 @@ CvAchievementXMLEntries* CvGlobals::GetGameAchievements() const
 }
 #endif
 
+#ifdef MOD_SPECIALIST_RESOURCES
+std::tr1::unordered_set<PolicyTypes>& CvGlobals::getSpecialistResourcesPolicies()
+{
+	return m_vSpecialistResourcesPolicies;
+}
+void CvGlobals::initSpecialistResourcesDependencies()
+{
+	for (CvSpecialistInfo* sinfo : getSpecialistInfo())
+	{
+		for (CvSpecialistInfo::ResourceInfo& rinfo : sinfo->GetResourceInfo())
+		{
+			if (rinfo.m_eRequiredPolicy != NO_POLICY)
+			{
+				m_vSpecialistResourcesPolicies.insert(rinfo.m_eRequiredPolicy);
+			}
+			if (rinfo.m_eRequiredTech != NO_TECH)
+			{
+				m_vSpecialistResourcesTechnologies.insert(rinfo.m_eRequiredTech);
+			}
+		}
+	}
+}
+std::tr1::unordered_set<TechTypes>& CvGlobals::getSpecialistResourcesTechnologies()
+{
+	return m_vSpecialistResourcesTechnologies;
+}
+#endif
+
+std::vector<CvLuaFormula*>& CvGlobals::GetLuaFormulaEntries()
+{
+	return m_pLuaFormulaEntries->GetEntries();
+}
+int CvGlobals::GetNumLuaFormulaEntries()
+{
+	return m_pLuaFormulaEntries->GetNumEntries();
+}
+CvLuaFormula* CvGlobals::GetLuaFormulaEntry(LuaFormulaTypes eFormula)
+{
+	return m_pLuaFormulaEntries->GetEntry(eFormula);
+}
+
+lua::EvaluatorManager* CvGlobals::GetLuaEvaluatorManager()
+{
+	return m_pLuaEvaluatorManager;
+}
+
+CvIndependentPromotionInfo* CvGlobals::GetIndependentPromotion()
+{
+	return m_pIndependentPromotion;
+}
+
+CvUnitPurchaseCollections* CvGlobals::GetUnitPurchaseCollections()
+{
+	return m_pUnitPurchaseCollections;
+}
+
 CvString*& CvGlobals::getFootstepAudioTags()
 {
 	return m_paszFootstepAudioTags;
@@ -4407,6 +4797,9 @@ void CvGlobals::cacheGlobals()
 	m_iAI_CITIZEN_VALUE_SCIENCE = getDefineINT("AI_CITIZEN_VALUE_SCIENCE");
 	m_iAI_CITIZEN_VALUE_CULTURE = getDefineINT("AI_CITIZEN_VALUE_CULTURE");
 	m_iAI_CITIZEN_VALUE_FAITH = getDefineINT("AI_CITIZEN_VALUE_FAITH");
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	m_iAI_CITIZEN_VALUE_HEALTH = getDefineINT("AI_CITIZEN_VALUE_HEALTH");
+#endif
 	m_iAI_CITIZEN_FOOD_MOD_SIZE_CUTOFF = getDefineINT("AI_CITIZEN_FOOD_MOD_SIZE_CUTOFF");
 	m_iAI_CITIZEN_FOOD_MOD_SIZE_EXPONENT = getDefineINT("AI_CITIZEN_FOOD_MOD_SIZE_EXPONENT");
 	m_iAI_CITIZEN_MOD_FOOD_DEFICIT = getDefineINT("AI_CITIZEN_MOD_FOOD_DEFICIT");
@@ -4761,6 +5154,7 @@ void CvGlobals::cacheGlobals()
 	m_iOPINION_WEIGHT_DOF = getDefineINT("OPINION_WEIGHT_DOF");
 	m_iOPINION_WEIGHT_DOF_WITH_FRIEND = getDefineINT("OPINION_WEIGHT_DOF_WITH_FRIEND");
 	m_iOPINION_WEIGHT_DOF_WITH_ENEMY = getDefineINT("OPINION_WEIGHT_DOF_WITH_ENEMY");
+	m_iOPINION_WEIGHT_MARRIAGE = getDefineINT("OPINION_WEIGHT_MARRIAGE");
 	m_iOPINION_WEIGHT_DENOUNCED_BY_FRIEND_EACH = getDefineINT("OPINION_WEIGHT_DENOUNCED_BY_FRIEND_EACH");
 	m_iOPINION_WEIGHT_DENOUNCED_BY_FRIEND_DONT_LIKE = getDefineINT("OPINION_WEIGHT_DENOUNCED_BY_FRIEND_DONT_LIKE");
 	m_iOPINION_WEIGHT_DENOUNCED_FRIEND_EACH = getDefineINT("OPINION_WEIGHT_DENOUNCED_FRIEND_EACH");
@@ -4784,6 +5178,7 @@ void CvGlobals::cacheGlobals()
 	m_iOPINION_WEIGHT_ROBBED_BY = getDefineINT("OPINION_WEIGHT_ROBBED_BY");
 	m_iOPINION_WEIGHT_INTRIGUE_SHARED_BY = getDefineINT("OPINION_WEIGHT_INTRIGUE_SHARED_BY");
 	m_iOPINION_WEIGHT_CAPTURED_CAPITAL = getDefineINT("OPINION_WEIGHT_CAPTURED_CAPITAL");
+	m_iOPINION_WEIGHT_CAPTURED_RELIGION = getDefineINT("OPINION_WEIGHT_CAPTURED_RELIGION");
 	m_iOPINION_WEIGHT_WE_LIKED_THEIR_PROPOSAL = getDefineINT("OPINION_WEIGHT_WE_LIKED_THEIR_PROPOSAL");
 	m_iOPINION_WEIGHT_WE_LIKED_THEIR_PROPOSAL_NUM_TURNS = getDefineINT("OPINION_WEIGHT_WE_LIKED_THEIR_PROPOSAL_NUM_TURNS");
 	m_iOPINION_WEIGHT_WE_DISLIKED_THEIR_PROPOSAL = getDefineINT("OPINION_WEIGHT_WE_DISLIKED_THEIR_PROPOSAL");
@@ -4800,6 +5195,8 @@ void CvGlobals::cacheGlobals()
 	m_iOPINION_THRESHOLD_FAVORABLE = getDefineINT("OPINION_THRESHOLD_FAVORABLE");
 	m_iOPINION_THRESHOLD_FRIEND = getDefineINT("OPINION_THRESHOLD_FRIEND");
 	m_iOPINION_THRESHOLD_ALLY = getDefineINT("OPINION_THRESHOLD_ALLY");
+	m_iDOF_WEIGHT_CHANGE_FROM_MARRIAGE = getDefineINT("DOF_WEIGHT_CHANGE_FROM_MARRIAGE");
+	m_iDOF_WEIGHT_MODIFIER_FROM_MARRIAGE = getDefineINT("DOF_WEIGHT_MODIFIER_FROM_MARRIAGE");
 	m_iAPPROACH_NEUTRAL_DEFAULT = getDefineINT("APPROACH_NEUTRAL_DEFAULT");
 	m_iAPPROACH_BIAS_FOR_CURRENT = getDefineINT("APPROACH_BIAS_FOR_CURRENT");
 	m_iAPPROACH_WAR_CURRENTLY_DECEPTIVE = getDefineINT("APPROACH_WAR_CURRENTLY_DECEPTIVE");
@@ -4831,6 +5228,10 @@ void CvGlobals::cacheGlobals()
 	m_iAPPROACH_FRIENDLY_WORKING_WITH_PLAYER = getDefineINT("APPROACH_FRIENDLY_WORKING_WITH_PLAYER");
 	m_iAPPROACH_HOSTILE_WORKING_WITH_PLAYER = getDefineINT("APPROACH_HOSTILE_WORKING_WITH_PLAYER");
 	m_iAPPROACH_GUARDED_WORKING_WITH_PLAYER = getDefineINT("APPROACH_GUARDED_WORKING_WITH_PLAYER");
+	m_iAPPROACH_DECEPTIVE_MARRIAGE_WITH_PLAYER = getDefineINT("APPROACH_DECEPTIVE_MARRIAGE_WITH_PLAYER");
+	m_iAPPROACH_FRIENDLY_MARRIAGE_WITH_PLAYER = getDefineINT("APPROACH_FRIENDLY_MARRIAGE_WITH_PLAYER");
+	m_iAPPROACH_HOSTILE_MARRIAGE_WITH_PLAYER = getDefineINT("APPROACH_HOSTILE_MARRIAGE_WITH_PLAYER");
+	m_iAPPROACH_GUARDED_MARRIAGE_WITH_PLAYER = getDefineINT("APPROACH_GUARDED_MARRIAGE_WITH_PLAYER");
 	m_iAPPROACH_DECEPTIVE_WORKING_AGAINST_PLAYER = getDefineINT("APPROACH_DECEPTIVE_WORKING_AGAINST_PLAYER");
 	m_iAPPROACH_HOSTILE_WORKING_AGAINST_PLAYER = getDefineINT("APPROACH_HOSTILE_WORKING_AGAINST_PLAYER");
 	m_iAPPROACH_WAR_WORKING_AGAINST_PLAYER = getDefineINT("APPROACH_WAR_WORKING_AGAINST_PLAYER");
@@ -5419,6 +5820,14 @@ void CvGlobals::cacheGlobals()
 	m_iVERY_UNHAPPY_MAX_PRODUCTION_PENALTY = getDefineINT("VERY_UNHAPPY_MAX_PRODUCTION_PENALTY");
 	m_iVERY_UNHAPPY_GOLD_PENALTY_PER_UNHAPPY = getDefineINT("VERY_UNHAPPY_GOLD_PENALTY_PER_UNHAPPY");
 	m_iVERY_UNHAPPY_MAX_GOLD_PENALTY = getDefineINT("VERY_UNHAPPY_MAX_GOLD_PENALTY");
+	m_iVERY_UNHAPPY_DISEASE_PENALTY_PER_UNHAPPY = getDefineINT("VERY_UNHAPPY_DISEASE_PENALTY_PER_UNHAPPY");
+	m_iVERY_UNHAPPY_MAX_DISEASE_PENALTY = getDefineINT("VERY_UNHAPPY_MAX_DISEASE_PENALTY");
+	m_iVERY_UNHAPPY_CRIME_PENALTY_PER_UNHAPPY = getDefineINT("VERY_UNHAPPY_CRIME_PENALTY_PER_UNHAPPY");
+	m_iVERY_UNHAPPY_MAX_CRIME_PENALTY = getDefineINT("VERY_UNHAPPY_MAX_CRIME_PENALTY");
+
+	m_iHEALTH_DISEASE_CONNECTION_MOD = getDefineINT("HEALTH_DISEASE_CONNECTION_MOD");
+	m_iHEALTH_DISEASE_TRADE_MOD = getDefineINT("HEALTH_DISEASE_TRADE_MOD");
+
 	m_iWLTKD_GROWTH_MULTIPLIER = getDefineINT("WLTKD_GROWTH_MULTIPLIER");
 	m_iINDUSTRIAL_ROUTE_PRODUCTION_MOD = getDefineINT("INDUSTRIAL_ROUTE_PRODUCTION_MOD");
 	m_iRESOURCE_DEMAND_COUNTDOWN_BASE = getDefineINT("RESOURCE_DEMAND_COUNTDOWN_BASE");
@@ -5428,6 +5837,7 @@ void CvGlobals::cacheGlobals()
 	m_iGREAT_GENERAL_RANGE = getDefineINT("GREAT_GENERAL_RANGE");
 	m_iGREAT_GENERAL_STRENGTH_MOD = getDefineINT("GREAT_GENERAL_STRENGTH_MOD");
 	m_iBONUS_PER_ADJACENT_FRIEND = getDefineINT("BONUS_PER_ADJACENT_FRIEND");
+	m_iBONUS_PER_ADJACENT_FRIEND_RANGED = getDefineINT("BONUS_PER_ADJACENT_FRIEND_RANGED");
 	m_iPOLICY_ATTACK_BONUS_MOD = getDefineINT("POLICY_ATTACK_BONUS_MOD");
 	m_iCONSCRIPT_MIN_CITY_POPULATION = getDefineINT("CONSCRIPT_MIN_CITY_POPULATION");
 	m_iCONSCRIPT_POPULATION_PER_COST = getDefineINT("CONSCRIPT_POPULATION_PER_COST");
@@ -5457,6 +5867,28 @@ void CvGlobals::cacheGlobals()
 	m_iBASE_GOLDEN_AGE_UNITS = getDefineINT("BASE_GOLDEN_AGE_UNITS");
 	m_iGOLDEN_AGE_UNITS_MULTIPLIER = getDefineINT("GOLDEN_AGE_UNITS_MULTIPLIER");
 	m_iGOLDEN_AGE_LENGTH = getDefineINT("GOLDEN_AGE_LENGTH");
+	m_iGOLDEN_AGE_POINT_MULTIPLE_IN_GA = getDefineINT("GOLDEN_AGE_POINT_MULTIPLE_IN_GA");
+#if defined(MOD_GLOBAL_UNIT_MOVES_AFTER_DISEMBARK)
+	m_iUNIT_MOVES_AFTER_DISEMBARK = getDefineINT("UNIT_MOVES_AFTER_DISEMBARK");
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	m_iNUM_OUTSIZE_PLOT_MAX_BUILD = getDefineINT("NUM_OUTSIZE_PLOT_MAX_BUILD");
+#endif
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	m_iTROOP_RATE_TIMES100_LOW = getDefineINT("TROOP_RATE_TIMES100_LOW");
+	m_iTROOP_RATE_TIMES100_DEFAULT = getDefineINT("TROOP_RATE_TIMES100_DEFAULT");
+	m_iTROOP_RATE_TIMES100_HIGH = getDefineINT("TROOP_RATE_TIMES100_HIGH");
+	m_iTROOP_NUM_BASE = getDefineINT("TROOP_NUM_BASE");
+#endif
+#if defined(MOD_INTERNATIONAL_IMMIGRATION_FOR_SP)
+	m_iIMMIGRATION_BASE_RATE = getDefineINT("IMMIGRATION_BASE_RATE");
+#endif
+	m_iMAX_POPULATION_INCREASE_NOTIOFACATION = getDefineINT("MAX_POPULATION_INCREASE_NOTIOFACATION");
+	m_iMAXIMUM_WORK_PLOT_DISTANCE_MINOR_REDUCE = getDefineINT("MAXIMUM_WORK_PLOT_DISTANCE_MINOR_REDUCE");
+
+#if defined(MOD_ROG_CORE)
+	m_iORIGINAL_CAPITAL_MODMAX = getDefineINT("ORIGINAL_CAPITAL_MODMAX");
+#endif
 	m_iGOLDEN_AGE_GREAT_PEOPLE_MODIFIER = getDefineINT("GOLDEN_AGE_GREAT_PEOPLE_MODIFIER");
 	m_iMIN_UNIT_GOLDEN_AGE_TURNS = getDefineINT("MIN_UNIT_GOLDEN_AGE_TURNS");
 	m_iGOLDEN_AGE_CULTURE_MODIFIER = getDefineINT("GOLDEN_AGE_CULTURE_MODIFIER");
@@ -5682,6 +6114,17 @@ void CvGlobals::cacheGlobals()
 	m_iCITY_STRENGTH_POPULATION_CHANGE = getDefineINT("CITY_STRENGTH_POPULATION_CHANGE");
 	m_iCITY_STRENGTH_UNIT_DIVISOR = getDefineINT("CITY_STRENGTH_UNIT_DIVISOR");
 	m_iCITY_STRENGTH_HILL_CHANGE = getDefineINT("CITY_STRENGTH_HILL_CHANGE");
+	m_iCITY_FRESH_WATER_HEALTH_YIELD = getDefineINT("FRESH_WATER_HEALTH_YIELD");
+	m_iCITY_CRIME_SPY_YIELD = getDefineINT("CITY_CRIME_SPY_YIELD");
+
+	m_iCITY_CRIME_OPINION_REVOLUTIONARY_WAVE_YIELD = getDefineINT("CITY_CRIME_OPINION_REVOLUTIONARY_WAVE_YIELD");
+	m_iCITY_CRIME_OPINION_CIVIL_RESISTANCE_YIELD = getDefineINT("CITY_CRIME_OPINION_CIVIL_RESISTANCE_YIELD");
+	m_iCITY_CRIME_OPINION_DISSIDENTS_YIELD = getDefineINT("CITY_CRIME_OPINION_DISSIDENTS_YIELD");
+
+	m_iCITY_CRIME_GOLDEN_AGE_YIELD = getDefineINT("CITY_CRIME_GOLDEN_AGE_YIELD");
+	m_iCITY_LOYALTY_GOLDEN_AGE_YIELD = getDefineINT("CITY_LOYALTY_GOLDEN_AGE_YIELD");
+
+	m_iCITY_STRENGTH_MOUNTAIN_CHANGE = getDefineINT("CITY_STRENGTH_MOUNTAIN_CHANGE");
 	m_iCITY_ATTACKING_DAMAGE_MOD = getDefineINT("CITY_ATTACKING_DAMAGE_MOD");
 	m_iATTACKING_CITY_MELEE_DAMAGE_MOD = getDefineINT("ATTACKING_CITY_MELEE_DAMAGE_MOD");
 	m_iCITY_ATTACK_RANGE = getDefineINT("CITY_ATTACK_RANGE");
@@ -5917,6 +6360,7 @@ void CvGlobals::cacheGlobals()
 	m_iPROMOTION_ALLWATER_EMBARKATION = getDefineINT("PROMOTION_ALLWATER_EMBARKATION");
 	m_iPROMOTION_OCEAN_IMPASSABLE_UNTIL_ASTRONOMY = getDefineINT("PROMOTION_OCEAN_IMPASSABLE_UNTIL_ASTRONOMY");
 	m_iPROMOTION_OCEAN_IMPASSABLE = getDefineINT("PROMOTION_OCEAN_IMPASSABLE");
+	m_iPROMOTION_NEW_UNIT_CAPTURED = getDefineINT("PROMOTION_NEW_UNIT_CAPTURED");
 	m_iAI_HANDICAP = getDefineINT("AI_HANDICAP");
 	m_iBARBARIAN_CAMP_IMPROVEMENT = getDefineINT("BARBARIAN_CAMP_IMPROVEMENT");
 	m_iWALLS_BUILDINGCLASS = getDefineINT("WALLS_BUILDINGCLASS");
@@ -6033,17 +6477,27 @@ void CvGlobals::cacheGlobals()
 	}
 #endif
 
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
-	if (MOD_API_UNIFIED_YIELDS_TOURISM) {
+	{
 		GD_INT_CACHE(TOURISM_START_TECH);
 		GD_INT_CACHE(TOURISM_START_ERA);
 		GD_INT_CACHE(PUPPET_TOURISM_MODIFIER);
 	}
-#endif
-
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
-	if (MOD_API_UNIFIED_YIELDS_GOLDEN_AGE) {
+	{
+		GD_INT_CACHE(WONDER_GOLDEN_AGE_PURCHASE_MODIFIER);
+	}
+	{
 		GD_INT_CACHE(PUPPET_GOLDEN_AGE_MODIFIER);
+	}
+
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	if (MOD_API_UNIFIED_YIELDS_MORE) {
+		GD_INT_CACHE(PUPPET_GREAT_GENERAL_POINTS_MODIFIER);
+		GD_INT_CACHE(PUPPET_GREAT_ADMIRAL_POINTS_MODIFIER);
+		GD_INT_CACHE(PUPPET_HEALTH_MODIFIER);
+		GD_INT_CACHE(PUPPET_DISEASE_MODIFIER);
+		GD_INT_CACHE(PUPPET_CRIME_MODIFIER);
+		GD_INT_CACHE(PUPPET_LOYALTY_MODIFIER);
+		GD_INT_CACHE(PUPPET_SOVEREIGNTY_MODIFIER);
 	}
 #endif
 
@@ -6064,28 +6518,28 @@ void CvGlobals::cacheGlobals()
 	}
 #endif
 
+#if defined(MOD_GLOBAL_INTERNAL_TRADE_ROUTE_BONUS_FROM_ORIGIN_CITY)
+	if (MOD_GLOBAL_INTERNAL_TRADE_ROUTE_BONUS_FROM_ORIGIN_CITY) {
+		GD_INT_CACHE(INTERNAL_TRADE_ROUTE_FOOD_BONUS_BASE_FROM_ORIGIN);
+		GD_INT_CACHE(INTERNAL_TRADE_ROUTE_FOOD_BONUS_MOD_FROM_ORIGIN);
+		GD_INT_CACHE(INTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_BASE_FROM_ORIGIN);
+		GD_INT_CACHE(INTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_MOD_FROM_ORIGIN);
+	}
+#endif
+
 #if defined(MOD_GLOBAL_CS_GIFTS)
 	if (MOD_GLOBAL_CS_GIFTS) {
-		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP);
 		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_BONUS_CULTURE);
 		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_BONUS_FAITH);
 		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_BONUS_GOLD);
 		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_BONUS_FOOD);
-		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_BONUS_UNIT);
-		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_XP_PER_ERA);
-		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_XP_RANDOM);
-		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_PLAYER_MULTIPLIER);
-		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_PLAYER_DIVISOR);
+		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP);
 		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_SUBSEQUENT_TEAM_MULTIPLIER);
 		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_SUBSEQUENT_TEAM_DIVISOR);
 		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_MULTIPLIER);
 		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_DIVISOR);
-		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_FRIENDLY_UNIT_MULTIPLIER);
-		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_FRIENDLY_UNIT_DIVISOR);
 		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_MULTIPLIER);
 		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_DIVISOR);
-		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_HOSTILE_UNIT_MULTIPLIER);
-		GD_INT_CACHE(MINOR_CIV_FIRST_CONTACT_HOSTILE_UNIT_DIVISOR);
 	}
 #endif
 
@@ -6094,17 +6548,25 @@ void CvGlobals::cacheGlobals()
 		GD_INT_CACHE(CITY_UNIT_LIMIT);
 	}
 #endif
-
-#if defined(MOD_EVENTS_CITY_BOMBARD)
-	if (MOD_EVENTS_CITY_BOMBARD) {
-		GD_INT_CACHE(MAX_CITY_ATTACK_RANGE);
-	}
-#endif
-
+	GD_INT_CACHE(MAX_CITY_ATTACK_RANGE);
 #if defined(MOD_UI_CITY_EXPANSION)
 	if (MOD_UI_CITY_EXPANSION) {
 		GD_INT_CACHE(PLOT_INFLUENCE_COST_VISIBLE_DIVISOR);
 	}
+#endif
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	if (MOD_GLOBAL_WAR_CASUALTIES)
+	{
+		GD_INT_CACHE(WAR_CASUALTIES_THRESHOLD);
+		GD_INT_CACHE(WAR_CASUALTIES_DELTA_BASE);
+		GD_INT_CACHE(WAR_CASUALTIES_POPULATION_LOSS);
+	}
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	GD_INT_CACHE(CORRUPTION_SCORE_PER_DISTANCE);
+	GD_INT_CACHE(CORRUPTION_SCORE_COASTAL_BONUS);
 #endif
 }
 

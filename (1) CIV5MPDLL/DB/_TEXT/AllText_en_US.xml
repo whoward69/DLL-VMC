@@ -1,0 +1,835 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<!-- Espionage.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_UNIT_PLAGUE_CHANCE">
+			<Text>[COLOR_CYAN]Status Effect Chance ({1_Name})[ENDCOLOR]</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_ALREADY_PLAGUED">
+			<Text>[COLOR_CYAN]Has {1_Num} Status Effect[ENDCOLOR]</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_UNIT_IMMUNE_PLAGUED">
+			<Text>[COLOR_CYAN]Immune to {1_Num}[ENDCOLOR]</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SPY_EVICTED_FPRBIDDEN_YOU">
+			<Text>Your spy {1_SpyRank}{2_SpyName}fled {3_CityName}, because this city no longer supports action.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NO_ACTION_BUILDING_EMPIRE_RESOURCE">
+			<Text>[NEWLINE]Need domestic ownership{1_FeatureName:textkey}.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NO_ACTION_BUILDING_LOCAL_FEATURE">
+			<Text>[NEWLINE]Need to be near the city{1_FeatureName:textkey}.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_AIR_PATROL_BOMBED_GROUND_TARGETS">
+			<Text>Your {@1_UnitName} met no resistance and attacked enemy air and ground air defense units!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_MORALE_FALL_BACK">
+			<Text>Our {2_Unit} was knocked back by the enemy's {1_Unit}!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_MORALE_FALL_BACK_S">
+			<Text>{1_Unit}was repelled!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_MORALE_FALL_BACK_THEM">
+			<Text>Our {1_Unit} forced the enemy's {2_Unit} to retreat!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_MORALE_FALL_BACK_THEM_S">
+			<Text>Enemy {1_Unit} has been knocked back!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_RESET_PLOT_COST">
+			<Text>Founding a new City has reset the cost increase of Tile purchases in all owned cities!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SUMMARY_RESET_PLOT_COST">
+			<Text>Manifest Destiny!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_UNIT_CLASS">
+			<Text>[NEWLINE][ICON_BULLET]Modifier for Unit Class: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_FEATURES">
+			<Text>[NEWLINE][ICON_BULLET]Modifier for Worked Features: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_TERRAINS">
+			<Text>[NEWLINE][ICON_BULLET]Modifier for Worked Terrains: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_IMPROVEMENTS">
+			<Text>[NEWLINE][ICON_BULLET]Modifier for Worked Improvements: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_SPECIALIST">
+			<Text>[NEWLINE][ICON_BULLET]Modifier for Specialist: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_SPIES">
+			<Text>[NEWLINE][ICON_BULLET]Active Spies Modifier: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_FROM_HEALTH_MOD">
+			<Text>[NEWLINE][ICON_BULLET]City Modifier for Health: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_FROM_INTER_TRADE_MOD">
+			<Text>[NEWLINE][ICON_BULLET]Modifier for Trade Routes: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_FROM_CRIME_MOD">
+			<Text>[NEWLINE][ICON_BULLET]City Modifier for Crime: {1_Num}%</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_UNIT_PLAGUE_TRANSFER">
+			<Text>A virulent plague was spread from your {1_Unit} to their {2_Unit} during combat!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_PLAGUE_TRANSFER_S">
+			<Text>Your {1_Unit} is spreading plague!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_PLAGUE_TRANSFER_THEM">
+			<Text>A virulent plague was spread to our {1_Unit} from their {2_Unit} during combat!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_PLAGUE_TRANSFER_THEM_S">
+			<Text>Plague spreads to your {1_Unit}!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_POLICY_CITY_LOVE_KING">
+			<Text>[NEWLINE][ICON_BULLET]We Love King Day(Policy): {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_YIELD_HEALTH">
+			<Text>HEALTH</Text>
+		</Row>
+		<Row Tag="TXT_KEY_YIELD_DISEASE">
+			<Text>DISEASE</Text>
+		</Row>
+		<Row Tag="TXT_KEY_YIELD_CRIME">
+			<Text>CRIME</Text>
+		</Row>
+		<Row Tag="TXT_KEY_YIELD_SOVEREIGNTY">
+			<Text>SOVEREIGNTY</Text>
+		</Row>
+		<Row Tag="TXT_KEY_YIELD_LOYALTY">
+			<Text>LOYALTY</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_YIELD_VIOLENCE">
+			<Text>VIOLENCE</Text>
+		</Row>
+		<Row Tag="TXT_KEY_YIELD_HERESY">
+			<Text>HERESY</Text>
+		</Row>
+		<Row Tag="TXT_KEY_YIELD_GREAT_GENERAL_POINTS">
+			<Text>GENERAL</Text>
+		</Row>
+		<Row Tag="TXT_KEY_YIELD_GREAT_ADMIRAL_POINTS">
+			<Text>ADMIRAL</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_LOCAL_CITY_WONDER_GLOBAL">
+			<Text>[NEWLINE][ICON_BULLET]Global City Fix (World Wonder): {1_Num}%</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_SPY_STATE_TERMINATED">
+			<Text>Eliminated!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_WONDER_IMPROVEMENT">
+			<Text>[NEWLINE][ICON_BULLET]Improved facilities provide spectacle construction bonus: {1_Num}%</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- GoodyHutMessages.xml -->
+	<Language_en_US>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_GOLD" />
+			<Set>
+				<Text>In the ruins you find the treasures of an ancient empire!</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_PROPHET_FAITH" />
+			<Set>
+				<Text>You have found a secret religious community. The preacher foretells the arrival of a Great Prophet.</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_CHOOSE_PROPHET_FAITH" />
+			<Set>
+				<Text>Let the preacher foretells the arrival of a Great Prophet.</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_FAITH" />
+			<Set>
+				<Text>You have found an ancient oracle. The priestess has blessed you with a divine revelation.</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_CULTURE" />
+			<Set>
+				<Text>You have found cultural artifacts which awe your citizens!</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_MISC_RECEIVED_GOLD" />
+			<Set>
+				<Text>[SPACE]You have received {1_Num} [ICON_GOLD] Gold!</Text>
+			</Set>
+		</Update>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_CULTURE">
+			<Text>[SPACE]You have received {1_Num} [ICON_CULTURE] Culture!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_FAITH">
+			<Text>[SPACE]You have received {1_Num} [ICON_PEACE] Faith!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_SCIENCE">
+			<Text>[SPACE]You have received {1_Num} [ICON_RESEARCH] Science!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_PRODUCITON">
+			<Text>[SPACE]Your city {1_Name} have received {2_Num} [ICON_PRODUCTION]Production!</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- Religion.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_ACTIVE_PLAYER">
+			<Text>You have enhanced your pantheon by adding a new belief.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED">
+			<Text>{1_CivName} {1: plural 1?has; 2?have;} enhanced their pantheon by adding a new belief.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_UNKNOWN">
+			<Text>An unknown civilization has enhanced their pantheon by adding a new belief.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_S">
+			<Text>Pantheon Enhanced</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- SpyNames.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_SPY_NAME_UNKNOWN">
+			<Text>Unknown</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- UnifiedYieldsGoldenAge.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_YIELD_GOLDEN_AGE_POINTS">
+			<Text>Golden Age</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_GOLDEN_AGE_POINTS_YIELD_TT">
+			<Text>{1_Num} [ICON_GOLDEN_AGE] Golden Age</Text>
+		</Row>
+		<Row Tag="TXT_KEY_GOLDEN_AGE_POINTS_FROM_TRADE_ROUTES">
+			<Text>{1_perTurn:number "#.##"} [ICON_GOLDEN_AGE] from Trade Routes established with this city</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- UnifiedYieldsTourism.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_YIELD_TOURISM">
+			<Text>Tourism</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_TOURISM_YIELD_TT">
+			<Text>{1_Num} [ICON_TOURISM] Tourism</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOURISM_FROM_TRADE_ROUTES">
+			<Text>{1_perTurn:number "#.##"} [ICON_TOURISM] from Trade Routes established with this city</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- UnitclassNotUnit.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_TP_FAITH_NEXT_PROPHET_PARAM">
+			<Text>{1_Num} [ICON_PEACE] Faith is minimum required for your next chance at a {2_UNITCLASS_PROPHET}.</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_RO_FAITH_TOOLTIP_PARAM">
+			<Text>Need minimum of {1_MinFaith} [ICON_PEACE] Faith for next {2_UNITCLASS_PROPHET}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PROPHET_PARAM">
+			<Text>Save for {1_UNITCLASS_PROPHET}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PURCHASE_PROPHET_PARAM">
+			<Text>Purchase {1_UNITCLASS_PROPHET}</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- UnitNaming.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_INVULNERABIILITY">
+			<Text>Defensive Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_SNEAK_ATTACK">
+			<Text>Flanking Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_HEROISM">
+			<Text>Heroic Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_AMBITION">
+			<Text>Offensive Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_RESTLESSNESS">
+			<Text>Restless Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_RECRUITMENT">
+			<Text>Regenerating Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_ENEMY_BLADE">
+			<Text>Cursed Kris</Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_INDONESIAN_KRIS_SWORDSMAN_EVIL_SPIRITS">
+			<Text>Possessed Kris</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- VariableRecon.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_SHORT_RANGE">
+			<Text>Short Range Recon</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_SHORT_RANGE_HELP">
+			<Text>Short Range Recon (-2 visibility).</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PEDIA_PROMOTION_RECON_SHORT_RANGE">
+			<Text>Short Range Recon</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_LONG_RANGE">
+			<Text>Long Range Recon</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PROMOTION_RECON_LONG_RANGE_HELP">
+			<Text>Long Range Recon (+2 visibility).</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PEDIA_PROMOTION_RECON_LONG_RANGE">
+			<Text>Long Range Recon</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- Quests.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_CITY_STATE_QUEST_GENERIC_FORMAL">
+			<Text>They want you to do something for them.</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- New Yield Modifier -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_NUM_GREAT_WORK">
+			<Text>[NEWLINE][ICON_BULLET]Great Work Modifiers: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_NUM_ARTIFACT">
+			<Text>[NEWLINE][ICON_BULLET]Artifacts Modifiers: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_NUM_PER_GP_CREATION">
+			<Text>[NEWLINE][ICON_BULLET]Great People Creation Modifiers: {1_Num}%</Text>
+		</Row>
+	</Language_en_US>
+
+	<Language_en_US>
+		<Row Tag="TXT_KEY_NOTIFICATION_WAR_CASUALTIES_MESSAGE">
+			<Text>Casualties in the battle has caused {2_loss} [ICON_CITIZEN] Citizen lost (urgently drawn into the reserves) in your city: [COLOR_NEGATIVE_TEXT]{@1_CityName}[ENDCOLOR]!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_WAR_CASUALTIES_MESSAGE2">
+			<Text>Casualties in the battle has caused a Blackout and all current stacked [ICON_FOOD] Food lost (Citizen was urgently drawn into the reserves) in your city: [COLOR_NEGATIVE_TEXT]{@1_CityName}[ENDCOLOR]!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_WAR_CASUALTIES_SUMMARY">
+			<Text>Casualties in Battle!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE">
+			<Text>While defending, Your {2_UnitName} was [COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR] damaged by {1_EnUName} due to AoE Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE_ENEMY">
+			<Text>Your {1_UnitName} did [COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR] damage to {2_EnUName} due to AoE Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE_DEATH">
+			<Text>While defending, Your {2_UnitName} was destroyed by {1_EnUName} due to AoE Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SPLASH_DAMAGE_ENEMY_DEATH">
+			<Text>Your {1_UnitName} destroyed {2_EnUName} due to AoE Damage!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE">
+			<Text>While defending, Your {2_UnitName} was [COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR] damaged by an enemy {1_EnUName} due to Collateral Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE_ENEMY">
+			<Text>Your {1_UnitName} did [COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR] damage to an enemy {2_EnUName} due to Collateral Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE_DEATH">
+			<Text>While defending, Your {2_UnitName} was destroyed by {1_EnUName} due to Collateral Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_COLL_DAMAGE_ENEMY_DEATH">
+			<Text>Your {1_UnitName} destroyed an enemy {2_EnUName} due to Collateral Damage!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_NUKED_DAMAGE">
+			<Text>While defending, Your {2_UnitName} was [COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR] damaged by an enemy {1_EnUName} due to Nuke Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_NUKED_DAMAGE_ENEMY">
+			<Text>Your {1_UnitName} did [COLOR_NEGATIVE_TEXT]{3_Damage}[ENDCOLOR] damage to an enemy {2_EnUName} due to Nuke Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_NUKED_DAMAGE_DEATH">
+			<Text>While defending, Your {2_UnitName} was destroyed by {1_EnUName} due to Nuke Damage!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_NUKED_DAMAGE_ENEMY_DEATH">
+			<Text>Your {1_UnitName} destroyed an enemy {2_EnUName} due to Nuke Damage!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_BOMBER_CITY_BUILDING_DESTROYED_ATTACKING">
+			<Text>[COLOR_NEGATIVE_TEXT]{1_num}[ENDCOLOR] Building(s) DESTROYED in the traget city during this bombardment!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_BOMBER_CITY_BUILDING_DESTROYED_ATTACKED">
+			<Text>[COLOR_NEGATIVE_TEXT]{1_num}[ENDCOLOR] Building(s) DESTROYED in your city: {2_CityName}</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_BOMBER_CITY_KILL_POPULATION_ATTACKING">
+			<Text>[COLOR_NEGATIVE_TEXT]{1_num}[ENDCOLOR] [ICON_CITIZEN] Citizens are KILLED in the traget city during this bombardment!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_BOMBER_CITY_KILL_POPULATION_ATTACKED">
+			<Text>[COLOR_NEGATIVE_TEXT]{1_num}[ENDCOLOR] [ICON_CITIZEN] Citizens are KILLED in your city: {2_CityName}</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_LOCAL_CITY_WONDER">
+			<Text>
+				[NEWLINE][ICON_BULLET]City Modifier for World Wonder: {1_Num}%
+			</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_POLICY_TRADE_ROUTE_NUM">
+			<Text>
+				[NEWLINE][ICON_BULLET]City Modifier for the Trade Routes(Policy): {1_Num}%
+			</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_TP_HAPPINESS_FAITH">
+			<Text>
+				{1_Happiness} from Faith.
+			</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_CITY_POPULATION_LOST_BY_RANGEDFIRE">
+			<Text> A [ICON_CITIZEN] Citizen has been killed in {2_CityName:textkey} by the Ranged Attack of the enemy's {1_UnitName}! (this city's hitpoint is 0 and it cannot protect citizens from enemy's Ranged Attack.)</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_CITY_POPULATION_LOST_BY_RANGEDFIRE_SHORT">
+			<Text>City heavily damaged! Citizen killed! </Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_POLICY_CITY_NUMBER">
+			<Text>
+				[NEWLINE][ICON_BULLET]City Modifier for the Number of Cities(Policy): {1_Num}%
+			</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_ATTACKING_CITY_LOST_MOVEMENT">
+			<Text>Your {@1_name} consumed all its [ICON_MOVES] Movements after attacking the enemy city!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_RESOURCE_BUFF">
+			<Text>
+				[NEWLINE][ICON_BULLET] Global Modifier for Resources: {1_Num}%
+			</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_HAPPINESS_GLOBAL">
+			<Text>
+				[NEWLINE][ICON_BULLET] Global Modifier for Happiness: {1_Num}%
+			</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_HAPPINESS_POLICY">
+			<Text>
+				[NEWLINE][ICON_BULLET] Global Modifier for Happiness (Policy): {1_Num}%
+			</Text>
+		</Row>
+		<Row Tag="TXT_KEY_LEAGUE_OVERVIEW_EFFECT_SUMMARY_EMBARGO_IDEOLOGY">
+			<Text>No [ICON_INTERNATIONAL_TRADE] Trade Routes with Ideological opponents or non-allied City-States. Allied City-State [ICON_INFLUENCE] Influence does not decay.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RESOLUTION_COLD_WAR">
+			<Text>Cold War</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RESOLUTION_COLD_WAR_HELP">
+			<Text>Ideological differences have pushed the world into a cold war, and economic and political factions are forming based on ideology alone. [NEWLINE][NEWLINE]While this resolution is active, players may only make [ICON_INTERNATIONAL_TRADE] Trade Routes with civilizations that follow the same ideology, or with allied City-States. Furthermore, [ICON_INFLUENCE] Influence levels with allied City-States do not decline. [NEWLINE][NEWLINE]Available once any Civilization discovers Atomic Theory.</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_LEAGUE_OVERVIEW_EFFECT_SUMMARY_GLOBAL_ATTACK_MODIFIER">
+			<Text>All Units attack modifier change {1_NumModifier}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_LEAGUE_OVERVIEW_EFFECT_SUMMARY_GLOBAL_WAR_CASUTIES_CHANGES">
+			<Text>Global war Casualties and Population losses after capture Cities change {1_NumModifier}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RESOLUTION_WAR_CONVENTION">
+			<Text>War Convention</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RESOLUTION_WAR_CONVENTION_HELP">
+			<Text>With the development of international humanism, All over the world have asked the militaries of all countries to maintain basic principles and bottom lines in the war. [NEWLINE][NEWLINE]While this resolution is active, All Units attack modifier -10%, global war Casualties and Population losses after the capture of a city are reduced by 20% . [NEWLINE][NEWLINE]Available once any Civilization discovers Atomic Theory.</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_REPORT">
+			<Text>[COLOR_WARNING_TEXT]-Administrative Cost Report-[ENDCOLOR]</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_SCORE_FROM_DISTANCE">
+			<Text>From Capital Distance: {1_score}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_SCORE_FROM_COASTAL_BONUS">
+			<Text>From Capital and City are both coastal: {1_score}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_SCORE_FROM_BUILDING">
+			<Text>From Building: {1_score}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_SCORE_FROM_RESOURCE">
+			<Text>From resource: {1_score}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_SCORE_FROM_TRAIT">
+			<Text>From Leader Trait: {1_score}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_SCORE_MOD_FROM_SPY">
+			<Text>From Spy: {1_score}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_SCORE_MOD_FROM_POLICY">
+			<Text>From Policy: {1_score}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_SCORE_MOD_FROM_TRAIT">
+			<Text>From Leader Trait: {1_score}%</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_LEVEL_REDUCE_BY_ONE_GLOBAL">
+			<Text>City hall level change (civ trait or policy): -1</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_LEVEL_MAX_TRAIT">
+			<Text>Maximum town hall level: {1_level}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_LEVEL_CHANGE_FROM_BUILDING">
+			<Text>City hall level change (from building): {1_level}</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_SCORE">
+			<Text>Administrative cost (total): {1_score}</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_CITYBANNER_CORRUPTION_ANNEX_PUPPET_LEVEL_PREVIEW">
+			<Text>If you annex this city, the estimated city hall level is: {1_level}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_FOUNDED_CITY_LEVEL_PREVIEW">
+			<Text>If you found a city city here, the Corruption score will be: {1_score} ({2_level})</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOURISM_FROM_CITY_RATE">
+			<Text>{1_Num}[ICON_TOURISM]Tourism from Buildings, Terrian ...:</Text>
+		</Row>
+		<Replace Tag="TXT_KEY_CO_CITY_TOURISM_TECH_ENHANCED">
+			<Text>{1_Num}[ICON_TOURISM]Tourism from Tech enhanced Buildings</Text>
+		</Replace>
+		<Row Tag="TXT_KEY_CITY_TOURISM_MODIFIER_FROM_WORLD_CONGRESS">
+			<Text>+{1_Num}% Bonus from World Congress({2_Num} turns)</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITY_BASE_TOURISM_MODIFIER">
+			<Text>[COLOR_POSITIVE_TEXT]{1_Num}%{2_IconString} Modifier Total[ENDCOLOR]</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PLAYER_TOURISM_INTERNATIONAL_MODIFIER">
+			<Text>[ICON_TOURISM]The International influence of Tourism:</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOURISM_HELP_INFO">
+			<Text>[ICON_TOURISM] Tourism is generated by Great Works or Artifacts that are placed in certain Culture buildings, and is the primary yield you will use to spread your cultural influence to other civilizations.</Text>
+		</Row>	
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_NON_SPECIALIST_CITIZENS">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Non_Specialist_Citizens</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_ESPIONAGE_SPY">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Espionage Spy</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_CITY_CONNECTION">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from trade route</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_DISCORD">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Discord</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_GARRISONED_UNIT">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Garrisoned Unit</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_CS_FRIENDSHIP">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from friendly city state</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_CS_ALLIANCE">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from alliance city state</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_CITY_PRODUCTION_TO">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from City Production To Yield</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_GREATWORK">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Great Works extra Output</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_TERRAIN">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Terrian</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_UNIMPROVEMENT_FEATURES">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Unimprovement Feature</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_PER_ADJACENT_FEATURES">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from adjacent Feature</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_BUILDINGS">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Buildings</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_SPECIALISTS">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Specilists</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_MISC">
+			<Text>[NEWLINE]{1_Num}{2_IconString} from Misc</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_TRAITS">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Leader</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_RELIGION">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Religion</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_OTHER_YIELD">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from other Yield</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_TRADE_ROUTE">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from City Connection</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FRESH_WATER">
+			<Text>[NEWLINE][ICON_BULLET][COLOR_POSITIVE_TEXT]{1_Num}[ENDCOLOR]{2_IconString} from Fresh Water</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_NO_FRESH_WATER">
+			<Text>[NEWLINE][ICON_BULLET][COLOR_WARNING_TEXT]{1_Num}[ENDCOLOR]{2_IconString} from lacking Fresh Water</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_HEALTH">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Health</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_HAPPINESS">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Happiness</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_CRIME">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Crime</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_NUCLEAR_WINTER">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Nuclear Winter</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_SPIES">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from spy</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_OPINION">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from opinion</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_POPULATION">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from local Population</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_RELOGION_POPULATION">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from num of Religions</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_TOTAL_POPULATION">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Total Population</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_TRADE_VALUE">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Trade Route</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_POLICY">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Policy</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_LEAGUES">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Leagues</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_PROJECTS">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Projects</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_ERA">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Eras</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_PER_ERA">
+			<Text>[NEWLINE][ICON_BULLET]Eras Modifier: {1_Num}%</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_VOLCAN_EVENT_TITLE">
+			<Text>Volcanic eruptions!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_VOLCANO_EVENT_1">
+			<Text>A small eruption of a volcano occurred.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_VOLCANO_EVENT_2">
+			<Text>A large eruption of a volcano occurred.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_VOLCANO_EVENT_3">
+			<Text>A supermassive eruption of a volcano occurred.</Text>
+		</Row>
+
+		<Row tag="TXT_KEY_NOTIFICATION_INSTANT_TOURISM_WHEN_CONQUER">
+			<Text>You have conquered {1_city} and spread +{2_num}[ICON_TOURISM] tourism influence to all civilizations you have met. </Text>
+		</Row>
+		<Row Tag="TXT_KEY_CO_PLAYER_TOURISM_DIFFERENT_IDEOLOGY">
+			<Text>+{1_Num}% Bonus for different ideologies from policies[NEWLINE]</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NO_ACTION_LACKING_TROOPS">
+			<Text>[NEWLINE]Lacking Troops</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_RESOURCE_LIMIT_GLOBAL_1">
+			<Text>You are currently using more {1_Resource:textkey} than you have!, you are affected by the following:</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_OVER_RESOURCE_LIMIT_COMBAT">
+			<Text>[NEWLINE][ICON_BULLET]All units which require it will [COLOR_NEGATIVE_TEXT]fight much less effectively[ENDCOLOR]</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_OVER_RESOURCE_LIMIT_DEBUFF">
+			<Text>[NEWLINE][ICON_BULLET][COLOR_NEGATIVE_TEXT]{3_Num}%[ENDCOLOR] {1_IconString} {2_Description} across the country</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_OVER_RESOURCE_LIMIT_UNHAPPINESS">
+			<Text>[NEWLINE][ICON_BULLET][COLOR_NEGATIVE_TEXT]+{1_Num}%[ENDCOLOR] [ICON_HAPPINESS_4] Unhappiness across the country</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CO_PLAYER_TOURISM_IGNOR_TECH_BONUS">
+			<Text>Ignoring Tech bouns[NEWLINE]</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_CHAIN_REACTION_ATTACKER">
+			<Text>Your {1_UnitName} Cause [COLOR_POSITIVE_TEXT] {2_Percent}% [ENDCOLOR] Damage to all enemy milltary units within your sight regardless of distance</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_CHAIN_REACTION_DEFENDER">
+			<Text>Enemy {1_UnitName} Cause [COLOR_NEGATIVE_TEXT] {2_Percent}% [ENDCOLOR] Damage to all your milltary units within their sight regardless of distance</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MISC_CAPTURE_PROJECT">
+			<Text>{1_PlyrName} already knew the secrets of {@2_PrjctName}!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SETTLER_TRAINED_CITY">
+			<Text>{1_Num} [ICON_CITIZEN] Citizen in your city: {2_CityName:textkey} leaves the city!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SETTLER_TRAINED_CITY_SHORT">
+			<Text>Citizen Left the city!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_CLOSE_TRANSACTION_EARLY">
+			<Text>Due to the outbreak of the war, your loans Trade with {1_name} was forced to be settled early (by confiscating your foreign assets, etc.), and you [COLOR_NEGATIVE_TEXT] lost {2_num}[ICON_GOLD] Gold [ENDCOLOR].</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_CLOSE_TRANSACTION_EARLY_2">
+			<Text>Due to the outbreak of the war, your loans Trade with {1_name} was forced to be settled early (by confiscating their foreign assets, etc.), and you [COLOR_POSITIVE_TEXT] get {2_num}[ICON_GOLD] Gold [ENDCOLOR].</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_CLOSE_TRANSACTION_EARLY_SHORT">
+			<Text>Transaction forced to close!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_DIPLO_BREAK_COMPLIANCE">
+			<Text>[COLOR_NEGATIVE_TEXT]You have signed a large trading contract, but did not follow through![ENDCOLOR]</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_MINOR_TRADE_LOCAL">
+			<Text>[NEWLINE][ICON_BULLET]Modifier for Minor Trade local: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_MINOR_TRADE_GLOBAL">
+			<Text>[NEWLINE][ICON_BULLET]Modifier for Minor Trade global: {1_Num}%</Text>
+		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_ADJACENT_FEATURE">
+			<Text>[NEWLINE][ICON_BULLET]Modifier for adjacent Feature: {1_Num}%</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_TRAIT_CULTURE_FROM_UNIT">
+			<Text>Banzai! You received {1_num} [ICON_CULTURE] Culture from building a {2_name}!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_POLICY_CULTURE_FROM_UNIT">
+			<Text>You received {1_num} [ICON_CULTURE] Culture from building a {2_name}!</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOBEL_PRIZE_PHYSICS">
+			<Text>Nobel Prize in Physics</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOBEL_PRIZE_CHEMICAL">
+			<Text>Nobel Prize in Chemistry</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOBEL_PRIZE_MEDICINE">
+			<Text>Nobel Prize in Medicine or Physiology</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_WIN_NOBEL_PRIZE_MESSAGE">
+			<Text>{1_civ}'s great scientist [COLOR:33:190:247:255]{2_person_name}[ENDCOLOR] won the new {4_prizeType}, and you won +[COLOR:33:190:247:255]{3_research}[ENDCOLOR][ICON_RESEARCH] scientific research! </Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_WIN_NOBEL_PRIZE_SUMMARY">
+			<Text>Nobel Prize winner! </Text>
+		</Row>
+		<Row Tag="TXT_KEY_UNIT_IGNORE_ZOC_D">
+			<Text>[COLOR_CYAN]Ignor ZOC[ENDCOLOR]</Text>
+		</Row>
+		<Row Tag="TXT_KEY_SP_NOTIFICATION_MP_PLOT_SIGNAL">
+			<Text>{1_PlayerName}Marks a Plot.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_SP_NOTIFICATION_MP_PLOT_SIGNAL_SUMMARY">
+			<Text>Mark Plot.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MULTIPLIER_YIELD">
+			<Text>[NEWLINE][ICON_BULLET]City Multiplier: {1_Num}%</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NUCLERA_WINTER_YIELD">
+			<Text>[NEWLINE][ICON_BULLET]Nuclear Winter Multiplier: {1_Num}%</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_DIPLO_MARRIAGE">
+			<Text>Diplomatic marriage</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_MARRIAGE_EXPIRED_S">
+			<Text>Your diplomatic marriage with {1_LeaderName} has expired. </Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_MARRIAGE_EXPIRED">
+			<Text>The diplomatic marriage has expired</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_NOTIFICATION_MARRIAGE">
+			<Text>{1_CivName:textkey} and {2_CivName:textkey} decided to enter into a political
+				marriage to establish a solid bond between the two countries. </Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_MARRIAGE_S">
+			<Text>{1_CivName:textkey} and {2_CivName:textkey} are now married! </Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_DUAL_EMPIRE_TREATY">
+			<Text>Dual Empire Treaty</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_DUAL_EMPIRE_TREATY">
+			<Text>{1_CivName:textkey} and {2_CivName:textkey} completed the agreement to establish a
+				dual empire, and the two countries were officially unified under the same flag. </Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_DUAL_EMPIRE_TREATY_S">
+			<Text>
+				{1_CivName:textkey} and {2_CivName:textkey} have now reached a dual empire
+				treaty!
+			</Text>
+		</Row>
+		
+		<Row Tag="TXT_KEY_NUCLEAR_LEVEL_NONE">
+			<Text>Clear Skies</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NUCLEAR_LEVEL_NONE_HELP">
+			<Text>Existing nuclear smoke and radioactive dust on the planet have been completely cleared, global City outputs are no longer affected by the Nuclear Winter!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SUMMARY_NUCLEAR_WINTER_PROCESS_CHANGED">
+			<Text>The Nuclear Winter process has changed: {1_ProcessName}！</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_SUMMARY_NUCLEAR_WINTER_GLOBAL_EFFECT">
+			<Text>Based on the current Nuclear Winter process, every 100 Nuclear Winter points will cause the following effects on global Cities:</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_NUCLEAR_WINTER_DEBUFF_YIELD">
+			<Text>{1_IconString}{2_Description}[COLOR_NEGATIVE_TEXT]{3_Num}[ENDCOLOR]</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_NUCLEAR_WINTER_DEBUFF_YIELD_MULTIPLIER">
+			<Text>{1_IconString}{2_Description}Total Output[COLOR_NEGATIVE_TEXT]{3_Num}%[ENDCOLOR]</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_PRODMOD_WONDER_TRAIT">
+			<Text>[NEWLINE][ICON_BULLET]Trait Modifier for Wonders: {1_Num}%</Text>
+		</Row>
+
+		<Replace Tag="TXT_KEY_HOLY_CITY_REGAINED">
+			<Text>[ICON_RELIGION] Holy City Regained!</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_REGAINED_TT">
+			<Text>{1_LeaderName} has regained the [ICON_RELIGION][COLOR_POSITIVE_TEXT]Holy City[ENDCOLOR] of {2_ReligionName}: {3_HolyCity}, and will become the leader of this religion again next Turn!</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED">
+			<Text>[ICON_RELIGION] Holy City Occupied!</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED_TT">
+			<Text>{1_LeaderName} has occupied the [ICON_RELIGION][COLOR_POSITIVE_TEXT]Holy City[ENDCOLOR] of {2_ReligionName}: {3_HolyCity}. After City's [ICON_RESISTANCE] Resistance, if the number of followers of {2_ReligionName} in this civilization exceeds half of the total followers of {2_ReligionName}, and more than 3/4 of the cities follow {2_ReligionName}, they will become the leader of {2_ReligionName} in the new Turn!</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED_ALTER">
+			<Text>New Religion leader!</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED_ALTER_TT">
+			<Text>{1_LeaderName} has claimed the [ICON_RELIGION][COLOR_POSITIVE_TEXT]Holy City[ENDCOLOR] of {2_ReligionName}: {3_HolyCity}, and become the Religion leader of {2_ReligionName}!</Text>
+		</Replace>
+		<Row Tag="TXT_KEY_DIPLO_CAPTURED_RELIGION">
+			<Text>[COLOR_NEGATIVE_TEXT]You are competing with them for Religious orthodoxy.[ENDCOLOR]</Text>
+		</Row>
+		<Row Tag="TXT_KEY_BELIEF_CUTTING_NONUS">
+			<Text>Religion Beliefs bring {1_CityName} extra bonus: {2_BonusStr}.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MPDLL_ERROR_VERSION">
+			<Text>[COLOR_NEGATIVE_TEXT]An error occurred with the MPDLL. If you are using the latest versions, please contact the administrator.[COLOR_NEGATIVE_TEXT]</Text>
+		</Row>
+	</Language_en_US>
+
+</GameData>

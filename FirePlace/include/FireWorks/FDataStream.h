@@ -20,10 +20,9 @@
 #include "FFastVector.h"
 #include "FArray.h"
 #include "FEndian.h"
+#include "FString.h"
 
 class YouMustImplementASerializeOperatorForThisTypeError;
-class FStringA;
-class FStringW;
 
 //
 // Stream base class
@@ -68,7 +67,7 @@ public:
 	virtual unsigned int GetEOF() const;
 	virtual unsigned int GetSizeLeft() const;
 	virtual void CopyToMem(void* mem);
-	virtual void RaiseException( std::exception& kException ) const;
+	virtual void RaiseException(std::exception& kException) const;
 
 	// Methods:
 	//--------
@@ -96,7 +95,7 @@ protected:
 	unsigned int WriteString(int count, const std::string values[]);
 	unsigned int WriteString(const std::wstring& szName);
 	unsigned int WriteString(int count, const std::wstring values[]);
-	void Write(const YouMustImplementASerializeOperatorForThisTypeError & szName);
+	void Write(const YouMustImplementASerializeOperatorForThisTypeError& szName);
 	void Write(const FStringA& szName);
 	void Write(int count, const FStringA values[]);
 	void Write(const FStringW& szName);
@@ -111,23 +110,23 @@ protected:
 	template <typename T>
 	void Write(int count, const T values[]);
 
-	void Write(const GUID &); // JAR : todo  -- GUID isn't portable and should probably be handled elsewhere
-	void Write(const bool &);
-	void Write(const unsigned char &);
-	void Write(const char &);
-	void Write(const INT32 &);
-	void Write(const UINT32 &);
-	void Write(const UINT64 &);
-	void Write(const INT64 &);
+	void Write(const GUID&); // JAR : todo  -- GUID isn't portable and should probably be handled elsewhere
+	void Write(const bool&);
+	void Write(const unsigned char&);
+	void Write(const char&);
+	void Write(const INT32&);
+	void Write(const UINT32&);
+	void Write(const UINT64&);
+	void Write(const INT64&);
 #ifndef		_NDS
 	// On DS, UINT32 is a define for u32 which is a define for "unsigned long"
-	void Write(const unsigned long &);
+	void Write(const unsigned long&);
 #endif	//	_NDS
-	void Write(const INT16 &);
-	void Write(const UINT16 &);
-	void Write(const WCHAR &);
-	void Write(const float &);
-	void Write(const double &);
+	void Write(const INT16&);
+	void Write(const UINT16&);
+	void Write(const WCHAR&);
+	void Write(const float&);
+	void Write(const double&);
 
 	void Write(int, const INT32 values[]);
 	void Write(int, const UINT32 values[]);
@@ -144,7 +143,7 @@ protected:
 	void Write(int, const double values[]);
 	void Write(int, const GUID values[]);
 
-		// Reading
+	// Reading
 	unsigned int ReadString(FStringA& szName);
 	unsigned int ReadString(int count, FStringA values[]);
 	unsigned int ReadString(FStringW& szName);
@@ -153,8 +152,8 @@ protected:
 	unsigned int ReadString(int count, std::string values[]);
 	unsigned int ReadString(std::wstring& szName);
 	unsigned int ReadString(int count, std::wstring values[]);
-	
-	void Read(YouMustImplementASerializeOperatorForThisTypeError & szName);
+
+	void Read(YouMustImplementASerializeOperatorForThisTypeError& szName);
 	void Read(FStringA& szName);
 	void Read(int count, FStringA values[]);
 	void Read(FStringW& szName);
@@ -165,30 +164,30 @@ protected:
 	void Read(int count, std::wstring values[]);
 	/*template <class T>
 	void Read(T& value); */
-	
+
 	template <class T>
 	void Read(int count, T values[]);
-	
-	void Read(GUID &);
-	void Read(bool &);
-	void Read(unsigned char &);
-	void Read(char &);
+
+	void Read(GUID&);
+	void Read(bool&);
+	void Read(unsigned char&);
+	void Read(char&);
 	// specializations for plain old data types
-	void Read(INT32 &);
-	void Read(UINT32 &);
-	void Read(UINT64 &);
-	void Read(INT64 &);
+	void Read(INT32&);
+	void Read(UINT32&);
+	void Read(UINT64&);
+	void Read(INT64&);
 #ifndef		_NDS
 	// On DS, UINT32 is a define for u32 which is a define for "unsigned long"
-	void Read(unsigned long &);
+	void Read(unsigned long&);
 #endif	//	_NDS
-	void Read(INT16 &);
-	void Read(UINT16 &);
-	void Read(WCHAR &);
-	void Read(float &);
-	void Read(double &);
+	void Read(INT16&);
+	void Read(UINT16&);
+	void Read(WCHAR&);
+	void Read(float&);
+	void Read(double&);
 
-	void Read(int, GUID values[]); 
+	void Read(int, GUID values[]);
 	void Read(int, INT32 values[]);
 	void Read(int, UINT32 values[]);
 	void Read(int, INT64 values[]);
@@ -212,17 +211,14 @@ protected:
 	FEndian::EEndianness m_eEndianness;		// the desired endianness of data
 
 	unsigned int m_uiBytesRead;
-	unsigned int m_uiPosition;	
+	unsigned int m_uiPosition;
 };
 
-FDataStream & operator<<(FDataStream & saveTo, FDataStream & readFrom);
-FDataStream & operator>>(FDataStream & loadFrom, FDataStream & writeTo);
-
 template<typename ValueType, size_t count>
-FDataStream & operator<<(FDataStream & saveTo, const ValueType (&readFrom)[count])
+FDataStream& operator<<(FDataStream& saveTo, const ValueType(&readFrom)[count])
 {
 	size_t i = 0;
-	for(i = 0; i < count; ++i)
+	for (i = 0; i < count; ++i)
 	{
 		saveTo << readFrom[i];
 	}
@@ -230,10 +226,10 @@ FDataStream & operator<<(FDataStream & saveTo, const ValueType (&readFrom)[count
 }
 
 template<typename ValueType, size_t count>
-FDataStream & operator>>(FDataStream & loadFrom, ValueType (&writeTo)[count])
+FDataStream& operator>>(FDataStream& loadFrom, ValueType(&writeTo)[count])
 {
 	size_t i = 0;
-	for(i = 0; i < count; ++i)
+	for (i = 0; i < count; ++i)
 	{
 		loadFrom >> writeTo[i];
 	}
@@ -241,7 +237,7 @@ FDataStream & operator>>(FDataStream & loadFrom, ValueType (&writeTo)[count])
 }
 
 template < class T >
-inline FDataStream& FDataStream::operator <<( const T& kData )
+inline FDataStream& FDataStream::operator <<(const T& kData)
 {
 	// If the compiler produces an error here complaining about 
 	// YouMustImplementASerializeOperatorForThisTypeError then
@@ -250,12 +246,12 @@ inline FDataStream& FDataStream::operator <<( const T& kData )
 	// the header (FStlContainerSerialization.h, for example), 
 	// if not, implement :
 	// FDataStream & operator<<(FDataStream &, YourCustomType &)
-	Write( kData );
-	return ( *this );
+	Write(kData);
+	return (*this);
 }
 
 template < class T >
-inline FDataStream& FDataStream::operator >>( T& kData )
+inline FDataStream& FDataStream::operator >>(T& kData)
 {
 	// If the compiler produces an error here complaining about 
 	// YouMustImplementASerializeOperatorForThisTypeError then
@@ -264,42 +260,42 @@ inline FDataStream& FDataStream::operator >>( T& kData )
 	// the header (FStlContainerSerialization.h, for example), 
 	// if not, implement :
 	// FDataStream & operator>>(FDataStream &, YourCustomType &)
-	Read( kData );
-	return ( *this );
+	Read(kData);
+	return (*this);
 }
 
 /* JAR  - disabling this catch-all. It takes any non-specialized
-          type, gets sizeof(T), then dumps it through a void *
+		  type, gets sizeof(T), then dumps it through a void *
 		  producing a raw memory dump of the type in the stream.
-		  Disabling this uncovered dozens of probably unknown bugs 
+		  Disabling this uncovered dozens of probably unknown bugs
 		  in serialization.
 
-                                    ________
-                              , -‘”          ``~ ,
-                          , -”                    “- ,
-                        ,/                           ”:,
-                     ,?                                 \,
-                    /                                    ,}
-                  /                               ,:`^`  }
-                /                              ,:”       /
-               ?    __                        :`        /
-              /__ (   “~-,_                 ,:`        /
-             /(_  ”~,_    “~,_             ,:`       _/
-            {  _$;_  ”=,_    “-,_     ,-~-,}, ~”;/  }
-             ((   *~_  ”=- _    “;,, /`  /”          /
-     ,,,___ \`~,     “~ ,           `     }         /
-              (  `=-,,   `                 (  ;_,,-”
-              / `~,      `-                 \   /\
-               \`~ *-,                       |, / \,__
+									________
+							  , -æ†¯          ``~ ,
+						  , -?                   ? ,
+						,/                           ?,
+					 ,?                                 \,
+					/                                    ,}
+				  /                               ,:`^`  }
+				/                              ,:?      /
+			   ?    __                        :`        /
+			  /__ (   æ¤-,_                 ,:`        /
+			 /(_  æ”¡,_    æ¤,_             ,:`       _/
+			{  _$;_  ?,_    ?,_     ,-~-,}, ~?/  }
+			 ((   *~_  ?- _    ?,, /`  /?         /
+	 ,,,___ \`~,     æ¤ ,           `     }         /
+			  (  `=-,,   `                 (  ;_,,-?
+			  / `~,      `-                 \   /\
+			   \`~ *-,                       |, / \,__
   ,,_          } >- _\                      |         `=~-,
-       `=~-,_\_      `\,                     \
-                  `=~-,, \,                    \
-                            `:,,                `\        __
-                                `=-,            ,%`>--==``
-                                   _\    _,-%       `\
-                                 ,<`  _|_,-&``      `\
+	   `=~-,_\_      `\,                     \
+				  `=~-,, \,                    \
+							`:,,                `\        __
+								`=-,            ,%`>--==``
+								   _\    _,-%       `\
+								 ,<`  _|_,-&``      `\
 
-             P I C A R D    F A C E P A L M
+			 P I C A R D    F A C E P A L M
 Because expressing how dumb that was in words just doesn't work
 
 template < class T >
@@ -314,14 +310,14 @@ ReadIt( sizeof ( T ), &value );
 }
 */
 template < class T >
-inline void FDataStream::Write( int count, const T values[] )
+inline void FDataStream::Write(int count, const T values[])
 {
 	if (sizeof(T) == 1)
-		WriteIt( count, values );
+		WriteIt(count, values);
 	else
 	{
 		int i;
-		for(i=0;i<count;i++)
+		for (i = 0; i < count; i++)
 		{
 			//Write( values[i] );
 			*this << values[i];
@@ -330,14 +326,14 @@ inline void FDataStream::Write( int count, const T values[] )
 }
 
 template < class T >
-inline void FDataStream::Read( int count, T values[] )
+inline void FDataStream::Read(int count, T values[])
 {
 	if (sizeof(T) == 1)
-		ReadIt( count, values );
+		ReadIt(count, values);
 	else
 	{
 		int i;
-		for(i=0;i<count;i++)
+		for (i = 0; i < count; i++)
 		{
 			// JAR  - comment this out, allow data stream to 
 			// call user-supplied serialization, and not
@@ -374,14 +370,14 @@ template<typename ValueType>
 class ArrayWrapper
 {
 public:
-	ArrayWrapper(int count, ValueType * values)
+	ArrayWrapper(int count, ValueType* values)
 		: m_values(values), m_count(count) {}
 
-	ValueType * getArray()
+	ValueType* getArray()
 	{
 		return m_values;
 	}
-	const ValueType * getArray() const
+	const ValueType* getArray() const
 	{
 		return m_values;
 	}
@@ -395,44 +391,44 @@ public:
 	// in the stream.  If the count is less that the array size, the remaining entries
 	// in the array will be filled with the supplied value.  If the count is greater than
 	// the array, the remaining items in the stream will be skipped
-	void readCounted(FDataStream & readFrom, ValueType tFill = (ValueType)0)
+	void readCounted(FDataStream& readFrom, ValueType tFill = (ValueType)0)
 	{
 		int i = 0;
 		int iStreamCount;
 		readFrom >> iStreamCount;
 		int iArrayCount = getCount();
-		int readCount = (iStreamCount < iArrayCount)?iStreamCount:iArrayCount;
-		ValueType * values = getArray();
-		for(i = 0; i < readCount; ++i)
+		int readCount = (iStreamCount < iArrayCount) ? iStreamCount : iArrayCount;
+		ValueType* values = getArray();
+		for (i = 0; i < readCount; ++i)
 		{
 			readFrom >> values[i];
 		}
 		if (iStreamCount < iArrayCount)
 		{
-			for(; i < iArrayCount; ++i)
+			for (; i < iArrayCount; ++i)
 			{
 				values[i] = tFill;
 			}
 		}
 		else
-		if (iStreamCount > iArrayCount)
-		{
-			for(; i < iStreamCount; ++i)
+			if (iStreamCount > iArrayCount)
 			{
-				readFrom >> tFill;
-			}		
-		}
-		
+				for (; i < iStreamCount; ++i)
+				{
+					readFrom >> tFill;
+				}
+			}
+
 	}
 
 	// Writes out the array, with a count value first.
-	void writeCounted(FDataStream & writeTo)
+	void writeCounted(FDataStream& writeTo)
 	{
 		int i = 0;
 		int count = getCount();
 		writeTo << count;
-		const ValueType * values = getArray();
-		for(i = 0; i < count; ++i)
+		const ValueType* values = getArray();
+		for (i = 0; i < count; ++i)
 		{
 			writeTo << values[i];
 		}
@@ -442,10 +438,10 @@ private:
 	// disabled, this wrapper does not belong in containers 
 	// or allow copy construction
 	ArrayWrapper();
-	ArrayWrapper(const ArrayWrapper &);
-	ArrayWrapper & operator=(const ArrayWrapper &);
+	ArrayWrapper(const ArrayWrapper&);
+	ArrayWrapper& operator=(const ArrayWrapper&);
 
-	ValueType * m_values;
+	ValueType* m_values;
 	int         m_count;
 };
 
@@ -454,7 +450,7 @@ template< typename ValueType >
 class ArrayWrapperConst
 {
 public:
-	ArrayWrapperConst(int count, const ValueType * values)
+	ArrayWrapperConst(int count, const ValueType* values)
 		: m_values(values), m_count(count) {}
 
 	const ValueType* getArray() const
@@ -467,13 +463,13 @@ public:
 	}
 
 	// Writes out the array, with a count value first.
-	void writeCounted(FDataStream & writeTo)
+	void writeCounted(FDataStream& writeTo)
 	{
 		int i = 0;
 		int count = getCount();
 		writeTo << count;
-		const ValueType * values = getArray();
-		for(i = 0; i < count; ++i)
+		const ValueType* values = getArray();
+		for (i = 0; i < count; ++i)
 		{
 			writeTo << values[i];
 		}
@@ -484,10 +480,10 @@ private:
 	// disabled, this wrapper does not belong in containers 
 	// or allow copy construction
 	ArrayWrapperConst();
-	ArrayWrapperConst(const ArrayWrapperConst &);
-	ArrayWrapperConst & operator=(const ArrayWrapperConst &);
+	ArrayWrapperConst(const ArrayWrapperConst&);
+	ArrayWrapperConst& operator=(const ArrayWrapperConst&);
 
-	const ValueType * m_values;
+	const ValueType* m_values;
 	int         m_count;
 };
 
@@ -498,12 +494,12 @@ private:
 //-----------------------------------------------------------------------
 
 template<typename ValueType>
-FDataStream & operator<<(FDataStream & saveTo, const ArrayWrapper<ValueType> & v)
+FDataStream& operator<<(FDataStream& saveTo, const ArrayWrapper<ValueType>& v)
 {
 	int i = 0;
 	int count = v.getCount();
-	const ValueType * values = v.getArray();
-	for(i = 0; i < count; ++i)
+	const ValueType* values = v.getArray();
+	for (i = 0; i < count; ++i)
 	{
 		saveTo << values[i];
 	}
@@ -511,12 +507,12 @@ FDataStream & operator<<(FDataStream & saveTo, const ArrayWrapper<ValueType> & v
 }
 
 template<typename ValueType>
-FDataStream & operator>>(FDataStream & loadFrom, ArrayWrapper<ValueType> & v)
+FDataStream& operator>>(FDataStream& loadFrom, ArrayWrapper<ValueType>& v)
 {
 	int i = 0;
 	int count = v.getCount();
-	ValueType * values = v.getArray();
-	for(i = 0; i < count; ++i)
+	ValueType* values = v.getArray();
+	for (i = 0; i < count; ++i)
 	{
 		loadFrom >> values[i];
 	}
@@ -524,12 +520,12 @@ FDataStream & operator>>(FDataStream & loadFrom, ArrayWrapper<ValueType> & v)
 }
 
 template<typename ValueType>
-FDataStream & operator<<(FDataStream & saveTo, const ArrayWrapperConst<ValueType> & v)
+FDataStream& operator<<(FDataStream& saveTo, const ArrayWrapperConst<ValueType>& v)
 {
 	int i = 0;
 	int count = v.getCount();
-	const ValueType * values = v.getArray();
-	for(i = 0; i < count; ++i)
+	const ValueType* values = v.getArray();
+	for (i = 0; i < count; ++i)
 	{
 		saveTo << values[i];
 	}
@@ -537,12 +533,12 @@ FDataStream & operator<<(FDataStream & saveTo, const ArrayWrapperConst<ValueType
 }
 
 template<typename ValueType>
-FDataStream & operator>>(FDataStream & loadFrom, ArrayWrapperConst<ValueType> & v)
+FDataStream& operator>>(FDataStream& loadFrom, ArrayWrapperConst<ValueType>& v)
 {
 	int i = 0;
 	int count = v.getCount();
-	ValueType * values = v.getArray();
-	for(i = 0; i < count; ++i)
+	ValueType* values = v.getArray();
+	for (i = 0; i < count; ++i)
 	{
 		loadFrom >> values[i];
 	}
@@ -556,9 +552,9 @@ FDataStream & operator>>(FDataStream & loadFrom, ArrayWrapperConst<ValueType> & 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 template< class T, unsigned int ARRAY_SIZE >
-FDataStream & operator >> ( FDataStream & kStream, Firaxis::Array<T, ARRAY_SIZE> & kArray )
+FDataStream& operator >> (FDataStream& kStream, Firaxis::Array<T, ARRAY_SIZE>& kArray)
 {
-	for( unsigned int i = 0; i < kArray.size(); ++i )
+	for (unsigned int i = 0; i < kArray.size(); ++i)
 	{
 		kStream >> kArray[i];
 	}
@@ -566,9 +562,9 @@ FDataStream & operator >> ( FDataStream & kStream, Firaxis::Array<T, ARRAY_SIZE>
 }
 
 template< class T, unsigned int ARRAY_SIZE >
-FDataStream & operator << (FDataStream & kStream, const Firaxis::Array< T, ARRAY_SIZE > & kArray )
+FDataStream& operator << (FDataStream& kStream, const Firaxis::Array< T, ARRAY_SIZE >& kArray)
 {
-	for( unsigned int i = 0; i < kArray.size(); ++i )
+	for (unsigned int i = 0; i < kArray.size(); ++i)
 	{
 		kStream << kArray[i];
 	}
@@ -582,19 +578,19 @@ FDataStream & operator << (FDataStream & kStream, const Firaxis::Array< T, ARRAY
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 template< class T, bool bPODType, unsigned int AllocPool, unsigned int nSubID >
-FDataStream & operator >> ( FDataStream & kStream, FFastVector< T, bPODType, AllocPool, nSubID > & kVec )
+FDataStream& operator >> (FDataStream& kStream, FFastVector< T, bPODType, AllocPool, nSubID >& kVec)
 {
 	unsigned int iSize;
 	kStream >> iSize;
 
-	if(iSize > kVec.size())
+	if (iSize > kVec.size())
 	{
 		unsigned int count = iSize - kVec.size();
 		kVec.push_back_copy(T(), count);
 	}
-	
+
 	unsigned int i = 0;
-	for( i = 0; i < iSize; ++i )
+	for (i = 0; i < iSize; ++i)
 	{
 		kStream >> kVec[i];
 	}
@@ -602,10 +598,10 @@ FDataStream & operator >> ( FDataStream & kStream, FFastVector< T, bPODType, All
 }
 
 template< class T, bool bPODType, unsigned int AllocPool, unsigned int nSubID >
-FDataStream & operator << ( FDataStream & kStream, const FFastVector< T, bPODType, AllocPool, nSubID > & kVec )
+FDataStream& operator << (FDataStream& kStream, const FFastVector< T, bPODType, AllocPool, nSubID >& kVec)
 {
 	kStream << kVec.size();
-	for( unsigned int i = 0; i < kVec.size(); ++i )
+	for (unsigned int i = 0; i < kVec.size(); ++i)
 	{
 		kStream << kVec[i];
 	}
@@ -613,13 +609,13 @@ FDataStream & operator << ( FDataStream & kStream, const FFastVector< T, bPODTyp
 }
 
 template< class T, unsigned int L, bool bPODType, unsigned int AllocPool, unsigned int nSubID >
-FDataStream & operator >> ( FDataStream & kStream, FStaticVector< T, L, bPODType, AllocPool, nSubID > & kVec )
+FDataStream& operator >> (FDataStream& kStream, FStaticVector< T, L, bPODType, AllocPool, nSubID >& kVec)
 {
 	unsigned int iSize;
 	kStream >> iSize;
-	kVec.resize( iSize );
+	kVec.resize(iSize);
 
-	for( unsigned int i = 0; i < iSize; ++i )
+	for (unsigned int i = 0; i < iSize; ++i)
 	{
 		kStream >> kVec[i];
 	}
@@ -627,11 +623,11 @@ FDataStream & operator >> ( FDataStream & kStream, FStaticVector< T, L, bPODType
 }
 
 template< class T, unsigned int L, bool bPODType, unsigned int AllocPool, unsigned int nSubID >
-FDataStream & operator << ( FDataStream & kStream, const FStaticVector< T, L, bPODType, AllocPool, nSubID > & kVec )
+FDataStream& operator << (FDataStream& kStream, const FStaticVector< T, L, bPODType, AllocPool, nSubID >& kVec)
 {
 	kStream << (unsigned int)kVec.size();
 
-	for( unsigned int i = 0; i < kVec.size(); ++i )
+	for (unsigned int i = 0; i < kVec.size(); ++i)
 	{
 		kStream << kVec[i];
 	}
@@ -639,4 +635,6 @@ FDataStream & operator << ( FDataStream & kStream, const FStaticVector< T, L, bP
 }
 
 #endif	//FDATASTREAM_H
+
+
 

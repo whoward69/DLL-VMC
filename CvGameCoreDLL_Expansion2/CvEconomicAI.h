@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -213,6 +213,14 @@ public:
 	{
 		return m_iExplorersDisbanded;
 	};
+	void IncrementSeaExplorersDisbanded()
+	{
+		m_iSeaExplorersDisbanded++;
+	};
+	int GetSeaExplorersDisbanded()
+	{
+		return m_iSeaExplorersDisbanded;
+	};
 	int GetLastTurnWorkerDisbanded() const
 	{
 		return m_iLastTurnWorkerDisbanded;
@@ -257,6 +265,7 @@ private:
 	ReconState m_eReconState;
 	ReconState m_eNavalReconState;
 	int m_iExplorersDisbanded;
+	int m_iSeaExplorersDisbanded;
 	int m_iLastTurnWorkerDisbanded;
 	int m_iVisibleAntiquitySites;
 

@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -15,6 +15,7 @@
 class CvLuaCity : public CvLuaScopedInstance<CvLuaCity, CvCity>
 {
 public:
+	static void RegistStaticFunctions();
 	//! Push CvCity methods into table t
 	static void PushMethods(lua_State* L, int t);
 
@@ -124,6 +125,7 @@ protected:
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(Purchase, void, int, int, int, int);
 #endif
+	static int lGetNumTimesAttackedThisTurn(lua_State* L);
 	static int lGetUnitPurchaseCost(lua_State* L);
 	static int lGetUnitFaithPurchaseCost(lua_State* L);
 	static int lGetBuildingPurchaseCost(lua_State* L);
@@ -188,7 +190,9 @@ protected:
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(GetNumBuildingClass, int, iBuildingClassType);
 	LUAAPIEXTN(IsHasBuildingClass, bool, iBuildingClassType);
+	LUAAPIEXTN(SetNumRealBuildingClass, int, iBuildingClassType, iNum);
 #endif
+	static int lGetLocalBuildingClassYield(lua_State* L);
 	static int lGetNumActiveBuilding(lua_State* L);
 	static int lGetID(lua_State* L);
 	static int lGetX(lua_State* L);
@@ -223,6 +227,11 @@ protected:
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_GLOBAL_CITY_AUTOMATON_WORKERS)
 	LUAAPIEXTN(GetAutomatons, int);
 	LUAAPIEXTN(SetAutomatons, void, iAutomatons, bReassignPop);
+#endif
+
+#if defined(MOD_ROG_CORE)
+	static int lGetForcedDamageValue(lua_State* L);
+	static int lGetChangeDamageValue(lua_State* L);
 #endif
 
 	static int lGetHighestPopulation(lua_State* L);
@@ -292,6 +301,7 @@ protected:
 	static int lIsReligionInCity(lua_State* L);
 	static int lIsHolyCityForReligion(lua_State* L);
 	static int lIsHolyCityAnyReligion(lua_State* L);
+	static int lGetReligionFoundedHere(lua_State* L);
 	static int lGetNumFollowers(lua_State* L);
 	static int lGetReligiousMajority(lua_State* L);
 	static int lGetSecondaryReligion(lua_State* L);
@@ -397,10 +407,14 @@ protected:
 	static int lGetLakePlotYield(lua_State* L);
 
 	static int lGetBaseYieldRate(lua_State* L);
-
+	static int lGetYieldRateInfoTool(lua_State* L);
+	LUAAPIEXTN(GetBaseYieldRateFromProjects, int, iYield);
+	LUAAPIEXTN(GetYieldPerEra, int, iYield);
+	static int lGetTradeRouteFromTheCityYieldsPerEra(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_GLOBAL_GREATWORK_YIELDTYPES)
 	LUAAPIEXTN(GetBaseYieldRateFromGreatWorks, int, iYield);
 #endif
+	LUAAPIEXTN(GetBaseYieldRateFromPolicy, int, iYield);
 
 	static int lGetBaseYieldRateFromTerrain(lua_State* L);
 	static int lChangeBaseYieldRateFromTerrain(lua_State* L);
@@ -418,6 +432,7 @@ protected:
 	static int lChangeBaseYieldRateFromReligion(lua_State* L);
 
 	static int lGetYieldPerPopTimes100(lua_State* L);
+	static int lGetExtraBaseYieldRateTimes100(lua_State* L);
 
 	static int lGetBaseYieldRateModifier(lua_State* L);
 	static int lGetYieldRate(lua_State* L);
@@ -428,10 +443,15 @@ protected:
 	static int lGetExtraSpecialistYieldOfType(lua_State* L);
 
 	static int lGetDomainFreeExperience(lua_State* L);
+	static int lGetDomainFreeExperienceFromGreatWorks(lua_State* L);
+	static int lGetDomainFreeExperienceFromGreatWorksGlobal(lua_State* L);
 	static int lGetDomainProductionModifier(lua_State* L);
 
 	static int lIsEverOwned(lua_State* L);
-
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	static int lHasEnableCrops(lua_State* L);
+	static int lHasEnableArmee(lua_State* L);
+#endif
 	static int lIsRevealed(lua_State* L);
 	static int lSetRevealed(lua_State* L);
 	static int lGetNameKey(lua_State* L);
@@ -454,6 +474,9 @@ protected:
 	static int lGetSpecialistUpgradeThreshold(lua_State* L);
 	static int lGetNumSpecialistsAllowedByBuilding(lua_State* L);
 	static int lGetSpecialistCount(lua_State* L);
+	static int lGetProjectCount(lua_State* L);
+	static int lGetTotalSpecialistCount(lua_State* L);
+	static int lGetSpecialistCityModifier(lua_State* L);
 	static int lGetSpecialistGreatPersonProgress(lua_State* L);
 	static int lGetSpecialistGreatPersonProgressTimes100(lua_State* L);
 	static int lChangeSpecialistGreatPersonProgressTimes100(lua_State* L);
@@ -461,6 +484,9 @@ protected:
 	static int lDoReallocateCitizens(lua_State* L);
 	static int lDoVerifyWorkingPlots(lua_State* L);
 	static int lIsNoAutoAssignSpecialists(lua_State* L);
+#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
+	static int lGetGreatPersonPointFromReligion(lua_State* L);
+#endif
 
 	static int lGetFocusType(lua_State* L);
 	static int lSetFocusType(lua_State* L);
@@ -477,10 +503,11 @@ protected:
 
 	static int lGetDamage(lua_State* L);
 	static int lSetDamage(lua_State* L);
+
 	static int lChangeDamage(lua_State* L);
 	static int lGetMaxHitPoints(lua_State* L);
 
-#if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_EVENTS_CITY_BOMBARD)
+#if defined(MOD_EVENTS_CITY_BOMBARD)
 	LUAAPIEXTN(GetBombardRange, int); // returns iRange, bIndirectFire
 #endif
 	static int lCanRangeStrike(lua_State* L);
@@ -494,6 +521,7 @@ protected:
 	static int lIsWorkingPlot(lua_State* L);
 	static int lAlterWorkingPlot(lua_State* L);
 	static int lIsForcedWorkingPlot(lua_State* L);
+	static int lSetForcedWorkingPlot(lua_State* L);
 	static int lGetNumForcedWorkingPlots(lua_State* L);
 	static int lGetNumRealBuilding(lua_State* L);
 	static int lSetNumRealBuilding(lua_State* L);
@@ -547,9 +575,64 @@ protected:
 	static int lGetCultureFromSpecialist(lua_State* L);
 
 	static int lGetReligionCityRangeStrikeModifier(lua_State* L);
-
+#ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
+	static int lGetBaseYieldRateFromOtherYield(lua_State* L);
+#endif
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(AddMessage, void, sMessage, iNotifyPlayer);
+#endif
+
+	static int lGetAdditionalFood(lua_State* L);
+	static int lSetAdditionalFood(lua_State* L);
+	static int lSetMadeAttack(lua_State* L);
+
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	
+	static int lGetOrganizedCrime(lua_State* L);
+	static int lSetOrganizedCrime(lua_State* L);
+	static int lHasOrganizedCrime(lua_State* L);
+
+	static int lChangeResistanceCounter(lua_State* L);
+	static int lSetResistanceCounter(lua_State* L);
+	static int lGetResistanceCounter(lua_State* L);
+
+	static int lChangePlagueCounter(lua_State* L);
+	static int lSetPlagueCounter(lua_State* L);
+	static int lGetPlagueCounter(lua_State* L);
+
+	static int lGetPlagueTurns(lua_State* L);
+	static int lChangePlagueTurns(lua_State* L);
+	static int lSetPlagueTurns(lua_State* L);
+
+	static int lGetPlagueType(lua_State* L);
+	static int lSetPlagueType(lua_State* L);
+	static int lHasPlague(lua_State* L);
+
+	static int lChangeLoyaltyCounter(lua_State* L);
+	static int lSetLoyaltyCounter(lua_State* L);
+	static int lGetLoyaltyCounter(lua_State* L);
+
+	static int lChangeDisloyaltyCounter(lua_State* L);
+	static int lSetDisloyaltyCounter(lua_State* L);
+	static int lGetDisloyaltyCounter(lua_State* L);
+
+	static int lGetLoyaltyState(lua_State* L);
+	static int lSetLoyaltyState(lua_State* L);
+	static int lHasLoyaltyState(lua_State* L);
+
+	static int lGetYieldModifierFromHealth(lua_State* L);
+	static int lSetYieldModifierFromHealth(lua_State* L);
+
+	static int lGetYieldModifierFromCrime(lua_State* L);
+	static int lSetYieldModifierFromCrime(lua_State* L);
+
+	static int lGetYieldFromHappiness(lua_State* L);
+	static int lSetYieldFromHappiness(lua_State* L);
+	static int lGetYieldFromHealth(lua_State* L);
+	static int lSetYieldFromHealth(lua_State* L);
+
+	static int lGetYieldFromCrime(lua_State* L);
+	static int lSetYieldFromCrime(lua_State* L);
 #endif
 
 #if defined(MOD_API_LUA_EXTENSIONS)
@@ -609,6 +692,52 @@ protected:
 	LUAAPIEXTN(CountTerrain, int, iTerrain);
 	LUAAPIEXTN(CountWorkedTerrain, int, iTerrain);
 #endif
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+	static int lGetMajorReligionPantheonBelief(lua_State* L);
+	static int lIsHasMajorBelief(lua_State* L);
+	static int lIsHasSecondaryBelief(lua_State* L);
+	static int lIsSecondaryReligionActive(lua_State* L);
+#endif
+
+#if defined(MOD_INTERNATIONAL_IMMIGRATION_FOR_SP)
+	LUAAPIEXTN(IsCanDoImmigration, bool);
+	LUAAPIEXTN(SetCanDoImmigration, void);
+	LUAAPIEXTN(CanImmigrantIn, bool);
+	LUAAPIEXTN(CanImmigrantOut, bool);
+#endif
+#ifdef MOD_GLOBAL_CITY_SCALES
+	LUAAPIEXTN(GetScale, int);
+	LUAAPIEXTN(CanGrowNormally, bool);
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	LUAAPIEXTN(GetCorruptionScore, int);
+	LUAAPIEXTN(GetCorruptionLevel, int);
+	LUAAPIEXTN(UpdateCorruption);
+	LUAAPIEXTN(CalculateTotalCorruptionScore, int);
+	LUAAPIEXTN(CalculateCorruptionScoreFromDistance, int);
+	LUAAPIEXTN(CalculateCorruptionScoreFromCoastalBonus, int);
+	LUAAPIEXTN(CalculateCorruptionScoreModifierFromSpy, int);
+	LUAAPIEXTN(CalculateCorruptionScoreModifierFromTrait, int);
+	LUAAPIEXTN(GetCorruptionScoreChangeFromBuilding, int);
+	LUAAPIEXTN(GetCorruptionLevelChangeFromBuilding, int);
+	LUAAPIEXTN(CalculateCorruptionScoreFromResource, int);
+	LUAAPIEXTN(CalculateCorruptionScoreFromTrait, int);
+	LUAAPIEXTN(DecideCorruptionLevelForNormalCity, CorruptionLevelTypes, int);
+	LUAAPIEXTN(GetCorruptionScoreModifierFromPolicy, int);
+	LUAAPIEXTN(GetMaxCorruptionLevel, int);
+	LUAAPIEXTN(IsCorruptionLevelReduceByOne, bool);
+#endif
+	LUAAPIEXTN(GetHurryModifier, int);
+	LUAAPIEXTN(GetHurryModifierLocal, int);
+	LUAAPIEXTN(GetUnitMaxExperienceLocal, int);
+
+	LUAAPIEXTN(IsSecondCapital, bool);
+	LUAAPIEXTN(GetFoodConsumptionPerPopTimes100, bool);
+	LUAAPIEXTN(GetDefendedAgainstSpreadUntilTurn, int);
+
+	LUAAPIEXTN(IsAllowSpaceshipLaunch, bool);
 };
 
 #endif //CVLUACITY_H

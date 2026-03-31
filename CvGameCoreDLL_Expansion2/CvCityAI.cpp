@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -116,7 +116,7 @@ void CvCityAI::AI_chooseProduction(bool bInterruptWonders)
 			bool checkBuildWonder = true;
 			
 			// All of this only has sense if the AI is able to expand...
-			if (MOD_AI_SMART_V3 && !GC.getGame().isOption(GAMEOPTION_ONE_CITY_CHALLENGE))
+			if (MOD_AI_SMART_V3)
 			{
 				int cityExpansionFlavor = m_pCityStrategyAI->GetLatestFlavorValue((FlavorTypes)GC.getInfoTypeForString("FLAVOR_EXPANSION"));
 				int cityWonderFlavor = m_pCityStrategyAI->GetLatestFlavorValue((FlavorTypes)GC.getInfoTypeForString("FLAVOR_WONDER"));
@@ -131,7 +131,7 @@ void CvCityAI::AI_chooseProduction(bool bInterruptWonders)
 					for(pLoopCity = kOwner.firstCity(&iLoop); pLoopCity != NULL; pLoopCity = kOwner.nextCity(&iLoop))
 					{
 						int cityProd = pLoopCity->getCurrentProductionDifference(true, false);
-						if (pLoopCity == this)
+						if (isThis(*pLoopCity))
 						{
 							currentCityProd = cityProd;
 						}

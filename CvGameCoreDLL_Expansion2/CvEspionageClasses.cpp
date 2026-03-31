@@ -1,10 +1,11 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
 	All rights reserved. 
 	------------------------------------------------------------------------------------------------------- */
+#include "CustomMods.h"
 #include "CvGameCoreDLLPCH.h"
 #include "CvGameCoreDLLUtil.h"
 #include "ICvDLLUserInterface.h"
@@ -1335,6 +1336,18 @@ CvCity* CvPlayerEspionage::GetCityWithSpy(uint uiSpyIndex)
 	return pCity;
 }
 
+CvEspionageSpy* CvPlayerEspionage::GetSpyByID(uint uiSpyIndex)
+{
+	CvAssertMsg(uiSpyIndex < m_aSpyList.size(), "uiSpyIndex is out of bounds");
+	if (uiSpyIndex >= m_aSpyList.size())
+	{
+		return NULL;
+	}
+
+	return &m_aSpyList[uiSpyIndex];
+
+}
+
 
 int CvPlayerEspionage::GetSpyIndexInCity(CvCity* pCity)
 {
@@ -1371,6 +1384,18 @@ bool CvPlayerEspionage::CanEverMoveSpyTo(CvCity* pCity)
 
 	// check to see if the plot can be seen
 	if(!pPlot->isRevealed(m_pPlayer->getTeam()))
+	{
+		return false;
+	}
+
+
+	if (GET_PLAYER(pCity->getOwner()).isForbiddenForeignSpyGlobal() && (m_pPlayer->GetID() != pCity->getOwner()))
+	{
+		return false;
+	}
+
+
+	if (pCity->isForbiddenForeignSpy() && (m_pPlayer->GetID() != pCity->getOwner()))
 	{
 		return false;
 	}
@@ -1490,6 +1515,13 @@ bool CvPlayerEspionage::MoveSpyTo(CvCity* pCity, uint uiSpyIndex, bool bAsDiplom
 		int iRate = CalcPerTurn(SPY_STATE_TRAVELLING, pCity, uiSpyIndex);
 		int iGoal = CalcRequired(SPY_STATE_TRAVELLING, pCity, uiSpyIndex);
 		pCityEspionage->SetActivity(m_pPlayer->GetID(), 0, iRate, iGoal);
+
+#ifdef MOD_GLOBAL_CORRUPTION
+		if (MOD_GLOBAL_CORRUPTION)
+		{
+			pCity->UpdateCorruption();
+		}
+#endif
 	}
 
 	if(GC.getLogging())
@@ -1594,6 +1626,13 @@ bool CvPlayerEspionage::ExtractSpyFromCity(uint uiSpyIndex)
 	pCity->GetCityEspionage()->m_aiSpyAssignment[m_pPlayer->GetID()] = -1;
 	pCity->GetCityEspionage()->ResetProgress(m_pPlayer->GetID());
 
+#ifdef MOD_GLOBAL_CORRUPTION
+	if (MOD_GLOBAL_CORRUPTION)
+	{
+		pCity->UpdateCorruption();
+	}
+#endif
+
 	return true;
 }
 
@@ -1611,6 +1650,22 @@ void CvPlayerEspionage::LevelUpSpy(uint uiSpyIndex)
 
 		// announce promotion through notification
 		m_aSpyList[uiSpyIndex].m_eRank = (CvSpyRank)(m_aSpyList[uiSpyIndex].m_eRank + 1);
+		
+#ifdef MOD_GLOBAL_CORRUPTION
+		if (MOD_GLOBAL_CORRUPTION)
+		{
+			const int iX = m_aSpyList[uiSpyIndex].m_iCityX;
+			const int iY = m_aSpyList[uiSpyIndex].m_iCityY;
+			CvPlot* pPlot = GC.getMap().plot(iX, iY);
+			if(pPlot)
+			{
+				CvCity* pCity = pPlot->getPlotCity();
+				if (pCity) {
+					pCity->UpdateCorruption();
+				}
+			}
+		}
+#endif
 
 		CvNotifications* pNotifications = m_pPlayer->GetNotifications();
 		if(pNotifications)
@@ -1757,8 +1812,9 @@ int CvPlayerEspionage::CalcPerTurn(int iSpyState, CvCity* pCity, int iSpyIndex)
 			PlayerTypes eCityOwner = pCity->getOwner();
 			int iBaseYieldRate = pCity->getYieldRateTimes100(YIELD_SCIENCE, false);
 			iBaseYieldRate *= GC.getESPIONAGE_GATHERING_INTEL_RATE_BASE_PERCENT();
+			iBaseYieldRate /= 100;
 			iBaseYieldRate *= GC.getGame().getGameSpeedInfo().getSpyRatePercent();
-			iBaseYieldRate /= 10000;
+			iBaseYieldRate /= 100;
 			int iCityEspionageModifier = pCity->GetEspionageModifier();
 			int iPlayerEspionageModifier = GET_PLAYER(eCityOwner).GetEspionageModifier();
 			int iTheirPoliciesEspionageModifier = GET_PLAYER(eCityOwner).GetPlayerPolicies()->GetNumericModifier(POLICYMOD_STEAL_TECH_SLOWER_MODIFIER);
@@ -1771,6 +1827,8 @@ int CvPlayerEspionage::CalcPerTurn(int iSpyState, CvCity* pCity, int iSpyIndex)
 				int iSpyRank = m_aSpyList[iSpyIndex].m_eRank;
 				iSpyRank += m_pPlayer->GetCulture()->GetInfluenceMajorCivSpyRankBonus(eCityOwner);
 				iResult *= 100 + (GC.getESPIONAGE_GATHERING_INTEL_RATE_BY_SPY_RANK_PERCENT() * iSpyRank);
+				iResult /= 100;
+				iResult *= 100 + (GET_PLAYER(m_pPlayer->GetID()).GetEspionageSpeedModifier());
 				iResult /= 100;
 			}
 
@@ -4454,7 +4512,7 @@ void CvCityEspionage::SetSpyResult(PlayerTypes eSpyOwner, int iResult)
 
 #if defined(MOD_EVENTS_ESPIONAGE)
 	if (MOD_EVENTS_ESPIONAGE) {
-		GAMEEVENTINVOKE_HOOK(GAMEEVENT_EspionageResult, (int) eSpyOwner, iSpyIndex, iResult, m_pCity->getX(), m_pCity->getX());
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_EspionageResult, (int) eSpyOwner, iSpyIndex, iResult, m_pCity->getX(), m_pCity->getY());
 	}
 #endif
 }

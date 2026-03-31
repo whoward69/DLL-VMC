@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -29,9 +29,11 @@ public:
 
 	int GetVictoryPrereq() const;
 	int GetTechPrereq() const;
+	int GetPolicyBranchPrereq() const;
 	int GetAnyoneProjectPrereq() const;
 	void SetAnyoneProjectPrereq(int i);
 	int GetMaxGlobalInstances() const;
+	int CityMaxNum() const;
 	int GetMaxTeamInstances() const;
 	int GetProductionCost() const;
 	int GetNukeInterception() const;
@@ -42,10 +44,15 @@ public:
 	int GetFlavorValue(int i) const;
 	bool IsSpaceship() const;
 	bool IsAllowsNukes() const;
+	bool IsNoBroadcast() const;
+	int CostScalerNumberOfRepeats() const;
+	int GetGoldMaintenance() const;
+	int CostScalerEra() const;
 	const char* GetMovieArtDef() const;
 
 	const char* GetCreateSound() const;
 	void SetCreateSound(const char* szVal);
+	int GetFreePromotion() const;
 
 	// Arrays
 	int GetResourceQuantityRequirement(int i) const;
@@ -53,11 +60,19 @@ public:
 	int GetVictoryMinThreshold(int i) const;
 	int GetProjectsNeeded(int i) const;
 
+	int GetYieldChange(int i) const;
+	int* GetYieldChangeArray() const;
+	int GetYieldModifier(int i) const;;
+	int* GetYieldModifierArray() const;
+	const std::vector<PolicyTypes>& GetPolicyNeeded() const;
+
 protected:
 	int m_iVictoryPrereq;
 	int m_iTechPrereq;
+	int m_iPolicyBranchPrereq = NO_POLICY_BRANCH_TYPE;
 	int m_iAnyoneProjectPrereq;
 	int m_iMaxGlobalInstances;
+	int m_iCityMaxNum;
 	int m_iMaxTeamInstances;
 	int m_iProductionCost;
 	int m_iNukeInterception;
@@ -68,9 +83,13 @@ protected:
 
 	bool m_bSpaceship;
 	bool m_bAllowsNukes;
-
+	bool m_bNoBroadcast;
+	int m_iGoldMaintenance;
+	int m_iCostScalerEra;
+	int m_iCostScalerNumRepeats;
 	CvString m_strCreateSound;
 	CvString m_strMovieArtDef;
+	int m_iFreePromotion;
 
 	// Arrays
 	int* m_piResourceQuantityRequirements;
@@ -78,6 +97,10 @@ protected:
 	int* m_piVictoryMinThreshold;
 	int* m_piProjectsNeeded;
 	int* m_piFlavorValue;
+
+	int* m_piYieldChange;
+	int* m_piYieldModifier;
+	std::vector<PolicyTypes> m_vePolicyNeeded;
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

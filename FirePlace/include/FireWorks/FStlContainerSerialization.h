@@ -38,10 +38,11 @@
 #include <set>
 #include <vector>
 #include <unordered_set>
-
+#include <unordered_map>
+#include "CvStructs.h"
 
 template<typename FirstType, typename SecondType>
-FDataStream & operator<<(FDataStream & saveTo, const std::pair<FirstType, SecondType> & readFrom)
+FDataStream& operator<<(FDataStream& saveTo, const std::pair<FirstType, SecondType>& readFrom)
 {
 	saveTo << readFrom.first;
 	saveTo << readFrom.second;
@@ -49,7 +50,7 @@ FDataStream & operator<<(FDataStream & saveTo, const std::pair<FirstType, Second
 }
 
 template<typename FirstType, typename SecondType>
-FDataStream & operator>>(FDataStream & loadFrom, std::pair<FirstType, SecondType> & writeTo)
+FDataStream& operator>>(FDataStream& loadFrom, std::pair<FirstType, SecondType>& writeTo)
 {
 	loadFrom >> writeTo.first;
 	loadFrom >> writeTo.second;
@@ -63,29 +64,34 @@ FDataStream & operator>>(FDataStream & loadFrom, std::pair<FirstType, SecondType
 template<typename ElementType, typename ContainerType>
 struct SerializeFromSequenceContainer
 {
-	SerializeFromSequenceContainer(FDataStream & saveTo, const ContainerType & container) :
-	m_saveTo(saveTo)
-	, m_container(container)
+	SerializeFromSequenceContainer(FDataStream& saveTo, const ContainerType& container) :
+		m_saveTo(saveTo)
+		, m_container(container)
 	{
 		m_saveTo << container.size();
 	}
 
-	void operator() (ElementType & i)
+	void operator() (ElementType& i)
 	{
 		m_saveTo << i;
 	}
 
-	FDataStream & m_saveTo;
-	const ContainerType & m_container;
+	FDataStream& m_saveTo;
+	const ContainerType& m_container;
 };
 template<typename ElementType, typename ContainerType>
-void SerializeToSequenceContainer(FDataStream & loadFrom, ContainerType & container)
+void SerializeToSequenceContainer(FDataStream& loadFrom, ContainerType& container)
 {
 	container.clear();
-	ContainerType::size_type count = 0;
+	typename ContainerType::size_type count = 0;
 	loadFrom >> count;
-	ContainerType::size_type i = 0;
-	for(i = 0; i < count; ++i)
+
+	//failsafe - may be pointless but let's try
+	if (count == 0xFFFFFFFF)
+		return;
+
+	typename ContainerType::size_type i = 0;
+	for (i = 0; i < count; ++i)
 	{
 		ElementType v;
 		loadFrom >> v;
@@ -119,31 +125,35 @@ struct SerializeToSequenceContainer
 template<typename ElementType, typename ContainerType>
 struct SerializeFromAssociativeContainer
 {
-	SerializeFromAssociativeContainer(FDataStream & saveTo, ContainerType & container) :
-	m_saveTo(saveTo)
-	, m_container(container)
+	SerializeFromAssociativeContainer(FDataStream& saveTo, ContainerType& container) :
+		m_saveTo(saveTo)
+		, m_container(container)
 	{
 		size_t count = container.size();
 		m_saveTo << count;
 	}
 
-	void operator()(const ElementType & i)
+	void operator()(const ElementType& i)
 	{
 		m_saveTo << i;
 	}
 
-	FDataStream & m_saveTo;
-	ContainerType & m_container;
+	FDataStream& m_saveTo;
+	ContainerType& m_container;
 };
 
 template<typename ElementType, typename ContainerType>
-void SerializeToAssociativeContainer(FDataStream & loadFrom, ContainerType & container)
+void SerializeToAssociativeContainer(FDataStream& loadFrom, ContainerType& container)
 {
 	container.clear();
 	size_t count = 0;
 	loadFrom >> count;
-	size_t i = 0;
-	for(i = 0; i < count; ++i)
+
+	//failsafe - may be pointless but let's try
+	if (count == 0xFFFFFFFF)
+		return;
+
+	for (size_t i = 0; i < count; ++i)
 	{
 		ElementType e;
 		loadFrom >> e;
@@ -152,56 +162,63 @@ void SerializeToAssociativeContainer(FDataStream & loadFrom, ContainerType & con
 }
 
 template<typename KeyType, typename ElementType>
-FDataStream & operator<<(FDataStream & saveTo, const std::map<KeyType, ElementType> & readFrom)
+FDataStream& operator<<(FDataStream& saveTo, const std::map<KeyType, ElementType>& readFrom)
 {
 	std::for_each(readFrom.begin(), readFrom.end(), SerializeFromAssociativeContainer<std::pair<KeyType, ElementType>, const std::map<KeyType, ElementType> >(saveTo, readFrom));
 	return saveTo;
 }
 
 template<typename KeyType, typename ElementType>
-FDataStream & operator<<(FDataStream & saveTo, const stdext::hash_map<KeyType, ElementType> & readFrom)
+FDataStream& operator<<(FDataStream& saveTo, const stdext::hash_map<KeyType, ElementType>& readFrom)
 {
 	std::for_each(readFrom.begin(), readFrom.end(), SerializeFromAssociativeContainer<std::pair<KeyType, ElementType>, const stdext::hash_map<KeyType, ElementType> >(saveTo, readFrom));
 	return saveTo;
 }
 
+template<typename KeyType, typename ElementType>
+FDataStream& operator<<(FDataStream& saveTo, const std::tr1::unordered_map<KeyType, ElementType>& readFrom)
+{
+	std::for_each(readFrom.begin(), readFrom.end(), SerializeFromAssociativeContainer<std::pair<KeyType, ElementType>, const std::tr1::unordered_map<KeyType, ElementType> >(saveTo, readFrom));
+	return saveTo;
+}
+
 template<typename KeyType>
-FDataStream & operator <<(FDataStream & saveTo, const std::tr1::unordered_set<KeyType>& readFrom)
+FDataStream& operator <<(FDataStream& saveTo, const std::tr1::unordered_set<KeyType>& readFrom)
 {
 	std::for_each(readFrom.begin(), readFrom.end(), SerializeFromAssociativeContainer<KeyType, const std::tr1::unordered_set<KeyType> >(saveTo, readFrom));
 	return saveTo;
 }
 
 template<typename ElementType>
-FDataStream & operator<<(FDataStream & saveTo, const std::set<ElementType> & readFrom)
+FDataStream& operator<<(FDataStream& saveTo, const std::set<ElementType>& readFrom)
 {
 	std::for_each(readFrom.begin(), readFrom.end(), SerializeFromAssociativeContainer<ElementType, const std::set<ElementType> >(saveTo, readFrom));
 	return saveTo;
 }
 
-template<typename ElementType> 
-FDataStream & operator<<(FDataStream & saveTo, const std::deque<ElementType> & readFrom)
+template<typename ElementType>
+FDataStream& operator<<(FDataStream& saveTo, const std::deque<ElementType>& readFrom)
 {
 	std::for_each(readFrom.begin(), readFrom.end(), SerializeFromSequenceContainer<const ElementType, const std::deque<ElementType> >(saveTo, readFrom));
 	return saveTo;
 }
 
-template<typename ElementType> 
-FDataStream & operator<<(FDataStream & saveTo, const std::list<ElementType> & readFrom)
+template<typename ElementType>
+FDataStream& operator<<(FDataStream& saveTo, const std::list<ElementType>& readFrom)
 {
 	std::for_each(readFrom.begin(), readFrom.end(), SerializeFromSequenceContainer<const ElementType, const std::list<ElementType> >(saveTo, readFrom));
 	return saveTo;
 }
 
-template<typename ElementType> 
-FDataStream & operator<<(FDataStream & saveTo, const std::vector<ElementType> & readFrom)
+template<typename ElementType>
+FDataStream& operator<<(FDataStream& saveTo, const std::vector<ElementType>& readFrom)
 {
 	std::for_each(readFrom.begin(), readFrom.end(), SerializeFromSequenceContainer<const ElementType, const std::vector<ElementType> >(saveTo, readFrom));
 	return saveTo;
 }
 
 template<typename ElementType>
-FDataStream & operator>>(FDataStream & loadFrom, std::deque<ElementType> & writeTo)
+FDataStream& operator>>(FDataStream& loadFrom, std::deque<ElementType>& writeTo)
 {
 	// The functor needs to be instantiated to properly resize the container based 
 	// on how many elements the stream says it should have before passing it along
@@ -211,7 +228,7 @@ FDataStream & operator>>(FDataStream & loadFrom, std::deque<ElementType> & write
 }
 
 template<typename ElementType>
-FDataStream & operator>>(FDataStream & loadFrom, std::list<ElementType> & writeTo)
+FDataStream& operator>>(FDataStream& loadFrom, std::list<ElementType>& writeTo)
 {
 	// The functor needs to be instantiated to properly resize the container based 
 	// on how many elements the stream says it should have before passing it along
@@ -221,7 +238,7 @@ FDataStream & operator>>(FDataStream & loadFrom, std::list<ElementType> & writeT
 }
 
 template<typename ElementType>
-FDataStream & operator>>(FDataStream & loadFrom, std::vector<ElementType> & writeTo)
+FDataStream& operator>>(FDataStream& loadFrom, std::vector<ElementType>& writeTo)
 {
 	// The functor needs to be instantiated to properly resize the container based 
 	// on how many elements the stream says it should have before passing it along
@@ -233,34 +250,41 @@ FDataStream & operator>>(FDataStream & loadFrom, std::vector<ElementType> & writ
 }
 
 template<typename KeyType, typename ElementType>
-FDataStream & operator>>(FDataStream & loadFrom, std::map<KeyType, ElementType> & writeTo)
+FDataStream& operator>>(FDataStream& loadFrom, std::map<KeyType, ElementType>& writeTo)
 {
 	SerializeToAssociativeContainer<std::pair<KeyType, ElementType>, std::map<KeyType, ElementType> >(loadFrom, writeTo);
 	return loadFrom;
 }
 
 template<typename KeyType, typename ElementType>
-FDataStream & operator>>(FDataStream & loadFrom, stdext::hash_map<KeyType, ElementType> & writeTo)
+FDataStream& operator>>(FDataStream& loadFrom, stdext::hash_map<KeyType, ElementType>& writeTo)
 {
 	SerializeToAssociativeContainer<std::pair<KeyType, ElementType>, stdext::hash_map<KeyType, ElementType> >(loadFrom, writeTo);
 	return loadFrom;
 }
 
+template<typename KeyType, typename ElementType>
+FDataStream& operator>>(FDataStream& loadFrom, std::tr1::unordered_map<KeyType, ElementType>& writeTo)
+{
+	SerializeToAssociativeContainer<std::pair<KeyType, ElementType>, std::tr1::unordered_map<KeyType, ElementType> >(loadFrom, writeTo);
+	return loadFrom;
+}
+
 template<typename KeyType>
-FDataStream & operator>>(FDataStream & loadFrom, std::tr1::unordered_set<KeyType> & writeTo)
+FDataStream& operator>>(FDataStream& loadFrom, std::tr1::unordered_set<KeyType>& writeTo)
 {
 	SerializeToAssociativeContainer<KeyType, std::tr1::unordered_set<KeyType> >(loadFrom, writeTo);
 	return loadFrom;
 }
 
 template<typename ElementType>
-FDataStream & operator>>(FDataStream & loadFrom, std::set<ElementType> & writeTo)
+FDataStream& operator>>(FDataStream& loadFrom, std::set<ElementType>& writeTo)
 {
 	SerializeToAssociativeContainer<ElementType, std::set<ElementType> >(loadFrom, writeTo);
 	return loadFrom;
 }
 
-FDataStream & operator<<(FDataStream & saveTo, const std::string & readFrom);
-FDataStream & operator>>(FDataStream & loadFrom, std::string & writeTo);
+FDataStream& operator<<(FDataStream& saveTo, const std::string& readFrom);
+FDataStream& operator>>(FDataStream& loadFrom, std::string& writeTo);
 
 #endif//_INCLUDED_FStlContainerSerialization_H

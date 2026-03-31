@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -78,7 +78,14 @@ void CvBarbarians::DoBarbCampCleared(CvPlot* pPlot, PlayerTypes ePlayer)
 bool CvBarbarians::CanBarbariansSpawn()
 {
 	CvGame& kGame = GC.getGame();
-	if (kGame.getElapsedGameTurns() < 10)
+	int iMinTurn = 10;
+	if(MOD_GLOBAL_SP_BARBARIAN_ENHANCE)
+	{
+		iMinTurn /= 2;
+		if (kGame.isOption(GAMEOPTION_RAGING_BARBARIANS)) iMinTurn /= 2;
+	}
+
+	if (kGame.getElapsedGameTurns() < iMinTurn)
 	{
 		return false;
 	}
@@ -112,7 +119,9 @@ void CvBarbarians::DoCampActivationNotice(CvPlot* pPlot)
 {
 	CvGame& kGame = GC.getGame();
 	// Default to between 8 and 12 turns per spawn
-	int iNumTurnsToSpawn = 8 + kGame.getJonRandNum(5, "Barb Spawn Rand call");
+	int iBaseTurnToSpawn = 8;
+	if(MOD_GLOBAL_SP_BARBARIAN_ENHANCE) iBaseTurnToSpawn = 6;
+	int iNumTurnsToSpawn = iBaseTurnToSpawn + kGame.getJonRandNum(5, "Barb Spawn Rand call");
 
 	// Raging
 	if (kGame.isOption(GAMEOPTION_RAGING_BARBARIANS))
@@ -492,13 +501,15 @@ void CvBarbarians::DoCamps()
 													eBestUnit = GetRandomBarbarianUnitType(kMap.getArea(pLoopPlot->getArea()), UNITAI_DEFENSE);
 #endif
 
+													CvUnit* pNewBarbarianUnit = NULL;
+
 													if(eBestUnit != NO_UNIT)
-													{
-														GET_PLAYER(BARBARIAN_PLAYER).initUnit(eBestUnit, pLoopPlot->getX(), pLoopPlot->getY(), (UnitAITypes) GC.getUnitInfo(eBestUnit)->GetDefaultUnitAIType());
+													{												
+														pNewBarbarianUnit = GET_PLAYER(BARBARIAN_PLAYER).initUnit(eBestUnit, pLoopPlot->getX(), pLoopPlot->getY(), (UnitAITypes) GC.getUnitInfo(eBestUnit)->GetDefaultUnitAIType());
 
 #if defined(MOD_EVENTS_BARBARIANS)
 														if (MOD_EVENTS_BARBARIANS) {
-															GAMEEVENTINVOKE_HOOK(GAMEEVENT_BarbariansSpawnedUnit, pLoopPlot->getX(), pLoopPlot->getY(), eBestUnit);
+															GAMEEVENTINVOKE_HOOK(GAMEEVENT_BarbariansSpawnedUnit, pNewBarbarianUnit->getOwner(), pNewBarbarianUnit->GetID(), pLoopPlot->getX(), pLoopPlot->getY(), eBestUnit);
 														}
 #endif
 													}
@@ -624,7 +635,26 @@ UnitTypes CvBarbarians::GetRandomBarbarianUnitType(CvArea* pArea, UnitAITypes eU
 
 			if(bValid)
 			{
-				if(!GET_PLAYER(BARBARIAN_PLAYER).canTrain(eLoopUnit))
+				if(MOD_GLOBAL_UNIT_BARBARIAN_CAN_TRAIN)
+				{
+					if(!kUnit.IsBarbarianCanTrait()) bValid = false;
+					
+					// Tech requirements
+					if(!GET_TEAM(BARBARIAN_TEAM).GetTeamTechs()->HasTech((TechTypes)kUnit.GetPrereqAndTech()))
+					{
+						bValid = false;
+					}
+					// Obsolete Tech
+					TechTypes eObsoleteTech = (TechTypes)kUnit.GetObsoleteTech();
+					if(!kUnit.IsBarbarianTraitTechObsolete() && eObsoleteTech != NO_TECH)
+					{
+						if(GET_TEAM(BARBARIAN_TEAM).GetTeamTechs()->HasTech(eObsoleteTech))
+						{
+							bValid = false;
+						}
+					}
+				}
+				else if(!GET_PLAYER(BARBARIAN_PLAYER).canTrain(eLoopUnit))
 				{
 					bValid = false;
 				}
@@ -758,7 +788,7 @@ void CvBarbarians::DoSpawnBarbarianUnit(CvPlot* pPlot, bool bIgnoreMaxBarbarians
 			
 #if defined(MOD_EVENTS_BARBARIANS)
 			if (MOD_EVENTS_BARBARIANS) {
-				GAMEEVENTINVOKE_HOOK(GAMEEVENT_BarbariansSpawnedUnit, pPlot->getX(), pPlot->getY(), eUnit);
+				GAMEEVENTINVOKE_HOOK(GAMEEVENT_BarbariansSpawnedUnit, pUnit->getOwner(), pUnit->GetID(), pPlot->getX(), pPlot->getY(), eUnit);
 			}
 #endif
 
@@ -875,7 +905,7 @@ void CvBarbarians::DoSpawnBarbarianUnit(CvPlot* pPlot, bool bIgnoreMaxBarbarians
 
 #if defined(MOD_EVENTS_BARBARIANS)
 				if (pUnit != NULL && MOD_EVENTS_BARBARIANS) {
-					GAMEEVENTINVOKE_HOOK(GAMEEVENT_BarbariansSpawnedUnit, pSpawnPlot->getX(), pSpawnPlot->getY(), eUnit);
+					GAMEEVENTINVOKE_HOOK(GAMEEVENT_BarbariansSpawnedUnit, pUnit->getOwner(), pUnit->GetID(), pSpawnPlot->getX(), pSpawnPlot->getY(), eUnit);
 				}
 #endif
 			}

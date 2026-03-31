@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -205,12 +205,21 @@ int CvLuaEnums::pRegister(lua_State* L)
 	RegisterEnum(YIELD_SCIENCE);
 	RegisterEnum(YIELD_CULTURE);
 	RegisterEnum(YIELD_FAITH);
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
 	RegisterEnum(YIELD_TOURISM);
-#endif
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
 	RegisterEnum(YIELD_GOLDEN_AGE_POINTS);
+
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	RegisterEnum(YIELD_GREAT_GENERAL_POINTS);
+	RegisterEnum(YIELD_GREAT_ADMIRAL_POINTS);	
+	RegisterEnum(YIELD_HEALTH);	
+	RegisterEnum(YIELD_DISEASE);	
+	RegisterEnum(YIELD_CRIME);
+	RegisterEnum(YIELD_LOYALTY);
+	RegisterEnum(YIELD_SOVEREIGNTY); 
+	RegisterEnum(YIELD_VIOLENCE);
+	RegisterEnum(YIELD_HERESY);
 #endif
+
 	RegisterEnum(NUM_YIELD_TYPES);
 	EnumEnd(L);
 
@@ -239,6 +248,20 @@ int CvLuaEnums::pRegister(lua_State* L)
 	RegisterEnum(GAMEOPTION_NO_HAPPINESS);
 	RegisterEnum(GAMEOPTION_NO_TUTORIAL);
 	RegisterEnum(GAMEOPTION_NO_RELIGION);
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	RegisterEnum(GAMEOPTION_SP_CORPS_MODE_DISABLE);
+	RegisterEnum(GAMEOPTION_SP_CORPS_MODE_HIGH);
+	RegisterEnum(GAMEOPTION_SP_CORPS_MODE_LOW);
+#endif
+#if defined(MOD_INTERNATIONAL_IMMIGRATION_FOR_SP)
+	RegisterEnum(GAMEOPTION_SP_IMMIGRATION_OFF);
+#endif
+#if defined(MOD_NUCLEAR_WINTER_FOR_SP)
+	RegisterEnum(GAMEOPTION_SP_NUCLEARWINTER_OFF);
+#endif
+	RegisterEnum(GAMEOPTION_CIV_CONQUER);
+	RegisterEnum(GAMEOPTION_HUMAN_ALL_UC);
+	RegisterEnum(GAMEOPTION_PROJECT_CAPTURE);
 	RegisterEnum(NUM_GAMEOPTION_TYPES);
 
 
@@ -308,6 +331,7 @@ int CvLuaEnums::pRegister(lua_State* L)
 	RegisterEnum(NUM_TERRAIN_TYPES);
 	EnumEnd(L);
 
+	
 	//InterfaceModeTypes
 	EnumStart(L, "InterfaceModeTypes");
 	RegisterEnum(NO_INTERFACEMODE);
@@ -519,6 +543,12 @@ int CvLuaEnums::pRegister(lua_State* L)
 	RegisterEnum(COMMAND_DELETE);
 	RegisterEnum(COMMAND_GIFT);
 	RegisterEnum(COMMAND_HOTKEY);
+
+
+	//RegisterEnum(COMMAND_KILL);
+	//RegisterEnum(COMMAND_TELEPORT);
+
+
 	RegisterEnum(NUM_COMMAND_TYPES);
 	EnumEnd(L);
 
@@ -749,6 +779,8 @@ int CvLuaEnums::pRegister(lua_State* L)
 	RegisterEnum(TRADE_ITEM_ALLOW_EMBASSY);
 	RegisterEnum(TRADE_ITEM_DECLARATION_OF_FRIENDSHIP);
 	RegisterEnum(TRADE_ITEM_VOTE_COMMITMENT);
+	RegisterEnum(TRADE_ITEM_DIPLOMATIC_MARRIAGE);
+	RegisterEnum(TRADE_ITEM_DUAL_EMPIRE_TREATY);
 	RegisterEnum(NUM_TRADEABLE_ITEMS);
 	EnumEnd(L);
 

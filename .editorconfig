@@ -1,0 +1,13 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Apply to C++ and header files
+[*.{cpp,h}]
+
+# Use tabs for indentation
+indent_style = tab
+
+# Set tab width to 4
+tab_width = 4

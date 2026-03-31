@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -866,7 +866,11 @@ int PathDestValid(int iToX, int iToY, const void* pointer, CvAStar* finder)
 		return TRUE;
 	}
 
-	if(pToPlot->isMountain() && (!pCacheData->isHuman() || pCacheData->IsAutomated()))
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	if(pToPlot->isMountain() && !pToPlot->isCity() && !pUnit->canFoundMountainCity() && (!pCacheData->isHuman() || pCacheData->IsAutomated()))
+#else 
+	if(pToPlot->isMountain() && !pToPlot->isCity() && (!pCacheData->isHuman() || pCacheData->IsAutomated()))
+#endif
 	{
 		return FALSE;
 	}
@@ -920,10 +924,10 @@ int PathDestValid(int iToX, int iToY, const void* pointer, CvAStar* finder)
 	}
 
 #if defined(MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS)
-	if(bToPlotRevealed && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || pUnit->IsCombatUnit()))
-#else
-	if(bToPlotRevealed)
+	// This can cause problems when there are others units in the city we want to attack,  --Qingyin
+	//if(bToPlotRevealed && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || pUnit->IsCombatUnit()))
 #endif
+	if(bToPlotRevealed)
 	{
 		CvCity* pCity = pToPlot->getPlotCity();
 		if(pCity)
@@ -1092,12 +1096,19 @@ int PathCost(CvAStarNode* parent, CvAStarNode* node, int data, const void* point
 		}
 
 		// Penalty for ending a turn on a mountain
-		if(pToPlot->isMountain())
+		if(pToPlot->isMountain() && !pToPlot->isCity())
 		{
 			// We want to discourage AIs and automated units from exhausting their movement on a mountain, but if the unit is manually controlled by the human, let them do what they want.
 			if (!pCacheData->isHuman() || pCacheData->IsAutomated())
 			{
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+				if (!pUnit->canFoundMountainCity())
+				{
+					iCost += PATH_END_TURN_MOUNTAIN_WEIGHT;
+				}
+#else
 				iCost += PATH_END_TURN_MOUNTAIN_WEIGHT;
+#endif
 			}
 		}
 
@@ -1237,6 +1248,9 @@ int PathValid(CvAStarNode* parent, CvAStarNode* node, int data, const void* poin
 	kToNodeCacheData.iUnitPlotLimit = pToPlot->getUnitLimit();
 #endif
 	kToNodeCacheData.bIsMountain = pToPlot->isMountain();
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	kToNodeCacheData.bIsCity = pToPlot->isCity();
+#endif
 	kToNodeCacheData.bIsWater = (pToPlot->isWater() && !pToPlot->IsAllowsWalkWater());
 #if defined(MOD_PATHFINDER_TERRAFIRMA)
 	kToNodeCacheData.bIsTerraFirma = pToPlot->isTerraFirma(pUnit) && !pToPlot->IsAllowsWalkWater();
@@ -1339,15 +1353,27 @@ int PathValid(CvAStarNode* parent, CvAStarNode* node, int data, const void* poin
 							return FALSE;
 						}
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+						if (kNodeCacheData.bIsMountain && !kNodeCacheData.bIsCity && !(iFinderIgnoreStacking) && (!bIsHuman || bAIControl) && !pUnit->canFound(pToPlot))
+						{
+							return FALSE;
+						}
+
+						if (kNodeCacheData.bIsMountain && !kNodeCacheData.bIsCity && !kNodeCacheData.bCanEnterTerrain)
+						{
+							return FALSE;
+						}
+#else
 						if (kNodeCacheData.bIsMountain && !(iFinderIgnoreStacking) && (!bIsHuman || bAIControl))
 						{
 							return FALSE;
 						}
 
-						if(kNodeCacheData.bIsMountain && !kNodeCacheData.bCanEnterTerrain)
+						if (kNodeCacheData.bIsMountain && !kNodeCacheData.bCanEnterTerrain)
 						{
 							return FALSE;
 						}
+#endif
 
 						if ((iFinderInfo & CvUnit::MOVEFLAG_STAY_ON_LAND) && kNodeCacheData.bIsWater)
 						{
@@ -1356,10 +1382,10 @@ int PathValid(CvAStarNode* parent, CvAStarNode* node, int data, const void* poin
 					}
 
 #if defined(MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS)
-					if(kNodeCacheData.bIsRevealedToTeam && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || bUnitIsCombat))
-#else
-					if(kNodeCacheData.bIsRevealedToTeam)
+					// This can cause problems when there are others units in the city we want to attack,  --Qingyin
+					//if(kNodeCacheData.bIsRevealedToTeam && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || bUnitIsCombat))
 #endif
+					if(kNodeCacheData.bIsRevealedToTeam)
 					{
 						if (kNodeCacheData.bContainsOtherFriendlyTeamCity && !(iFinderIgnoreStacking))
 							return FALSE;
@@ -1605,7 +1631,14 @@ int PathNodeAdd(CvAStarNode* parent, CvAStarNode* node, int data, const void* po
 	if(data == ASNL_ADDOPEN || data == ASNL_STARTOPEN)
 	{
 		// Are there movement points left and we're worried about stacking or mountains?
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+		if (node->m_iData1 > 0
+			&& !finder->IsPathDest(node->m_iX, node->m_iY)
+			&& (!(finder->GetInfo() & MOVE_IGNORE_STACKING)
+				|| (GC.getMap().plotUnchecked(node->m_iX, node->m_iY)->isMountain() && !GC.getMap().plotUnchecked(node->m_iX, node->m_iY)->isCity())))
+#else
 		if(node->m_iData1 > 0 && !finder->IsPathDest(node->m_iX, node->m_iY) && (!(finder->GetInfo() & MOVE_IGNORE_STACKING) || GC.getMap().plotUnchecked(node->m_iX, node->m_iY)->isMountain()))
+#endif
 		{
 			// Retrieve another node
 			CvTwoLayerPathFinder* twoLayerFinder = static_cast<CvTwoLayerPathFinder*>(finder);
@@ -1652,7 +1685,11 @@ int IgnoreUnitsDestValid(int iToX, int iToY, const void* pointer, CvAStar* finde
 		return FALSE;
 	}
 
-	if(pToPlot->isMountain() && (!pCacheData->isHuman() || pCacheData->IsAutomated()))
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	if((pToPlot->isMountain() && !pToPlot->isCity() && !pUnit->canFoundMountainCity()) && (!pCacheData->isHuman() || pCacheData->IsAutomated()))
+#else
+	if((pToPlot->isMountain() && !pToPlot->isCity()) && (!pCacheData->isHuman() || pCacheData->IsAutomated()))
+#endif
 	{
 		return FALSE;
 	}
@@ -2068,7 +2105,7 @@ int StepValid(CvAStarNode* parent, CvAStarNode* node, int data, const void* poin
 		return FALSE;
 	}
 
-	if(pNewPlot->isImpassable() || pNewPlot->isMountain())
+	if(pNewPlot->isImpassable() || (pNewPlot->isMountain() && !pNewPlot->isCity()))
 	{
 		return FALSE;
 	}
@@ -2242,7 +2279,7 @@ int InfluenceCost(CvAStarNode* parent, CvAStarNode* node, int data, const void* 
 			iCost += GC.getINFLUENCE_RIVER_COST();
 
 		// Mountain Cost
-		if(pToPlot->isMountain())
+		if(pToPlot->isMountain() && !pToPlot->isCity())
 			iCost += GC.getINFLUENCE_MOUNTAIN_COST();
 		// Not a mountain - use the terrain cost
 		else
@@ -2405,7 +2442,7 @@ int RouteValid(CvAStarNode* parent, CvAStarNode* node, int data, const void* poi
 
 	if(kPlayer.GetPlayerTraits()->IsMoveFriendlyWoodsAsRoad())
 	{
-		if(pNewPlot->getOwner() == ePlayer)
+		if(MOD_TRAIT_WOOD_AS_ROAD_SP || pNewPlot->getOwner() == ePlayer)
 		{
 			if(pNewPlot->getFeatureType() == FEATURE_FOREST || pNewPlot->getFeatureType() == FEATURE_JUNGLE)
 			{
@@ -2681,7 +2718,7 @@ int BuildRouteValid(CvAStarNode* parent, CvAStarNode* node, int data, const void
 		return FALSE;
 	}
 
-	if(pNewPlot->isImpassable() || pNewPlot->isMountain())
+	if(pNewPlot->isImpassable() || (pNewPlot->isMountain() && !pNewPlot->isCity()))
 	{
 		return FALSE;
 	}
@@ -3425,6 +3462,9 @@ int TacticalAnalysisMapPathValid(CvAStarNode* parent, CvAStarNode* node, int dat
 	kToNodeCacheData.iUnitPlotLimit = pToPlot->getUnitLimit();
 #endif
 	kToNodeCacheData.bIsMountain = pToPlot->isMountain();
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+	kToNodeCacheData.bIsCity = pToPlot->isCity();
+#endif
 	kToNodeCacheData.bIsWater = pToPlotCell->IsWater();
 #if defined(MOD_PATHFINDER_TERRAFIRMA)
 	kToNodeCacheData.bIsTerraFirma = pToPlotCell->IsTerraFirma();
@@ -3535,15 +3575,28 @@ int TacticalAnalysisMapPathValid(CvAStarNode* parent, CvAStarNode* node, int dat
 							return FALSE;
 						}
 
+#ifdef MOD_TRAITS_CAN_FOUND_MOUNTAIN_CITY
+						if (kNodeCacheData.bIsMountain && !kNodeCacheData.bIsCity && !(iFinderIgnoreStacking) && (!bIsHuman || bAIControl))
+						{
+							return FALSE;
+						}
+
+						if (kNodeCacheData.bIsMountain && !kNodeCacheData.bIsCity && !kNodeCacheData.bCanEnterTerrain)	// only doing canEnterTerrain on mountain plots because it is expensive, though it probably should always be called and some other checks in this loop could be removed.
+						{
+							return FALSE;
+						}
+#else
 						if (kNodeCacheData.bIsMountain && !(iFinderIgnoreStacking) && (!bIsHuman || bAIControl))
 						{
 							return FALSE;
 						}
 
-						if(kNodeCacheData.bIsMountain && !kNodeCacheData.bCanEnterTerrain)	// only doing canEnterTerrain on mountain plots because it is expensive, though it probably should always be called and some other checks in this loop could be removed.
+						if (kNodeCacheData.bIsMountain && !kNodeCacheData.bCanEnterTerrain)	// only doing canEnterTerrain on mountain plots because it is expensive, though it probably should always be called and some other checks in this loop could be removed.
 						{
 							return FALSE;
 						}
+#endif
+
 
 						if ((finder->GetInfo() & CvUnit::MOVEFLAG_STAY_ON_LAND) && kNodeCacheData.bIsWater)
 						{
@@ -3552,10 +3605,10 @@ int TacticalAnalysisMapPathValid(CvAStarNode* parent, CvAStarNode* node, int dat
 					}
 
 #if defined(MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS)
-					if(kNodeCacheData.bIsRevealedToTeam && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || bUnitIsCombat))
-#else
-					if(kNodeCacheData.bIsRevealedToTeam)
+					// This can cause problems when there are others units in the city we want to attack,  --Qingyin
+					//if(kNodeCacheData.bIsRevealedToTeam && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || bUnitIsCombat))
 #endif
+					if(kNodeCacheData.bIsRevealedToTeam)
 					{
 						if (kNodeCacheData.bContainsOtherFriendlyTeamCity && !(iFinderIgnoreStacking))
 							return FALSE;
@@ -4018,8 +4071,12 @@ int TradeRouteLandPathCost(CvAStarNode* parent, CvAStarNode* node, int data, con
 	// Penalty for ending a turn on a mountain
 #if defined(MOD_GLOBAL_ALPINE_PASSES)
 	bool bMountain = pToPlot->isMountain();
-	if (bMountain && MOD_GLOBAL_ALPINE_PASSES && pToPlot->getRouteType() != NO_ROUTE) {
+	if (bMountain && !pToPlot->isCity() && MOD_GLOBAL_ALPINE_PASSES && pToPlot->getRouteType() != NO_ROUTE) {
 		// Any land unit may travel over a mountain with a pass
+		bMountain = false;
+	}
+	if (bMountain && pToPlot->isCity())
+	{
 		bMountain = false;
 	}
 
@@ -4080,7 +4137,7 @@ int TradeRouteLandValid(CvAStarNode* parent, CvAStarNode* node, int data, const 
 
 #if defined(MOD_GLOBAL_ALPINE_PASSES)
 	bool bMountain = pNewPlot->isMountain();
-	if (bMountain && MOD_GLOBAL_ALPINE_PASSES && pNewPlot->getRouteType() != NO_ROUTE) {
+	if (bMountain && pNewPlot->isCity() && MOD_GLOBAL_ALPINE_PASSES && pNewPlot->getRouteType() != NO_ROUTE) {
 		// Any land unit may travel over a mountain with a pass
 		bMountain = false;
 	}

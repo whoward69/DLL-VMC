@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -265,7 +265,10 @@ bool IsTestCityStrategy_FirstGoldBuilding(CvCity* pCity);
 bool IsTestCityStrategy_FirstFaithBuilding(CvCity* pCity);
 bool IsTestCityStrategy_FirstProductionBuilding(CvCity* pCity);
 bool IsTestCityStrategy_UnderBlockade(CvCity* pCity);
-bool IsTestCityStrategy_IsPuppet(CvCity* pCity);
+
+//bool IsTestCityStrategy_IsPuppet(CvCity* pCity);
+bool IsTestCityStrategy_IsPuppet(const CvCity* pCity);
+
 bool IsTestCityStrategy_MediumCityHighDifficulty(CvCity* pCity);
 bool IsTestCityStrategy_OriginalCapital(CvCity* pCity);
 bool IsTestCityStrategy_RiverCity(CvCity* pCity);

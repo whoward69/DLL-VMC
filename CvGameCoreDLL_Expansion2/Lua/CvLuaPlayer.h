@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -22,6 +22,7 @@
 class CvLuaPlayer : public CvLuaScopedInstance<CvLuaPlayer, CvPlayerAI>
 {
 public:
+	static void RegistStaticFunctions();
 	//! Push all player instances to Lua
 	static void Register(lua_State* L);
 
@@ -171,6 +172,7 @@ protected:
 	static int lGetResearchTurnsLeft(lua_State* L);
 	static int lGetResearchCost(lua_State* L);
 	static int lGetResearchProgress(lua_State* L);
+	static int lGetResearchProgressExceptOverflow(lua_State* L);
 
 	static int lUnitsRequiredForGoldenAge(lua_State* L);
 	static int lUnitsGoldenAgeCapable(lua_State* L);
@@ -236,6 +238,10 @@ protected:
 
 	static int lGetJONSCultureEverGenerated(lua_State* L);
 
+	static int lGetGoldenAgePointPerTurnFromReligion(lua_State* L);
+	static int lGetGoldenAgePointPerTurnFromTraits(lua_State* L);
+	static int lGetGoldenAgePointPerTurnFromCitys(lua_State* L);
+
 	static int lGetLastTurnLifetimeCulture(lua_State* L);
 	static int lGetInfluenceOn(lua_State* L);
 	static int lGetLastTurnInfluenceOn(lua_State* L);
@@ -293,6 +299,10 @@ protected:
 	static int lGetMinimumFaithNextGreatProphet(lua_State* L);
 	static int lHasReligionInMostCities(lua_State* L);
 	static int lDoesUnitPassFaithPurchaseCheck(lua_State* L);
+
+#ifdef MOD_API_RELIGION_EXTENSIONS
+	static int lIsSecondReligionPantheon(lua_State* L);
+#endif // MOD_API_RELIGION_EXTENSIONS
 
 	static int lGetHappiness(lua_State* L);
 	static int lSetHappiness(lua_State* L);
@@ -358,6 +368,8 @@ protected:
 	static int lSetBarbarianCombatBonus(lua_State* L);
 	static int lChangeBarbarianCombatBonus(lua_State* L);
 	static int lGetCombatBonusVsHigherTech(lua_State* L);
+	static int lGetAwayFromCapitalCombatModifier(lua_State* L);
+	static int lGetAwayFromCapitalCombatModifierMax(lua_State* L);
 	static int lGetCombatBonusVsLargerCiv(lua_State* L);
 
 	static int lGetGarrisonedCityRangeStrikeModifier(lua_State* L);
@@ -378,6 +390,7 @@ protected:
 	static int lGetNumPoliciesInBranch(lua_State* L);
 	static int lHasPolicy(lua_State* L);
 	static int lSetHasPolicy(lua_State* L);
+
 	static int lGetNextPolicyCost(lua_State* L);
 	static int lCanAdoptPolicy(lua_State* L);
 	static int lDoAdoptPolicy(lua_State* L);
@@ -423,6 +436,7 @@ protected:
 	static int lGetAttackBonusTurns(lua_State* L);
 	static int lGetCultureBonusTurns(lua_State* L);
 	static int lGetTourismBonusTurns(lua_State* L);
+	static int lGetInternationalTourismTooltip(lua_State* L);
 
 	static int lGetGoldenAgeProgressThreshold(lua_State* L);
 	static int lGetGoldenAgeProgressMeter(lua_State* L);
@@ -480,6 +494,8 @@ protected:
 	static int lGetMaxTeamBuildingProductionModifier(lua_State* L);
 	static int lGetMaxPlayerBuildingProductionModifier(lua_State* L);
 	static int lGetFreeExperience(lua_State* L);
+	static int lGetUnitCombatFreeExperiences(lua_State* L);
+	static int lGetDomainFreeExperience(lua_State* L);
 	static int lGetFeatureProductionModifier(lua_State* L);
 	static int lGetWorkerSpeedModifier(lua_State* L);
 	static int lGetImprovementUpgradeRateModifier(lua_State* L);
@@ -559,6 +575,13 @@ protected:
 	// Minor Civ stuff
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(IsMajorCiv, bool);
+	LUAAPIEXTN(GetCivBuilding, int);
+	LUAAPIEXTN(GetCivUnit, int);
+	LUAAPIEXTN(GetCivBuildingWithDefault, int);
+	LUAAPIEXTN(GetCivUnitWithDefault, int);
+	LUAAPIEXTN(GetCivUnitNowTech, int);
+	LUAAPIEXTN(IsBuildingObsolete, int);
+	LUAAPIEXTN(IsUnitObsolete, int);
 #endif
 	static int lIsMinorCiv(lua_State* L);
 	static int lGetMinorCivType(lua_State* L);
@@ -579,6 +602,7 @@ protected:
 	static int lGetFriendshipChangePerTurnTimes100(lua_State* L);
 	static int lGetMinorCivFriendshipWithMajor(lua_State* L);
 	static int lChangeMinorCivFriendshipWithMajor(lua_State* L);
+	static int lGetMinorBullyInfluenceLoss(lua_State* L);
 	static int lGetMinorCivFriendshipAnchorWithMajor(lua_State* L);
 	static int lGetFriendshipNeededForNextLevel(lua_State* L);
 	static int lGetMinorCivFriendshipLevelWithMajor(lua_State* L);
@@ -676,6 +700,7 @@ protected:
 	static int lGetPlayerColor(lua_State* L);
 
 	static int lGetSeaPlotYield(lua_State* L);
+	static int lGetCityLoveKingDayYieldMod(lua_State* L);
 	static int lGetYieldRateModifier(lua_State* L);
 	static int lGetCapitalYieldRateModifier(lua_State* L);
 	static int lGetExtraYieldThreshold(lua_State* L);
@@ -690,8 +715,11 @@ protected:
 	static int lGetScienceFromHappinessTimes100(lua_State* L);
 	static int lGetScienceFromResearchAgreementsTimes100(lua_State* L);
 	static int lGetScienceFromBudgetDeficitTimes100(lua_State* L);
+	static int lGetScienceFromReligion(lua_State* L);
 
 	// END Science
+
+	static int lGetAllTradeValueTimes100(lua_State* L);
 
 	static int lGetProximityToPlayer(lua_State* L);
 	static int lDoUpdateProximityToPlayer(lua_State* L);
@@ -717,6 +745,7 @@ protected:
 
 	static int lIsBuildingFree(lua_State* L);
 	static int lGetUnitClassCount(lua_State* L);
+	static int lGetUnitCountFromHasPromotion(lua_State* L);
 	static int lIsUnitClassMaxedOut(lua_State* L);
 	static int lGetUnitClassMaking(lua_State* L);
 	static int lGetUnitClassCountPlusMaking(lua_State* L);
@@ -729,6 +758,9 @@ protected:
 	static int lIsHasAccessToHurry(lua_State* L);
 	static int lIsCanHurry(lua_State* L);
 	static int lGetHurryGoldCost(lua_State* L);
+
+	static int lGetMinorFriendCount(lua_State* L);
+	static int lGetMinorAllyCount(lua_State* L);
 
 	static int lIsResearchingTech(lua_State* L);
 	static int lSetResearchingTech(lua_State* L);
@@ -759,6 +791,12 @@ protected:
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(GetNumPuppetCities, int);
 #endif
+
+
+#if defined(MOD_ROG_CORE)
+	static int lGetNumOriginalCapital(lua_State* L);
+#endif
+
 	static int lGetCityByID(lua_State* L);
 
 	static int lGetUnits(lua_State* L);
@@ -819,6 +857,8 @@ protected:
 	static int lIsDoFMessageTooSoon(lua_State* L);
 	static int lIsDoF(lua_State* L);
 	static int lGetDoFCounter(lua_State* L);
+	static int lIsMarriageAccepted(lua_State* L);
+	static int lGetMarriageCounter(lua_State* L);
 	static int lIsPlayerDoFwithAnyFriend(lua_State* L);
 	static int lIsPlayerDoFwithAnyEnemy(lua_State* L);
 	static int lIsPlayerDenouncedFriend(lua_State* L);
@@ -891,6 +931,9 @@ protected:
 	static int lDoForceDoF(lua_State* L);
 	static int lDoForceDenounce(lua_State* L);
 
+	static int lIsCanDiplomaticMarriage(lua_State* L);
+	static int lIsAbleToDualEmpire(lua_State* L);
+
 	// END Diplomacy Stuff
 
 	static int lGetNumNotifications(lua_State* L);
@@ -929,6 +972,7 @@ protected:
 
 	static int lGetNumFreeTechs(lua_State* L);
 	static int lSetNumFreeTechs(lua_State* L);
+	static int lChooseFreeTechs(lua_State* L);
 	static int lGetNumFreePolicies(lua_State* L);
 	static int lSetNumFreePolicies(lua_State* L);
 	static int lChangeNumFreePolicies(lua_State* L);
@@ -950,14 +994,18 @@ protected:
 	static int lUnitsAux(lua_State* L);
 	static int lUnits(lua_State* L);
 
+	static int lGetUnitsListFromHasPromotion(lua_State* L);
+
 	static int lCitiesAux(lua_State* L);
 	static int lCities(lua_State* L);
 
 	static int lHasReceivedNetTurnComplete(lua_State* L);
 	static int lGetTraitGoldenAgeCombatModifier(lua_State* L);
 	static int lGetTraitCityStateCombatModifier(lua_State* L);
+	static int lGetTraitCityStateFriendshipModifier(lua_State* L);
 	static int lGetTraitGreatGeneralExtraBonus(lua_State* L);
 	static int lGetTraitGreatScientistRateModifier(lua_State* L);
+	static int lGetTraitUnitMaxHitPointChangePerRazedCityPopLimit(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_TRAITS_ANY_BELIEF)
 	LUAAPIEXTN(IsTraitAnyBelief, bool);
 #endif
@@ -1051,6 +1099,7 @@ protected:
 	static int lGetInternationalTradeRouteTheirBuildingBonus(lua_State* L);
 	static int lGetInternationalTradeRoutePolicyBonus(lua_State* L);
 	static int lGetInternationalTradeRouteOtherTraitBonus(lua_State* L);
+	static int lGetInternationalTradeRouteTraitBonus(lua_State* L);
 	static int lGetInternationalTradeRouteRiverModifier(lua_State* L);
 	static int lGetInternationalTradeRouteDomainModifier(lua_State* L);
 	static int lGetInternationalTradeRouteTotal(lua_State* L);
@@ -1089,6 +1138,12 @@ protected:
 	static int lGetWarmongerPreviewString(lua_State* L);
 	static int lGetLiberationPreviewString(lua_State* L);
 
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	static int lGetWarCasualtiesCounter(lua_State* L);
+	static int lChangeWarCasualtiesCounter(lua_State* L);
+	static int lSetWarCasualtiesCounter(lua_State* L);
+	static int lCheckAndUpdateWarCasualtiesCounter(lua_State* L);
+#endif
 
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(AddMessage, void, sMessage);
@@ -1163,6 +1218,88 @@ protected:
 	LUAAPIEXTN(ActivateMilitaryStrategy, void, iStrategy);
 	LUAAPIEXTN(DeactivateMilitaryStrategy, void, iStrategy);
 #endif
+
+#if defined(MOD_SPECIALIST_RESOURCES)
+	LUAAPIEXTN(GetSpecialistResources, table, eSpecialist);
+#endif
+
+	LUAAPIEXTN(GetHappinessFromFaith, int);
+
+#ifdef MOD_RESOURCE_EXTRA_BUFF
+	LUAAPIEXTN(GetUnHappinessModFromResourceByIndex, int, eResourceType);
+	LUAAPIEXTN(GetCityConnectionTradeRouteGoldModifierFromResourceByIndex, int, eResourceType);
+	LUAAPIEXTN(GetGoldHurryCostModifierFromResourceByIndex, int, eResourceType);
+#endif
+
+	LUAAPIEXTN(GetYieldModifierFromHappiness, int, eYieldType);
+	LUAAPIEXTN(GetYieldModifierFromNumGreakWork, int, eYieldType);
+	LUAAPIEXTN(GetYieldModifierFromNumArtifact, int, eYieldType);
+	LUAAPIEXTN(GetYieldModifierFromHappinessPolicy, int, eYieldType);
+
+	LUAAPIEXTN(GetGlobalYieldModifierFromResource, int, eYieldType);
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	LUAAPIEXTN(IsCorruptionLevelReduceByOne, bool);
+	LUAAPIEXTN(GetCorruptionScoreModifierFromPolicy, int);
+#endif
+
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	static int lGetDomainTroopsTotalTimes100(lua_State* L);
+	static int lChangeDomainTroopsTotalTimes100(lua_State* L);
+	static int lSetDomainTroopsTotalTimes100(lua_State* L);
+
+	static int lGetDomainTroopsUsed(lua_State* L);
+	static int lChangeDomainTroopsUsed(lua_State* L);
+	static int lSetDomainTroopsUsed(lua_State* L);
+
+	LUAAPIEXTN(GetTroopsRateTimes100, int);
+	static int lGetDomainTroopsTotal(lua_State* L);
+	static int lIsLackingTroops(lua_State* L);
+	static int lGetDomainTroopsActive(lua_State* L);
+
+	LUAAPIEXTN(GetNumCropsTotalTimes100, int);
+	LUAAPIEXTN(ChangeNumCropsTotalTimes100, void, iChange);
+	LUAAPIEXTN(GetNumCropsUsed, int);
+	LUAAPIEXTN(ChangeNumCropsUsed, void, iChange);
+	LUAAPIEXTN(GetNumCropsTotal, int);
+	LUAAPIEXTN(IsCanEstablishCrops, bool);
+
+	LUAAPIEXTN(GetNumArmeeTotalTimes100, int);
+	LUAAPIEXTN(ChangeNumArmeeTotalTimes100, void, iChange);
+	LUAAPIEXTN(GetNumArmeeUsed, int);
+	LUAAPIEXTN(ChangeNumArmeeUsed, void, iChange);
+	LUAAPIEXTN(GetNumArmeeTotal, int);
+	LUAAPIEXTN(IsCanEstablishArmee, bool);
+#endif
+#if defined(MOD_INTERNATIONAL_IMMIGRATION_FOR_SP)
+	LUAAPIEXTN(GetImmigrationCounter, int, iIndex);
+	LUAAPIEXTN(ChangeImmigrationCounter, void, iIndex, iChange);
+	LUAAPIEXTN(SetImmigrationCounter, void, iIndex, iValue);
+	LUAAPIEXTN(GetImmigrationRate, int, eTargetPlayer);
+	LUAAPIEXTN(GetImmigrationInRateFromPolicy, int);
+	LUAAPIEXTN(GetImmigrationOutRateFromPolicy, int);
+#endif
+
+	LUAAPIEXTN(GetScienceTimes100FromFriendsTable);
+	LUAAPIEXTN(GetBossLevel, int);
+	LUAAPIEXTN(ChangeBossLevel, void, iChange);
+	LUAAPIEXTN(SetBossLevel, void, iValue);
+
+	LUAAPIEXTN(GetUUFromExtra, int);
+	LUAAPIEXTN(GetUBFromExtra, int);
+	LUAAPIEXTN(GetUIFromExtra, int);
+	LUAAPIEXTN(ChangeUUFromExtra, void, eUnitTypes, bIsAdd);
+	LUAAPIEXTN(ChangeUBFromExtra, void, eBuildingTypes, bIsAdd);
+	LUAAPIEXTN(ChangeUIFromExtra, void, eImprovementTypes, bIsAdd);
+
+	LUAAPIEXTN(IsLostUC, int);
+	LUAAPIEXTN(SetLostUC, void, bIsLost);
+
+	LUAAPIEXTN(GetNumTechsKnown, int);
+	LUAAPIEXTN(GetFreeBuildingCount, int);
+	LUAAPIEXTN(ChangeFreeBuildingCount, void, BuildingTypes, int);
+
+	LUAAPIEXTN(GetMilitaryPromiseTurnLeft, int, ePlayer);
 };
 
 #endif //CVLUAPLAYER_H

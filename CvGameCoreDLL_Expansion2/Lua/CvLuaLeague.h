@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -16,9 +16,11 @@
 class CvLuaLeague : public CvLuaScopedInstance<CvLuaLeague, CvLeague>
 {
 public:
+	static void RegistStaticFunctions();
+
 	//! Push CvLeague methods into table t
 	static void PushMethods(lua_State* L, int t);
-
+	
 	//! Error handle for missing instances
 	static void HandleMissingInstance(lua_State* L);
 
@@ -83,6 +85,7 @@ protected:
 
 	static int lGetArtsyGreatPersonRateModifier(lua_State* L);
 	static int lGetScienceyGreatPersonRateModifier(lua_State* L);
+	static int lGetGreatDoctorPersonRateModifier(lua_State* L);
 
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_API_EXTENSIONS)
 	LUAAPIEXTN(IsPlayerEmbargoed, bool, iPlayer);

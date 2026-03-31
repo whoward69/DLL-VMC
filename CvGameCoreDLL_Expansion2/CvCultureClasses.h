@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -183,7 +183,7 @@ public:
 	bool HasAvailableGreatWorkSlot(GreatWorkSlotType eGreatWorkSlot);
 	int GetNumAvailableGreatWorkSlots(GreatWorkSlotType eGreatWorkSlot) const;
 	CvCity *GetClosestAvailableGreatWorkSlot(int iX, int iY, GreatWorkSlotType eGreatWorkSlot, BuildingClassTypes *eBuildingClass, int *iSlot) const;
-	int GetNumGreatWorks() const;
+	int GetNumGreatWorks(bool bIncludeArtifact = true, bool bIncludeGreatWork = true) const;
 	int GetNumGreatWorkSlots() const;
 	int GetNumGreatWorkSlots(GreatWorkSlotType eGreatWorkSlot) const;
 	bool ControlsGreatWork (int iIndex);
@@ -199,7 +199,8 @@ public:
 	bool ThemeBuilding(vector<CvGreatWorkBuildingInMyEmpire>::const_iterator it, vector<CvGreatWorkInMyEmpire> &works1, vector<CvGreatWorkInMyEmpire> &works2, bool bConsiderOtherPlayers);
 	bool ThemeEqualArtArtifact(CvGreatWorkBuildingInMyEmpire kBldg, int iThemingBonusIndex, int iNumSlots, vector<CvGreatWorkInMyEmpire> &works1, vector<CvGreatWorkInMyEmpire> &works2, bool bConsiderOtherPlayers);
 #if defined(MOD_GLOBAL_GREATWORK_YIELDTYPES)
-	void MoveSingleWorks(vector<CvGreatWorkBuildingInMyEmpire> &buildings, vector<CvGreatWorkInMyEmpire> &works1, vector<CvGreatWorkInMyEmpire> &works2, YieldTypes eFocusYield);
+	//void MoveSingleWorks(vector<CvGreatWorkBuildingInMyEmpire> &buildings, vector<CvGreatWorkInMyEmpire> &works1, vector<CvGreatWorkInMyEmpire> &works2, YieldTypes eFocusYield);
+	bool MoveSingleWorks(vector<CvGreatWorkBuildingInMyEmpire>& buildings, vector<CvGreatWorkInMyEmpire>& works1, vector<CvGreatWorkInMyEmpire>& works2, YieldTypes eFocusYield, bool bPuppet);
 #endif
 	bool FillBuilding(vector<CvGreatWorkBuildingInMyEmpire>::const_iterator it, vector<CvGreatWorkInMyEmpire> &works1, vector<CvGreatWorkInMyEmpire> &works2);
 	void MoveWorkIntoSlot (CvGreatWorkInMyEmpire kWork, int iCityID, BuildingTypes eBuilding, int iSlot);
@@ -328,17 +329,17 @@ public:
 	void Init(CvCity* m_pCity);
 
 #if defined(MOD_GLOBAL_GREATWORK_YIELDTYPES)
-	int GetNumGreatWorks(bool bIgnoreYield = true) const;
-#else
-	int GetNumGreatWorks() const;
 #endif
+	int GetNumGreatWorks(bool bIgnoreYield = true, bool bIncludeArtifact = true, bool bIncludeGreatWork = true) const;
+
 	int GetNumGreatWorkSlots() const;
 	int GetNumAvailableGreatWorkSlots(GreatWorkSlotType eSlotType) const;
 	void ClearGreatWorks();
 	GreatWorkSlotType GetSlotTypeFirstAvailableCultureBuilding() const;
 
-	int GetBaseTourismBeforeModifiers();
-	int GetBaseTourism();
+	void CalculateBaseTourismBeforeModifiers(CvString& toolTipSink);
+	int CalculateBaseTourism(CvString& toolTipSink);
+
 	int GetTourismMultiplier(PlayerTypes ePlayer, bool bIgnoreReligion, bool bIgnoreOpenBorders, bool bIgnoreTrade, bool bIgnorePolicies, bool bIgnoreIdeologies) const;
 
 	CvString GetTourismTooltip();

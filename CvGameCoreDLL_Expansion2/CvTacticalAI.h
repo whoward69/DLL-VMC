@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -907,7 +907,7 @@ private:
 #endif
 	void TurnOffMove(TacticalAIMoveTypes eType);
 	bool FindUnitsForThisMove(TacticalAIMoveTypes eMove, CvPlot* pTargetPlot, int iNumTurnsAway=0, bool bRangedOnly=false);
-	bool FindUnitsWithinStrikingDistance(CvPlot *pTargetPlot, int iNumTurnsAway, int iPreferredDamageLevel, bool bNoRangedUnits=false, bool bNavalOnly=false, bool bMustMoveThrough=false, bool bIncludeBlockedUnits=false, bool bWillPillage=false, bool bTargetUndefended=false);
+	bool FindUnitsWithinStrikingDistance(CvPlot *pTargetPlot, int iNumTurnsAway, int iPreferredDamageLevel, bool bNoRangedUnits=false, bool bNavalOnly=false, bool bMustMoveThrough=false, bool bIncludeBlockedUnits=false, bool bWillPillage=false, bool bTargetUndefended=false, bool bIsDefenseCamp = false);
 	bool FindParatroopersWithinStrikingDistance(CvPlot *pTargetPlot);
 	bool FindCitiesWithinStrikingDistance(CvPlot* pTargetPlot);
 	bool FindClosestUnit(CvPlot* pTargetPlot, int iNumTurnsAway, bool bMustHaveHalfHP, bool bMustBeRangedUnit=false, int iRangeRequired=2, bool bNeedsIgnoreLOS=false, bool bMustBeMeleeUnit=false, bool bIgnoreUnits=false, CvPlot* pRangedAttackTarget=NULL);

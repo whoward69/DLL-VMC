@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -124,6 +124,11 @@ struct CvResolutionEffects
 	int iScienceyGreatPersonRateMod;
 	int iGreatPersonTileImprovementCulture;
 	int iLandmarkCulture;
+#if defined(MOD_VOTING_NEW_EFFECT_FOR_SP)
+	int iGlobalAttackModifier;
+	int iGlobalWarCasualtiesChanges;
+	bool bEmbargoIdeology;
+#endif
 };
 
 FDataStream& operator>>(FDataStream&, CvResolutionEffects&);
@@ -403,9 +408,16 @@ typedef FStaticVector<CvRepealProposal, 2, false, c_eCiv5GameplayDLL> RepealProp
 //!  - Tracks members and their statuses
 //!  - Queried for certain effects of active Resolutions by other game classes
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-class CvLeague
+class CvLeague : public CvGameObjectExtractable
 {
 public:
+	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
+	static void RegistInstanceFunctions();
+	static void RegistStaticFunctions();
+	static void GetArgumentsAndExecute(LeagueTypes league);
+	static CvLeague* Provide(LeagueTypes league);
+
 	CvLeague(void);
 	CvLeague(LeagueTypes eID);
 	~CvLeague(void);
@@ -716,6 +728,15 @@ public:
 	int GetPressureForIdeology(PlayerTypes ePlayer, PolicyBranchTypes eIdeology);
 	int GetArtsyGreatPersonRateModifier(PlayerTypes ePlayer);
 	int GetScienceyGreatPersonRateModifier(PlayerTypes ePlayer);
+#if defined(MOD_VOTING_NEW_EFFECT_FOR_SP)
+	int GetGlobalAttackModifier();
+	void ChangeGlobalAttackModifier(int iChange);
+	int GetGlobalWarCasualtiesChanges();
+	void ChangeGlobalWarCasualtiesChanges(int iChange);
+	bool IsIdeologyEmbargoed(PlayerTypes eTrader, PlayerTypes eRecipient);
+	bool IsColdWarActive();
+	void SetColdWarActive(int iValue);
+#endif
 
 	// General Logging
 	CvString GetLogFileName() const;
@@ -726,6 +747,11 @@ public:
 	int m_iNumLeaguesEverFounded;
 	PlayerTypes m_eDiplomaticVictor;
 	EraTypes m_eLastEraTrigger;
+#if defined(MOD_VOTING_NEW_EFFECT_FOR_SP)
+	int m_iGlobalAttackModifier;
+	int m_iGlobalWarCasualtiesChanges;
+	bool m_bEmbargoIdeology;
+#endif
 
 private:
 	// Logging
@@ -1232,7 +1258,11 @@ public:
 	int GetScienceyGreatPersonRateMod() const;
 	int GetGreatPersonTileImprovementCulture() const;
 	int GetLandmarkCulture() const;
-
+#if defined(MOD_VOTING_NEW_EFFECT_FOR_SP)
+	int GetGlobalAttackModifier() const;
+	int GetGlobalWarCasualtiesChanges() const;
+	bool IsEmbargoIdeology() const;
+#endif
 protected:
 	ResolutionDecisionTypes m_eVoterDecision;
 	ResolutionDecisionTypes m_eProposerDecision;
@@ -1267,6 +1297,11 @@ protected:
 	int m_iScienceyGreatPersonRateMod;
 	int m_iGreatPersonTileImprovementCulture;
 	int m_iLandmarkCulture;
+#if defined(MOD_VOTING_NEW_EFFECT_FOR_SP)
+	int m_iGlobalAttackModifier;
+	int m_iGlobalWarCasualtiesChanges;
+	bool m_bEmbargoIdeology;
+#endif
 
 private:
 	CvResolutionEntry(const CvResolutionEntry&);

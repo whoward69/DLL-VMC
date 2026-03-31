@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -400,6 +400,7 @@ public:
 	bool IsHasPaidTributeTo(PlayerTypes ePlayer);
 	bool IsNukedBy(PlayerTypes ePlayer);
 	bool IsCapitalCapturedBy(PlayerTypes ePlayer);
+	bool IsReligionCapturedBy(PlayerTypes ePlayer);
 	bool IsAngryAboutProtectedMinorKilled(PlayerTypes ePlayer);
 	bool IsAngryAboutProtectedMinorAttacked(PlayerTypes ePlayer);
 	bool IsAngryAboutProtectedMinorBullied(PlayerTypes ePlayer);
@@ -801,6 +802,21 @@ public:
 	void SetFriendDeclaredWarOnUs(PlayerTypes ePlayer, bool bValue);
 	int GetWeDeclaredWarOnFriendCount();
 
+	// Marriage with players
+	bool IsMarriageAccepted(PlayerTypes ePlayer) const;
+	void SetMarriageAccepted(PlayerTypes ePlayer, bool bValue);
+
+	short GetMarriageCounter(PlayerTypes ePlayer) const;
+	void SetMarriageCounter(PlayerTypes ePlayer, int iValue);
+	void ChangeMarriageCounter(PlayerTypes ePlayer, int iChange);
+
+	short GetMarriageFinishCounter(PlayerTypes ePlayer) const;
+	void SetMarriageFinishCounter(PlayerTypes ePlayer, int iValue);
+	void ChangeMarriageFinishCounter(PlayerTypes ePlayer, int iChange);
+
+	short GetDualEmpireTreatyCounter() const;
+	void  ChangeDualEmpireTreatyCounter(const int value);
+
 	// Working Against Player
 	//bool DoTestWorkingAgainstPlayersDesire(PlayerTypes ePlayer, PlayerTypes &eChosenAgainstPlayer);
 
@@ -1010,6 +1026,7 @@ public:
 	int GetDOFAcceptedScore(PlayerTypes ePlayer);
 	int GetDOFWithAnyFriendScore(PlayerTypes ePlayer);
 	int GetDOFWithAnyEnemyScore(PlayerTypes ePlayer);
+	int GetMarriageAcceptedScore(PlayerTypes ePlayer);
 	int GetFriendDenouncementScore(PlayerTypes ePlayer);
 	int GetWeDenouncedFriendScore(PlayerTypes ePlayer);
 	int GetFriendDenouncedUsScore(PlayerTypes ePlayer);
@@ -1025,6 +1042,7 @@ public:
 	int GetRecentAssistScore(PlayerTypes ePlayer);
 	int GetNukedByScore(PlayerTypes ePlayer);
 	int GetCapitalCapturedByScore(PlayerTypes ePlayer);
+	int GetReligionCapturedByScore(PlayerTypes ePlayer);
 	int GetGaveAssistanceToScore(PlayerTypes ePlayer);
 	int GetPaidTributeToScore(PlayerTypes ePlayer);
 	int GetLikedTheirProposalScore(PlayerTypes ePlayer);
@@ -1032,6 +1050,7 @@ public:
 	int GetSupportedMyProposalScore(PlayerTypes ePlayer);
 	int GetFoiledMyProposalScore(PlayerTypes ePlayer);
 	int GetSupportedMyHostingScore(PlayerTypes ePlayer);
+	int GetWeBreakOurComplianceScore(PlayerTypes ePlayer);
 #if defined(MOD_EVENTS_DIPLO_MODIFIERS)
 	int GetDiploModifiers(PlayerTypes ePlayer, std::vector<Opinion>& aOpinions);
 #endif
@@ -1044,6 +1063,8 @@ public:
 	/////////////////////////////////////////////////////////
 
 	bool DoPossibleMinorLiberation(PlayerTypes eMinor, int iCityID);
+
+	bool IsPlayerBadTheftTarget(PlayerTypes ePlayer,  const CvPlot* pPlot = NULL);
 
 	int GetNumOurEnemiesPlayerAtWarWith(PlayerTypes ePlayer);
 
@@ -1108,6 +1129,12 @@ public:
 	void LogCloseEmbassy(PlayerTypes ePlayer);
 
 private:
+	/// Helper function to return this player's ID more conveniently
+	inline PlayerTypes GetID() const
+	{
+		return m_pPlayer->GetID();
+	}
+
 	bool IsValidUIDiplomacyTarget(PlayerTypes eTargetPlayer);
 
 	bool IsAtWar(PlayerTypes eOtherPlayer);
@@ -1369,6 +1396,12 @@ private:
 		char m_aacCoopWarAcceptedState[MAX_MAJOR_CIVS* MAX_MAJOR_CIVS];
 		short m_aaiCoopWarCounter[MAX_MAJOR_CIVS* MAX_MAJOR_CIVS];
 
+		std::tr1::array<bool, MAX_MAJOR_CIVS> m_pabMarriageAccepted;
+		std::tr1::array<short, MAX_MAJOR_CIVS> m_paiMarriageCounter;
+		std::tr1::array<short, MAX_MAJOR_CIVS> m_paiMarriageFinishCounter;
+
+		int m_iDualEmpireTreatyCounter = 0;
+
 #if defined(MOD_AI_MP_DIPLOMACY)
 		float m_aTradePriority[MAX_MAJOR_CIVS]; // current ai to human trade priority
 #endif
@@ -1584,6 +1617,12 @@ private:
 	short* m_paiOtherPlayerTurnsSinceTheyFoiledOurProposal;
 	short* m_paiOtherPlayerTurnsSinceTheySupportedOurHosting;
 
+	std::tr1::array<bool, MAX_MAJOR_CIVS> m_pabMarriageAccepted;
+	std::tr1::array<short, MAX_MAJOR_CIVS> m_paiMarriageCounter;
+	std::tr1::array<short, MAX_MAJOR_CIVS> m_paiMarriageFinishCounter;
+
+	short m_iDualEmpireTreatyCounter = 0;
+
 	// Memory of what we've talked about with people
 	DiploLogData** m_ppaDiploStatementsLog;
 
@@ -1616,17 +1655,10 @@ private:
 
 namespace CvDiplomacyAIHelpers
 {
-#if defined(MOD_CONFIG_AI_IN_XML)
-	int GetWarmongerOffset(PlayerTypes eOriginalOwner, bool bIsCapital);
-	CvString GetWarmongerPreviewString(PlayerTypes eCurrentOwner, bool bIsCapital);
-	CvString GetLiberationPreviewString(PlayerTypes eOriginalOwner, bool bIsCapital);
+	int GetWarmongerOffset(PlayerTypes eOriginalOwner, bool bIsCapital, PlayerTypes eConqueror = NO_PLAYER, bool IsLiberation = false);
+	CvString GetWarmongerPreviewString(PlayerTypes eCurrentOwner, bool bIsCapital, PlayerTypes eConqueror = NO_PLAYER);
+	CvString GetLiberationPreviewString(PlayerTypes eOriginalOwner, bool bIsCapital, PlayerTypes eConqueror = NO_PLAYER);
 	void ApplyWarmongerPenalties(PlayerTypes eConqueror, PlayerTypes eConquered, bool bIsCapital);
-#else
-	int GetWarmongerOffset(int iNumCitiesRemaining, bool bIsMinor);
-	CvString GetWarmongerPreviewString(PlayerTypes eCurrentOwner);
-	CvString GetLiberationPreviewString(PlayerTypes eOriginalOwner);
-	void ApplyWarmongerPenalties(PlayerTypes eConqueror, PlayerTypes eConquered);
-#endif
 }
 
 #endif //CIV5_AI_DIPLOMACY_H

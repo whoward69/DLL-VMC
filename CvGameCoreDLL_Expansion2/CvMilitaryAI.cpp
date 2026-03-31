@@ -1,5 +1,5 @@
-/*	-------------------------------------------------------------------------------------------------------
-	� 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+﻿/*	-------------------------------------------------------------------------------------------------------
+	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -871,7 +871,7 @@ CvUnit* CvMilitaryAI::BuyEmergencyUnit(UnitAITypes eUnitType, CvCity* pCity)
 				if(pCity->getOwner() == m_pPlayer->GetID())		// Player must own the city or this will create a unit for another player
 				{
 					// This is an EXTRA build for the operation beyond any that are already assigned to this city, so pass in the right flag to CreateUnit()
-					int iResult = pCity->CreateUnit(eType, NO_UNITAI, false /*bUseToSatisfyOperation*/);
+					int iResult = pCity->CreateUnit(eType, true, false, NO_UNITAI, false /*bUseToSatisfyOperation*/);
 
 					CvAssertMsg(iResult != FFreeList::INVALID_INDEX, "Unable to create unit");
 
@@ -915,7 +915,7 @@ CvUnit* CvMilitaryAI::BuyEmergencyUnit(UnitAITypes eUnitType, CvCity* pCity)
 				m_pPlayer->ChangeFaith(-iFaithCost);
 
 				// This is an EXTRA build for the operation beyond any that are already assigned to this city, so pass in the right flag to CreateUnit()
-				int iResult = pCity->CreateUnit(eType, NO_UNITAI, false /*bUseToSatisfyOperation*/);
+				int iResult = pCity->CreateUnit(eType, false, true, NO_UNITAI, false /*bUseToSatisfyOperation*/);
 
 				CvAssertMsg(iResult != FFreeList::INVALID_INDEX, "Unable to create unit");
 				CvUnit* pUnit = m_pPlayer->getUnit(iResult);
@@ -1386,12 +1386,8 @@ int CvMilitaryAI::ScoreTarget(CvMilitaryTarget& target, AIOperationTypes eAIOper
 	iEconomicValue += target.m_pTargetCity->getYieldRateTimes100(YIELD_GOLD, false) / 10;
 	iEconomicValue += target.m_pTargetCity->getYieldRateTimes100(YIELD_CULTURE, false) / 10;
 	iEconomicValue += target.m_pTargetCity->getYieldRateTimes100(YIELD_FAITH, false) / 10;
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
 	iEconomicValue += target.m_pTargetCity->getYieldRateTimes100(YIELD_TOURISM, false) / 10;
-#endif
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
 	iEconomicValue += target.m_pTargetCity->getYieldRateTimes100(YIELD_GOLDEN_AGE_POINTS, false) / 10;
-#endif
 	uliRtnValue *= iEconomicValue;
 
 	uliRtnValue /= 10;
@@ -2095,49 +2091,50 @@ void CvMilitaryAI::UpdateBaseData()
 	for(pLoopUnit = m_pPlayer->firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = m_pPlayer->nextUnit(&iLoop))
 	{
 		// Don't count civilians or exploration units
-		if(pLoopUnit->IsCanAttack() && pLoopUnit->AI_getUnitAIType() != UNITAI_EXPLORE && pLoopUnit->AI_getUnitAIType() != UNITAI_EXPLORE_SEA)
+		if (!pLoopUnit->IsCanAttack())
+			continue;
+
+		if (pLoopUnit->getDomainType() == DOMAIN_LAND)
 		{
-			if(pLoopUnit->getDomainType() == DOMAIN_LAND)
+			m_iNumLandUnits++;
+
+			if (pLoopUnit->getArmyID() != FFreeList::INVALID_INDEX)
 			{
-				m_iNumLandUnits++;
-
-				if(pLoopUnit->getArmyID() != FFreeList::INVALID_INDEX)
-				{
-					m_iNumLandUnitsInArmies++;
-				}
-
-				if(pLoopUnit->IsCanAttackRanged())
-				{
-					m_iNumRangedLandUnits++;
-				}
-				else if(pLoopUnit->getExtraIntercept() > 0)
-				{
-					// I'm an anti-air unit
-					m_iNumAntiAirUnits++;
-				}
-				else if(pLoopUnit->getUnitInfo().GetMoves() > 2)
-				{
-					m_iNumMobileLandUnits++;
-				}
-				else
-				{
-					m_iNumMeleeLandUnits++;
-				}
+				m_iNumLandUnitsInArmies++;
 			}
-			else if(pLoopUnit->getDomainType() == DOMAIN_SEA)
-			{
-				m_iNumNavalUnits++;
 
-				if(pLoopUnit->getArmyID() != FFreeList::INVALID_INDEX)
-				{
-					m_iNumNavalUnitsInArmies++;
-				}
-			}
-			else if(pLoopUnit->getDomainType() == DOMAIN_AIR)
+			if (pLoopUnit->IsCanAttackRanged())
 			{
-				m_iNumAirUnits++;
+				m_iNumRangedLandUnits++;
+			}
+			else if (pLoopUnit->canIntercept())
+			{
+				// I'm an anti-air unit
+				m_iNumAntiAirUnits++;
+			}
+			else if (pLoopUnit->getUnitInfo().GetMoves() > 2)
+			{
+				m_iNumMobileLandUnits++;
+			}
+			else
+			{
+				m_iNumMeleeLandUnits++;
 			}
 		}
+		else if (pLoopUnit->getDomainType() == DOMAIN_SEA)
+		{
+			m_iNumNavalUnits++;
+
+			if (pLoopUnit->getArmyID() != FFreeList::INVALID_INDEX)
+			{
+				m_iNumNavalUnitsInArmies++;
+			}
+		}
+		else if (pLoopUnit->getDomainType() == DOMAIN_AIR)
+		{
+			m_iNumAirUnits++;
+		}
+		
 	}
 
 	float fMultiplier;
@@ -4988,17 +4985,12 @@ bool MilitaryAIHelpers::IsTestStrategy_NeedAirCarriers(CvPlayer* pPlayer)
 		}
 	}
 
+	int iFactor = 1;
 #if defined(MOD_CONFIG_AI_IN_XML)
 	// Why would we ever want to load EVERY plane onto a carrier?
-	int iFactor = GC.getAI_CONFIG_MILITARY_AIRCRAFT_PER_CARRIER_SPACE();
-	if (iNumLoadableAirUnits > iFactor*iNumTotalCargoSpace)
-#else
-#if defined(MOD_AI_SMART_V3)
-	if ((iNumLoadableAirUnits > iNumTotalCargoSpace) && (!MOD_AI_SMART_V3 || ((iNumNavalUnits / 4) >= iNumCargoUnits)))
-#else
-	if (iNumLoadableAirUnits > iNumTotalCargoSpace)
+	iFactor = GC.getAI_CONFIG_MILITARY_AIRCRAFT_PER_CARRIER_SPACE();
 #endif
-#endif
+	if ((iNumLoadableAirUnits > iFactor*iNumTotalCargoSpace) || (MOD_SP_SMART_AI && (iNumNavalUnits / 6) >= iNumCargoUnits))
 	{
 		return true;
 	}

@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -151,6 +151,28 @@ class ICvPlot1;
 class ICvRandom1;
 class ICvUnit1;
 
+#ifdef MOD_GLOBAL_CITY_SCALES
+#include "CvCityScaleClasses.h"
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+#include "CvCorruption.h"
+#endif
+
+#ifdef MOD_NUCLEAR_WINTER_FOR_SP
+#include "CvNuclearWinter.h"
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+#include "CvPromotionCollectionClasses.h"
+#endif
+
+#include "CvBuildingClassCollectionsClasses.h"
+
+#include "CvLuaFormula.h"
+
+#include "CvIndependentPromotionInfo.h"
+#include "CvUnitPurchaseCollections.h"
 
 class CvGlobals
 {
@@ -404,6 +426,49 @@ public:
 	CvImprovementEntry* getImprovementInfo(ImprovementTypes eImprovementNum);
 	CvImprovementXMLEntries* GetGameImprovements() const;
 
+#ifdef MOD_GLOBAL_CITY_SCALES
+	int getNumCityScales();
+	std::vector<CvCityScaleEntry*>& getCityScaleInfo();
+	_Ret_maybenull_ CvCityScaleEntry* getCityScaleInfo(CityScaleTypes eCityScale);
+
+	void sortAndUpdateOrderedCityScale(const std::vector<CvCityScaleEntry*>&);
+	CvCityScaleEntry* getCityScaleInfoByPopulation(int iPopulation) const;
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	int getNumCorruptionLevel();
+	std::vector<CvCorruptionLevel*>& getCorruptionLevelInfo();
+	CvCorruptionLevel* getCorruptionLevelInfo(CorruptionLevelTypes eCorruptionLevel);
+
+	std::vector<CvCorruptionLevel*>& getOrderedNormalCityCorruptionLevels();
+	void initCityCorruptionLevelsByCityType();
+
+	CvCorruptionLevel* getPuppetCityCorruptionLevel() const;
+	CvCorruptionLevel* getCapitalCityCorruptionLevel() const;
+#endif
+
+#ifdef MOD_NUCLEAR_WINTER_FOR_SP
+	int getNumNuclearWinterLevel();
+	std::vector<CvNuclearWinterLevel*>& getNuclearWinterLevelInfo();
+	CvNuclearWinterLevel* getNuclearWinterLevelInfo(NuclearWinterLevelTypes eLevel);
+	void initGlobalNuclearWinterLevels();
+	std::vector<CvNuclearWinterLevel*>& CvGlobals::getOrderedNuclearWinterLevels();
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+	std::vector<CvPromotionCollectionEntry*>& GetPromotionCollections();
+	CvPromotionCollectionEntry* GetPromotionCollection(PromotionCollectionsTypes ePromotionCollection);
+	int GetNumPromotionCollections();
+	void InitPromotion2CollectionMapping();
+	std::tr1::unordered_map<PromotionTypes, std::tr1::unordered_set<PromotionCollectionsTypes> >& GetPromotion2CollectionsMapping();
+#endif
+
+#ifdef MOD_BUILDINGCLASS_COLLECTIONS
+	std::vector<CvBuildingClassCollectionsEntry*>& GetBuildingClassCollections();
+	CvBuildingClassCollectionsEntry* GetBuildingClassCollection(BuildingClassCollectionsTypes eBuildingClassCollection);
+	int GetNumBuildingClassCollections();
+#endif
+
 	int getNumBuildInfos();
 	std::vector<CvBuildInfo*>& getBuildInfo();
 	CvBuildInfo* getBuildInfo(BuildTypes eBuildNum);
@@ -587,6 +652,21 @@ public:
 	_Ret_maybenull_ CvAchievementInfo* getAchievementInfo(EAchievement eAchievementNum);
 	CvAchievementXMLEntries* GetGameAchievements() const;
 #endif
+
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::tr1::unordered_set<PolicyTypes>& getSpecialistResourcesPolicies();
+	std::tr1::unordered_set<TechTypes>& getSpecialistResourcesTechnologies();
+	void initSpecialistResourcesDependencies();
+#endif
+
+	std::vector<CvLuaFormula*>& GetLuaFormulaEntries();
+	int GetNumLuaFormulaEntries();
+	CvLuaFormula* GetLuaFormulaEntry(LuaFormulaTypes eFormula);
+
+	lua::EvaluatorManager* GetLuaEvaluatorManager();
+
+	CvIndependentPromotionInfo* GetIndependentPromotion();
+	CvUnitPurchaseCollections* GetUnitPurchaseCollections();
 
 	//
 	// Global Types
@@ -1234,6 +1314,12 @@ public:
 	{
 		return m_iAI_CITIZEN_VALUE_FAITH;
 	}
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	inline int getAI_CITIZEN_VALUE_HEALTH()
+	{
+		return m_iAI_CITIZEN_VALUE_HEALTH;
+	}
+#endif
 	inline int getAI_CITIZEN_FOOD_MOD_SIZE_CUTOFF()
 	{
 		return m_iAI_CITIZEN_FOOD_MOD_SIZE_CUTOFF;
@@ -2642,6 +2728,10 @@ public:
 	{
 		return m_iOPINION_WEIGHT_DOF;
 	}
+	inline int getOPINION_WEIGHT_MARRIAGE()
+	{
+		return m_iOPINION_WEIGHT_MARRIAGE;
+	}
 	inline int getOPINION_WEIGHT_DOF_WITH_FRIEND()
 	{
 		return m_iOPINION_WEIGHT_DOF_WITH_FRIEND;
@@ -2742,6 +2832,10 @@ public:
 	{
 		return m_iOPINION_WEIGHT_CAPTURED_CAPITAL;
 	}
+	inline int getOPINION_WEIGHT_CAPTURED_RELIGION()
+	{
+		return m_iOPINION_WEIGHT_CAPTURED_RELIGION;
+	}
 	inline int getOPINION_WEIGHT_WE_LIKED_THEIR_PROPOSAL()
 	{
 		return m_iOPINION_WEIGHT_WE_LIKED_THEIR_PROPOSAL;
@@ -2805,6 +2899,14 @@ public:
 	inline int getOPINION_THRESHOLD_ALLY()
 	{
 		return m_iOPINION_THRESHOLD_ALLY;
+	}
+	inline int getDOF_WEIGHT_CHANGE_FROM_MARRIAGE()
+	{
+		return m_iDOF_WEIGHT_CHANGE_FROM_MARRIAGE;
+	}
+	inline int getDOF_WEIGHT_MODIFIER_FROM_MARRIAGE()
+	{
+		return m_iDOF_WEIGHT_MODIFIER_FROM_MARRIAGE;
 	}
 	inline int getAPPROACH_NEUTRAL_DEFAULT()
 	{
@@ -2929,6 +3031,22 @@ public:
 	inline int getAPPROACH_GUARDED_WORKING_WITH_PLAYER()
 	{
 		return m_iAPPROACH_GUARDED_WORKING_WITH_PLAYER;
+	}
+	inline int getAPPROACH_DECEPTIVE_MARRIAGE_WITH_PLAYER()
+	{
+		return m_iAPPROACH_DECEPTIVE_MARRIAGE_WITH_PLAYER;
+	}
+	inline int getAPPROACH_FRIENDLY_MARRIAGE_WITH_PLAYER()
+	{
+		return m_iAPPROACH_FRIENDLY_MARRIAGE_WITH_PLAYER;
+	}
+	inline int getAPPROACH_HOSTILE_MARRIAGE_WITH_PLAYER()
+	{
+		return m_iAPPROACH_HOSTILE_MARRIAGE_WITH_PLAYER;
+	}
+	inline int getAPPROACH_GUARDED_MARRIAGE_WITH_PLAYER()
+	{
+		return m_iAPPROACH_GUARDED_MARRIAGE_WITH_PLAYER;
 	}
 	inline int getAPPROACH_DECEPTIVE_WORKING_AGAINST_PLAYER()
 	{
@@ -5273,6 +5391,37 @@ public:
 	{
 		return m_iVERY_UNHAPPY_MAX_GOLD_PENALTY;
 	}
+
+	inline int getVERY_UNHAPPY_DISEASE_PENALTY_PER_UNHAPPY()
+	{
+		return m_iVERY_UNHAPPY_DISEASE_PENALTY_PER_UNHAPPY;
+	}
+	inline int getVERY_UNHAPPY_MAX_DISEASE_PENALTY()
+	{
+		return m_iVERY_UNHAPPY_MAX_DISEASE_PENALTY;
+	}
+
+	inline int getVERY_UNHAPPY_CRIME_PENALTY_PER_UNHAPPY()
+	{
+		return m_iVERY_UNHAPPY_CRIME_PENALTY_PER_UNHAPPY;
+	}
+	inline int getVERY_UNHAPPY_MAX_CRIME_PENALTY()
+	{
+		return m_iVERY_UNHAPPY_MAX_CRIME_PENALTY;
+	}
+
+
+	inline int getHEALTH_DISEASE_CONNECTION_MOD()
+	{
+		return m_iHEALTH_DISEASE_CONNECTION_MOD;
+	}
+	inline int getHEALTH_DISEASE_TRADE_MOD()
+	{
+		return m_iHEALTH_DISEASE_TRADE_MOD;
+	}
+
+
+
 	inline int getWLTKD_GROWTH_MULTIPLIER()
 	{
 		return m_iWLTKD_GROWTH_MULTIPLIER;
@@ -5308,6 +5457,10 @@ public:
 	inline int getBONUS_PER_ADJACENT_FRIEND()
 	{
 		return m_iBONUS_PER_ADJACENT_FRIEND;
+	}
+	inline int getBONUS_PER_ADJACENT_FRIEND_RANGED()
+	{
+		return m_iBONUS_PER_ADJACENT_FRIEND_RANGED;
 	}
 	inline int getPOLICY_ATTACK_BONUS_MOD()
 	{
@@ -5425,6 +5578,64 @@ public:
 	{
 		return m_iGOLDEN_AGE_LENGTH;
 	}
+	inline int getGOLDEN_AGE_POINT_MULTIPLE_IN_GA()
+	{
+		return m_iGOLDEN_AGE_POINT_MULTIPLE_IN_GA;
+	}
+#if defined(MOD_GLOBAL_UNIT_MOVES_AFTER_DISEMBARK)
+	inline int getUNIT_MOVES_AFTER_DISEMBARK()
+	{
+		return m_iUNIT_MOVES_AFTER_DISEMBARK;
+	}
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	inline int getNUM_OUTSIZE_PLOT_MAX_BUILD()
+	{
+		return m_iNUM_OUTSIZE_PLOT_MAX_BUILD;
+	}
+#endif
+
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	inline int getTROOP_RATE_TIMES100_LOW()
+	{
+		return m_iTROOP_RATE_TIMES100_LOW;
+	}
+	inline int getTROOP_RATE_TIMES100_DEFAULT()
+	{
+		return m_iTROOP_RATE_TIMES100_DEFAULT;
+	}
+	inline int getTROOP_RATE_TIMES100_HIGH()
+	{
+		return m_iTROOP_RATE_TIMES100_HIGH;
+	}
+	inline int getTROOP_NUM_BASE()
+	{
+		return m_iTROOP_NUM_BASE;
+	}
+#endif
+#if defined(MOD_INTERNATIONAL_IMMIGRATION_FOR_SP)
+	inline int getIMMIGRATION_BASE_RATE()
+	{
+		return m_iIMMIGRATION_BASE_RATE;
+	}
+#endif
+
+	inline int getMAX_POPULATION_INCREASE_NOTIOFACATION()
+	{
+		return m_iMAX_POPULATION_INCREASE_NOTIOFACATION;
+	}
+	inline int getMAXIMUM_WORK_PLOT_DISTANCE_MINOR_REDUCE()
+	{
+		return m_iMAXIMUM_WORK_PLOT_DISTANCE_MINOR_REDUCE;
+	}
+
+#if defined(MOD_ROG_CORE)
+	inline int getORIGINAL_CAPITAL_MODMAX()
+	{
+		return m_iORIGINAL_CAPITAL_MODMAX;
+	}
+#endif
+
 	inline int getGOLDEN_AGE_GREAT_PEOPLE_MODIFIER()
 	{
 		return m_iGOLDEN_AGE_GREAT_PEOPLE_MODIFIER;
@@ -6325,6 +6536,42 @@ public:
 	{
 		return m_iCITY_STRENGTH_HILL_CHANGE;
 	}
+	inline int getCITY_FRESH_WATER_HEALTH_YIELD()
+	{
+		return m_iCITY_FRESH_WATER_HEALTH_YIELD;
+	}
+
+	inline int getCITY_CRIME_SPY_YIELD()
+	{
+		return m_iCITY_CRIME_SPY_YIELD;
+	}
+
+	inline int getCITY_CRIME_OPINION_REVOLUTIONARY_WAVE_YIELD()
+	{
+		return m_iCITY_CRIME_OPINION_REVOLUTIONARY_WAVE_YIELD;
+	}
+	inline int getCITY_CRIME_OPINION_CIVIL_RESISTANCE_YIELD()
+	{
+		return m_iCITY_CRIME_OPINION_CIVIL_RESISTANCE_YIELD;
+	}
+	inline int getCITY_CRIME_OPINION_DISSIDENTS_YIELD()
+	{
+		return m_iCITY_CRIME_OPINION_DISSIDENTS_YIELD;
+	}
+
+	inline int getCITY_CRIME_GOLDEN_AGE_YIELD()
+	{
+		return m_iCITY_CRIME_GOLDEN_AGE_YIELD;
+	}
+	inline int getCITY_LOYALTY_GOLDEN_AGE_YIELD()
+	{
+		return m_iCITY_LOYALTY_GOLDEN_AGE_YIELD;
+	}
+
+	inline int getCITY_STRENGTH_MOUNTAIN_CHANGE()
+	{
+		return m_iCITY_STRENGTH_MOUNTAIN_CHANGE;
+	}
 	inline int getCITY_ATTACKING_DAMAGE_MOD()
 	{
 		return m_iCITY_ATTACKING_DAMAGE_MOD;
@@ -7050,6 +7297,10 @@ public:
 	{
 		return m_iPROMOTION_OCEAN_IMPASSABLE;
 	}
+	inline int getPROMOTION_NEW_UNIT_CAPTURED()
+	{
+		return m_iPROMOTION_NEW_UNIT_CAPTURED;
+	}
 	inline int getPROMOTION_ONLY_DEFENSIVE()
 	{
 		return m_iPROMOTION_ONLY_DEFENSIVE;
@@ -7466,15 +7717,22 @@ public:
 	GD_INT_DEF(CITY_STARTING_RINGS)
 #endif
 
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
 	GD_INT_DEF(TOURISM_START_TECH)
 	GD_INT_DEF(TOURISM_START_ERA)
 	GD_INT_DEF(PUPPET_TOURISM_MODIFIER)
+	GD_INT_DEF(WONDER_GOLDEN_AGE_PURCHASE_MODIFIER)
+	GD_INT_DEF(PUPPET_GOLDEN_AGE_MODIFIER)
+
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	GD_INT_DEF(PUPPET_GREAT_GENERAL_POINTS_MODIFIER)
+	GD_INT_DEF(PUPPET_GREAT_ADMIRAL_POINTS_MODIFIER)
+	GD_INT_DEF(PUPPET_HEALTH_MODIFIER)
+	GD_INT_DEF(PUPPET_DISEASE_MODIFIER)
+	GD_INT_DEF(PUPPET_CRIME_MODIFIER)
+	GD_INT_DEF(PUPPET_LOYALTY_MODIFIER)
+	GD_INT_DEF(PUPPET_SOVEREIGNTY_MODIFIER)
 #endif
 
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
-	GD_INT_DEF(PUPPET_GOLDEN_AGE_MODIFIER)
-#endif
 
 #if defined(MOD_TRADE_ROUTE_SCALING)
 	GD_INT_DEF(TRADE_ROUTE_BASE_TARGET_TURNS)
@@ -7491,39 +7749,46 @@ public:
 	GD_INT_DEF(TRADE_ROUTE_PLUNDER_TURNS_COUNTER)
 #endif
 
+#if defined(MOD_GLOBAL_INTERNAL_TRADE_ROUTE_BONUS_FROM_ORIGIN_CITY)
+	GD_INT_DEF(INTERNAL_TRADE_ROUTE_FOOD_BONUS_BASE_FROM_ORIGIN)
+	GD_INT_DEF(INTERNAL_TRADE_ROUTE_FOOD_BONUS_MOD_FROM_ORIGIN)
+	GD_INT_DEF(INTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_BASE_FROM_ORIGIN)
+	GD_INT_DEF(INTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_MOD_FROM_ORIGIN)
+#endif
+
 #if defined(MOD_GLOBAL_CS_GIFTS)
-	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_BONUS_CULTURE)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_BONUS_FAITH)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_BONUS_GOLD)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_BONUS_FOOD)
-	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_BONUS_UNIT)
-	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_XP_PER_ERA)
-	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_XP_RANDOM)
-	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_PLAYER_MULTIPLIER)
-	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_PLAYER_DIVISOR)
+	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_SUBSEQUENT_TEAM_MULTIPLIER)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_SUBSEQUENT_TEAM_DIVISOR)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_MULTIPLIER)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_DIVISOR)
-	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_FRIENDLY_UNIT_MULTIPLIER)
-	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_FRIENDLY_UNIT_DIVISOR)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_MULTIPLIER)
 	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_DIVISOR)
-	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_HOSTILE_UNIT_MULTIPLIER)
-	GD_INT_DEF(MINOR_CIV_FIRST_CONTACT_HOSTILE_UNIT_DIVISOR)
 #endif
 
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	GD_INT_DEF(CITY_UNIT_LIMIT)
 #endif
 
-#if defined(MOD_EVENTS_CITY_BOMBARD)
 	GD_INT_DEF(MAX_CITY_ATTACK_RANGE)
-#endif
 
 #if defined(MOD_UI_CITY_EXPANSION)
 	GD_INT_DEF(PLOT_INFLUENCE_COST_VISIBLE_DIVISOR)
+#endif
+
+#if defined(MOD_GLOBAL_WAR_CASUALTIES)
+	GD_INT_DEF(WAR_CASUALTIES_THRESHOLD);
+	GD_INT_DEF(WAR_CASUALTIES_DELTA_BASE);
+	GD_INT_DEF(WAR_CASUALTIES_POPULATION_LOSS);
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	GD_INT_DEF(CORRUPTION_SCORE_PER_DISTANCE);
+	GD_INT_DEF(CORRUPTION_SCORE_COASTAL_BONUS);
 #endif
 
 	////////////// END DEFINES //////////////////
@@ -7754,6 +8019,43 @@ protected:
 	CvAchievementXMLEntries* m_pAchievements;
 #endif
 
+#ifdef MOD_GLOBAL_CITY_SCALES
+	CvCityScaleXMLEntries* m_pCityScales;
+	std::vector<CvCityScaleEntry*> m_vOrderedCityScales; // order by min population
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	CvCorruptionLevelXMLEntries* m_pCorruptionInfo;
+	std::vector<CvCorruptionLevel*> m_vOrderedNormalCityCorruptionLevels; // order by score lower bound.
+	CvCorruptionLevel* m_pPuppetCityCorruptionLevel = nullptr;
+	CvCorruptionLevel* m_pCapitalCityCorruptionLevel = nullptr;
+#endif
+
+#ifdef MOD_NUCLEAR_WINTER_FOR_SP
+	CvNuclearWinterLevelXMLEntries* m_pNuclearWinterInfo;
+	std::vector<CvNuclearWinterLevel*> m_vOrderedNuclearWinterLevels; // order by Trigger Threshold lower bound.
+#endif
+
+#ifdef MOD_PROMOTION_COLLECTIONS
+	CvPromotionCollectionEntries* m_pPromotionCollections;
+	std::tr1::unordered_map<PromotionTypes, std::tr1::unordered_set<PromotionCollectionsTypes> > m_mPromotion2CollectionsMapping;
+#endif
+
+#ifdef MOD_BUILDINGCLASS_COLLECTIONS
+	CvBuildingClassCollectionsXMLEntries* m_pBuildingClassCollections;
+#endif
+
+#ifdef MOD_SPECIALIST_RESOURCES
+	std::tr1::unordered_set<PolicyTypes> m_vSpecialistResourcesPolicies;
+	std::tr1::unordered_set<TechTypes> m_vSpecialistResourcesTechnologies;
+#endif
+
+	CvLuaFormulaXMLEntries* m_pLuaFormulaEntries;
+	lua::EvaluatorManager* m_pLuaEvaluatorManager;
+
+	CvIndependentPromotionInfo* m_pIndependentPromotion;
+	CvUnitPurchaseCollections* m_pUnitPurchaseCollections;
+
 	//////////////////////////////////////////////////////////////////////////
 	// GLOBAL TYPES
 	//////////////////////////////////////////////////////////////////////////
@@ -7926,6 +8228,9 @@ protected:
 	int m_iAI_CITIZEN_VALUE_SCIENCE;
 	int m_iAI_CITIZEN_VALUE_CULTURE;
 	int m_iAI_CITIZEN_VALUE_FAITH;
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	int m_iAI_CITIZEN_VALUE_HEALTH;
+#endif
 	int m_iAI_CITIZEN_FOOD_MOD_SIZE_CUTOFF;
 	int m_iAI_CITIZEN_FOOD_MOD_SIZE_EXPONENT;
 	int m_iAI_CITIZEN_MOD_FOOD_DEFICIT;
@@ -8278,6 +8583,7 @@ protected:
 	int m_iOPINION_WEIGHT_DOF;
 	int m_iOPINION_WEIGHT_DOF_WITH_FRIEND;
 	int m_iOPINION_WEIGHT_DOF_WITH_ENEMY;
+	int m_iOPINION_WEIGHT_MARRIAGE;
 	int m_iOPINION_WEIGHT_DENOUNCED_BY_FRIEND_EACH;
 	int m_iOPINION_WEIGHT_DENOUNCED_BY_FRIEND_DONT_LIKE;
 	int m_iOPINION_WEIGHT_DENOUNCED_FRIEND_EACH;
@@ -8301,6 +8607,7 @@ protected:
 	int m_iOPINION_WEIGHT_ROBBED_BY;
 	int m_iOPINION_WEIGHT_INTRIGUE_SHARED_BY;
 	int m_iOPINION_WEIGHT_CAPTURED_CAPITAL;
+	int m_iOPINION_WEIGHT_CAPTURED_RELIGION;
 	int m_iOPINION_WEIGHT_WE_LIKED_THEIR_PROPOSAL;
 	int m_iOPINION_WEIGHT_WE_LIKED_THEIR_PROPOSAL_NUM_TURNS;
 	int m_iOPINION_WEIGHT_WE_DISLIKED_THEIR_PROPOSAL;
@@ -8317,6 +8624,8 @@ protected:
 	int m_iOPINION_THRESHOLD_FAVORABLE;
 	int m_iOPINION_THRESHOLD_FRIEND;
 	int m_iOPINION_THRESHOLD_ALLY;
+	int m_iDOF_WEIGHT_CHANGE_FROM_MARRIAGE;
+	int m_iDOF_WEIGHT_MODIFIER_FROM_MARRIAGE;
 	int m_iAPPROACH_NEUTRAL_DEFAULT;
 	int m_iAPPROACH_BIAS_FOR_CURRENT;
 	int m_iAPPROACH_WAR_CURRENTLY_DECEPTIVE;
@@ -8348,6 +8657,10 @@ protected:
 	int m_iAPPROACH_FRIENDLY_WORKING_WITH_PLAYER;
 	int m_iAPPROACH_HOSTILE_WORKING_WITH_PLAYER;
 	int m_iAPPROACH_GUARDED_WORKING_WITH_PLAYER;
+	int m_iAPPROACH_DECEPTIVE_MARRIAGE_WITH_PLAYER;
+	int m_iAPPROACH_FRIENDLY_MARRIAGE_WITH_PLAYER;
+	int m_iAPPROACH_HOSTILE_MARRIAGE_WITH_PLAYER;
+	int m_iAPPROACH_GUARDED_MARRIAGE_WITH_PLAYER;
 	int m_iAPPROACH_DECEPTIVE_WORKING_AGAINST_PLAYER;
 	int m_iAPPROACH_HOSTILE_WORKING_AGAINST_PLAYER;
 	int m_iAPPROACH_WAR_WORKING_AGAINST_PLAYER;
@@ -8937,6 +9250,14 @@ protected:
 	int m_iVERY_UNHAPPY_MAX_PRODUCTION_PENALTY;
 	int m_iVERY_UNHAPPY_GOLD_PENALTY_PER_UNHAPPY;
 	int m_iVERY_UNHAPPY_MAX_GOLD_PENALTY;
+	int m_iVERY_UNHAPPY_DISEASE_PENALTY_PER_UNHAPPY;
+	int m_iVERY_UNHAPPY_MAX_DISEASE_PENALTY;
+	int m_iVERY_UNHAPPY_CRIME_PENALTY_PER_UNHAPPY;
+	int m_iVERY_UNHAPPY_MAX_CRIME_PENALTY;
+
+	int m_iHEALTH_DISEASE_CONNECTION_MOD;
+	int m_iHEALTH_DISEASE_TRADE_MOD;
+
 	int m_iWLTKD_GROWTH_MULTIPLIER;
 	int m_iINDUSTRIAL_ROUTE_PRODUCTION_MOD;
 	int m_iRESOURCE_DEMAND_COUNTDOWN_BASE;
@@ -8946,6 +9267,7 @@ protected:
 	int m_iGREAT_GENERAL_RANGE;
 	int m_iGREAT_GENERAL_STRENGTH_MOD;
 	int m_iBONUS_PER_ADJACENT_FRIEND;
+	int m_iBONUS_PER_ADJACENT_FRIEND_RANGED;
 	int m_iPOLICY_ATTACK_BONUS_MOD;
 	int m_iCONSCRIPT_MIN_CITY_POPULATION;
 	int m_iCONSCRIPT_POPULATION_PER_COST;
@@ -8975,6 +9297,29 @@ protected:
 	int m_iBASE_GOLDEN_AGE_UNITS;
 	int m_iGOLDEN_AGE_UNITS_MULTIPLIER;
 	int m_iGOLDEN_AGE_LENGTH;
+	int m_iGOLDEN_AGE_POINT_MULTIPLE_IN_GA;
+#if defined(MOD_GLOBAL_UNIT_MOVES_AFTER_DISEMBARK)
+	int m_iUNIT_MOVES_AFTER_DISEMBARK;
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	int m_iNUM_OUTSIZE_PLOT_MAX_BUILD;
+#endif
+	int m_iMAX_POPULATION_INCREASE_NOTIOFACATION;
+	int m_iMAXIMUM_WORK_PLOT_DISTANCE_MINOR_REDUCE;
+
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	int m_iTROOP_RATE_TIMES100_LOW;
+	int m_iTROOP_RATE_TIMES100_DEFAULT;
+	int m_iTROOP_RATE_TIMES100_HIGH;
+	int m_iTROOP_NUM_BASE;
+#endif
+#if defined(MOD_INTERNATIONAL_IMMIGRATION_FOR_SP)
+	int m_iIMMIGRATION_BASE_RATE;
+#endif
+
+#if defined(MOD_ROG_CORE)
+	int m_iORIGINAL_CAPITAL_MODMAX;
+#endif
 	int m_iGOLDEN_AGE_GREAT_PEOPLE_MODIFIER;
 	int m_iMIN_UNIT_GOLDEN_AGE_TURNS;
 	int m_iGOLDEN_AGE_CULTURE_MODIFIER;
@@ -9200,6 +9545,17 @@ protected:
 	int m_iCITY_STRENGTH_POPULATION_CHANGE;
 	int m_iCITY_STRENGTH_UNIT_DIVISOR;
 	int m_iCITY_STRENGTH_HILL_CHANGE;
+	int m_iCITY_FRESH_WATER_HEALTH_YIELD;	
+	int m_iCITY_CRIME_SPY_YIELD;
+
+	int m_iCITY_CRIME_OPINION_REVOLUTIONARY_WAVE_YIELD;
+	int m_iCITY_CRIME_OPINION_CIVIL_RESISTANCE_YIELD;
+	int m_iCITY_CRIME_OPINION_DISSIDENTS_YIELD;
+
+	int m_iCITY_CRIME_GOLDEN_AGE_YIELD;
+	int m_iCITY_LOYALTY_GOLDEN_AGE_YIELD;
+
+	int m_iCITY_STRENGTH_MOUNTAIN_CHANGE;
 	int m_iCITY_ATTACKING_DAMAGE_MOD;
 	int m_iATTACKING_CITY_MELEE_DAMAGE_MOD;
 	int m_iCITY_ATTACK_RANGE;
@@ -9475,6 +9831,7 @@ protected:
 	int m_iPROMOTION_ALLWATER_EMBARKATION;
 	int m_iPROMOTION_OCEAN_IMPASSABLE_UNTIL_ASTRONOMY;
 	int m_iPROMOTION_OCEAN_IMPASSABLE;
+	int m_iPROMOTION_NEW_UNIT_CAPTURED;
 	int m_iAI_HANDICAP;
 	int m_iBARBARIAN_CAMP_IMPROVEMENT;
 	int m_iWALLS_BUILDINGCLASS;
@@ -9528,14 +9885,20 @@ protected:
 	GD_INT_DECL(CITY_STARTING_RINGS);
 #endif
 
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
 	GD_INT_DECL(TOURISM_START_TECH);
 	GD_INT_DECL(TOURISM_START_ERA);
 	GD_INT_DECL(PUPPET_TOURISM_MODIFIER);
-#endif
-
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
+	GD_INT_DECL(WONDER_GOLDEN_AGE_PURCHASE_MODIFIER);
 	GD_INT_DECL(PUPPET_GOLDEN_AGE_MODIFIER);
+
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	GD_INT_DECL(PUPPET_GREAT_GENERAL_POINTS_MODIFIER);
+	GD_INT_DECL(PUPPET_GREAT_ADMIRAL_POINTS_MODIFIER);
+	GD_INT_DECL(PUPPET_HEALTH_MODIFIER);
+	GD_INT_DECL(PUPPET_DISEASE_MODIFIER);
+	GD_INT_DECL(PUPPET_CRIME_MODIFIER);
+	GD_INT_DECL(PUPPET_LOYALTY_MODIFIER);
+	GD_INT_DECL(PUPPET_SOVEREIGNTY_MODIFIER);
 #endif
 
 #if defined(MOD_TRADE_ROUTE_SCALING)
@@ -9553,39 +9916,46 @@ protected:
 	GD_INT_DECL(TRADE_ROUTE_PLUNDER_TURNS_COUNTER);
 #endif
 
+#if defined(MOD_GLOBAL_INTERNAL_TRADE_ROUTE_BONUS_FROM_ORIGIN_CITY)
+	GD_INT_DECL(INTERNAL_TRADE_ROUTE_FOOD_BONUS_BASE_FROM_ORIGIN);
+	GD_INT_DECL(INTERNAL_TRADE_ROUTE_FOOD_BONUS_MOD_FROM_ORIGIN);
+	GD_INT_DECL(INTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_BASE_FROM_ORIGIN);
+	GD_INT_DECL(INTERNAL_TRADE_ROUTE_PRODUCTION_BONUS_MOD_FROM_ORIGIN);
+#endif
+
 #if defined(MOD_GLOBAL_CS_GIFTS)
-	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP);
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_BONUS_CULTURE);
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_BONUS_FAITH);
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_BONUS_GOLD);
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_BONUS_FOOD);
-	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_BONUS_UNIT);
-	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_XP_PER_ERA);
-	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_XP_RANDOM);
-	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_PLAYER_MULTIPLIER);
-	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_PLAYER_DIVISOR);
+	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP);
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_SUBSEQUENT_TEAM_MULTIPLIER);
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_SUBSEQUENT_TEAM_DIVISOR);
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_MULTIPLIER);
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_DIVISOR);
-	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_FRIENDLY_UNIT_MULTIPLIER);
-	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_FRIENDLY_UNIT_DIVISOR);
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_MULTIPLIER);
 	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_DIVISOR);
-	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_HOSTILE_UNIT_MULTIPLIER);
-	GD_INT_DECL(MINOR_CIV_FIRST_CONTACT_HOSTILE_UNIT_DIVISOR);
 #endif
 
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	GD_INT_DECL(CITY_UNIT_LIMIT);
 #endif
 
-#if defined(MOD_EVENTS_CITY_BOMBARD)
 	GD_INT_DECL(MAX_CITY_ATTACK_RANGE);
-#endif
 
 #if defined(MOD_UI_CITY_EXPANSION)
 	GD_INT_DECL(PLOT_INFLUENCE_COST_VISIBLE_DIVISOR);
+#endif
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	GD_INT_DECL(WAR_CASUALTIES_THRESHOLD);
+	GD_INT_DECL(WAR_CASUALTIES_DELTA_BASE);
+	GD_INT_DECL(WAR_CASUALTIES_POPULATION_LOSS);
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	GD_INT_DECL(CORRUPTION_SCORE_PER_DISTANCE);
+	GD_INT_DECL(CORRUPTION_SCORE_COASTAL_BONUS);
 #endif
 
 	// DLL interface

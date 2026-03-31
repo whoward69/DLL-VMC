@@ -1,0 +1,1 @@
+alter table Yields add column ExcessHappinessModifierFormula text references LuaFormula(Type);

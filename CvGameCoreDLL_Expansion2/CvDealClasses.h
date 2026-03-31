@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -38,7 +38,9 @@ enum TradeableItems
     TRADE_ITEM_ALLOW_EMBASSY,
 	TRADE_ITEM_DECLARATION_OF_FRIENDSHIP,	// Only "traded" between human players
 	TRADE_ITEM_VOTE_COMMITMENT,
-    NUM_TRADEABLE_ITEMS,
+	TRADE_ITEM_DIPLOMATIC_MARRIAGE,
+	TRADE_ITEM_DUAL_EMPIRE_TREATY,
+	NUM_TRADEABLE_ITEMS,
 };
 FDataStream& operator>>(FDataStream&, TradeableItems&);
 FDataStream& operator<<(FDataStream&, const TradeableItems&);
@@ -81,7 +83,7 @@ typedef FFastList< CvTradedItem, c_eMPoolTypeGame, 0 > TradedItemList;
 //!  - Also stores the players involved and the turn the deal ends (if any)
 //!  - Populated through calls to a group of methods that each create and add a CvTradedItem
 //!  - These methods to create CvTradedItems have customized parameters so the external caller
-//!    doesn’t need to know how the data is stored internally
+//!    doesn need to know how the data is stored internally
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 class CvDeal
 {
@@ -192,6 +194,8 @@ public:
 	void AddThirdPartyEmbargo(PlayerTypes eFrom, PlayerTypes eThirdParty, int iDuration);
 	void AddDeclarationOfFriendship(PlayerTypes eFrom);
 	void AddVoteCommitment(PlayerTypes eFrom, int iResolutionID, int iVoteChoice, int iNumVotes, bool bRepeal);
+	void AddDiplomaticMarriage(PlayerTypes eFrom, int iDuration);
+	void AddDualEmpireTreaty(PlayerTypes eFrom);
 
 	int GetGoldTrade(PlayerTypes eFrom);
 	bool ChangeGoldTrade(PlayerTypes eFrom, int iNewAmount);
@@ -215,6 +219,9 @@ public:
 	bool IsThirdPartyPeaceTrade(PlayerTypes eFrom, TeamTypes eThirdPartyTeam);
 	bool IsThirdPartyWarTrade(PlayerTypes eFrom, TeamTypes eThirdPartyTeam);
 	bool IsVoteCommitmentTrade(PlayerTypes eFrom);
+	bool IsDiplomaticMarriage(PlayerTypes eFrom);
+	bool IsDualEmpireTreaty(PlayerTypes eFrom);
+
 	static DealRenewStatus GetItemTradeableState(TradeableItems eItem);
 	bool IsPotentiallyRenewable();
 
@@ -226,6 +233,8 @@ public:
 	void RemoveThirdPartyWar(PlayerTypes eFrom, TeamTypes eThirdPartyTeam);
 	void RemoveThirdPartyEmbargo(PlayerTypes eFrom, PlayerTypes eThirdParty);
 	void RemoveVoteCommitment(PlayerTypes eFrom, int iResolutionID, int iVoteChoice, int iNumVotes, bool bRepeal);
+	void RemoveDiplomaticMarriage(PlayerTypes eFrom);
+	void RemoveDualEmpireTreaty(PlayerTypes eFrom);
 
 	bool ContainsItemType(TradeableItems eItemType, PlayerTypes eFrom = NO_PLAYER);
 };

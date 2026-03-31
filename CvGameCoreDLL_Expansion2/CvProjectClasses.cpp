@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -13,11 +13,16 @@
 #include "LintFree.h"
 
 CvProjectEntry::CvProjectEntry(void):
+	m_iFreePromotion(NO_PROMOTION),
 	m_piResourceQuantityRequirements(NULL),
 	m_piVictoryThreshold(NULL),
 	m_piVictoryMinThreshold(NULL),
 	m_piProjectsNeeded(NULL),
-	m_piFlavorValue(NULL)
+	m_piFlavorValue(NULL),
+
+	m_piYieldChange(NULL),
+	m_piYieldModifier(NULL),
+	m_vePolicyNeeded()
 {
 }
 //------------------------------------------------------------------------------
@@ -28,6 +33,8 @@ CvProjectEntry::~CvProjectEntry(void)
 	SAFE_DELETE_ARRAY(m_piVictoryMinThreshold);
 	SAFE_DELETE_ARRAY(m_piProjectsNeeded);
 	SAFE_DELETE_ARRAY(m_piFlavorValue);
+	SAFE_DELETE_ARRAY(m_piYieldChange);
+	SAFE_DELETE_ARRAY(m_piYieldModifier);
 }
 //------------------------------------------------------------------------------
 bool CvProjectEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility)
@@ -36,6 +43,7 @@ bool CvProjectEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility
 		return false;
 
 	m_iMaxGlobalInstances = kResults.GetInt("MaxGlobalInstances");
+	m_iCityMaxNum = kResults.GetInt("CityMaxNum");
 	m_iMaxTeamInstances = kResults.GetInt("MaxTeamInstances");
 	m_iProductionCost = kResults.GetInt("Cost");
 	m_iNukeInterception = kResults.GetInt("NukeInterception");
@@ -45,7 +53,10 @@ bool CvProjectEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility
 
 	m_bSpaceship = kResults.GetBool("Spaceship");
 	m_bAllowsNukes = kResults.GetBool("AllowsNukes");
-
+	m_bNoBroadcast = kResults.GetBool("NoBroadcast");
+	m_iGoldMaintenance = kResults.GetInt("Maintenance");
+	m_iCostScalerEra = kResults.GetInt("CostScalerEra");
+	m_iCostScalerNumRepeats = kResults.GetInt("CostScalerNumRepeats");
 	m_strMovieArtDef = kResults.GetText("MovieDefineTag");
 
 	const char* szVictoryPrereq = kResults.GetText("VictoryPrereq");
@@ -53,6 +64,9 @@ bool CvProjectEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility
 
 	const char* szTechPrereq = kResults.GetText("TechPrereq");
 	m_iTechPrereq = GC.getInfoTypeForString(szTechPrereq, true);
+
+	const char* szPolicyBranchPrereq = kResults.GetText("PolicyBranchPrereq");
+	m_iPolicyBranchPrereq = GC.getInfoTypeForString(szPolicyBranchPrereq, true);
 
 	const char* szEveryoneSpecialUnit = kResults.GetText("EveryoneSpecialUnit");
 	m_iEveryoneSpecialUnit = GC.getInfoTypeForString(szEveryoneSpecialUnit, true);
@@ -62,6 +76,9 @@ bool CvProjectEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility
 
 	const char* szAnyonePrereqProject = kResults.GetText("AnyonePrereqProject");
 	m_iAnyoneProjectPrereq = GC.getInfoTypeForString(szAnyonePrereqProject, true);
+
+	const char* szTextVal = kResults.GetText("FreePromotion");
+	m_iFreePromotion = GC.getInfoTypeForString(szTextVal, true);
 
 	//Arrays
 	const char* szProjectType = GetType();
@@ -96,6 +113,25 @@ bool CvProjectEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility
 	kUtility.SetFlavors(m_piFlavorValue, "Project_Flavors", "ProjectType", szProjectType);
 	kUtility.PopulateArrayByValue(m_piProjectsNeeded, "Projects", "Project_Prereqs", "PrereqProjectType", "ProjectType", szProjectType, "AmountNeeded");
 
+
+	kUtility.SetYields(m_piYieldChange, "Project_YieldChanges", "ProjectType", szProjectType);
+	kUtility.SetYields(m_piYieldModifier, "Project_YieldModifiers", "ProjectType", szProjectType);
+
+	{
+		std::string strKey("Project_PolicyNeeded");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Policies.ID from Project_PolicyNeeded inner join Policies on Policies.Type = PolicyType where ProjectType = ?;");
+		}
+		pResults->Bind(1, szProjectType);
+		while(pResults->Step())
+		{
+			const PolicyTypes ePolicy = (PolicyTypes)pResults->GetInt(0);
+			m_vePolicyNeeded.push_back(ePolicy);
+		}
+	}
+
 	return true;
 }
 //------------------------------------------------------------------------------
@@ -111,6 +147,11 @@ int CvProjectEntry::GetTechPrereq() const
 	return m_iTechPrereq;
 }
 
+int CvProjectEntry::GetPolicyBranchPrereq() const
+{
+	return m_iPolicyBranchPrereq;
+}
+
 /// Is there a project someone must have completed?
 int CvProjectEntry::GetAnyoneProjectPrereq() const
 {
@@ -121,6 +162,11 @@ int CvProjectEntry::GetAnyoneProjectPrereq() const
 void CvProjectEntry::SetAnyoneProjectPrereq(int i)
 {
 	m_iAnyoneProjectPrereq = i;
+}
+
+int CvProjectEntry::CityMaxNum() const
+{
+	return m_iCityMaxNum;
 }
 
 /// Is there a maximum number of these in the world?
@@ -197,6 +243,25 @@ bool CvProjectEntry::IsAllowsNukes() const
 	return m_bAllowsNukes;
 }
 
+bool CvProjectEntry::IsNoBroadcast() const
+{
+	return m_bNoBroadcast;
+}
+
+int CvProjectEntry::CostScalerEra() const
+{
+	return m_iCostScalerEra;
+}
+int CvProjectEntry::GetGoldMaintenance() const
+{
+	return m_iGoldMaintenance;
+}
+int CvProjectEntry::CostScalerNumberOfRepeats() const
+{
+	return m_iCostScalerNumRepeats;
+}
+
+
 /// Retrieve movie file name
 const char* CvProjectEntry::GetMovieArtDef() const
 {
@@ -213,6 +278,12 @@ const char* CvProjectEntry::GetCreateSound() const
 void CvProjectEntry::SetCreateSound(const char* szVal)
 {
 	m_strCreateSound = szVal;
+}
+
+/// Does this Project give units a promotion for free instantly?
+int CvProjectEntry::GetFreePromotion() const
+{
+	return m_iFreePromotion;
 }
 
 // ARRAYS
@@ -278,6 +349,40 @@ int CvProjectEntry::GetProjectsNeeded(int i) const
 	return 0;
 }
 
+
+/// Change to yield by type
+int CvProjectEntry::GetYieldChange(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piYieldChange ? m_piYieldChange[i] : -1;
+}
+
+/// Array of yield changes
+int* CvProjectEntry::GetYieldChangeArray() const
+{
+	return m_piYieldChange;
+}
+
+/// Modifier to yield by type
+int CvProjectEntry::GetYieldModifier(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piYieldModifier ? m_piYieldModifier[i] : -1;
+}
+
+/// Array of yield modifiers
+int* CvProjectEntry::GetYieldModifierArray() const
+{
+	return m_piYieldModifier;
+}
+
+/// vector of policy needed
+const std::vector<PolicyTypes>& CvProjectEntry::GetPolicyNeeded() const
+{
+	return m_vePolicyNeeded;
+}
 //=====================================
 // CvProjectXMLEntries
 //=====================================
@@ -321,3 +426,5 @@ CvProjectEntry* CvProjectXMLEntries::GetEntry(int index)
 {
 	return m_paProjectEntries[index];
 }
+
+

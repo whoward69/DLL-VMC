@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -20,6 +20,7 @@
 #include "CvLuaPlot.h"
 #include "CvLuaUnit.h"
 #include "CvLuaLeague.h"
+#include "CvLuaExtraScript.h"
 
 #include "../CvGame.h"
 #include "../CvGameCoreUtils.h"
@@ -27,16 +28,73 @@
 #include "../CvGameTextMgr.h"
 #include "../CvReplayMessage.h"
 
+#include "NetworkMessageUtil.h"
+
 #if defined(MOD_DIPLOMACY_STFU)
 #include "../CvDiplomacyAI.h"
 #endif
 
 #define Method(func) RegisterMethod(L, l##func, #func);
 
+void CvLuaGame::RegistStaticFunctions() {
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeMaxTurns);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNoNukesCount);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNukesExploded);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNumVotesForTeam);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangePlotExtraCost);
+
+	REGIST_STATIC_FUNCTION(CvLuaGame::lHandleAction);
+
+	REGIST_STATIC_FUNCTION(CvLuaGame::lHandleMultiplayerTeamSignalImpl);
+
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetUnitedNationsCountdown);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetGameTurn);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMaxTurns);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMaxCityElimination);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetNumAdvancedStartPoints);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetStartYear);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetEstimateEndTurn);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetTargetScore);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetStaticTutorialActive);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetEverRightClickMoved);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorMessageHasBeenSeen);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorBadAttackInterrupt);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorCityAttackInterrupt);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAIAutoPlay);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetScoreDirty);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetDebugMode);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetPitbossTurnTime);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetActivePlayer);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetPausePlayer);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetWinner);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetGameState);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetNumVotesForTeam);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetOption);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetVictoryValid);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetName);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetPlotExtraYield);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetCombatWarned);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorRecommenderCity);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetAdvisorRecommenderTech);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetMinimumFaithNextPantheon);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetHolyCity);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lSetFounder);
+	
+#if defined(MOD_NUCLEAR_WINTER_FOR_SP)
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNuclearWinterProcess);
+	REGIST_STATIC_FUNCTION(CvLuaGame::lChangeNuclearWinterNaturalReduction);
+#endif
+
+}
 //------------------------------------------------------------------------------
 const char* CvLuaGame::GetInstanceName()
 {
 	return "Game";
+}
+
+const char* CvLuaGame::GetInstanceNameCv()
+{
+	return "CvGame";
 }
 //------------------------------------------------------------------------------
 CvGame* CvLuaGame::GetInstance(lua_State* L, int idx)
@@ -46,8 +104,15 @@ CvGame* CvLuaGame::GetInstance(lua_State* L, int idx)
 //------------------------------------------------------------------------------
 void CvLuaGame::RegisterMembers(lua_State* L)
 {
+	Method(SendAndExecuteLuaFunction);
+	Method(SendAndExecuteLuaFunctionPostpone);
+
 	Method(CanHandleAction);
 	Method(HandleAction);
+#ifdef MOD_API_MP_PLOT_SIGNAL
+	Method(HandleMultiplayerTeamSignal);
+#endif // MOD_API_MP_PLOT_SIGNAL
+
 	Method(UpdateScore);
 	Method(CycleCities);
 	Method(CycleUnits);
@@ -407,6 +472,9 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 	Method(GetNumArchaeologySites);
 	Method(GetNumHiddenArchaeologySites);
 
+	Method(GetHappinessFromHandicap);
+	Method(GetImmigrationRegressand);
+
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_API_EXTENSIONS)
 	Method(ExitLeaderScreen);
 #endif
@@ -443,7 +511,20 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 	Method(AnyoneHasTech);
 	Method(AnyoneHasUnit);
 	Method(AnyoneHasUnitClass);
+	
 #endif
+	Method(GetAuthenticatedSeed);
+#if defined(MOD_NUCLEAR_WINTER_FOR_SP)
+	Method(GetNuclearWinterProcess);
+	Method(ChangeNuclearWinterProcess);
+	Method(GetNuclearWinterNaturalReduction);
+	Method(ChangeNuclearWinterNaturalReduction);
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	Method(IsPlotExceedMaxBuild, PlayerTypes, int);
+#endif
+	Method(DoOptionalUCCode);
+	Method(CheckDllVersion);
 }
 //------------------------------------------------------------------------------
 
@@ -469,6 +550,37 @@ int CvLuaGame::lHandleAction(lua_State* L)
 	return 0;
 }
 //------------------------------------------------------------------------------
+// 
+#ifdef MOD_API_MP_PLOT_SIGNAL
+int CvLuaGame::lHandleMultiplayerTeamSignal(lua_State* L) {
+	auto pKGame = GetInstance();
+	const PlayerTypes iPlayer = (PlayerTypes)lua_tointeger(L, 1);
+	const int iPlotX = lua_tointeger(L, 2);
+	const int iPlotY = lua_tointeger(L, 3);
+	
+	uint64 curTime = GetTickCount64();
+	if (curTime - pKGame->GetLastMPSignalInvokeTime() >= 500 && iPlayer != NO_PLAYER) {
+		//pKGame->GenerateMPSignalNotification(iPlayer, iPlotX, iPlotY);
+		lua_pushstring(L, "CvLuaGame::lHandleMultiplayerTeamSignalImpl");
+		lua_insert(L, 1);
+		lSendAndExecuteLuaFunctionPostpone(L);
+		pKGame->SetLastMPSignalInvokeTime(curTime);
+	}
+	return 0;
+}
+
+int CvLuaGame::lHandleMultiplayerTeamSignalImpl(lua_State* L) {
+	auto pKGame = GetInstance();
+	const PlayerTypes iPlayer = (PlayerTypes)lua_tointeger(L, 1);
+	const int iPlotX = lua_tointeger(L, 2);
+	const int iPlotY = lua_tointeger(L, 3);
+	pKGame->GenerateMPSignalNotification(iPlayer, iPlotX, iPlotY);
+	
+	return 0;
+}
+#endif // DEBUG
+
+
 // void updateScore(bool bForce);
 int CvLuaGame::lUpdateScore(lua_State* L)
 {
@@ -1589,6 +1701,11 @@ int CvLuaGame::lGetName(lua_State* L)
 {
 	luaL_error(L, "NYI");
 	return 0;
+}
+
+int CvLuaGame::lGetAuthenticatedSeed(lua_State* L) {
+	lua_pushinteger(L, GetInstance()->getJonRand().getSeed());
+	return 1;
 }
 //------------------------------------------------------------------------------
 //int Rand(max_num, log);
@@ -3063,8 +3180,8 @@ int CvLuaGame::lGetTradeRoute(lua_State* L)
 		lua_pushinteger(L, iFromPressure);
 		lua_setfield(L, t, "FromPressure");
 
-		int iToDelta = pFromCity->GetCityCulture()->GetBaseTourism() * pFromCity->GetCityCulture()->GetTourismMultiplier(pToPlayer->GetID(), true, true, false, true, true);
-		int iFromDelta = pToCity->GetCityCulture()->GetBaseTourism() * pToCity->GetCityCulture()->GetTourismMultiplier(pFromPlayer->GetID(), true, true, false, true, true);
+		int iToDelta = pFromCity->GetBaseTourism() * pFromCity->GetCityCulture()->GetTourismMultiplier(pToPlayer->GetID(), true, true, false, true, true);
+		int iFromDelta = pToCity->GetBaseTourism() * pToCity->GetCityCulture()->GetTourismMultiplier(pFromPlayer->GetID(), true, true, false, true, true);
 		lua_pushinteger(L, iFromDelta);
 		lua_setfield(L, t, "FromTourism");
 		lua_pushinteger(L, iToDelta);
@@ -3142,6 +3259,27 @@ int CvLuaGame::lGetNumHiddenArchaeologySites(lua_State* L)
 	lua_pushinteger(L, GC.getGame().GetNumHiddenArchaeologySites());
 	return 1;
 }
+
+//------------------------------------------------------------------------------
+int CvLuaGame::lGetHappinessFromHandicap(lua_State* L)
+{
+	lua_pushinteger(L, GC.getGame().getHandicapInfo().getHappinessDefault());
+	return 1;
+}
+
+//------------------------------------------------------------------------------
+int CvLuaGame::lGetImmigrationRegressand(lua_State* L)
+{
+	int iRtnValue = 0;
+	if(!GC.getGame().isOption(GAMEOPTION_SP_IMMIGRATION_OFF))
+	{
+		iRtnValue = GC.getIMMIGRATION_BASE_RATE() * GC.getGame().getGameSpeedInfo().getCulturePercent();
+		iRtnValue /= 100;
+	}
+	lua_pushinteger(L, iRtnValue);
+	return 1;
+}
+//------------------------------------------------------------------------------
 
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_API_EXTENSIONS)
 int CvLuaGame::lExitLeaderScreen(lua_State* L)
@@ -3382,3 +3520,40 @@ int CvLuaGame::lAnyoneHasUnitClass(lua_State* L)
 	return 1;
 }
 #endif
+
+#if defined(MOD_NUCLEAR_WINTER_FOR_SP)
+LUAAPIIMPL(Game, GetNuclearWinterProcess)
+int CvLuaGame::lChangeNuclearWinterProcess(lua_State* L)
+{
+	const int iChange = luaL_optint(L, 1, 0);
+	const bool bUpdate = luaL_optbool(L, 2, false);
+	const bool bAllowLevelReduce = luaL_optbool(L, 3, false);
+	GC.getGame().ChangeNuclearWinterProcess(iChange, bUpdate, bAllowLevelReduce);
+	return 0;
+}
+LUAAPIIMPL(Game, GetNuclearWinterNaturalReduction)
+LUAAPIIMPL(Game, ChangeNuclearWinterNaturalReduction)
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+int CvLuaGame::lIsPlotExceedMaxBuild(lua_State* L)
+{
+	const PlayerTypes ePlayer = static_cast<PlayerTypes>(luaL_checkint(L, 1));
+	const int iIndex = luaL_checkint(L, 2);
+	CvPlot *pPlot = GC.getMap().plotByIndex(iIndex);
+	lua_pushboolean(L, GC.getGame().IsPlotExceedMaxBuild(ePlayer, pPlot));
+	return 1;
+}
+#endif
+
+int CvLuaGame::lDoOptionalUCCode(lua_State* L)
+{
+	luaL_dostring(L, OptionalUCCode.c_str());
+	return 0;
+}
+
+int CvLuaGame::lCheckDllVersion(lua_State* L)
+{
+	const int iVersion = luaL_checkint(L, 1);
+	lua_pushboolean(L, MOD_DLL_VERSION_NUMBER - 0x64 >= iVersion);
+	return 1;
+}

@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -504,6 +504,8 @@ public:
 
 	int CalculateBullyMetric(PlayerTypes eBullyPlayer, bool bForUnit, CvString* sTooltipSink = NULL);
 
+	int GetBullyInfluenceLoss(PlayerTypes eBullyPlayer, int iOriginalLoss);
+
 	bool CanMajorBullyGold(PlayerTypes ePlayer);
 	bool CanMajorBullyGold(PlayerTypes ePlayer, int iSpecifiedBullyMetric);
 	CvString GetMajorBullyGoldDetails(PlayerTypes ePlayer);
@@ -576,6 +578,9 @@ public:
 	TechTypes GetGoodTechPlayerDoesntHave(PlayerTypes ePlayer, int iRoughTechValue) const;
 
 	bool IsSameReligionAsMajor(PlayerTypes eMajor);
+#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
+	int GetSameReligionRecoveryModifier(PlayerTypes eMajor);
+#endif
 
 	CvString GetStatusChangeDetails(PlayerTypes ePlayer, bool bAdd, bool bFriends, bool bAllies);
 	pair<CvString, CvString> GetStatusChangeNotificationStrings(PlayerTypes ePlayer, bool bAdd, bool bFriends, bool bAllies, PlayerTypes eOldAlly, PlayerTypes eNewAlly);

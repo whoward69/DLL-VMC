@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -56,6 +56,7 @@ public:
 	int GetStrategicResourceMod() const;
 	int GetWonderProductionModifier() const;
 	int GetBuildingProductionModifier() const;
+	int GetReligionProductionModifier() const;
 	int GetGreatPeopleRateModifier() const;
 	int GetGreatGeneralRateModifier() const;
 	int GetGreatAdmiralRateModifier() const;
@@ -73,6 +74,20 @@ public:
 	int GetCapitalUnhappinessMod() const;
 	int GetFreeExperience() const;
 	int GetWorkerSpeedModifier() const;
+#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
+	int GetFreePromotionRemoved() const;
+	bool IsRemoveCurrentPromotion() const;
+	bool IsRemoveOceanImpassableCombatUnit() const;
+	bool IsNullifyInfluenceModifier() const;
+	int GetDifferentIdeologyTourismModifier() const;
+	int GetHappinessPerPolicy() const;
+	int GetNumTradeRouteBonus() const;
+	int GetWaterBuildSpeedModifier() const;
+	int GetSettlerProductionEraModifier() const;
+	int GetSettlerProductionStartEra() const;
+	int GetHappinessPerReligionInCity() const;
+	int GetBuildSpeedModifier(int i) const;
+#endif
 	int GetAllFeatureProduction() const;
 	int GetImprovementCostModifier() const;
 	int GetImprovementUpgradeRateModifier() const;
@@ -107,12 +122,34 @@ public:
 	int GetTradeMissionGoldModifier() const;
 	int GetFaithCostModifier() const;
 	int GetCulturalPlunderMultiplier() const;
+	int GetConquestCasualtiesModifier() const;
 	int GetStealTechSlowerModifier() const;
 	int GetStealTechFasterModifier() const;
 	int GetCatchSpiesModifier() const;
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	int GetConversionModifier() const;
 #endif
+	int GetFreeBuildingClass() const;
+	int GetDeepWaterNavalStrengthCultureModifier() const;
+	int GetSettlerPopConsume() const;
+	int GetTourismModifierPerGPCreation() const;
+	int GetScienceModifierFromRANum() const;
+	int GetDiplomatPropagandaModifier() const;
+	int GetCityExtraProductionCount() const;
+	int GetNationalWonderCityCostModifier() const;
+
+	int GetYieldFromNonSpecialistCitizens(int i) const;
+	int* GetYieldFromNonSpecialistCitizensArray() const;
+	int GetYieldChangesPerReligionTimes100(int i) const;
+	int* GetYieldChangesPerReligionTimes100Array() const;
+	int GetUnitClassProductionModifiers(int i) const;
+
+	int GetYieldModifierFromActiveSpies(int i) const;
+	int* GetYieldModifierFromActiveSpiesArray() const;
+
+	int GetYieldModifierPerArtifacts(int i) const;
+	int GetGreatPersonOutputModifierPerGWs(int i) const;
+
 	int GetGoldPerUnit() const;
 	int GetGoldPerMilitaryUnit() const;
 	int GetCityStrengthMod() const;
@@ -143,17 +180,27 @@ public:
 	int GetSharedIdeologyTourismModifier() const;
 	int GetLandTradeRouteGoldChange() const;
 	int GetSeaTradeRouteGoldChange() const;
+	int GetCapitalTradeRouteGoldChange() const;
+	int GetCapitalTradeRouteRangeChange() const;
 	int GetSharedIdeologyTradeGoldChange() const;
 	int GetRiggingElectionModifier() const;
+	int GetRiggingElectionInfluenceModifier() const;
+	bool IsSpyLevelUpWhenRigging() const;
+	bool IsNoOccupiedUnhappinessGarrisonedCity() const;
 	int GetMilitaryUnitGiftExtraInfluence() const;
 	int GetProtectedMinorPerTurnInfluence() const;
 	int GetAfraidMinorPerTurnInfluence() const;
 	int GetMinorBullyScoreModifier() const;
+	int GetMinorLocalBullyScoreModifier() const;
+	int GetMinorAllyBullyScoreModifier() const;
+	int GetMinorBullyInfluenceLossModifier() const;
 	int GetThemingBonusMultiplier() const;
 	int GetInternalTradeRouteYieldModifier() const;
 	int GetSharedReligionTourismModifier() const;
 	int GetTradeRouteTourismModifier() const;
 	int GetOpenBordersTourismModifier() const;
+	int GetImmigrationInModifier() const;
+	int GetImmigrationOutModifier() const;
 	int GetCityStateTradeChange() const;
 	bool IsMinorGreatPeopleAllies() const;
 	bool IsMinorScienceAllies() const;
@@ -200,6 +247,8 @@ public:
 	int* GetCapitalYieldChangeArray() const;
 	int GetCapitalYieldPerPopChange(int i) const;
 	int* GetCapitalYieldPerPopChangeArray() const;
+	int GetYieldPerPopChange(int i) const;
+	int* GetYieldPerPopChangeArray() const;
 	int GetCapitalYieldModifier(int i) const;
 	int* GetCapitalYieldModifierArray() const;
 	int GetGreatWorkYieldChange(int i) const;
@@ -214,17 +263,18 @@ public:
 #endif
 	int GetUnitCombatProductionModifiers(int i) const;
 	int GetUnitCombatFreeExperiences(int i) const;
-	int GetBuildingClassCultureChange(int i) const;
 	int GetBuildingClassHappiness(int i) const;
 	int GetBuildingClassProductionModifier(int i) const;
 	int GetBuildingClassTourismModifier(int i) const;
-	int GetNumFreeUnitsByClass(int i) const;
+	int GetNumFreeUnitsByClass() const;
+	std::pair<UnitClassTypes, int>* GetFreeUnitsByClass() const;
 	int GetTourismByUnitClassCreated(int i) const;
 	int GetImprovementCultureChanges(int i) const;
 
 	int GetHurryModifier(int i) const;
 	bool IsSpecialistValid(int i) const;
 	int GetImprovementYieldChanges(int i, int j) const;
+	int GetCityLoveKingDayYieldMod(int i) const;
 #if defined(MOD_API_UNIFIED_YIELDS) && defined(MOD_API_PLOT_YIELDS)
 	int GetPlotYieldChanges(int i, int j) const;
 #endif
@@ -256,10 +306,65 @@ public:
 #if defined(MOD_BUGFIX_DUMMY_POLICIES)
 	bool IsDummy() const;
 #endif
+	bool IsAlwaysWeLoveKindDayInGoldenAge() const;
+	bool IsNoResistance() const;
+	bool IsUpgradeAllTerritory() const;
+	bool IsNoTechForWonder() const;
+	bool IsNoTechForProject() const;
+	int GetDefenseBoost() const;
+	int GetCityCaptureHealGlobal() const;
+	int GetOriginalCapitalCaptureTech() const;
+	int GetOriginalCapitalCapturePolicy() const;
+	int GetOriginalCapitalCaptureGreatPerson() const;
+	int GetFreePopulation() const;
+	int GetFreePopulationCapital() const;
+	int GetExtraSpies() const;
+	int GetGreatScientistBeakerPolicyModifier() const;
+	int GetProductionBeakerMod() const;
 	bool IsOneShot() const;
 	bool IncludesOneShotFreeUnits() const;
 
 	BuildingTypes GetFreeBuildingOnConquest() const;
+
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	int GetMinorsTradeRouteYieldRate(const YieldTypes eYieldType) const;
+	int GetInternalTradeRouteDestYieldRate(const YieldTypes eYieldType) const;
+#endif
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int GetWarCasualtiesModifier() const;
+#endif
+
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+	int GetIdeologyPressureModifier() const;
+	int GetIdeologyUnhappinessModifier() const;
+#endif
+
+	int GetInstantFoodThresholdPercent() const;
+	int GetInstantFoodKeptPercent() const;
+	LuaFormulaTypes GetCaptureCityResistanceTurnsChangeFormula() const;
+
+	std::vector<PolicyYieldInfo>& GetCityWithWorldWonderYieldModifier();
+	std::vector<PolicyYieldInfo>& GetTradeRouteCityYieldModifier();
+	std::vector<PolicyYieldInfo>& GetCityNumberCityYieldModifier();
+	std::vector<PolicyYieldInfo>& GetHappinessYieldModifier();
+
+	std::vector<PolicyResourceInfo>& GetCityResources();
+
+	int GetGlobalHappinessFromFaithPercent() const;
+	int GetHappinessInWLTKDCities() const;
+
+#ifdef MOD_RESOURCE_EXTRA_BUFF
+	int GetResourceUnhappinessModifier() const;
+	int GetResourceCityConnectionTradeRouteGoldModifier() const;
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	int GetCorruptionScoreModifier() const;
+	bool GetCorruptionLevelReduceByOne() const;
+	bool IsInvolveCorruption() const;
+	int GetCorruptionLevelPolicyCostModifier(CorruptionLevelTypes level) const;
+#endif
 
 private:
 	int m_iTechPrereq;
@@ -288,6 +393,7 @@ private:
 	int m_iStrategicResourceMod;
 	int m_iWonderProductionModifier;
 	int m_iBuildingProductionModifier;
+	int m_iReligionProductionModifier;
 	int m_iGreatPeopleRateModifier;
 	int m_iGreatGeneralRateModifier;
 	int m_iGreatAdmiralRateModifier;
@@ -305,6 +411,19 @@ private:
 	int m_iCapitalUnhappinessMod;
 	int m_iFreeExperience;
 	int m_iWorkerSpeedModifier;
+#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
+	int m_iFreePromotionRemoved;
+	bool m_bRemoveCurrentPromotion;
+	bool m_bNullifyInfluenceModifier;
+	int m_iDifferentIdeologyTourismModifier;
+	int m_iHappinessPerPolicy;
+	int m_iNumTradeRouteBonus;
+	int m_iWaterBuildSpeedModifier;
+	int m_iSettlerProductionEraModifier;
+	int m_iSettlerProductionStartEra;
+	int m_iHappinessPerReligionInCity;
+	int* m_piBuildSpeedModifier;
+#endif
 	int m_iAllFeatureProduction;
 	int m_iImprovementCostModifier;
 	int m_iImprovementUpgradeRateModifier;
@@ -339,12 +458,21 @@ private:
 	int m_iTradeMissionGoldModifier;
 	int m_iFaithCostModifier;
 	int m_iCulturalPlunderMultiplier;
+	int m_iConquestCasualtiesModifier;
 	int m_iStealTechSlowerModifier;
 	int m_iStealTechFasterModifier;
 	int m_iCatchSpiesModifier;
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	int m_iConversionModifier;
 #endif
+	int m_iFreeBuildingClass;
+	int m_iDeepWaterNavalStrengthCultureModifier;
+	int m_iSettlerPopConsume;
+	int m_iTourismModifierPerGPCreation;
+	int m_iScienceModifierFromRANum;
+	int m_iDiplomatPropagandaModifier;
+	int m_iCityExtraProductionCount;
+	int m_iNationalWonderCityCostModifier;
 	int m_iGoldPerUnit;
 	int m_iGoldPerMilitaryUnit;
 	int m_iCityStrengthMod;
@@ -370,19 +498,30 @@ private:
 	int m_iCommonFoeTourismModifier;
 	int m_iLessHappyTourismModifier;
 	int m_iSharedIdeologyTourismModifier;
+	bool m_bRemoveOceanImpassableCombatUnit;
 	int m_iLandTradeRouteGoldChange;
 	int m_iSeaTradeRouteGoldChange;
+	int m_iCapitalTradeRouteGoldChange;
+	int m_iCapitalTradeRouteRangeChange;
 	int m_iSharedIdeologyTradeGoldChange;
 	int m_iRiggingElectionModifier;
+	int m_iRiggingElectionInfluenceModifier;
+	bool m_bSpyLevelUpWhenRigging;
+	bool m_bNoOccupiedUnhappinessGarrisonedCity;
 	int m_iMilitaryUnitGiftExtraInfluence;
 	int m_iProtectedMinorPerTurnInfluence;
 	int m_iAfraidMinorPerTurnInfluence;
 	int m_iMinorBullyScoreModifier;
+	int m_iMinorLocalBullyScoreModifier;
+	int m_iMinorAllyBullyScoreModifier;
+	int m_iMinorBullyInfluenceLossModifier;
 	int m_iThemingBonusMultiplier;
 	int m_iInternalTradeRouteYieldModifier;
 	int m_iSharedReligionTourismModifier;
 	int m_iTradeRouteTourismModifier;
 	int m_iOpenBordersTourismModifier;
+	int m_iImmigrationInModifier;
+	int m_iImmigrationOutModifier;
 	int m_iCityStateTradeChange;
 	bool m_bMinorGreatPeopleAllies;
 	bool m_bMinorScienceAllies;
@@ -415,6 +554,21 @@ private:
 #if defined(MOD_BUGFIX_DUMMY_POLICIES)
 	bool m_bDummy;
 #endif
+	bool m_bAlwaysWeLoveKindDayInGoldenAge;
+	bool m_bNoResistance;
+	bool m_bUpgradeAllTerritory;
+	bool m_bNoTechForWonder;
+	bool m_bNoTechForProject;
+	int m_iDefenseBoost;
+	int m_iCityCaptureHealGlobal;
+	int m_iOriginalCapitalCaptureTech;
+	int m_iOriginalCapitalCapturePolicy;
+	int m_iOriginalCapitalCaptureGreatPerson;
+	int m_iFreePopulation;
+	int m_iFreePopulationCapital;
+	int m_iExtraSpies;
+	int m_iGreatScientistBeakerPolicyModifier;
+	int m_iProductionBeakerMod;
 	bool m_bOneShot;
 	bool m_bIncludesOneShotFreeUnits;
 
@@ -436,6 +590,7 @@ private:
 	int* m_piCoastalCityYieldChange;
 	int* m_piCapitalYieldChange;
 	int* m_piCapitalYieldPerPopChange;
+	int* m_piYieldPerPopChange;
 	int* m_piCapitalYieldModifier;
 	int* m_piGreatWorkYieldChange;
 	int* m_piSpecialistExtraYield;
@@ -444,13 +599,14 @@ private:
 	int* m_paiUnitCombatProductionModifiers;
 	int* m_paiUnitCombatFreeExperiences;
 	int* m_paiHurryModifier;
-	int* m_paiBuildingClassCultureChanges;
 	int* m_paiBuildingClassProductionModifiers;
 	int* m_paiBuildingClassTourismModifiers;
 	int* m_paiBuildingClassHappiness;
-	int* m_paiFreeUnitClasses;
+	int m_iNumFreeUnitClass;
+	std::pair<UnitClassTypes, int>* m_pFreeUnitClasses;
 	int* m_paiTourismOnUnitCreation;
 
+	int* m_piCityLoveKingDayYieldMod;
 //	bool* m_pabHurry;
 	bool* m_pabSpecialistValid;
 	int** m_ppiImprovementYieldChanges;
@@ -473,9 +629,56 @@ private:
 	int* m_piYieldChangesNaturalWonder;
 	int* m_piYieldChangeWorldWonder;
 #endif
+	int* m_piYieldFromNonSpecialistCitizens;
+	int* m_piYieldChangesPerReligion;
+	int* m_paiUnitClassProductionModifiers;
+
+	int* m_piYieldModifierFromActiveSpies;
+	int* m_piYieldModifierPerArtifacts;
+	int* m_piGreatPersonOutputModifierPerGWs;
 	int** m_ppiBuildingClassYieldModifiers;
 	int** m_ppiBuildingClassYieldChanges;
 	int* m_piFlavorValue;
+
+#ifdef MOD_GLOBAL_WAR_CASUALTIES
+	int m_iWarCasualtiesModifier;
+#endif
+
+
+#ifdef MOD_POLICIY_PUBLIC_OPTION
+	int m_iIdeologyPressureModifier = 0;
+	int m_iIdeologyUnhappinessModifier = 0;
+#endif
+
+	int m_iInstantFoodThresholdPercent = 0;
+	int m_iInstantFoodKeptPercent = 0;
+
+	LuaFormulaTypes m_eCaptureCityResistanceTurnsChangeFormula = NO_LUA_FORMULA;
+
+#ifdef MOD_API_TRADE_ROUTE_YIELD_RATE
+	Firaxis::Array<int, YieldTypes::NUM_YIELD_TYPES> m_piMinorsTradeRouteYieldRate;
+	Firaxis::Array<int, YieldTypes::NUM_YIELD_TYPES> m_piInternalTradeRouteDestYieldRate;
+#endif
+
+	std::vector<PolicyYieldInfo> m_vCityWithWorldWonderYieldModifier;
+	std::vector<PolicyYieldInfo> m_vTradeRouteCityYieldModifier;
+	std::vector<PolicyYieldInfo> m_vCityNumberCityYieldModifier;
+	std::vector<PolicyYieldInfo> m_vHappinessYieldModifier;
+	int m_iGlobalHappinessFromFaithPercent = 0;
+	int m_iHappinessInWLTKDCities = 0;
+
+#ifdef MOD_RESOURCE_EXTRA_BUFF
+	int m_iResourceUnhappinessModifier = 0;
+	int m_iResourceCityConnectionTradeRouteGoldModifier = 0;
+#endif
+
+	std::vector<PolicyResourceInfo> m_vCityResources;
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	int m_iCorruptionScoreModifier = 0;
+	bool m_bCorruptionLevelReduceByOne = false;
+	std::vector<int> m_paiCorruptionLevelPolicyCostModifier;
+#endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -507,6 +710,7 @@ public:
 
 	// Accessor Functions (Arrays)
 	int GetPolicyBranchDisables(int i) const;
+	bool IsLockedByCivilization(int i) const;
 
 private:
 	int m_iEraPrereq;
@@ -524,6 +728,7 @@ private:
 
 	// Arrays
 	int* m_piPolicyBranchDisables;
+	std::tr1::unordered_set<int> m_setPolicyBranchCivilizationLocked;
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -562,59 +767,6 @@ private:
 	std::vector<CvPolicyBranchEntry*> m_paPolicyBranchEntries;
 };
 
-enum PolicyModifierType
-{
-    POLICYMOD_EXTRA_HAPPINESS = 0,
-    POLICYMOD_EXTRA_HAPPINESS_PER_CITY,
-    POLICYMOD_GREAT_PERSON_RATE,
-    POLICYMOD_GREAT_GENERAL_RATE,
-    POLICYMOD_DOMESTIC_GREAT_GENERAL_RATE,
-    POLICYMOD_POLICY_COST_MODIFIER,
-    POLICYMOD_RELIGION_PRODUCTION_MODIFIER,
-    POLICYMOD_WONDER_PRODUCTION_MODIFIER,
-    POLICYMOD_BUILDING_PRODUCTION_MODIFIER,
-    POLICYMOD_FREE_EXPERIENCE,
-    POLICYMOD_EXTRA_CULTURE_FROM_IMPROVEMENTS,
-    POLICYMOD_CULTURE_FROM_KILLS,
-    POLICYMOD_EMBARKED_EXTRA_MOVES,
-    POLICYMOD_CULTURE_FROM_BARBARIAN_KILLS,
-    POLICYMOD_GOLD_FROM_KILLS,
-    POLICYMOD_CULTURE_FROM_GARRISON,
-    POLICYMOD_UNIT_FREQUENCY_MODIFIER,
-    POLICYMOD_TRADE_MISSION_GOLD_MODIFIER,
-    POLICYMOD_FAITH_COST_MODIFIER,
-    POLICYMOD_CULTURAL_PLUNDER_MULTIPLIER,
-    POLICYMOD_STEAL_TECH_SLOWER_MODIFIER,
-    POLICYMOD_CATCH_SPIES_MODIFIER,
-	POLICYMOD_GREAT_ADMIRAL_RATE,
-	POLICYMOD_GREAT_WRITER_RATE,
-	POLICYMOD_GREAT_ARTIST_RATE,
-	POLICYMOD_GREAT_MUSICIAN_RATE,
-	POLICYMOD_GREAT_MERCHANT_RATE,
-	POLICYMOD_GREAT_SCIENTIST_RATE,
-	POLICYMOD_TOURISM_MOD_COMMON_FOE,
-	POLICYMOD_TOURISM_MOD_LESS_HAPPY,
-	POLICYMOD_TOURISM_MOD_SHARED_IDEOLOGY,
-	POLICYMOD_BUILDING_PURCHASE_COST_MODIFIER,
-	POLICYMOD_LAND_TRADE_GOLD_CHANGE,
-	POLICYMOD_SEA_TRADE_GOLD_CHANGE,
-	POLICYMOD_SHARED_IDEOLOGY_TRADE_CHANGE,
-	POLICYMOD_RIGGING_ELECTION_MODIFIER,
-	POLICYMOD_MILITARY_UNIT_GIFT_INFLUENCE,
-	POLICYMOD_PROTECTED_MINOR_INFLUENCE,
-	POLICYMOD_AFRAID_INFLUENCE,
-	POLICYMOD_MINOR_BULLY_SCORE_MODIFIER,
-	POLICYMOD_STEAL_TECH_FASTER_MODIFIER,
-	POLICYMOD_THEMING_BONUS,
-	POLICYMOD_CITY_STATE_TRADE_CHANGE,
-	POLICYMOD_INTERNAL_TRADE_MODIFIER,
-    POLICYMOD_SHARED_RELIGION_TOURISM_MODIFIER,
-    POLICYMOD_TRADE_ROUTE_TOURISM_MODIFIER,
-	POLICYMOD_OPEN_BORDERS_TOURISM_MODIFIER,
-#if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
-    POLICYMOD_CONVERSION_MODIFIER,
-#endif
-};
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //  CLASS:      CvPlayerPolicies

@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -208,6 +208,74 @@ bool CvDatabaseUtility::PopulateArrayByExistence(int*& pArray, const char* szTyp
 	while(pResults->Step())
 	{
 		pArray[idx++] = pResults->GetInt(0);
+	}
+
+	pResults->Reset();
+
+	return true;
+}
+//------------------------------------------------------------------------------
+bool CvDatabaseUtility::PopulateArrayByExistence(std::tr1::unordered_set<int>& set, const char* szTypeTableName, const char* szDataTableName, const char* szTypeColumn, const char* szFilterColumn, const char* szFilterValue)
+{
+	std::string strKey = "_PABE_";
+	strKey.append(szTypeTableName);
+	strKey.append(szDataTableName);
+	strKey.append(szFilterColumn);
+
+	Database::Results* pResults = GetResults(strKey);
+	if(pResults == NULL)
+	{
+		char szSQL[512];
+		sprintf_s(szSQL, "select %s.ID from %s inner join %s on %s = %s.Type where %s = ?", szTypeTableName, szDataTableName, szTypeTableName, szTypeColumn, szTypeTableName, szFilterColumn);
+		pResults = PrepareResults(strKey, szSQL);
+		if(pResults == NULL)
+			return false;
+	}
+
+	if(!pResults->Bind(1, szFilterValue, false))
+	{
+		CvAssertMsg(false, GetErrorMessage());
+		return false;
+	}
+
+	int idx = 0;
+	while(pResults->Step())
+	{
+		set.insert(pResults->GetInt(0));
+	}
+
+	pResults->Reset();
+
+	return true;
+}
+//------------------------------------------------------------------------------
+bool CvDatabaseUtility::PopulateArrayByExistence(std::vector<int>& vector, const char* szTypeTableName, const char* szDataTableName, const char* szTypeColumn, const char* szFilterColumn, const char* szFilterValue)
+{
+	std::string strKey = "_PABE_";
+	strKey.append(szTypeTableName);
+	strKey.append(szDataTableName);
+	strKey.append(szFilterColumn);
+
+	Database::Results* pResults = GetResults(strKey);
+	if(pResults == NULL)
+	{
+		char szSQL[512];
+		sprintf_s(szSQL, "select %s.ID from %s inner join %s on %s = %s.Type where %s = ?", szTypeTableName, szDataTableName, szTypeTableName, szTypeColumn, szTypeTableName, szFilterColumn);
+		pResults = PrepareResults(strKey, szSQL);
+		if(pResults == NULL)
+			return false;
+	}
+
+	if(!pResults->Bind(1, szFilterValue, false))
+	{
+		CvAssertMsg(false, GetErrorMessage());
+		return false;
+	}
+
+	int idx = 0;
+	while(pResults->Step())
+	{
+		vector.push_back(pResults->GetInt(0));
 	}
 
 	pResults->Reset();

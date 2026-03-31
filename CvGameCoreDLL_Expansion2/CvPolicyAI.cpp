@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -398,9 +398,30 @@ void CvPolicyAI::DoChooseIdeology(CvPlayer *pPlayer)
 	}
 #endif
 
-	int iFreedomTotal = iDiploPriority + iTechPriority + iCulturePriority;
-	int iAutocracyTotal = iDiploPriority + iConquestPriority + iCulturePriority;
-	int iOrderTotal = iTechPriority + iConquestPriority + iCulturePriority;
+	int iFreedomTotal = 0;
+	int iAutocracyTotal = 0;
+	int iOrderTotal = 0;
+
+	// For SP, different victory priority are given different weights in different Ideology
+	if(!MOD_SP_SMART_AI)
+	{
+		iFreedomTotal = iDiploPriority + iTechPriority + iCulturePriority;
+		iAutocracyTotal = iDiploPriority + iConquestPriority + iCulturePriority;
+		iOrderTotal = iTechPriority + iConquestPriority + iCulturePriority;
+	}
+	else
+	{
+		iFreedomTotal += iCulturePriority * 150 / 100;
+		iFreedomTotal += iTechPriority * 125 / 100;
+		iFreedomTotal += iDiploPriority * 50 /100;
+		iAutocracyTotal += iDiploPriority * 25 /100;
+		iAutocracyTotal += iTechPriority * 25 / 100;
+		iAutocracyTotal += iConquestPriority * 300 / 100;
+		iOrderTotal += iTechPriority * 175 / 100;
+		iOrderTotal += iConquestPriority * 125 / 100;
+		iOrderTotal += iCulturePriority * 25 /100;
+	}
+	
 	int iGrandTotal = iFreedomTotal + iAutocracyTotal + iOrderTotal;
 
 	if (iGrandTotal > 0)
@@ -547,11 +568,13 @@ void CvPolicyAI::DoChooseIdeology(CvPlayer *pPlayer)
 	LogIdeologyChoice(stage, iFreedomPriority, iAutocracyPriority, iOrderPriority);
 
 	// Small random add-on
-	iFreedomPriority += GC.getGame().getJonRandNum(10, "Freedom random priority bump");
-	iAutocracyPriority += GC.getGame().getJonRandNum(10, "Autocracy random priority bump");
-	iOrderPriority += GC.getGame().getJonRandNum(10, "Order random priority bump");
+	int iRandRange = 10;
+	if (MOD_SP_SMART_AI) iRandRange = 20;
+	iFreedomPriority += GC.getGame().getJonRandNum(iRandRange, "Freedom random priority bump");
+	iAutocracyPriority += GC.getGame().getJonRandNum(iRandRange, "Autocracy random priority bump");
+	iOrderPriority += GC.getGame().getJonRandNum(iRandRange, "Order random priority bump");
 
-	stage = "After Random (1 to 10)";
+	stage = "After Random (1 to iRandRange)";
 	LogIdeologyChoice(stage, iFreedomPriority, iAutocracyPriority, iOrderPriority);
 
 	// Rule out any branches that are totally out of consideration

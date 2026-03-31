@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -73,12 +73,9 @@ public:
 
 	void Update(void);
 	void UpdateRoutePlots(void);
+	void UpdateKeepFeatures(CvPlayer* pPlayer);
 
-#if defined(MOD_UNITS_LOCAL_WORKERS) || defined(MOD_AI_SECONDARY_WORKERS)
-	bool EvaluateBuilder(CvUnit* pUnit, BuilderDirective* paDirectives, UINT uaDirectives, bool bKeepOnlyBest = false, bool bOnlyEvaluateWorkersPlot = false, bool bLimit = false);
-#else
-	bool EvaluateBuilder(CvUnit* pUnit, BuilderDirective* paDirectives, UINT uaDirectives, bool bKeepOnlyBest = false, bool bOnlyEvaluateWorkersPlot = false);
-#endif
+	bool EvaluateBuilder(CvUnit* pUnit, BuilderDirective* paDirectives, UINT uaDirectives, std::list<CvPlot*>& lPlayerPlots, bool bKeepOnlyBest = false, bool bOnlyEvaluateWorkersPlot = false, bool bLimit = false);
 
 	void AddImprovingResourcesDirectives(CvUnit* pUnit, CvPlot* pPlot, int iMoveTurnsAway);
 	void AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlot, int iMoveTurnsAway);
@@ -89,11 +86,7 @@ public:
 	void AddScrubFalloutDirectives(CvUnit* pUnit, CvPlot* pPlot, int iMoveTurnsAway);
 
 	bool ShouldBuilderConsiderPlot(CvUnit* pUnit, CvPlot* pPlot);  // determines all the logistics if the builder should get to the plot
-#if defined(MOD_UNITS_LOCAL_WORKERS) || defined(MOD_AI_SECONDARY_WORKERS)
 	int FindTurnsAway(CvUnit* pUnit, CvPlot* pPlot, bool bLimit = false);  // returns -1 if no path can be found, otherwise it returns the # of turns to get there
-#else
-	int FindTurnsAway(CvUnit* pUnit, CvPlot* pPlot);  // returns -1 if no path can be found, otherwise it returns the # of turns to get there
-#endif
 
 	int GetBuildCostWeight(int iWeight, CvPlot* pPlot, BuildTypes eBuild);
 	int GetBuildTimeWeight(CvUnit* pUnit, CvPlot* pPlot, BuildTypes eBuild, bool bIgnoreFeatureTime = false, int iAdditionalTime = 0);
@@ -103,7 +96,7 @@ public:
 	CvCity* GetWorkingCity(CvPlot* pPlot);
 	bool DoesBuildHelpRush(CvUnit* pUnit, CvPlot* pPlot, BuildTypes eBuild);
 
-	int ScorePlot();
+	int ScorePlot(ImprovementTypes eImprovement, ImprovementTypes eExistingImprovement);
 
 	BuildTypes GetBuildTypeFromImprovement(ImprovementTypes eImprovement);
 	//static YieldTypes GetDeficientYield (CvCity* pCity, bool bIgnoreHappiness = false); // this is different from the CityStrategy one because it checks unhappiness before declaring a food emergency
@@ -145,6 +138,8 @@ protected:
 
 	bool m_bKeepMarshes;
 	bool m_bKeepJungle;
+	bool m_bKeepForest;
+	std::vector<bool> m_vKeepAdjacentFeatures;
 };
 
 #endif //CIV5_BUILDER_TASKING_AI_H

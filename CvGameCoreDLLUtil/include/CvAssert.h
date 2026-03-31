@@ -27,7 +27,7 @@ bool CvAssertDlg(const char* expr, const char* szFile, unsigned int uiLine, bool
 // _DEBUG.  Sometimes, however, it's useful to enable asserts in release builds, and you can do that
 // simply by changing the following lines to define CVASSERT_ENABLE or using project settings to override
 #if !defined(FINAL_RELEASE)
-#define		CVASSERT_ENABLE
+//#define		CVASSERT_ENABLE
 #endif	// FINAL_RELEASE
 
 

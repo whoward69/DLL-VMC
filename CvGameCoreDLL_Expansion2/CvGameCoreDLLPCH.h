@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -35,6 +35,13 @@
 #    error "_SECURE_SCL == 0 and _HAS_ITERATOR_DEBUGGING == 1. This combination settings can cause crashes."
 #  endif
 #endif
+
+
+#if __cplusplus >= 201703L
+#define NODISCARD [[nodiscard]]
+#else
+#define NODISCARD
+#endif // __cplusplus >= 201703L
 
 //Similar to UNUSED_VARIABLE, but implies that the variable IS used in debug builds.
 #define DEBUG_VARIABLE(x) (void)(sizeof(x))

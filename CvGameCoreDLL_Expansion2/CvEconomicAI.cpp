@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -328,6 +328,7 @@ void CvEconomicAI::Reset()
 	}
 
 	m_iExplorersDisbanded = 0;
+	m_iSeaExplorersDisbanded = 0;
 	m_eReconState = NO_RECON_STATE;
 	m_eNavalReconState = NO_RECON_STATE;
 	m_iLastTurnWorkerDisbanded = -1;
@@ -426,6 +427,7 @@ void CvEconomicAI::Read(FDataStream& kStream)
 	m_eNavalReconState = (ReconState)iTemp;
 
 	kStream >> m_iExplorersDisbanded;
+	kStream >> m_iSeaExplorersDisbanded;
 	kStream >> m_iLastTurnWorkerDisbanded;
 	kStream >> m_iVisibleAntiquitySites;
 
@@ -471,6 +473,7 @@ void CvEconomicAI::Write(FDataStream& kStream)
 	kStream << (int)m_eReconState;
 	kStream << (int)m_eNavalReconState;
 	kStream << m_iExplorersDisbanded;
+	kStream << m_iSeaExplorersDisbanded;
 	kStream << m_iLastTurnWorkerDisbanded;
 	kStream << m_iVisibleAntiquitySites;
 
@@ -1379,16 +1382,12 @@ void CvEconomicAI::LogMonitor(void)
 		case YIELD_FAITH:
 			AppendToLog(strHeader, strLog, "Faith", m_pPlayer->GetTotalFaithPerTurn());
 			break;
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
 		case YIELD_TOURISM:
 			AppendToLog(strHeader, strLog, "Tourism", m_pPlayer->calculateTotalYield((YieldTypes)ui));
 			break;
-#endif
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
 		case YIELD_GOLDEN_AGE_POINTS:
 			AppendToLog(strHeader, strLog, "Golden Age", m_pPlayer->calculateTotalYield((YieldTypes)ui));
 			break;
-#endif
 		}
 	}
 
@@ -1619,16 +1618,12 @@ void CvEconomicAI::LogCityMonitor()
 			case YIELD_FAITH:
 				AppendToLog(strHeader, strLog, "faith", aiCityYields[ui]);
 				break;
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
 			case YIELD_TOURISM:
 				AppendToLog(strHeader, strLog, "tourism", aiCityYields[ui]);
 				break;
-#endif
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
 			case YIELD_GOLDEN_AGE_POINTS:
 				AppendToLog(strHeader, strLog, "goldenage", aiCityYields[ui]);
 				break;
-#endif
 			}
 		}
 
@@ -1661,16 +1656,12 @@ void CvEconomicAI::LogCityMonitor()
 			case YIELD_FAITH:
 				AppendToLog(strHeader, strLog, "faith / pop", fRatio);
 				break;
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
 			case YIELD_TOURISM:
 				AppendToLog(strHeader, strLog, "tourism / pop", fRatio);
 				break;
-#endif
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
 			case YIELD_GOLDEN_AGE_POINTS:
 				AppendToLog(strHeader, strLog, "goldenage / pop", fRatio);
 				break;
-#endif
 			}
 		}
 
@@ -1698,16 +1689,12 @@ void CvEconomicAI::LogCityMonitor()
 			case YIELD_FAITH:
 				AppendToLog(strHeader, strLog, "faith specialist", aiSpecialistsYields[ui]);
 				break;
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
 			case YIELD_TOURISM:
 				AppendToLog(strHeader, strLog, "tourism specialist", aiSpecialistsYields[ui]);
 				break;
-#endif
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
 			case YIELD_GOLDEN_AGE_POINTS:
 				AppendToLog(strHeader, strLog, "goldenage specialist", aiSpecialistsYields[ui]);
 				break;
-#endif
 			}
 		}
 
@@ -1739,16 +1726,12 @@ void CvEconomicAI::LogCityMonitor()
 			case YIELD_FAITH:
 				AppendToLog(strHeader, strLog, "faith specialist / faith", fRatio);
 				break;
-#if defined(MOD_API_UNIFIED_YIELDS_TOURISM)
 			case YIELD_TOURISM:
 				AppendToLog(strHeader, strLog, "tourism specialist / tourism", fRatio);
 				break;
-#endif
-#if defined(MOD_API_UNIFIED_YIELDS_GOLDEN_AGE)
 			case YIELD_GOLDEN_AGE_POINTS:
 				AppendToLog(strHeader, strLog, "goldenage specialist / tourism", fRatio);
 				break;
-#endif
 			}
 		}
 
@@ -2211,7 +2194,7 @@ void CvEconomicAI::DoReconState()
 	else
 	{
 		// How many Units do we have exploring or being trained to do this job? The more Units we have the less we want this Strategy
-		iNumExploringUnits = m_pPlayer->GetNumUnitsWithUnitAI(UNITAI_EXPLORE_SEA, true, true);
+		iNumExploringUnits = m_pPlayer->GetNumUnitsWithUnitAI(UNITAI_EXPLORE_SEA, true, true) + m_iSeaExplorersDisbanded;
 		iStrategyWeight = /*100*/ GC.getAI_STRATEGY_EARLY_EXPLORATION_STARTING_WEIGHT();
 		iWeightThreshold = 110;  // So result is a number from 10 to 100
 		iWeightThreshold -= m_pPlayer->GetGrandStrategyAI()->GetPersonalityAndGrandStrategy((FlavorTypes)GC.getInfoTypeForString("FLAVOR_NAVAL_RECON")) *
@@ -2420,75 +2403,63 @@ void CvEconomicAI::DisbandExtraWorkers()
 // Check for very long obsolete units that didn't get an upgrade (usual suspects are wandering triremes and warriors)
 void CvEconomicAI::DisbandLongObsoleteUnits()
 {
-	CvUnit* pUnit;
-	int iLoop;
-	int unitEra;
-	int ArmyId;
-	int playerCurrentEra;
-	bool movingArmy;
-	CvTechEntry* pkTechInfo;
-	CvArmyAI* pThisArmy;
-	playerCurrentEra = m_pPlayer->GetCurrentEra();
+	int playerCurrentEra = m_pPlayer->GetCurrentEra();
 	// Treat information era as atomic for this checking.
-	playerCurrentEra = min(6, playerCurrentEra);
+	// For SP, Treat Feature era as information for this checking.
+	playerCurrentEra = min(MOD_SP_SMART_AI ? 8 : 6, playerCurrentEra);
 
 	// Loop through our units
-	for(pUnit = m_pPlayer->firstUnit(&iLoop); pUnit != NULL; pUnit = m_pPlayer->nextUnit(&iLoop))
+	int iLoop = 0;
+	for(CvUnit* pUnit = m_pPlayer->firstUnit(&iLoop); pUnit != NULL; pUnit = m_pPlayer->nextUnit(&iLoop))
 	{
-		if (pUnit)
+		if (!pUnit) continue;
+
+		int ArmyId = pUnit->getArmyID();
+		if (ArmyId == -1) continue;
+		CvArmyAI* pThisArmy = m_pPlayer->getArmyAI(ArmyId);
+		if (!pThisArmy) continue;
+		
+		bool movingArmy = ((pThisArmy->GetArmyAIState() == ARMYAISTATE_MOVING_TO_DESTINATION) || (pThisArmy->GetArmyAIState() == ARMYAISTATE_AT_DESTINATION));
+		if(movingArmy) continue;
+
+		// The unit must have an upgrade option, if not, then we don't care about this (includes workers, settlers, explorers)
+		UnitTypes eUpgradeUnitType = pUnit->GetUpgradeUnitType();
+		// Exclude settlers for this disband method, just in case
+		if(eUpgradeUnitType == NO_UNIT || pUnit->isFound()) continue;
+
+		const CvUnitEntry& pUnitInfo = pUnit->getUnitInfo();
+		// Exclude Policy Unit (e.g. Foreign Legion)
+		if(pUnitInfo.GetPolicyBranchType() != NO_POLICY_BRANCH_TYPE || pUnitInfo.GetPolicyType() != NO_POLICY)  continue;
+
+		// Check out unit era based on the prerequirement tech, defaults at ancient era.
+		TechTypes ePrereqTech = (TechTypes)pUnitInfo.GetPrereqAndTech();
+		int unitEra = 0;
+
+		if (ePrereqTech != NO_TECH)
 		{
-			movingArmy = false;
-			ArmyId = pUnit->getArmyID();
+			CvTechEntry* pkTechInfo = GC.getTechInfo(ePrereqTech);
 
-			if (ArmyId != -1)
+			if (pkTechInfo)
 			{
-				pThisArmy = m_pPlayer->getArmyAI(ArmyId);
+				unitEra = pkTechInfo->GetEra();
+			}
+		}
 
-				if (pThisArmy)
-				{
-					movingArmy = ((pThisArmy->GetArmyAIState() == ARMYAISTATE_MOVING_TO_DESTINATION) || (pThisArmy->GetArmyAIState() == ARMYAISTATE_AT_DESTINATION));
-				}
+		// for SP, stricter it
+		const int iMaxEraDiff = MOD_SP_SMART_AI ? 2 : 3;
+		// Too much era difference for that unit, lets scrap it.
+		if ((playerCurrentEra - unitEra) > iMaxEraDiff)
+		{
+			if(GC.getLogging() && GC.getAILogging())
+			{
+				CvString strLogString;
+				strLogString.Format("Disbanding long obsolete unit. %s, X: %d, Y: %d", pUnit->getName().GetCString(), pUnit->getX(), pUnit->getY());
+				m_pPlayer->GetHomelandAI()->LogHomelandMessage(strLogString);
 			}
 
-			if(!movingArmy)
-			{
-				// The unit must have an upgrade option, if not, then we don't care about this (includes workers, settlers, explorers)
-				UnitTypes eUpgradeUnitType = pUnit->GetUpgradeUnitType();
-
-				// Exclude settlers for this disband method, just in case
-				if(eUpgradeUnitType != NO_UNIT && !pUnit->isFound())
-				{
-					// Check out unit era based on the prerequirement tech, defaults at ancient era.
-					unitEra = 0;
-					UnitTypes currentUnitType = pUnit->getUnitType();
-					TechTypes ePrereqTech = (TechTypes)GC.getUnitInfo(currentUnitType)->GetPrereqAndTech();
-
-					if (ePrereqTech != NO_TECH)
-					{
-						pkTechInfo = GC.getTechInfo(ePrereqTech);
-
-						if (pkTechInfo)
-						{
-							unitEra = pkTechInfo->GetEra();
-						}
-					}
-
-					// Too much era difference for that unit, lets scrap it.
-					if ((playerCurrentEra - unitEra) > 3)
-					{
-						if(GC.getLogging() && GC.getAILogging())
-						{
-							CvString strLogString;
-							strLogString.Format("Disbanding long obsolete unit. %s, X: %d, Y: %d", pUnit->getName().GetCString(), pUnit->getX(), pUnit->getY());
-							m_pPlayer->GetHomelandAI()->LogHomelandMessage(strLogString);
-						}
-
-						pUnit->scrap();
-						// Only one unit scrap per turn.
-						return;
-					}
-				}
-			}
+			pUnit->scrap();
+			// Only one unit scrap per turn.
+			return;
 		}
 	}
 }
@@ -3596,8 +3567,15 @@ bool EconomicAIHelpers::IsTestStrategy_CitiesNeedNavalTileImprovement(EconomicAI
 //   upgrade if that assumption is no longer true
 bool EconomicAIHelpers::IsTestStrategy_FoundCity(EconomicAIStrategyTypes /*eStrategy*/, CvPlayer* pPlayer)
 {
+	// Never run this strategy for a human or barbarian player
+	if(pPlayer->isHuman() || pPlayer->isBarbarian()) return false;
+	// Don't run this strategy if have 0 cities, in that case we just want to drop down a city wherever we happen to be
+	if(pPlayer->getNumCities() < 1) return false;
+	// Won't be allowed to settle ...
+	if (pPlayer->IsEmpireVeryUnhappy()) return false;
+
 	int iUnitLoop;
-	CvUnit* pLoopUnit;
+	CvUnit* pLoopUnit = NULL;
 	CvUnit* pFirstSettler = 0;
 	int iLooseSettler = 0;
 	//int iStrategyWeight = 0;
@@ -3607,85 +3585,76 @@ bool EconomicAIHelpers::IsTestStrategy_FoundCity(EconomicAIStrategyTypes /*eStra
 	int iNumAreas;
 	int iArea = -1;
 
-	if(GC.getGame().isOption(GAMEOPTION_ONE_CITY_CHALLENGE) && pPlayer->isHuman())
+	// Look at map for loose settlers
+	for(pLoopUnit = pPlayer->firstUnit(&iUnitLoop); pLoopUnit != NULL; pLoopUnit = pPlayer->nextUnit(&iUnitLoop))
 	{
-		return false;
-	}
-
-	// Never run this strategy for a human player
-	if(!pPlayer->isHuman())
-	{
-		// Look at map for loose settlers
-		for(pLoopUnit = pPlayer->firstUnit(&iUnitLoop); pLoopUnit != NULL; pLoopUnit = pPlayer->nextUnit(&iUnitLoop))
+		if(pLoopUnit != NULL)
 		{
-			if(pLoopUnit != NULL)
+			if(pLoopUnit->AI_getUnitAIType() == UNITAI_SETTLE)
 			{
-				if(pLoopUnit->AI_getUnitAIType() == UNITAI_SETTLE)
+				if(pLoopUnit->getArmyID() == FFreeList::INVALID_INDEX)
 				{
-					if(pLoopUnit->getArmyID() == FFreeList::INVALID_INDEX)
-					{
-						iLooseSettler++;
-						iFirstSettlerArea = pLoopUnit->getArea();
-						pFirstSettler = pLoopUnit;
-						break;
-					}
+					iLooseSettler++;
+					iFirstSettlerArea = pLoopUnit->getArea();
+					pFirstSettler = pLoopUnit;
+					break;
 				}
 			}
 		}
+	}
 
-		// Don't run this strategy if have 0 cities, in that case we just want to drop down a city wherever we happen to be
-		if (iLooseSettler && pPlayer->getNumCities() >= 1)
+	
+	if (iLooseSettler)
+	{
+		iNumAreas = pPlayer->GetBestSettleAreas(pPlayer->GetEconomicAI()->GetMinimumSettleFertility(), iBestArea, iSecondBestArea);
+		if(iNumAreas == 0)
 		{
-			iNumAreas = pPlayer->GetBestSettleAreas(pPlayer->GetEconomicAI()->GetMinimumSettleFertility(), iBestArea, iSecondBestArea);
-			if(iNumAreas == 0)
+			return false;
+		}
+
+		bool bCanEmbark = GET_TEAM(pPlayer->getTeam()).canEmbark() || pPlayer->GetPlayerTraits()->IsEmbarkedAllWater();
+		bool bWantEscort = false;
+
+		// CASE 1: we can go offshore
+		if (bCanEmbark)
+		{
+			int iRandArea = GC.getGame().getJonRandNum(6, "Randomly choose an area to settle");
+
+			if (iRandArea <= 1) // this is "pick best tile I know ignoring what area it is part of", in the early game this is usually the start landmass
 			{
-				return false;
+				iArea = -1;
+				CvPlot* pPlot = pPlayer->GetBestSettlePlot(pFirstSettler, bWantEscort, -1);
+				if (!pPlot)
+				{
+					bWantEscort = true;
+				}
+			}
+			else if (iRandArea == 2) // least likely
+			{
+				iArea = iSecondBestArea;
+				bWantEscort = IsAreaSafeForQuickColony(iArea, pPlayer);
+			}
+			else // this is as likely as the other options combined
+			{
+				iArea = iBestArea;
+				bWantEscort = IsAreaSafeForQuickColony(iArea, pPlayer);
 			}
 
-			bool bCanEmbark = GET_TEAM(pPlayer->getTeam()).canEmbark() || pPlayer->GetPlayerTraits()->IsEmbarkedAllWater();
-			bool bWantEscort = false;
-
-			// CASE 1: we can go offshore
-			if (bCanEmbark && (pPlayer->getNumCities() > 1))
+			if (bWantEscort)
 			{
-				int iRandArea = GC.getGame().getJonRandNum(6, "Randomly choose an area to settle");
-
-				if (iRandArea <= 1) // this is "pick best tile I know ignoring what area it is part of", in the early game this is usually the start landmass
-				{
-					iArea = -1;
-					CvPlot* pPlot = pPlayer->GetBestSettlePlot(pFirstSettler, bWantEscort, -1);
-					if (!pPlot)
-					{
-						bWantEscort = true;
-					}
-				}
-				else if (iRandArea == 2) // least likely
-				{
-					iArea = iSecondBestArea;
-					bWantEscort = IsAreaSafeForQuickColony(iArea, pPlayer);
-				}
-				else // this is as likely as the other options combined
-				{
-					iArea = iBestArea;
-					bWantEscort = IsAreaSafeForQuickColony(iArea, pPlayer);
-				}
-
-				if (bWantEscort)
-				{
-					pPlayer->addAIOperation(AI_OPERATION_FOUND_CITY, NO_PLAYER, iArea);
-				}
-				else
-				{
-					pPlayer->addAIOperation(AI_OPERATION_QUICK_COLONIZE, NO_PLAYER, iArea);
-				}
-
-				return true;
+				pPlayer->addAIOperation(AI_OPERATION_FOUND_CITY, NO_PLAYER, iArea);
 			}
-			else // we can't embark yet
+			else
 			{
-				pPlayer->addAIOperation(AI_OPERATION_FOUND_CITY, NO_PLAYER, iBestArea);
-				return true;
+				pPlayer->addAIOperation(AI_OPERATION_QUICK_COLONIZE, NO_PLAYER, iArea);
 			}
+
+			return true;
+		}
+		else // we can't embark yet
+		{
+			pPlayer->addAIOperation(AI_OPERATION_FOUND_CITY, NO_PLAYER, iBestArea);
+			return true;
 		}
 	}
 

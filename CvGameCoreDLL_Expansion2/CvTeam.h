@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -16,12 +16,18 @@
 class CvArea;
 class CvTeamTechs;
 
-class CvTeam
+class CvTeam : public CvGameObjectExtractable
 {
 
 public:
 	CvTeam();
 	~CvTeam();
+
+	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
+	static void RegistInstanceFunctions();
+	static void RegistStaticFunctions();
+	static CvTeam* Provide(TeamTypes team);
 
 	// inlined for performance reasons, only in the dll
 	static CvTeam& getTeam(TeamTypes eTeam)
@@ -175,6 +181,14 @@ public:
 	bool isGoldTrading() const;
 	void changeGoldTradingCount(int iChange);
 
+
+	int getBombardIndirectCount() const;
+	bool isBombardIndirect() const;
+	void changeBombardIndirectCount(int iChange);
+
+	int GetBombardRange() const;
+	void ChangeBombardRange(int iChange);
+
 	bool HavePolicyInTeam(PolicyTypes ePolicy);
 
 	int getAllowEmbassyTradingAllowedCount() const;
@@ -204,6 +218,9 @@ public:
 	bool isPermanentAllianceTrading() const;
 	void changePermanentAllianceTradingCount(int iChange);
 
+	int GetRazeSpeedModifier() const;
+	void ChangeRazeSpeedModifier(int iChange);
+
 #if defined(MOD_TECHS_CITY_WORKING)
 	int GetCityWorkingChange() const;
 	bool isCityWorkingChange() const;
@@ -223,6 +240,10 @@ public:
 	int getWaterWorkCount() const;
 	bool isWaterWork() const;
 	void changeWaterWorkCount(int iChange);
+
+	int getCitySplashDamageCount() const;
+	bool isCitySplashDamage() const;
+	void changeCitySplashDamageCount(int iChange);
 
 	int getBorderObstacleCount() const;
 	bool isBorderObstacle() const;
@@ -318,6 +339,7 @@ public:
 	int GetTotalNumResearchAgreements() const;
 	bool IsHasResearchAgreement(TeamTypes eIndex) const;
 	void SetHasResearchAgreement(TeamTypes eIndex, bool bNewValue);
+	int GetResearchAgreementStartTurn(TeamTypes eIndex) const;
 	void CancelResearchAgreement(TeamTypes eIndex);
 
 	bool IsHasTradeAgreement(TeamTypes eIndex) const;
@@ -343,7 +365,7 @@ public:
 	void setProjectArtType(ProjectTypes eIndex, int number, int value);
 	bool isProjectMaxedOut(ProjectTypes eIndex, int iExtra = 0) const;
 	bool isProjectAndArtMaxedOut(ProjectTypes eIndex) const;
-	void changeProjectCount(ProjectTypes eIndex, int iChange);
+	void changeProjectCount(ProjectTypes eIndex, int iChange, bool bIsCapture = false);
 	void finalizeProjectArtTypes();
 
 	int getProjectMaking(ProjectTypes eIndex) const;
@@ -462,6 +484,8 @@ protected:
 	int m_iMapTradingCount;
 	int m_iTechTradingCount;
 	int m_iGoldTradingCount;
+	int m_iBombardIndirectCount;
+	int m_iBombardRange;
 	int m_iAllowEmbassyTradingAllowedCount;
 	int m_iOpenBordersTradingAllowedCount;
 	int m_iDefensivePactTradingAllowedCount;
@@ -475,8 +499,11 @@ protected:
 	int m_iCityAutomatonWorkersChange;
 #endif
 
+	int m_iRazeSpeedModifier = 0; // team level raze speed modifier
+
 	int m_iBridgeBuildingCount;
 	int m_iWaterWorkCount;
+	int m_iCitySplashDamageCount;
 	int m_iRiverTradeCount;
 	int m_iBorderObstacleCount;
 	int m_iVictoryPoints;
@@ -521,6 +548,7 @@ protected:
 	Firaxis::Array< bool, REALLY_MAX_TEAMS > m_abOpenBorders;
 	Firaxis::Array< bool, REALLY_MAX_TEAMS > m_abDefensivePact;
 	Firaxis::Array< bool, REALLY_MAX_TEAMS > m_abResearchAgreement;
+	Firaxis::Array< int, REALLY_MAX_TEAMS > m_aiResearchAgreementStartTurn;
 	Firaxis::Array< bool, REALLY_MAX_TEAMS > m_abTradeAgreement;
 	Firaxis::Array< bool, REALLY_MAX_TEAMS > m_abForcePeace;
 	Firaxis::Array< int, REALLY_MAX_PLAYERS > m_aiTurnTeamMet;

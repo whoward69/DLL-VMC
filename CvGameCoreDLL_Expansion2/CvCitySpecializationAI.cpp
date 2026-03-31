@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -1357,6 +1357,7 @@ int CvCitySpecializationAI::AdjustValueBasedOnBuildings(CvCity* pCity, YieldType
 
 	// ... and yield changes
 	int iYieldChanges = pCity->GetBaseYieldRateFromBuildings(eYield);
+	iYieldChanges += pCity->GetBaseYieldRateFromBuildingsPolicies(eYield);
 	if(iYieldChanges > 0)
 	{
 		// +20% per point of yield change
@@ -1379,10 +1380,25 @@ int CvCitySpecializationAI::AdjustValueBasedOnBuildings(CvCity* pCity, YieldType
 
 	case YIELD_PRODUCTION:
 		// Double production if any military training facilities present
-		if(pCity->getDomainFreeExperience(DOMAIN_LAND) > 0)
+#if defined(MOD_ROG_CORE)
+		if (pCity->getDomainFreeExperience(DOMAIN_LAND) > 0)
+		{
+			iRtnValue = iRtnValue * (100 + (pCity->getDomainFreeExperience(DOMAIN_LAND) * 10)) / 100;
+		}
+		if (pCity->getDomainFreeExperience(DOMAIN_AIR) > 0)
+		{
+			iRtnValue = iRtnValue * (100 + (pCity->getDomainFreeExperience(DOMAIN_AIR) * 10)) / 100;
+		}
+		if (pCity->getDomainFreeExperience(DOMAIN_SEA) > 0)
+		{
+			iRtnValue = iRtnValue * (100 + (pCity->getDomainFreeExperience(DOMAIN_SEA) * 10)) / 100;
+		}
+#else
+		if (pCity->getDomainFreeExperience(DOMAIN_LAND) > 0)
 		{
 			iRtnValue *= 2;
 		}
+#endif
 		break;
 
 	case YIELD_GOLD:
@@ -1390,7 +1406,23 @@ int CvCitySpecializationAI::AdjustValueBasedOnBuildings(CvCity* pCity, YieldType
 
 	case YIELD_SCIENCE:
 		break;
+
+
+#if defined(MOD_API_UNIFIED_YIELDS_MORE)
+	case YIELD_GREAT_GENERAL_POINTS:
+	case YIELD_GREAT_ADMIRAL_POINTS:
+	case YIELD_HEALTH:
+	case YIELD_DISEASE:
+	case YIELD_CRIME:
+	case YIELD_LOYALTY:
+	case YIELD_SOVEREIGNTY:
+	case YIELD_VIOLENCE:
+	case YIELD_HERESY:
+		break; // Yield unmodified.
+#endif
 	}
+
+
 
 	return iRtnValue;
 }

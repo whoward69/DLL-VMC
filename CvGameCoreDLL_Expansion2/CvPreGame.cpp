@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -37,7 +37,7 @@
 //GameOptionTypes enumeration usage vs the newer system that uses strings.
 const char* ConvertGameOptionTypeToString(GameOptionTypes eOption)
 {
-	switch(eOption)
+	switch (eOption)
 	{
 	case GAMEOPTION_NO_CITY_RAZING:
 		return "GAMEOPTION_NO_CITY_RAZING";
@@ -81,9 +81,31 @@ const char* ConvertGameOptionTypeToString(GameOptionTypes eOption)
 		return "GAMEOPTION_NO_TUTORIAL";
 	case GAMEOPTION_NO_RELIGION:
 		return "GAMEOPTION_NO_RELIGION";
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	case GAMEOPTION_SP_CORPS_MODE_DISABLE:
+		return "GAMEOPTION_SP_CORPS_MODE_DISABLE";
+	case GAMEOPTION_SP_CORPS_MODE_HIGH:
+		return "GAMEOPTION_SP_CORPS_MODE_HIGH";
+	case GAMEOPTION_SP_CORPS_MODE_LOW:
+		return "GAMEOPTION_SP_CORPS_MODE_LOW";
+#endif
+#if defined(MOD_INTERNATIONAL_IMMIGRATION_FOR_SP)
+	case GAMEOPTION_SP_IMMIGRATION_OFF:
+		return "GAMEOPTION_SP_IMMIGRATION_OFF";
+#endif
+#if defined(MOD_NUCLEAR_WINTER_FOR_SP)
+	case GAMEOPTION_SP_NUCLEARWINTER_OFF:
+		return "GAMEOPTION_SP_NUCLEARWINTER_OFF";
+#endif
+	case GAMEOPTION_CIV_CONQUER:
+		return "GAMEOPTION_CIV_CONQUER";
+	case GAMEOPTION_HUMAN_ALL_UC:
+		return "GAMEOPTION_HUMAN_ALL_UC";
+	case GAMEOPTION_PROJECT_CAPTURE:
+		return "GAMEOPTION_PROJECT_CAPTURE";
+	default:
+		return NULL;
 	}
-
-	return NULL;
 }
 
 namespace CvPreGame

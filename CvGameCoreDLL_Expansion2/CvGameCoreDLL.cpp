@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	� 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -11,19 +11,40 @@
 #include "Win32/FDebugHelper.h"
 #include "CvDllContext.h"
 
+
 // must be included after all other headers
 #include "LintFree.h"
-
+typedef void* (*SteamFriendsSingletonFunc)();
 //------------------------------------------------------------------------------
 extern "C" ICvGameContext1* DllGetGameContext()
 {
 	return CvDllGameContext::GetSingleton();
 }
+
+
+typedef bool(__thiscall *SetRichPresence_t)(void* ThisPointer, const char* Key, const char* Value);
+typedef const char* (__thiscall *GetPersonaName_t)(void* ThisPointer, const char *);
+typedef bool (*SteamAPI_Init_t)();
 //------------------------------------------------------------------------------
 BOOL APIENTRY DllMain(HANDLE hModule,
                       DWORD  ul_reason_for_call,
                       LPVOID)
 {
+	srand(17657230687);
+	/*HMODULE hSteamAPI = GetModuleHandle("steam_api.dll");
+	HMODULE hSteamClient = GetModuleHandle("steamclient.dll");
+	SteamAPI_Init_t SteamAPI_Init = (SteamAPI_Init_t)GetProcAddress(hSteamAPI, "SteamAPI_Init");
+	auto res = SteamAPI_Init();
+	SteamFriendsSingletonFunc SteamFriends = (SteamFriendsSingletonFunc)GetProcAddress(hSteamAPI, "SteamFriends");
+	auto SteamFriendsPointer = SteamFriends();
+	uint32 GetPersonaNameMagicOffset = 0x59C8B0;
+	SetRichPresence_t ptr = (SetRichPresence_t)((uint32)hSteamClient + SetRichPresenceMagicOffset);
+	GetPersonaName_t ptr2 = (GetPersonaName_t)((uint32)hSteamClient + GetPersonaNameMagicOffset);
+	void** vtable = *(void***)SteamFriendsPointer;
+	const char* a = "status";
+	const char* b = "直面天命";
+	const char* name = ptr2(SteamFriendsPointer, b);
+	res = ptr(SteamFriendsPointer, a, b);*/
 	switch(ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:

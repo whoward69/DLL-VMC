@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -1357,7 +1357,7 @@ bool CvWorldBuilderMapLoader::Save(const wchar_t* wszFilename, const char* szMap
 		else
 		{
 			CvFeatureInfo* pkFeatureInfo = GC.getFeatureInfo(eFeatureType);
-			if(pkFeatureInfo != NULL && pkFeatureInfo->IsNaturalWonder())
+			if (pkFeatureInfo != NULL && pkFeatureInfo->IsNaturalWonder(true))
 			{
 				kPlotData.SetFeatureType(CvWorldBuilderMap::PlotMapData::InvalidFeature);
 				kPlotData.SetNaturalWonderType((byte)eFeatureType);

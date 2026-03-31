@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -14,16 +14,11 @@ template<class Derived, class InstanceType, typename EnumType>
 class CvLuaScopedIndirectInstance : public CvLuaMethodWrapper<Derived, InstanceType>
 {
 public:
-	static void Push(lua_State* L, InstanceType* pkType);
-	static void Push(lua_State* L, FObjectHandle<InstanceType> handle)
-	{
-		Push(L, handle.pointer());
-	}
+	static void Push(lua_State* L, EnumType pkType);
 	static InstanceType* GetInstance(lua_State* L, int idx = 1, bool bErrorOnFail = true);
 
 	//! Used by CvLuaMethodWrapper to know where first argument is.
 	static const int GetStartingArgIndex();
-
 protected:
 	static void DefaultHandleMissingInstance(lua_State* L);
 };

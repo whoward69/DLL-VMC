@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -81,12 +81,18 @@ struct CvArchaeologyData
 FDataStream& operator>>(FDataStream&, CvArchaeologyData&);
 FDataStream& operator<<(FDataStream&, const CvArchaeologyData&);
 
-class CvPlot
+class CvPlot : public CvGameObjectExtractable
 {
 
 public:
 	CvPlot();
 	~CvPlot();
+
+	void ExtractToArg(BasicArguments* arg);
+	static void PushToLua(lua_State* L, BasicArguments* arg);
+	static void RegistInstanceFunctions();
+	static void RegistStaticFunctions();
+	static CvPlot* Provide(int x, int y);
 
 	void init(int iX, int iY);
 	void uninit();
@@ -124,6 +130,7 @@ public:
 	bool isAdjacentToIce() const;
 #endif
 	bool isCoastalLand(int iMinWaterSize = -1) const;
+	bool isCoastalArea(int iMinWaterSize = -1) const;
 	int GetSizeLargestAdjacentWater() const;
 
 	bool isVisibleWorked() const;
@@ -150,11 +157,9 @@ public:
 	void changeSeeFromSight(TeamTypes eTeam, DirectionTypes eDirection, int iFromLevel, bool bIncrement, InvisibleTypes eSeeInvisible);
 	void changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, InvisibleTypes eSeeInvisible, DirectionTypes eFacingDirection, bool bBasedOnUnit=true);
 #endif
-#if defined MOD_BUGFIX_NAVAL_TARGETING
+
 	bool canSeePlot(const CvPlot* plot, TeamTypes eTeam, int iRange, DirectionTypes eFacingDirection, DomainTypes eUnitDomain=DOMAIN_LAND) const;
-#else
-	bool canSeePlot(const CvPlot* plot, TeamTypes eTeam, int iRange, DirectionTypes eFacingDirection) const;
-#endif
+
 	bool shouldProcessDisplacementPlot(int dx, int dy, int range, DirectionTypes eFacingDirection) const;
 	void updateSight(bool bIncrement);
 	void updateSeeFromSight(bool bIncrement);
@@ -187,6 +192,8 @@ public:
 		return isCity() ? GC.getCITY_UNIT_LIMIT() : (GC.getPLOT_UNIT_LIMIT() + getAdditionalUnitsFromImprovement());
 	}
 #endif
+
+	CvCity* GetNukeInterceptor(PlayerTypes eAttackingPlayer) const;
 
 	int getExtraMovePathCost() const;
 	void changeExtraMovePathCost(int iChange);
@@ -277,6 +284,7 @@ public:
 	}
 
 	bool isFriendlyCity(const CvUnit& kUnit, bool bCheckImprovement) const;
+	bool isDangerCity(const CvUnit& kUnit) const;
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	bool isPassableImprovement() const;
 	bool isFriendlyCityOrPassableImprovement(const CvUnit& kUnit, bool bCheckImprovement) const;
@@ -368,12 +376,6 @@ public:
 	int getUpgradeTimeLeft(ImprovementTypes eImprovement, PlayerTypes ePlayer) const;
 	void setUpgradeProgress(int iNewValue);
 	void changeUpgradeProgress(int iChange);
-
-#if defined(MOD_API_UNIFIED_YIELDS)
-	int ComputeYieldFromAdjacentImprovement(CvImprovementEntry& kImprovement, ImprovementTypes eValue, YieldTypes eYield) const;
-#else
-	int ComputeCultureFromAdjacentImprovement(CvImprovementEntry& kImprovement, ImprovementTypes eValue) const;
-#endif
 
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	int getAdditionalUnitsFromImprovement() const;
@@ -524,7 +526,7 @@ public:
 
 	void setFeatureType(FeatureTypes eNewValue, int iVariety = -1);
 
-	bool IsNaturalWonder() const;
+	bool IsNaturalWonder(bool orPseudoNatural = false) const;
 
 	ResourceTypes getResourceType(TeamTypes eTeam = NO_TEAM) const;
 	ResourceTypes getNonObsoleteResourceType(TeamTypes eTeam = NO_TEAM) const;
@@ -585,7 +587,7 @@ public:
 	void SetPlayerThatClearedBarbCampHere(PlayerTypes eNewValue);
 
 	CvCity* GetResourceLinkedCity() const;
-	void SetResourceLinkedCity(const CvCity* pNewValue);
+	void SetResourceLinkedCity(const CvCity* pNewValue, ResourceTypes eResource = NO_RESOURCE);
 	bool IsResourceLinkedCityActive() const;
 	void SetResourceLinkedCityActive(bool bValue);
 	void DoFindCityToLinkResourceTo(CvCity* pCityToExclude = NULL);
@@ -603,6 +605,8 @@ public:
 	CvCity* getWorkingCity() const;
 	void updateWorkingCity();
 
+	bool isEffectiveOwner(const CvCity* pCity) const;
+
 	CvCity* getWorkingCityOverride() const;
 	void setWorkingCityOverride(const CvCity* pNewValue);
 
@@ -614,7 +618,7 @@ public:
 
 	short* getYield();
 	int getYield(YieldTypes eIndex) const;
-	int calculateNatureYield(YieldTypes eIndex, TeamTypes eTeam, bool bIgnoreFeature = false) const;
+	int calculateNatureYield(YieldTypes eIndex, TeamTypes eTeam, bool bIgnoreFeature = false, bool bIgnoreResource = false) const;
 	int calculateBestNatureYield(YieldTypes eIndex, TeamTypes eTeam) const;
 	int calculateTotalBestNatureYield(TeamTypes eTeam) const;
 	int calculateImprovementYieldChange(ImprovementTypes eImprovement, YieldTypes eYield, PlayerTypes ePlayer, bool bOptimal = false, RouteTypes eAssumeThisRoute = NUM_ROUTE_TYPES) const;
@@ -839,6 +843,19 @@ public:
 	LUAAPIINLINE(IsTerrainHills, HasTerrain, TERRAIN_HILL)
 	bool IsAdjacentToFeature(FeatureTypes iFeatureType) const;
 	bool IsWithinDistanceOfFeature(FeatureTypes iFeatureType, int iDistance) const;
+
+#if defined(MOD_API_EXTENSIONS)
+	bool IsWithinDistanceOfUnit(PlayerTypes ePlayer, UnitTypes eOtherUnit, int iDistance, bool bIsFriendly, bool bIsEnemy) const;
+	bool IsWithinDistanceOfUnitClass(PlayerTypes ePlayer, UnitClassTypes eUnitClass, int iDistance, bool bIsFriendly, bool bIsEnemy) const;
+	bool IsWithinDistanceOfUnitCombatType(PlayerTypes ePlayer, UnitCombatTypes eUnitCombat, int iDistance, bool bIsFriendly, bool bIsEnemy) const;
+	bool IsWithinDistanceOfUnitPromotion(PlayerTypes ePlayer, PromotionTypes eUnitPromotion, int iDistance, bool bIsFriendly, bool bIsEnemy) const;
+	bool IsWithinDistanceOfCity(const CvUnit* eThisUnit, int iDistance, bool bIsFriendly, bool bIsEnemy) const;
+	bool IsAdjacentToUnit(PlayerTypes ePlayer, UnitTypes eOtherUnit, bool bIsFriendly, bool bIsEnemy) const;
+	bool IsAdjacentToUnitClass(PlayerTypes ePlayer, UnitClassTypes eUnitClass, bool bIsFriendly, bool bIsEnemy) const;
+	bool IsAdjacentToUnitCombatType(PlayerTypes ePlayer, UnitCombatTypes eUnitCombat, bool bIsFriendly, bool bIsEnemy) const;
+	bool IsAdjacentToUnitPromotion(PlayerTypes ePlayer, PromotionTypes eUnitPromotion, bool bIsFriendly, bool bIsEnemy) const;
+#endif
+
 	bool IsAdjacentToImprovement(ImprovementTypes iImprovementType) const;
 	bool IsWithinDistanceOfImprovement(ImprovementTypes iImprovementType, int iDistance) const;
 	bool IsAdjacentToPlotType(PlotTypes iPlotType) const;
@@ -848,6 +865,50 @@ public:
 	bool IsAdjacentToTerrain(TerrainTypes iTerrainType) const;
 	bool IsWithinDistanceOfTerrain(TerrainTypes iTerrainType, int iDistance) const;
 #endif
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	int CvPlot::ComputeYieldFromOtherAdjacentImprovement(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
+	int CvPlot::ComputeYieldToOtherAdjacentImprovement(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
+#endif
+	
+#if defined(MOD_ROG_CORE)
+	bool IsFriendlyUnitAdjacent(TeamTypes eMyTeam, bool bCombatUnit) const;
+	int GetNumSpecificPlayerUnitsAdjacent(PlayerTypes ePlayer, const CvUnit* pUnitToExclude = NULL, const CvUnit* pExampleUnitType = NULL, bool bCombatOnly = true) const;
+	int GetNumSpecificFriendlyUnitCombatsAdjacent(TeamTypes eMyTeam, UnitCombatTypes eUnitCombat, const CvUnit* pUnitToExclude = NULL) const;
+
+	int CvPlot::ComputeYieldFromAdjacentTerrain(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
+	int CvPlot::ComputeYieldFromAdjacentResource(CvImprovementEntry& kImprovement, YieldTypes eYield, TeamTypes eTeam) const;
+	int CvPlot::ComputeYieldFromAdjacentFeature(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
+#endif
+
+#if defined(MOD_VOLCANO_BREAK)
+	bool IsVolcano() const;
+	void doVolcanoBreak();
+	bool IsImmueVolcanoDamage() const;
+	int GetBreakTurns() const;
+	void ChangeBreakTurns(int iValue); //Set in plot::doturn
+	void SetBreakTurns(int iValue);
+#endif
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	int GetXP() const;
+	int GetXPGrowth() const;
+	int SetXP(int iNewValue, bool bDoUpdate);
+	int ChangeXP(int iChange, bool bDoUpdate);
+#endif
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	void ClearUnitPromotions(bool bOnlyFriendUnit = false);
+#endif
+
+#ifdef MOD_GLOBAL_CORRUPTION
+	int CalculateCorruptionScoreFromDistance(const CvCity& capitalCity) const;
+	int CalculateCorruptionScoreFromCoastalBonus(const CvCity& capitalCity) const;
+	int CalculateCorruptionScoreFromResource() const;
+	int CalculateCorruptionScoreFromTrait(PlayerTypes ePlayer) const;
+	int CalculateCorruptionScoreModifierFromTrait(PlayerTypes ePlayer) const;
+#endif
+
+	/// Constructs a seed value from the plot suitable for pseudo-random number generation.
+	CvSeeder GetPseudoRandomSeed() const;
 
 protected:
 	class PlotBoolField
@@ -1007,6 +1068,13 @@ protected:
 	bool m_bIsImpassable:1;					// Cached value, do not serialize
 
 	CvArchaeologyData m_kArchaeologyData;
+
+#if defined(MOD_VOLCANO_BREAK)
+	short m_iBreakTurns = 0;
+#endif
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	short m_iXP = 0;
+#endif
 
 	void processArea(CvArea* pArea, int iChange);
 	void doImprovementUpgrade();

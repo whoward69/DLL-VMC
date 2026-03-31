@@ -1,5 +1,5 @@
 /*	-------------------------------------------------------------------------------------------------------
-	© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
+	Â© 1991-2012 Take-Two Interactive Software and its subsidiaries.  Developed by Firaxis Games.  
 	Sid Meier's Civilization V, Civ, Civilization, 2K Games, Firaxis Games, Take-Two Interactive Software 
 	and their respective logos are all trademarks of Take-Two interactive Software, Inc.  
 	All other marks and trademarks are the property of their respective owners.  
@@ -9,6 +9,8 @@
 
 #ifndef CIV5_IMPROVEMENT_CLASSES_H
 #define CIV5_IMPROVEMENT_CLASSES_H
+#include "CvInfos.h"
+#include "CustomMods.h"
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -54,11 +56,6 @@ public:
 
 	int GetGoldMaintenance() const;
 	int GetCultureBombRadius() const;
-#if defined(MOD_API_UNIFIED_YIELDS)
-	int GetYieldAdjacentSameType(YieldTypes eYield) const;
-#else
-	int GetCultureAdjacentSameType() const;
-#endif
 
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	int GetAdditionalUnits() const;
@@ -86,6 +83,28 @@ public:
 	int GetRequiresXAdjacentWater() const;
 #endif
 
+#if defined(MOD_ROG_CORE)
+	int GetWonderProductionModifier() const;
+	int GetNearbyFriendHeal() const;
+	int GetResourceFromImprovement() const;
+	int GetResourceQuantityFromImprovement() const;
+#endif
+
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+	int GetCreateItemMod() const;
+	int GetCreatedResourceQuantity() const;
+	int GetNewImprovement() const;
+	int GetNewFeature() const;
+
+	int GetCreateResource(CvPlot* pPlot) const;
+#endif
+	UnitClassTypes GetForbidSameBuildUnitClasses() const;
+	int GetExtraScore() const;
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	bool IsClearNegativePromotions() const;
+#endif
+
 #if defined(MOD_GLOBAL_RELOCATION)
 	bool IsAllowsRebaseTo() const;
 	bool IsAllowsAirliftFrom() const;
@@ -93,9 +112,7 @@ public:
 #endif
 
 	bool IsHillsMakesValid() const;
-#if defined(MOD_GLOBAL_ALPINE_PASSES)
 	bool IsMountainsMakesValid() const;
-#endif
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	bool IsMakesPassable() const;
 #endif
@@ -109,6 +126,10 @@ public:
 	bool IsFreshWaterMakesValid() const;
 	bool IsRiverSideMakesValid() const;
 	bool IsNoFreshWater() const;
+	bool IsFreshWater() const;
+	bool IsNoFeature() const;
+	bool IsNoRemove() const;
+	int GetNumWaterPlotMakesValid() const;
 #if defined(MOD_API_EXTENSIONS)
 	bool IsAddsFreshWater() const;
 #endif
@@ -119,6 +140,7 @@ public:
 	bool IsRemovesResource() const;
 	bool IsPromptWhenComplete() const;
 	bool IsWater() const;
+	bool IsNoLake() const;
 	bool IsCoastal() const;
 	bool IsDestroyedWhenPillaged() const;
 	bool IsDisplacePillager() const;
@@ -135,6 +157,10 @@ public:
 	bool IsAllowsWalkWater() const;
 	bool IsCreatedByGreatPerson() const;
 	bool IsSpecificCivRequired() const;
+
+	ImprovementTypes GetRequiredAdjacentImprovement() const;
+	bool IsRequiredAdjacentCity() const;
+	bool IsRemoveWhenSetNoFuture() const;
 
 	CivilizationTypes GetRequiredCivilization() const;
 
@@ -167,17 +193,35 @@ public:
 	int* GetFreshWaterYieldChangeArray();				// For Moose - CvWidgetData XXX
 	int GetAdjacentCityYieldChange(int i) const;
 	int* GetAdjacentCityYieldChangeArray();
-	int GetAdjacentMountainYieldChange(int i) const;
-	int* GetAdjacentMountainYieldChangeArray();
 
 	bool GetTerrainMakesValid(int i) const;
 	bool GetFeatureMakesValid(int i) const;
+	bool IsFeatureNeeded() const;
+	bool GetFeaturesNeeded(int i) const;
 	bool GetImprovementMakesValid(int i) const;
 
 #if defined(MOD_API_UNIFIED_YIELDS)
 	int GetAdjacentSameTypeYield(int i) const;
 #endif
 
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	int GetAdjacentImprovementYieldChanges(int i, int j) const;
+#endif
+
+	bool IsAdjacentResourceYieldChanges() const;
+	int GetAdjacentResourceYieldChanges(int i, int j) const;
+
+	bool IsAdjacentTerrainYieldChanges() const;
+	int GetAdjacentTerrainYieldChanges(int i, int j) const;
+	int GetAdjacentTerrainYieldChanges(const CvPlot& pPlot, YieldTypes eYield) const;
+
+	bool IsAdjacentFeatureYieldChanges() const;	
+	int GetAdjacentFeatureYieldChanges(int i, int j) const;
+
+#if defined(MOD_ROG_CORE)
+	int GetFeatureYieldChanges(int i, int j) const;
+#endif
+	int GetTerrainYieldChanges(int i, int j) const;
 	int GetTechYieldChanges(int i, int j) const;
 	int* GetTechYieldChangesArray(int i);
 	int GetTechNoFreshWaterYieldChanges(int i, int j) const;
@@ -187,6 +231,11 @@ public:
 	int GetRouteYieldChanges(int i, int j) const;
 	int* GetRouteYieldChangesArray(int i);				// For Moose - CvWidgetData XXX
 
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	int GetTradeRouteYieldChanges(int i, int j) const;
+	int* GetTradeRouteYieldChangesArray(int i);				// For Moose - CvWidgetData XXX
+#endif
+
 	int  GetImprovementResourceYield(int i, int j) const;
 	bool IsImprovementResourceMakesValid(int i) const;
 	bool IsImprovementResourceTrade(int i) const;
@@ -194,13 +243,44 @@ public:
 
 	int  GetFlavorValue(int i) const;
 
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	bool GetEnableXP() const;
+
+	bool GetEnableUpgrade() const;
+	int GetUpgradeXP() const;
+	ImprovementTypes GetUpgradeImprovementType() const;
+
+	bool GetEnableDowngrade() const;
+	ImprovementTypes GetDowngradeImprovementType() const;
+#endif
+
+#ifdef MOD_IMPROVEMENTS_YIELD_CHANGE_PER_UNIT
+	struct YieldChangesPerUnit {
+		YieldTypes eYieldType = NO_YIELD;
+		int iYield = 0;
+		UnitTypes eUnitType = NO_UNIT;
+		PromotionTypes ePromotionType = NO_PROMOTION;
+	};
+
+	std::vector<YieldChangesPerUnit>& GetYieldChangesPerUnitVec();
+#endif
+
+#ifdef MOD_IMPROVEMENTS_UNIT_XP_PER_TURN
+	struct UnitXPPerTurn {
+		int iValue = 0;
+		UnitTypes eUnitType = NO_UNIT;
+		PromotionTypes ePromotionType = NO_PROMOTION;
+	};
+
+	std::vector<UnitXPPerTurn>& GetUnitXPPerTurnVec();
+#endif
+
 	//---------------------------------------PROTECTED MEMBER VARIABLES---------------------------------
 protected:
 	void InitImprovementResourceList(CvImprovementResourceInfo** ppImprovementResource, int iListLen);
 
 	int m_iGoldMaintenance;
 	int m_iCultureBombRadius;
-	int m_iCultureAdjacentSameType;
 
 #if defined(MOD_GLOBAL_STACKING_RULES)
 	int m_iAdditionalUnits;
@@ -226,6 +306,33 @@ protected:
 	int m_iRequiresXAdjacentWater;
 #endif
 
+#if defined(MOD_ROG_CORE)
+	int m_iWonderProductionModifier;
+	int m_iNearbyFriendHeal;
+
+	int m_iImprovementResource;
+	int m_iImprovementResourceQuantity;
+#endif
+
+#if defined(MOD_IMPROVEMENTS_CREATE_ITEMS)
+	int m_iCreateItemMod;
+	int m_iCreatedResourceQuantity;
+	int m_iSetNewImprovement;
+	int m_iSetNewFeature;
+
+	int* m_iCreateResourceList;
+	int* m_iCreateTerrainList;
+	bool* m_iCreateTerrainOnlyList;
+	int* m_iCreateFeatureList;
+	bool* m_iCreateFeatureOnlyList;
+#endif
+	int m_iForbidSameBuildUnitClasses;
+	int m_iExtraScore;
+
+#ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
+	bool m_bClearNegativePromotions;
+#endif
+
 #if defined(MOD_GLOBAL_RELOCATION)
 	bool m_bAllowsRebaseTo;
 	bool m_bAllowsAirliftFrom;
@@ -233,9 +340,7 @@ protected:
 #endif
 
 	bool m_bHillsMakesValid;
-#if defined(MOD_GLOBAL_ALPINE_PASSES)
 	bool m_bMountainsMakesValid;
-#endif
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	bool m_bMakesPassable;
 #endif
@@ -249,6 +354,10 @@ protected:
 	bool m_bFreshWaterMakesValid;
 	bool m_bRiverSideMakesValid;
 	bool m_bNoFreshWater;
+	bool m_bIsFreshWater;
+	bool m_bNoFeature;
+	bool m_bNoRemove;
+	int m_iNumWaterPlotMakesValid;
 #if defined(MOD_API_EXTENSIONS)
 	bool m_bAddsFreshWater;
 #endif
@@ -259,6 +368,7 @@ protected:
 	bool m_bRemovesResource;
 	bool m_bPromptWhenComplete;
 	bool m_bWater;
+	bool m_bNoLake;
 	bool m_bCoastal;
 	bool m_bDestroyedWhenPillaged;
 	bool m_bDisplacePillager;
@@ -275,6 +385,10 @@ protected:
 	bool m_bAllowsWalkWater;
 	bool m_bCreatedByGreatPerson;
 	bool m_bSpecificCivRequired;
+
+	ImprovementTypes m_iRequiredAdjacentImprovement = NO_IMPROVEMENT;
+	bool m_bRequiredAdjacentCity = false;
+	bool m_bRemoveWhenSetNoFuture = false;
 
 	CvString m_strArtDefineTag;
 	ImprovementUsageTypes m_eImprovementUsageType;
@@ -293,21 +407,56 @@ protected:
 	int* m_piHillsYieldChange;
 	int* m_piFreshWaterChange;
 	int* m_piAdjacentCityYieldChange;
-	int* m_piAdjacentMountainYieldChange;
 	int* m_piFlavorValue;
 
 	bool* m_pbTerrainMakesValid;
 	bool* m_pbFeatureMakesValid;
+	bool m_bFeatureNeeded;
+	bool* m_pbFeaturesNeeded;
 	bool* m_pbImprovementMakesValid;
 
-#if defined(MOD_API_UNIFIED_YIELDS)
-	int* m_piAdjacentSameTypeYield;
+#if defined(MOD_API_VP_ADJACENT_YIELD_BOOST)
+	int** m_ppiAdjacentImprovementYieldChanges;
 #endif
+
+	int m_iAdjacentTerrainYieldChangesCount;
+	int m_iAdjacentResourceYieldChangesCount;
+	int m_iAdjacentFeatureYieldChangesCount;
+	int** m_ppiAdjacentTerrainYieldChanges;
+	int** m_ppiAdjacentResourceYieldChanges;
+	int** m_ppiAdjacentFeatureYieldChanges;
+#if defined(MOD_ROG_CORE)
+	int** m_ppiFeatureYieldChanges;
+#endif
+	int** m_ppiTerrainYieldChanges;
 
 	int** m_ppiTechYieldChanges;
 	int** m_ppiTechNoFreshWaterYieldChanges;
 	int** m_ppiTechFreshWaterYieldChanges;
 	int** m_ppiRouteYieldChanges;
+
+#if defined(MOD_IMPROVEMENT_TRADE_ROUTE_BONUSES)
+	int** m_ppiTradeRouteYieldChanges;
+#endif
+
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	bool m_bEnableXP = false;
+
+	bool m_bEnableUpgrade = false;
+	int m_iUpgradeXP = -1;
+	ImprovementTypes m_eUpgradeImprovementType = NO_IMPROVEMENT;
+
+	bool m_bEnableDowngrade = false;
+	ImprovementTypes m_eDowngradeImprovementType = NO_IMPROVEMENT;
+#endif
+
+#ifdef MOD_IMPROVEMENTS_YIELD_CHANGE_PER_UNIT
+	std::vector<YieldChangesPerUnit> m_vYieldChangesPerUnit;
+#endif
+
+#ifdef MOD_IMPROVEMENTS_UNIT_XP_PER_TURN
+	std::vector<UnitXPPerTurn> m_vUnitXPPerTurn;
+#endif
 
 	CvImprovementResourceInfo* m_paImprovementResource;
 };
